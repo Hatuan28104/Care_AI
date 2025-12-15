@@ -5,6 +5,9 @@ import 'register/register.dart';
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
 
+  static const _primary = Color(0xFF1F6BFF);
+  static const _titleColor = Color(0xFF0D459F);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -14,9 +17,9 @@ class WelcomeScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             children: [
-              // ===== PHẦN TRÊN =====
               const SizedBox(height: 100),
 
+              // ===== LOGO =====
               Image.asset(
                 'assets/images/Logo.png',
                 height: 260,
@@ -25,102 +28,108 @@ class WelcomeScreen extends StatelessWidget {
 
               const SizedBox(height: 30),
 
+              // ===== TITLE =====
               const Text(
                 'Welcome, Care AI',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: Color.fromARGB(255, 13, 69, 159),
+                  color: _titleColor,
                 ),
               ),
 
               const SizedBox(height: 12),
 
+              // ===== SUBTITLE =====
               const Text(
                 "Your digital friend, your family's peace of mind.",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 13,
-                  color: Colors.black,
                   height: 1.5,
                 ),
               ),
 
-              // ĐẨY PHẦN NÚT XUỐNG DƯỚI (KHÔNG CỐ ĐỊNH PIXEL)
               const Spacer(),
 
-              // ===== PHẦN NÚT (NEO CAO) =====
+              // ===== ACTION BUTTONS =====
               Padding(
-                padding: const EdgeInsets.only(bottom: 120), // 👈 CHỈNH SỐ NÀY
+                padding: const EdgeInsets.only(bottom: 120),
                 child: Column(
                   children: [
-                    SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const LoginScreen(),
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF1F6BFF),
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        child: const Text(
-                          'Login',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
+                    _primaryButton(
+                      text: 'Login',
+                      onTap: () => _go(context, const LoginScreen()),
                     ),
                     const SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: OutlinedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const RegisterScreen(),
-                            ),
-                          );
-                        },
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Color.fromARGB(255, 31, 65, 187),
-                          side: const BorderSide(
-                            color: Color.fromARGB(255, 31, 65, 187),
-                            width: 1,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        child: const Text(
-                          'Register',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
+                    _outlineButton(
+                      text: 'Register',
+                      onTap: () => _go(context, const RegisterScreen()),
                     ),
                   ],
                 ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  // ===== NAVIGATION =====
+  static void _go(BuildContext context, Widget page) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => page),
+    );
+  }
+
+  // ===== BUTTONS =====
+  static Widget _primaryButton({
+    required String text,
+    required VoidCallback onTap,
+  }) {
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: ElevatedButton(
+        onPressed: onTap,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: _primary,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+        child: Text(
+          text,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+        ),
+      ),
+    );
+  }
+
+  static Widget _outlineButton({
+    required String text,
+    required VoidCallback onTap,
+  }) {
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: OutlinedButton(
+        onPressed: onTap,
+        style: OutlinedButton.styleFrom(
+          foregroundColor: _titleColor,
+          side: const BorderSide(color: _titleColor),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+        child: Text(
+          text,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
         ),
       ),
     );
