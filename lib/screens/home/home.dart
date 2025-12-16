@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'digital_human.dart';
 import 'package:Care_AI/screens/settings/settings.dart';
+import 'digital_human.dart';
+import 'premium.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -47,7 +48,7 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           children: [
             _header(context),
-            _premiumBanner(),
+            _premiumBanner(context),
             const SizedBox(height: 18),
             Expanded(child: _content(context)),
           ],
@@ -72,7 +73,13 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          _iconBadge(Icons.auto_awesome),
+
+          // 🔥 ICON PRO – bấm vào là mở Premium
+          GestureDetector(
+            onTap: () => _goPremium(context),
+            child: _iconBadge(Icons.auto_awesome),
+          ),
+
           const SizedBox(width: 12),
           const Icon(Icons.notifications_none, size: 22),
           const SizedBox(width: 12),
@@ -85,31 +92,36 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // ===== PREMIUM =====
-  Widget _premiumBanner() {
+  // ===== PREMIUM BANNER =====
+  Widget _premiumBanner(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 18),
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF3B82F6), Color(0xFF1E40AF)],
-          ),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Row(
-          children: const [
-            Icon(Icons.smart_toy, color: Colors.white),
-            SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                "Your free 3-day Premium hasn't been claimed yet. Tap to claim.",
-                style:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-              ),
+      child: GestureDetector(
+        onTap: () => _goPremium(context),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF3B82F6), Color(0xFF1E40AF)],
             ),
-            Icon(Icons.arrow_forward_ios, color: Colors.white, size: 16),
-          ],
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Row(
+            children: const [
+              Icon(Icons.smart_toy, color: Colors.white),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  "Your free 3-day Premium hasn't been claimed yet. Tap to claim.",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              Icon(Icons.arrow_forward_ios, color: Colors.white, size: 16),
+            ],
+          ),
         ),
       ),
     );
@@ -169,18 +181,17 @@ class HomeScreen extends StatelessWidget {
   Widget _sectionHeader({required String title, VoidCallback? action}) {
     return Row(
       children: [
-        Text(title,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+        Text(
+          title,
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+        ),
         const Spacer(),
         if (action != null)
           GestureDetector(
             onTap: action,
             child: const Text(
               'See All',
-              style: TextStyle(
-                color: _blue,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(color: _blue, fontWeight: FontWeight.w600),
             ),
           ),
       ],
@@ -222,12 +233,18 @@ class HomeScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(h['name']!,
-                style: const TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.w800)),
+            Text(
+              h['name']!,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
             const SizedBox(height: 4),
-            Text(h['desc']!,
-                style: const TextStyle(color: Colors.white70, fontSize: 12)),
+            Text(
+              h['desc']!,
+              style: const TextStyle(color: Colors.white70, fontSize: 12),
+            ),
           ],
         ),
       ),
@@ -251,9 +268,13 @@ class HomeScreen extends StatelessWidget {
           Icon(icon, color: iconColor),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(text,
-                style:
-                    const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+            child: Text(
+              text,
+              style: const TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: 15,
+              ),
+            ),
           ),
           const Icon(Icons.chevron_right),
         ],
@@ -261,7 +282,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // ===== NAV =====
+  // ===== BOTTOM NAV =====
   Widget _bottomNav() {
     return BottomNavigationBar(
       currentIndex: 0,
@@ -278,8 +299,18 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // ===== NAV HELPER =====
+  // ===== NAV HELPERS =====
   static void _go(BuildContext context, Widget page) {
     Navigator.push(context, MaterialPageRoute(builder: (_) => page));
+  }
+
+  static void _goPremium(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => const PremiumScreen(),
+      ),
+    );
   }
 }

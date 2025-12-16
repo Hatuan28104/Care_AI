@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:Care_AI/screens/home/home.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 
 class CreateProfileScreen extends StatefulWidget {
   const CreateProfileScreen({super.key});
@@ -21,6 +23,8 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
   final _heightCtrl = TextEditingController();
   final _weightCtrl = TextEditingController();
   String? _gender;
+  final _picker = ImagePicker();
+  File? _avatarFile;
 
   @override
   void dispose() {
@@ -78,6 +82,19 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
     if (picked == null) return;
     _dobCtrl.text =
         '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
+  }
+
+  Future<void> _pickAvatar() async {
+    final picked = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 80,
+    );
+
+    if (picked == null) return;
+
+    setState(() {
+      _avatarFile = File(picked.path);
+    });
   }
 
   void _onContinue() {
@@ -164,7 +181,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
           SizedBox(
             height: 30,
             child: OutlinedButton(
-              onPressed: () {},
+              onPressed: _pickAvatar,
               child: const Text('Upload Avatar'),
             ),
           ),

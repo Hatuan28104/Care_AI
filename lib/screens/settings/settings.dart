@@ -37,7 +37,10 @@ class SettingsScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // ===== ACCOUNT =====
-              _section('Account'),
+              _section(
+                'Account',
+                fontSize: 18,
+              ),
               _card([
                 _item(
                   icon: Icons.person_outline,
@@ -132,20 +135,25 @@ class SettingsScreen extends StatelessWidget {
       ),
       title: const Text(
         'Settings',
-        style: TextStyle(fontWeight: FontWeight.w800, color: Colors.black),
+        style: TextStyle(
+            fontWeight: FontWeight.w800, fontSize: 24, color: Colors.black),
       ),
     );
   }
 
   // ===== SECTIONS =====
-  Widget _section(String title) {
+  Widget _section(
+    String text, {
+    double fontSize = 16, // 👈 thêm named parameter
+  }) {
     return Padding(
-      padding: const EdgeInsets.only(top: 16, bottom: 8),
+      padding: const EdgeInsets.only(bottom: 8, top: 16),
       child: Text(
-        title,
+        text,
         style: TextStyle(
+          fontSize: fontSize,
           fontWeight: FontWeight.w800,
-          color: Colors.black.withOpacity(.7),
+          color: Colors.black,
         ),
       ),
     );
@@ -155,7 +163,7 @@ class SettingsScreen extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Column(children: children),
     );
@@ -173,7 +181,8 @@ class SettingsScreen extends StatelessWidget {
       title: Text(text, style: const TextStyle(fontWeight: FontWeight.w600)),
       subtitle: subtitle != null
           ? Text(subtitle,
-              style: const TextStyle(fontSize: 12, color: Colors.black54))
+              style: const TextStyle(
+                  fontSize: 12, color: Color.fromARGB(200, 0, 0, 0)))
           : null,
       trailing: const Icon(Icons.chevron_right),
       onTap: onTap,
@@ -194,6 +203,8 @@ class SettingsScreen extends StatelessWidget {
           secondary: Icon(icon, color: _blue),
           title:
               Text(text, style: const TextStyle(fontWeight: FontWeight.w600)),
+          activeTrackColor: const Color.fromARGB(255, 19, 114, 255),
+          inactiveTrackColor: const Color.fromARGB(255, 238, 238, 238), // nền
         );
       },
     );
@@ -221,7 +232,7 @@ class SettingsScreen extends StatelessWidget {
         ),
         child: const Text(
           'Log out',
-          style: TextStyle(fontWeight: FontWeight.w700),
+          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
         ),
       ),
     );
@@ -229,9 +240,10 @@ class SettingsScreen extends StatelessWidget {
 
   // ===== HELPERS =====
   String _textSizeLabel(double scale) {
-    if (scale <= 0.9) return 'Small';
-    if (scale <= 1.1) return 'Default';
-    if (scale <= 1.3) return 'Large';
+    if (scale <= 0.8) return 'Small';
+    if (scale <= 0.9) return 'Default';
+    if (scale <= 1) return 'Medium';
+    if (scale <= 1.1) return 'Large';
     return 'Extra Large';
   }
 }

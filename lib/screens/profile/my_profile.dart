@@ -107,7 +107,8 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
       ),
       title: const Text(
         'My Profile',
-        style: TextStyle(fontWeight: FontWeight.w800, color: Colors.black),
+        style: TextStyle(
+            fontWeight: FontWeight.w800, fontSize: 24, color: Colors.black),
       ),
       actions: _isEditing ? _editActions() : _viewActions(),
     );
