@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:Care_AI/screens/settings/settings.dart';
 import 'digital_human.dart';
 import 'premium.dart';
+import 'decive/device_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   // ===== CONSTANTS =====
-  static const _blue = Color(0xFF1F6BFF);
-  static const _bg = Color(0xFFF3F5F9);
+  static const blue = Color(0xFF1F6BFF);
+  static const bg = Color(0xFFF3F5F9);
 
   // ===== DATA =====
   static final List<Map<String, String>> _humans = [
@@ -39,11 +40,10 @@ class HomeScreen extends StatelessWidget {
     },
   ];
 
-  // ===== UI =====
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: bg,
       body: SafeArea(
         child: Column(
           children: [
@@ -54,7 +54,7 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: _bottomNav(),
+      bottomNavigationBar: _bottomNav(context),
     );
   }
 
@@ -73,13 +73,10 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
           const Spacer(),
-
-          // 🔥 ICON PRO – bấm vào là mở Premium
           GestureDetector(
             onTap: () => _goPremium(context),
             child: _iconBadge(Icons.auto_awesome),
           ),
-
           const SizedBox(width: 12),
           const Icon(Icons.notifications_none, size: 22),
           const SizedBox(width: 12),
@@ -106,8 +103,8 @@ class HomeScreen extends StatelessWidget {
             ),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Row(
-            children: const [
+          child: const Row(
+            children: [
               Icon(Icons.smart_toy, color: Colors.white),
               SizedBox(width: 10),
               Expanded(
@@ -163,13 +160,12 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // ===== DIGITAL HUMAN LIST =====
+  // ===== LIST =====
   Widget _digitalHumanList() {
     return SizedBox(
       height: 230,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        physics: const ClampingScrollPhysics(),
         itemCount: _humans.length,
         separatorBuilder: (_, __) => const SizedBox(width: 12),
         itemBuilder: (_, i) => _humanCard(_humans[i]),
@@ -191,7 +187,7 @@ class HomeScreen extends StatelessWidget {
             onTap: action,
             child: const Text(
               'See All',
-              style: TextStyle(color: _blue, fontWeight: FontWeight.w600),
+              style: TextStyle(color: blue, fontWeight: FontWeight.w600),
             ),
           ),
       ],
@@ -202,10 +198,10 @@ class HomeScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        color: _blue.withOpacity(.1),
+        color: blue.withOpacity(.1),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Icon(icon, color: _blue, size: 18),
+      child: Icon(icon, color: blue, size: 18),
     );
   }
 
@@ -230,8 +226,8 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
             Text(
               h['name']!,
@@ -283,12 +279,17 @@ class HomeScreen extends StatelessWidget {
   }
 
   // ===== BOTTOM NAV =====
-  Widget _bottomNav() {
+  Widget _bottomNav(BuildContext context) {
     return BottomNavigationBar(
       currentIndex: 0,
-      selectedItemColor: _blue,
+      selectedItemColor: blue,
       unselectedItemColor: Colors.grey,
       type: BottomNavigationBarType.fixed,
+      onTap: (index) {
+        if (index == 2) {
+          _go(context, const DeviceScreen());
+        }
+      },
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'Home'),
         BottomNavigationBarItem(
