@@ -182,7 +182,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   OutlineInputBorder _outline(Color color, [double w = 1.2]) {
     return OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(10),
       borderSide: BorderSide(color: color, width: w),
     );
   }

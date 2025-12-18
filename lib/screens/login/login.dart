@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:intl_phone_field/phone_number.dart' as ipn;
 
+import 'package:Care_AI/ui.dart';
 import 'login_otp.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -14,7 +15,6 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   // ===== CONSTANTS =====
   static const _blue = Color(0xFF1F6BFF);
-  static const _bg = Color(0xFFF3F5F9);
   static const _fieldBg = Color(0xFFF3F5FF);
   static const _errorMsg = 'Please check and enter valid phone number !';
 
@@ -61,7 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: UI.bg, // ✅ bg chung
       appBar: _appBar(context),
       body: SafeArea(
         child: Padding(
@@ -94,16 +94,17 @@ class _LoginScreenState extends State<LoginScreen> {
       elevation: 0,
       centerTitle: true,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new_rounded,
-            color: Colors.black, size: 20),
+        icon: const Icon(
+          Icons.arrow_back_ios_new_rounded,
+          color: Colors.black,
+          size: 20,
+        ),
         onPressed: () => Navigator.pop(context),
       ),
-      title: const Text(
+      title: Text(
         'Log in',
-        style: TextStyle(
-          fontSize: 30,
-          fontWeight: FontWeight.w800,
-          color: Color(0xFF0D459F),
+        style: UI.primaryTitle.copyWith(
+          color: const Color(0xFF0D459F),
         ),
       ),
     );
@@ -138,65 +139,57 @@ class _LoginScreenState extends State<LoginScreen> {
 
         return value.isValidNumber() ? null : _errorMsg;
       },
-      builder: (state) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            IntlPhoneField(
-              initialCountryCode: 'VN',
-              disableLengthCheck: true,
-              dropdownIcon: const Icon(Icons.keyboard_arrow_down_rounded),
-              decoration: InputDecoration(
-                hintText: 'Phone number',
-                filled: true,
-                fillColor: _fieldBg,
-
-                // 👇 VIỀN XÁM GIỐNG REGISTER
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide:
-                      BorderSide(color: Colors.grey.shade300, width: 1.2),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(color: _blue, width: 1.4),
-                ),
-                errorBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(color: Colors.red, width: 1.2),
-                ),
-                focusedErrorBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(color: Colors.red, width: 1.4),
-                ),
-
-                isDense: true,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 16,
-                ),
+      builder: (state) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          IntlPhoneField(
+            initialCountryCode: 'VN',
+            disableLengthCheck: true,
+            dropdownIcon: const Icon(Icons.keyboard_arrow_down_rounded),
+            decoration: InputDecoration(
+              hintText: 'Phone number',
+              filled: true,
+              fillColor: _fieldBg,
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: Colors.grey.shade300, width: 1.2),
               ),
-              onChanged: (p) {
-                _phone = p;
-                _rawNumber = p.number.trim();
-                state.didChange(p);
-              },
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: _blue, width: 1.4),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Colors.red, width: 1.2),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Colors.red, width: 1.4),
+              ),
+              isDense: true,
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
             ),
-            if (state.hasError)
-              Padding(
-                padding: const EdgeInsets.only(top: 6, left: 12),
-                child: Text(
-                  state.errorText ?? '',
-                  style: const TextStyle(
-                    color: Colors.red,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
+            onChanged: (p) {
+              _phone = p;
+              _rawNumber = p.number.trim();
+              state.didChange(p);
+            },
+          ),
+          if (state.hasError)
+            Padding(
+              padding: const EdgeInsets.only(top: 6, left: 12),
+              child: Text(
+                state.errorText ?? '',
+                style: const TextStyle(
+                  color: Colors.red,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-          ],
-        );
-      },
+            ),
+        ],
+      ),
     );
   }
 
@@ -209,14 +202,14 @@ class _LoginScreenState extends State<LoginScreen> {
         onPressed: () => _goOtp(context),
         style: ElevatedButton.styleFrom(
           backgroundColor: _blue,
-          foregroundColor: Colors.white,
           elevation: 0,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
         child: const Text(
           'Continue',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+          style: TextStyle(
+              fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white),
         ),
       ),
     );

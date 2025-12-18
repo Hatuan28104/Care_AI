@@ -3,7 +3,7 @@ import 'package:Care_AI/screens/profile/my_profile.dart';
 import 'package:Care_AI/screens/welcome_screen.dart';
 import '../../app_settings.dart';
 
-import 'privacy_security.dart';
+import 'privacy_security/privacy_security.dart';
 import 'text_size.dart';
 import 'language.dart';
 import 'sound_vibration.dart';

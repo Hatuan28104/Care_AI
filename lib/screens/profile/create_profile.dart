@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:Care_AI/screens/home/home.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'profile_store.dart'; // ✅ thêm
 
 class CreateProfileScreen extends StatefulWidget {
   const CreateProfileScreen({super.key});
@@ -43,8 +44,6 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
       fillColor: _fieldBg,
       prefixIcon: Icon(icon, size: 20, color: Colors.black54),
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-
-      // ===== VIỀN XÁM =====
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(
@@ -52,17 +51,14 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
           width: 1.2,
         ),
       ),
-
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: _blue, width: 1.4),
       ),
-
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: Colors.red, width: 1.2),
       ),
-
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: Colors.red, width: 1.4),
@@ -99,6 +95,16 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
 
   void _onContinue() {
     if (!(_formKey.currentState?.validate() ?? false)) return;
+
+    // ✅ Lưu tạm profile (không cần backend)
+    ProfileStore.profile.value = UserProfile(
+      fullName: _nameCtrl.text.trim(),
+      dob: _dobCtrl.text.trim(),
+      gender: _gender ?? '',
+      height: _heightCtrl.text.trim(),
+      weight: _weightCtrl.text.trim(),
+      avatarFile: _avatarFile,
+    );
 
     Navigator.pushReplacement(
       context,
@@ -172,7 +178,16 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
               shape: BoxShape.circle,
               border: Border.all(color: Colors.black12),
             ),
-            child: const Icon(Icons.person, size: 40),
+
+            // ✅ giữ UI như cũ, chỉ thay icon -> ảnh nếu có
+            child: ClipOval(
+              child: _avatarFile == null
+                  ? const Icon(Icons.person, size: 40)
+                  : Image.file(
+                      _avatarFile!,
+                      fit: BoxFit.cover,
+                    ),
+            ),
           ),
           const SizedBox(height: 10),
           const Text('Username',
@@ -209,50 +224,171 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
   Widget _formFields() {
     return Column(
       children: [
-        TextFormField(
+        _profileField(
+          label: 'Full Name',
+          icon: Icons.person_outline,
           controller: _nameCtrl,
-          decoration: _dec('Full Name', Icons.person_outline),
-          validator: (v) =>
-              (v ?? '').trim().isEmpty ? 'Please enter full name' : null,
         ),
-        const SizedBox(height: 10),
-        TextFormField(
+        _profileField(
+          label: 'Date of Birth',
+          icon: Icons.calendar_today_outlined,
           controller: _dobCtrl,
           readOnly: true,
           onTap: _pickDob,
-          decoration: _dec('Date of Birth', Icons.calendar_today_outlined),
-          validator: (v) =>
-              (v ?? '').trim().isEmpty ? 'Please select date of birth' : null,
         ),
-        const SizedBox(height: 10),
-        DropdownButtonFormField<String>(
-          value: _gender,
-          decoration: _dec('Gender', Icons.wc_outlined),
-          items: const [
-            DropdownMenuItem(value: 'Male', child: Text('Male')),
-            DropdownMenuItem(value: 'Female', child: Text('Female')),
-            DropdownMenuItem(value: 'Other', child: Text('Other')),
-          ],
-          onChanged: (v) => setState(() => _gender = v),
-          validator: (v) => v == null ? 'Please choose gender' : null,
-        ),
-        const SizedBox(height: 10),
-        TextFormField(
+        _genderField(),
+        _profileField(
+          label: 'Height',
+          icon: Icons.height_rounded,
           controller: _heightCtrl,
           keyboardType: TextInputType.number,
-          decoration: _dec('Height', Icons.height_rounded),
-          validator: (v) =>
-              (v ?? '').trim().isEmpty ? 'Please enter height' : null,
         ),
-        const SizedBox(height: 10),
-        TextFormField(
+        _profileField(
+          label: 'Weight',
+          icon: Icons.monitor_weight_outlined,
           controller: _weightCtrl,
           keyboardType: TextInputType.number,
-          decoration: _dec('Weight', Icons.monitor_weight_outlined),
-          validator: (v) =>
-              (v ?? '').trim().isEmpty ? 'Please enter weight' : null,
         ),
       ],
+    );
+  }
+
+  Widget _profileField({
+    required String label,
+    required IconData icon,
+    required TextEditingController controller,
+    bool readOnly = false,
+    VoidCallback? onTap,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+        decoration: BoxDecoration(
+          color: _fieldBg,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Colors.grey.shade300,
+            width: 1.2,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, size: 18, color: _blue),
+                const SizedBox(width: 4),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: Colors.black54,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Padding(
+              padding: const EdgeInsets.only(left: 24),
+              child: TextFormField(
+                controller: controller,
+                readOnly: readOnly,
+                onTap: onTap,
+                keyboardType: keyboardType,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  height: 1.1,
+                  fontSize: 16,
+                  color: Colors.black,
+                ),
+                decoration: const InputDecoration(
+                  isDense: true,
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.zero,
+                ),
+                validator: (v) =>
+                    (v ?? '').trim().isEmpty ? 'Please enter $label' : null,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _genderField() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+        decoration: BoxDecoration(
+          color: _fieldBg,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Colors.grey.shade300,
+            width: 1.2,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: const [
+                Icon(Icons.wc_outlined, size: 18, color: _blue),
+                SizedBox(width: 4),
+                Text(
+                  'Gender',
+                  style: TextStyle(
+                    color: Colors.black54,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Padding(
+              padding: const EdgeInsets.only(left: 24),
+              child: DropdownButtonFormField<String>(
+                value: _gender,
+                isExpanded: true,
+                isDense: true,
+                iconSize: 20,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  height: 1.1,
+                  color: Colors.black,
+                ),
+                decoration: const InputDecoration(
+                  isDense: true,
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.zero,
+                ),
+                hint: const Text(
+                  'Select',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black38,
+                    fontWeight: FontWeight.w700,
+                    height: 1.1,
+                  ),
+                ),
+                items: const [
+                  DropdownMenuItem(value: 'Male', child: Text('Male')),
+                  DropdownMenuItem(value: 'Female', child: Text('Female')),
+                  DropdownMenuItem(value: 'Other', child: Text('Other')),
+                ],
+                onChanged: (v) => setState(() => _gender = v),
+                validator: (v) => v == null ? 'Please choose gender' : null,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

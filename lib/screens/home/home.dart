@@ -1,18 +1,22 @@
-<<<<<<< HEAD
-
-=======
 import 'package:flutter/material.dart';
+import 'package:Care_AI/app_settings.dart';
 import 'package:Care_AI/screens/settings/settings.dart';
+
 import 'digital_human.dart';
 import 'premium.dart';
+import 'alert.dart';
 import 'decive/device_screen.dart';
+
+import 'data/basic_health_data.dart';
+import 'data/activity_data.dart';
+import 'data/metric_item.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   // ===== CONSTANTS =====
-  static const blue = Color(0xFF1F6BFF);
-  static const bg = Color(0xFFF3F5F9);
+  static const _blue = Color(0xFF1F6BFF);
+  static const _bg = Color(0xFFF3F5F9);
 
   // ===== DATA =====
   static final List<Map<String, String>> _humans = [
@@ -43,10 +47,11 @@ class HomeScreen extends StatelessWidget {
     },
   ];
 
+  // ===== UI =====
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: _bg,
       body: SafeArea(
         child: Column(
           children: [
@@ -76,13 +81,20 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
           const Spacer(),
+
+          // PRO icon -> Premium
           GestureDetector(
             onTap: () => _goPremium(context),
             child: _iconBadge(Icons.auto_awesome),
           ),
+
           const SizedBox(width: 12),
-          const Icon(Icons.notifications_none, size: 22),
+
+          // Notification icon (badge)
+          _notificationIcon(context),
+
           const SizedBox(width: 12),
+
           GestureDetector(
             onTap: () => _go(context, const SettingsScreen()),
             child: const Icon(Icons.settings_outlined, size: 22),
@@ -129,6 +141,93 @@ class HomeScreen extends StatelessWidget {
 
   // ===== CONTENT =====
   Widget _content(BuildContext context) {
+    // demo data
+    final basicDemo = [
+      const MetricItem(
+        icon: Icons.favorite,
+        iconColor: Colors.red,
+        title: 'Heart rate',
+        value: '72',
+        unit: 'BPM',
+        time: '18:30',
+      ),
+      const MetricItem(
+        icon: Icons.bloodtype,
+        iconColor: Colors.blue,
+        title: 'Blood pressure',
+        value: '120 / 80',
+        unit: 'mmHg',
+        time: '18:30',
+      ),
+      const MetricItem(
+        icon: Icons.monitor_heart,
+        iconColor: Colors.indigo,
+        title: 'Blood oxygen - SpO₂',
+        value: '98',
+        unit: '%',
+        time: '18:30',
+      ),
+      const MetricItem(
+        icon: Icons.thermostat,
+        iconColor: Colors.orange,
+        title: 'Body temperature',
+        value: '36.8',
+        unit: '°C',
+        time: '18:30',
+      ),
+      const MetricItem(
+        icon: Icons.fitness_center,
+        iconColor: Colors.purple,
+        title: 'BMI',
+        value: '21.5',
+        unit: 'kg/m²',
+        time: '18:30',
+      ),
+    ];
+
+    final activityDemo = [
+      const MetricItem(
+        icon: Icons.directions_walk,
+        iconColor: Colors.red,
+        title: 'Steps',
+        value: '600',
+        unit: 'steps',
+        time: '18:30',
+      ),
+      const MetricItem(
+        icon: Icons.route,
+        iconColor: Colors.orange,
+        title: 'Walking + Running Distance',
+        value: '3.0',
+        unit: 'km',
+        time: '18:30',
+      ),
+      const MetricItem(
+        icon: Icons.bedtime,
+        iconColor: Colors.indigo,
+        title: 'Sleep duration',
+        value: '7.5',
+        unit: 'hours',
+        time: '18:30',
+      ),
+      const MetricItem(
+        icon: Icons.auto_graph,
+        iconColor: Colors.blue,
+        title: 'Sleep quality',
+        value: '85',
+        unit: '%',
+        time: '18:30',
+      ),
+      const MetricItem(
+        icon: Icons.local_fire_department,
+        iconColor: Colors.purple,
+        title: 'Exercise level',
+        value: '50',
+        unit: 'minutes',
+        time: '18:30',
+      ),
+    ];
+
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 18),
       child: Column(
@@ -150,12 +249,14 @@ class HomeScreen extends StatelessWidget {
             icon: Icons.accessibility_new,
             iconColor: Colors.purple,
             text: 'Basic health data',
+            onTap: () => _go(context, BasicHealthDataScreen(items: basicDemo)),
           ),
           const SizedBox(height: 10),
           _categoryItem(
             icon: Icons.local_fire_department,
             iconColor: Colors.red,
             text: 'Activity data',
+            onTap: () => _go(context, ActivityDataScreen(items: activityDemo)),
           ),
           const SizedBox(height: 40),
         ],
@@ -163,12 +264,13 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // ===== LIST =====
+  // ===== DIGITAL HUMAN LIST =====
   Widget _digitalHumanList() {
     return SizedBox(
       height: 230,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
+        physics: const ClampingScrollPhysics(),
         itemCount: _humans.length,
         separatorBuilder: (_, __) => const SizedBox(width: 12),
         itemBuilder: (_, i) => _humanCard(_humans[i]),
@@ -190,7 +292,7 @@ class HomeScreen extends StatelessWidget {
             onTap: action,
             child: const Text(
               'See All',
-              style: TextStyle(color: blue, fontWeight: FontWeight.w600),
+              style: TextStyle(color: _blue, fontWeight: FontWeight.w600),
             ),
           ),
       ],
@@ -201,10 +303,10 @@ class HomeScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        color: blue.withOpacity(.1),
+        color: _blue.withOpacity(.1),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Icon(icon, color: blue, size: 18),
+      child: Icon(icon, color: _blue, size: 18),
     );
   }
 
@@ -229,8 +331,8 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               h['name']!,
@@ -254,29 +356,77 @@ class HomeScreen extends StatelessWidget {
     required IconData icon,
     required Color iconColor,
     required String text,
+    VoidCallback? onTap,
   }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.black12),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: iconColor),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              text,
-              style: const TextStyle(
-                fontWeight: FontWeight.w700,
-                fontSize: 15,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.black12),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: iconColor),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                text,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                ),
               ),
             ),
-          ),
-          const Icon(Icons.chevron_right),
-        ],
+            const Icon(Icons.chevron_right),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ===== NOTIFICATION ICON =====
+  Widget _notificationIcon(BuildContext context) {
+    return GestureDetector(
+      onTap: () async {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const AlertScreen()),
+        );
+      },
+      child: ValueListenableBuilder<int>(
+        valueListenable: AppSettings.unreadAlertCount,
+        builder: (_, count, __) {
+          return Stack(
+            clipBehavior: Clip.none,
+            children: [
+              const Icon(Icons.notifications_none, size: 22),
+              if (count > 0)
+                Positioned(
+                  right: -2,
+                  top: -2,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF1F6BFF),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      count > 9 ? '9+' : '$count',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 9,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -285,7 +435,7 @@ class HomeScreen extends StatelessWidget {
   Widget _bottomNav(BuildContext context) {
     return BottomNavigationBar(
       currentIndex: 0,
-      selectedItemColor: blue,
+      selectedItemColor: _blue,
       unselectedItemColor: Colors.grey,
       type: BottomNavigationBarType.fixed,
       onTap: (index) {
@@ -318,4 +468,3 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
->>>>>>> 80ec3f59b66c18f89e810b47c924dc1b5da476e0

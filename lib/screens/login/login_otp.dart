@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:Care_AI/widgets/success_dialog.dart';
 import 'package:Care_AI/screens/profile/create_profile.dart';
 
+import 'package:Care_AI/app_settings.dart';
+
 class LoginOtpScreen extends StatefulWidget {
   final String phoneE164;
   final String displayPhone;
@@ -65,6 +67,20 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
 
   String _mmss(int s) => '${(s ~/ 60)}:${(s % 60).toString().padLeft(2, '0')}';
 
+  // ✅ format hiển thị giống ảnh: "(+84) 123 456 789"
+  String _formatPhoneForUi(String e164) {
+    if (e164.startsWith('+84')) {
+      final n = e164.substring(3); // phần sau +84
+      if (n.length >= 9) {
+        final a = n.substring(0, 3);
+        final b = n.substring(3, 6);
+        final c = n.substring(6);
+        return '(+84) $a $b $c';
+      }
+    }
+    return e164;
+  }
+
   // ===== ACTIONS =====
   Future<void> _onContinue() async {
     setState(() => _submitted = true);
@@ -85,6 +101,23 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
       );
 
       if (!mounted) return;
+
+      // ✅ 1) Lưu phone number để Privacy & Security show
+      AppSettings.phoneNumber.value = _formatPhoneForUi(widget.phoneE164);
+
+      // ✅ 2) Demo Login History (sau này backend trả về thì thay)
+      AppSettings.loginHistory.value = [
+        LoginHistoryItem(
+          device: 'iPhone 13',
+          location: 'Ho Chi Minh City',
+          time: 'Today, 10:30AM',
+        ),
+        LoginHistoryItem(
+          device: 'iPad Pro',
+          location: 'Ho Chi Minh City',
+          time: '2 days ago, 9:00AM',
+        ),
+      ];
 
       Navigator.pushReplacement(
         context,
@@ -176,7 +209,7 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 20,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),
@@ -184,7 +217,7 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
         Text(
           'Enter the OTP sent ${widget.displayPhone}',
           style: const TextStyle(
-            fontSize: 20,
+            fontSize: 18,
             color: Colors.black54,
             fontWeight: FontWeight.w600,
           ),
@@ -206,22 +239,20 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
         counterText: '',
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-
-        // 👇 VIỀN XÁM ĐỒNG BỘ REGISTER
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(color: Colors.grey.shade300, width: 1.2),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: _blue, width: 1.4),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: Colors.red, width: 1.2),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: Colors.red, width: 1.4),
         ),
       ),
@@ -246,7 +277,7 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
           foregroundColor: Colors.white,
           elevation: 0,
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
         child: _loading
             ? const SizedBox(
