@@ -1,12 +1,34 @@
 import 'package:flutter/material.dart';
 
-class HelpSupportScreen extends StatelessWidget {
+class HelpSupportScreen extends StatefulWidget {
   const HelpSupportScreen({super.key});
 
+  @override
+  State<HelpSupportScreen> createState() => _HelpSupportScreenState();
+}
+
+class _HelpSupportScreenState extends State<HelpSupportScreen> {
   // ===== CONSTANTS =====
   static const _blue = Color(0xFF1F6BFF);
-  static const _bg = Color(0xFFF3F5F9);
+  static const _bg = Color.fromARGB(255, 255, 255, 255);
   static const _fieldBg = Color(0xFFF3F5FF);
+
+  // ===== CONTROLLERS =====
+  final _nameCtrl = TextEditingController();
+  final _phoneCtrl = TextEditingController();
+  final _emailCtrl = TextEditingController();
+  final _msgCtrl = TextEditingController();
+
+  String? _subject;
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    _phoneCtrl.dispose();
+    _emailCtrl.dispose();
+    _msgCtrl.dispose();
+    super.dispose();
+  }
 
   // ===== UI =====
   @override
@@ -15,44 +37,24 @@ class HelpSupportScreen extends StatelessWidget {
       backgroundColor: _bg,
       appBar: _appBar(context),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
+        padding: const EdgeInsets.fromLTRB(22, 10, 22, 18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ===== QUICK CONTACT =====
             _sectionTitle('Quick Contact'),
-            _card([
-              _contactItem(Icons.call, 'Call Hotline', '1900 xxxx'),
-              const Divider(height: 1),
-              _contactItem(Icons.email, 'Email', 'support@careai.vn'),
-              const Divider(height: 1),
-              _contactItem(Icons.chat, 'Chat', null),
-            ]),
+            const SizedBox(height: 12),
+            _quickContact(),
+            const SizedBox(height: 22),
 
-            const SizedBox(height: 20),
-
-            // ===== SUBMIT REQUEST =====
             _sectionTitle('Submit a Support Request'),
-            _card([
-              Padding(
-                padding: const EdgeInsets.all(14),
-                child: Column(
-                  children: [
-                    _field('Full Name'),
-                    const SizedBox(height: 10),
-                    _field('Phone Number'),
-                    const SizedBox(height: 10),
-                    _field('Email'),
-                    const SizedBox(height: 10),
-                    _field('Subject'),
-                    const SizedBox(height: 10),
-                    _field('Message', maxLines: 4),
-                    const SizedBox(height: 20),
-                    _submitButton(context),
-                  ],
-                ),
-              ),
-            ]),
+            const SizedBox(height: 12),
+            _formCard(context),
+
+            // ✅ PHẦN DƯỚI (giống ảnh)
+            const SizedBox(height: 18),
+            _contactInfoCard(),
+            const SizedBox(height: 18),
+            _faqCard(),
           ],
         ),
       ),
@@ -72,114 +74,401 @@ class HelpSupportScreen extends StatelessWidget {
       ),
       title: const Text(
         'Help & Support',
-        style: TextStyle(fontWeight: FontWeight.w800, color: Colors.black),
+        style: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.w800,
+          color: Colors.black,
+        ),
       ),
     );
   }
 
   // ===== SECTION TITLE =====
   Widget _sectionTitle(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+    return Text(
+      text,
+      style: const TextStyle(
+        fontSize: 17,
+        fontWeight: FontWeight.w600,
+        color: Colors.black,
+      ),
+    );
+  }
+
+  // ===== QUICK CONTACT =====
+  Widget _quickContact() {
+    return Column(
+      children: [
+        _pill('Call Hotline: 1900 xxxx'),
+        const SizedBox(height: 6),
+        _pill('Email: support@careai.vn'),
+        const SizedBox(height: 6),
+        _pill('Chat'),
+      ],
+    );
+  }
+
+  Widget _pill(String text) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: _blue.withOpacity(0.15),
+            blurRadius: 10,
+            offset: const Offset(0, 8),
+          )
+        ],
+      ),
+      alignment: Alignment.center,
       child: Text(
         text,
-        style: TextStyle(
-          fontWeight: FontWeight.w800,
-          color: Colors.black.withOpacity(.75),
+        style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
         ),
       ),
     );
   }
 
-  // ===== CARD =====
-  Widget _card(List<Widget> children) {
+  // ===== FORM CARD =====
+  Widget _formCard(BuildContext context) {
     return Container(
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 12,
+            offset: const Offset(0, 8),
+          )
+        ],
       ),
-      child: Column(children: children),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _label('Full Name'),
+          const SizedBox(height: 6),
+          _input(_nameCtrl, 'Enter your full name'),
+          const SizedBox(height: 12),
+
+          _label('Phone Number'),
+          const SizedBox(height: 6),
+          _input(_phoneCtrl, 'Enter your phone number',
+              type: TextInputType.phone),
+          const SizedBox(height: 12),
+
+          _label('Email'),
+          const SizedBox(height: 6),
+          _input(_emailCtrl, 'Enter your email',
+              type: TextInputType.emailAddress),
+          const SizedBox(height: 12),
+
+          _label('Subject'),
+          const SizedBox(height: 6),
+          _subjectDropdown(), // ✅ có icon chọn
+          const SizedBox(height: 12),
+
+          _label('Message'),
+          const SizedBox(height: 6),
+          _input(_msgCtrl, 'Describe your issue...', lines: 2),
+
+          const SizedBox(height: 18),
+          _submitButton(context),
+        ],
+      ),
     );
   }
 
-  // ===== CONTACT ITEM =====
-  Widget _contactItem(IconData icon, String title, String? subtitle) {
-    return ListTile(
-      leading: Icon(icon, color: _blue),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-      subtitle: subtitle == null
-          ? null
-          : Text(subtitle, style: const TextStyle(fontSize: 12)),
+  // ===== LABEL =====
+  Widget _label(String text) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
+      ),
     );
   }
 
-  // ===== INPUT FIELD =====
-  Widget _field(String hint, {int maxLines = 1}) {
+  // ===== INPUT =====
+  Widget _input(
+    TextEditingController ctrl,
+    String hint, {
+    TextInputType? type,
+    int lines = 1,
+  }) {
     return TextField(
-      maxLines: maxLines,
+      controller: ctrl,
+      keyboardType: type,
+      maxLines: lines,
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
+      ),
       decoration: InputDecoration(
         hintText: hint,
         filled: true,
         fillColor: _fieldBg,
-        border: OutlineInputBorder(
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide.none,
+          borderSide: const BorderSide(color: _blue, width: 1.5),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: _blue, width: 2.4),
         ),
       ),
     );
   }
 
-  // ===== SUBMIT BUTTON =====
+  // ===== SUBJECT DROPDOWN (✅ có icon chọn) =====
+  Widget _subjectDropdown() {
+    final items = [
+      {'label': 'Technical Support', 'icon': Icons.build_outlined},
+      {'label': 'Account & Security', 'icon': Icons.lock_outline},
+      {'label': 'AI Features', 'icon': Icons.smart_toy_outlined},
+      {'label': 'Payment', 'icon': Icons.credit_card_outlined},
+      {'label': 'Other', 'icon': Icons.more_horiz},
+    ];
+
+    return DropdownButtonFormField<String>(
+      value: _subject,
+      icon: const SizedBox.shrink(), // ❌ bỏ icon mặc định
+      onChanged: (v) => setState(() => _subject = v),
+      items: items.map((e) {
+        return DropdownMenuItem<String>(
+          value: e['label'] as String,
+          child: Row(
+            children: [
+              Icon(
+                e['icon'] as IconData,
+                size: 20,
+                color: _blue,
+              ),
+              const SizedBox(width: 10),
+              Text(
+                e['label'] as String,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+
+      decoration: InputDecoration(
+        hintText: 'Select a subject',
+        filled: true,
+        fillColor: _fieldBg,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        suffixIcon: const Icon(
+          Icons.keyboard_arrow_down,
+          color: _blue,
+          size: 26,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: _blue, width: 1.5),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: _blue, width: 2.4),
+        ),
+      ),
+    );
+  }
+
+  // ===== SUBMIT =====
   Widget _submitButton(BuildContext context) {
     return SizedBox(
       width: double.infinity,
       height: 48,
       child: ElevatedButton(
-        onPressed: () => _showSuccessPopup(context),
+        onPressed: () {},
         style: ElevatedButton.styleFrom(
           backgroundColor: _blue,
-          foregroundColor: Colors.white,
-          elevation: 0,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
         child: const Text(
           'Submit Request',
-          style: TextStyle(fontWeight: FontWeight.w700),
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
         ),
       ),
     );
   }
 
-  // ===== SUCCESS POPUP =====
-  static void _showSuccessPopup(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+  Widget _contactInfoCard() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Contact Information',
+          style: TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+            color: Colors.black,
+          ),
         ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 24),
+        const SizedBox(height: 10),
+        Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFFF3F5F9),
+            borderRadius: BorderRadius.circular(10),
+          ),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: const [
-              Icon(Icons.check_circle, color: Colors.green, size: 56),
-              SizedBox(height: 16),
-              Text(
-                'Request Submitted!',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+            children: [
+              _contactRow(
+                icon: Icons.call_outlined,
+                title: 'Hotline',
+                value: '1900 xxxx',
+                note: '24/7 Support',
+              ),
+              const Divider(height: 1, thickness: 1, color: Color(0x11000000)),
+              _contactRow(
+                icon: Icons.email_outlined,
+                title: 'Email',
+                value: 'support@careai.vn',
+                note: 'Response within 24h',
+              ),
+              const Divider(height: 1, thickness: 1, color: Color(0x11000000)),
+              _contactRow(
+                icon: Icons.location_on_outlined,
+                title: 'Address',
+                value: '123 ABC Street, District 1, Ho Chi Minh City',
+                note: null,
               ),
             ],
           ),
         ),
+      ],
+    );
+  }
+
+  Widget _contactRow({
+    required IconData icon,
+    required String title,
+    required String value,
+    String? note,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: _blue, size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w400,
+                    color: _blue,
+                  ),
+                ),
+                if (note != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    note,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.black45,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
       ),
     );
+  }
 
-    // auto close
-    Future.delayed(const Duration(milliseconds: 1500), () {
-      if (Navigator.canPop(context)) Navigator.pop(context);
-    });
+  Widget _faqCard() {
+    final faqs = [
+      'How can I change the font size?',
+      'What can AI help me with?',
+      'How can I make a video call to Digital Human?',
+      'Is my information safe?',
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Frequently Asked Questions',
+          style: TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+            color: Colors.black,
+          ),
+        ),
+        const SizedBox(height: 10),
+        Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFFF3F5F9),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Column(
+            children: [
+              for (int i = 0; i < faqs.length; i++) ...[
+                _faqItem(faqs[i]),
+                if (i != faqs.length - 1)
+                  const Divider(
+                      height: 1, thickness: 1, color: Color(0x11000000)),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _faqItem(String text) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(10),
+      onTap: () {},
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Text(
+          text,
+          textAlign: TextAlign.left,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: Colors.black,
+          ),
+        ),
+      ),
+    );
   }
 }

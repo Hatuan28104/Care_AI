@@ -25,7 +25,7 @@ class DeviceScreen extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.w800,
-                    color: Color.fromARGB(255, 13, 69, 159),
+                    color: Color.fromARGB(255, 31, 65, 187),
                   ),
                 ),
                 const Spacer(),

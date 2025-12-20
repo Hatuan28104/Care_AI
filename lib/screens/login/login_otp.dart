@@ -119,9 +119,13 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
         ),
       ];
 
-      Navigator.pushReplacement(
+      Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => const CreateProfileScreen()),
+        MaterialPageRoute(
+          builder: (_) => CreateProfileScreen(
+            phone: _formatPhoneForUi(widget.phoneE164),
+          ),
+        ),
       );
     } catch (e) {
       if (!mounted) return;

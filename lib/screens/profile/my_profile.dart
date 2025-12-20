@@ -11,10 +11,31 @@ class MyProfileScreen extends StatefulWidget {
 }
 
 class _MyProfileScreenState extends State<MyProfileScreen> {
-  // ===== CONSTANTS =====
+  // ===== COLORS =====
   static const _blue = Color(0xFF1F6BFF);
   static const _bg = Color(0xFFF3F5F9);
-  static const _fieldBg = Color(0xFFF3F5FF);
+  static const _borderBlue = Color(0xFF1F41BB);
+
+  static const _labelStyle = TextStyle(
+    fontSize: 14,
+    color: Colors.black54,
+    fontWeight: FontWeight.w400,
+  );
+
+  static const _fieldTextStyle = TextStyle(
+    fontWeight: FontWeight.w500,
+    fontSize: 12,
+    color: Colors.black,
+  );
+
+  static const _hintStyle = TextStyle(
+    fontSize: 12,
+    color: Colors.black38,
+    fontWeight: FontWeight.w400,
+  );
+
+  static const _fieldPadding =
+      EdgeInsets.symmetric(horizontal: 12, vertical: 10);
 
   bool _isEditing = false;
 
@@ -24,7 +45,10 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   final _heightCtrl = TextEditingController();
   final _weightCtrl = TextEditingController();
 
-  // Gender
+  final _phoneCtrl = TextEditingController();
+  final _emailCtrl = TextEditingController();
+  final _addressCtrl = TextEditingController();
+
   String? _gender;
 
   // ===== AVATAR =====
@@ -36,11 +60,33 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   String? _bkGender;
   File? _bkAvatar;
 
+  late String _bkPhone, _bkEmail, _bkAddress;
+
   @override
   void initState() {
     super.initState();
     _loadFromStore();
   }
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    _dobCtrl.dispose();
+    _heightCtrl.dispose();
+    _weightCtrl.dispose();
+    _phoneCtrl.dispose();
+    _emailCtrl.dispose();
+    _addressCtrl.dispose();
+    super.dispose();
+  }
+
+  // ===== HELPERS =====
+  OutlineInputBorder _outline(Color c, double w) => OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: c, width: w),
+      );
+
+  Color get _borderColor => _isEditing ? _borderBlue : Colors.grey.shade400;
 
   void _loadFromStore() {
     final p = ProfileStore.profile.value;
@@ -51,6 +97,10 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
       _heightCtrl.text = '';
       _weightCtrl.text = '';
       _avatarFile = null;
+
+      _phoneCtrl.text = '';
+      _emailCtrl.text = '';
+      _addressCtrl.text = '';
       return;
     }
 
@@ -60,6 +110,10 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     _heightCtrl.text = p.height;
     _weightCtrl.text = p.weight;
     _avatarFile = p.avatarFile;
+
+    _phoneCtrl.text = p.phone;
+    _emailCtrl.text = p.email;
+    _addressCtrl.text = p.address;
   }
 
   // ===== ACTIONS =====
@@ -70,6 +124,10 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     _bkHeight = _heightCtrl.text;
     _bkWeight = _weightCtrl.text;
     _bkAvatar = _avatarFile;
+
+    _bkPhone = _phoneCtrl.text;
+    _bkEmail = _emailCtrl.text;
+    _bkAddress = _addressCtrl.text;
 
     setState(() => _isEditing = true);
   }
@@ -82,6 +140,10 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     _weightCtrl.text = _bkWeight;
     _avatarFile = _bkAvatar;
 
+    _phoneCtrl.text = _bkPhone;
+    _emailCtrl.text = _bkEmail;
+    _addressCtrl.text = _bkAddress;
+
     setState(() => _isEditing = false);
   }
 
@@ -89,12 +151,23 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     final ok = await showConfirmSaveDialog(context);
     if (!ok) return;
 
+    final old = ProfileStore.profile.value;
+
     ProfileStore.profile.value = UserProfile(
       fullName: _nameCtrl.text.trim(),
       dob: _dobCtrl.text.trim(),
       gender: (_gender ?? '').trim(),
       height: _heightCtrl.text.trim(),
       weight: _weightCtrl.text.trim(),
+      phone: _phoneCtrl.text.trim().isNotEmpty
+          ? _phoneCtrl.text.trim()
+          : (old?.phone ?? ''),
+      email: _emailCtrl.text.trim().isNotEmpty
+          ? _emailCtrl.text.trim()
+          : (old?.email ?? ''),
+      address: _addressCtrl.text.trim().isNotEmpty
+          ? _addressCtrl.text.trim()
+          : (old?.address ?? ''),
       avatarFile: _avatarFile,
     );
 
@@ -103,10 +176,8 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   }
 
   Future<void> _pickAvatar() async {
-    final picked = await _picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 80,
-    );
+    final picked =
+        await _picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
     if (picked == null) return;
 
     setState(() => _avatarFile = File(picked.path));
@@ -129,15 +200,6 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     setState(() {});
   }
 
-  @override
-  void dispose() {
-    _nameCtrl.dispose();
-    _dobCtrl.dispose();
-    _heightCtrl.dispose();
-    _weightCtrl.dispose();
-    super.dispose();
-  }
-
   // ===== UI =====
   @override
   Widget build(BuildContext context) {
@@ -146,17 +208,94 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
       appBar: _appBar(context),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 18),
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           child: Column(
             children: [
-              const SizedBox(height: 20),
-              _profileCard(),
-              const SizedBox(height: 20),
-              _sectionTitle(),
               const SizedBox(height: 10),
-              _formFields(),
-              const SizedBox(height: 24),
+              _profileCard(),
+              const SizedBox(height: 14),
+              _cardSection(
+                title: 'Basic Information',
+                child: Column(
+                  children: [
+                    _input(
+                      label: 'Full Name',
+                      required: true,
+                      controller: _nameCtrl,
+                      hint: 'Enter full name',
+                      readOnly: !_isEditing,
+                    ),
+                    const SizedBox(height: 10),
+                    _input(
+                      label: 'Date of Birth',
+                      required: true,
+                      controller: _dobCtrl,
+                      hint: 'dd/mm/yyyy',
+                      readOnly: true,
+                      onTap: _isEditing ? _pickDob : null,
+                      suffixIcon: Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child:
+                            Icon(Icons.calendar_month, color: _blue, size: 20),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    _genderDropdown(required: true),
+                    const SizedBox(height: 10),
+                    _input(
+                      label: 'Height',
+                      required: true,
+                      controller: _heightCtrl,
+                      hint: '160',
+                      readOnly: !_isEditing,
+                      keyboardType: TextInputType.number,
+                      suffixText: 'cm',
+                    ),
+                    const SizedBox(height: 10),
+                    _input(
+                      label: 'Weight',
+                      required: true,
+                      controller: _weightCtrl,
+                      hint: '45',
+                      readOnly: !_isEditing,
+                      keyboardType: TextInputType.number,
+                      suffixText: 'kg', // ✅ luôn hiện
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 14),
+              _cardSection(
+                title: 'Contact Information',
+                child: Column(
+                  children: [
+                    _input(
+                      label: 'Phone',
+                      controller: _phoneCtrl,
+                      hint: '',
+                      readOnly: !_isEditing, // muốn lock phone luôn -> true
+                      keyboardType: TextInputType.phone,
+                    ),
+                    const SizedBox(height: 10),
+                    _input(
+                      label: 'Email',
+                      controller: _emailCtrl,
+                      hint: '',
+                      readOnly: !_isEditing,
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                    const SizedBox(height: 10),
+                    _input(
+                      label: 'Address',
+                      controller: _addressCtrl,
+                      hint: '',
+                      readOnly: !_isEditing,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 18),
             ],
           ),
         ),
@@ -207,21 +346,29 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFFE3E2E2), Color(0xFFD1E3F9)],
+        ),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
         children: [
           Container(
             width: 350,
-            height: 100,
+            height: 90,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.black12),
+              border: Border.all(
+                color: const Color.fromARGB(255, 0, 0, 0),
+                width: 6,
+              ),
             ),
             child: ClipOval(
               child: _avatarFile == null
-                  ? const Icon(Icons.person, size: 40)
+                  ? const Icon(Icons.person,
+                      size: 80, color: Color.fromARGB(255, 0, 0, 0))
                   : Image.file(_avatarFile!, fit: BoxFit.cover),
             ),
           ),
@@ -231,208 +378,172 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
             style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 17),
           ),
           const SizedBox(height: 8),
-          if (_isEditing)
-            SizedBox(
-              height: 30,
-              child: OutlinedButton(
-                onPressed: _pickAvatar,
-                child: const Text('Change Avatar'),
-              ),
+          SizedBox(
+            height: 25,
+            child: OutlinedButton(
+              onPressed: _pickAvatar,
+              child: const Text('Change Avatar'),
             ),
+          ),
         ],
       ),
     );
   }
 
-  // ===== SECTION TITLE =====
-  Widget _sectionTitle() {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Text(
-        'Basic Information',
-        style: const TextStyle(
-          fontWeight: FontWeight.w800,
-          fontSize: 17,
-          color: Colors.black,
-        ),
+  // ===== SECTION CARD (GIỐNG CreateProfile) =====
+  Widget _cardSection({required String title, required Widget child}) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+      decoration: BoxDecoration(
+        color: const Color.fromARGB(250, 240, 240, 240),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        children: [
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: 18,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(height: 14),
+          child,
+        ],
       ),
     );
   }
 
-  // ===== FORM FIELDS =====
-  Widget _formFields() {
+  // ===== INPUT (GIỐNG CreateProfile: dấu * đỏ + suffix cm/kg luôn hiện) =====
+  Widget _input({
+    required String label,
+    required TextEditingController controller,
+    String hint = '',
+    bool readOnly = false,
+    bool required = false,
+    VoidCallback? onTap,
+    TextInputType keyboardType = TextInputType.text,
+    String? suffixText,
+    Widget? suffixIcon,
+  }) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _profileField(
-          label: 'Full Name',
-          icon: Icons.person_outline,
-          ctrl: _nameCtrl,
-          readOnly: !_isEditing,
+        RichText(
+          text: TextSpan(
+            text: label,
+            style: _labelStyle,
+            children: [
+              if (required)
+                const TextSpan(
+                  text: ' *',
+                  style:
+                      TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
+                ),
+            ],
+          ),
         ),
-        _profileField(
-          label: 'Date of Birth',
-          icon: Icons.calendar_today_outlined,
-          ctrl: _dobCtrl,
-          readOnly: true,
-          onTap: _isEditing ? _pickDob : null,
-        ),
-        _genderField(),
-        _profileField(
-          label: 'Height',
-          icon: Icons.height_rounded,
-          ctrl: _heightCtrl,
-          readOnly: !_isEditing,
-          keyboardType: TextInputType.number,
-        ),
-        _profileField(
-          label: 'Weight',
-          icon: Icons.monitor_weight_outlined,
-          ctrl: _weightCtrl,
-          readOnly: !_isEditing,
-          keyboardType: TextInputType.number,
+        const SizedBox(height: 4),
+        TextFormField(
+          controller: controller,
+          readOnly: readOnly,
+          onTap: onTap,
+          keyboardType: keyboardType,
+          style: _fieldTextStyle,
+          decoration: InputDecoration(
+            isDense: true,
+            contentPadding: _fieldPadding,
+            hintText: hint,
+            hintStyle: _hintStyle,
+
+            // ✅ ưu tiên suffixIcon nếu truyền, còn không thì hiện suffixText (cm/kg)
+            suffixIcon: suffixIcon ??
+                ((suffixText == null || suffixText.isEmpty)
+                    ? null
+                    : Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: Text(
+                          suffixText,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: _blue,
+                          ),
+                        ),
+                      )),
+            suffixIconConstraints:
+                const BoxConstraints(minWidth: 0, minHeight: 0),
+
+            enabledBorder: _outline(_borderColor, 1.2),
+            focusedBorder: _outline(_borderColor, 1.6),
+            errorBorder: _outline(Colors.red, 1.2),
+            focusedErrorBorder: _outline(Colors.red, 1.6),
+          ),
         ),
       ],
     );
   }
 
-  // ===== FIELD (ĐỒNG BỘ STYLE) =====
-  Widget _profileField({
-    required String label,
-    required IconData icon,
-    required TextEditingController ctrl,
-    bool readOnly = false,
-    VoidCallback? onTap,
-    TextInputType keyboardType = TextInputType.text,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-        decoration: BoxDecoration(
-          color: _fieldBg,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: _isEditing ? _blue : Colors.grey.shade300,
-            width: _isEditing ? 2 : 1.2,
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon, size: 18, color: _blue),
-                const SizedBox(width: 4), // ✅ đồng bộ
-                Text(
-                  label,
-                  style: const TextStyle(
-                    color: Colors.black54,
-                    fontWeight: FontWeight.w500, // ✅ đồng bộ
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Padding(
-              padding: const EdgeInsets.only(left: 24),
-              child: TextField(
-                controller: ctrl,
-                readOnly: readOnly,
-                onTap: onTap,
-                keyboardType: keyboardType,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w800,
-                  height: 1.1,
-                  fontSize: 16,
-                  color: Colors.black,
-                ),
-                decoration: const InputDecoration(
-                  isDense: true,
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  // ===== GENDER (GIỐNG CreateProfile: icon xanh + padding gộp) =====
+  Widget _genderDropdown({bool required = true}) {
+    const genders = ['Male', 'Female', 'Other'];
 
-  // ===== GENDER (ĐỒNG BỘ 4 Ý) =====
-  Widget _genderField() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-        decoration: BoxDecoration(
-          color: _fieldBg,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: _isEditing ? _blue : Colors.grey.shade300,
-            width: _isEditing ? 2 : 1.2,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        RichText(
+          text: TextSpan(
+            text: 'Gender',
+            style: _labelStyle,
+            children: [
+              if (required)
+                const TextSpan(
+                  text: ' *',
+                  style:
+                      TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
+                ),
+            ],
           ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: const [
-                Icon(Icons.wc_outlined, size: 18, color: _blue),
-                SizedBox(width: 4), // ✅ đồng bộ (trước là 6)
-                Text(
-                  'Gender',
-                  style: TextStyle(
-                    color: Colors.black54,
-                    fontWeight: FontWeight.w500, // ✅ đồng bộ (trước w700)
-                    fontSize: 16,
-                  ),
-                ),
-              ],
+        const SizedBox(height: 6),
+
+        // ✅ KHÓA TƯƠNG TÁC nhưng KHÔNG làm mờ
+        AbsorbPointer(
+          absorbing: !_isEditing, // false => cho bấm, true => khóa
+          child: DropdownButtonFormField<String>(
+            value: _gender,
+            isExpanded: true,
+            style: _fieldTextStyle,
+            icon: Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: Icon(Icons.arrow_drop_down, color: _blue, size: 22),
             ),
-            const SizedBox(height: 4),
-            Padding(
-              padding: const EdgeInsets.only(left: 24),
-              child: IgnorePointer(
-                ignoring: !_isEditing, // view mode: không bấm, nhưng không mờ
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    value: _gender,
-                    isExpanded: true,
-                    isDense: true,
-                    iconSize: 20,
-                    onChanged: (v) {
-                      if (!_isEditing) return;
-                      setState(() => _gender = v);
-                    },
-                    style: const TextStyle(
-                      fontSize: 16, // ✅ đồng bộ (trước 15.5)
-                      fontWeight: FontWeight.w800,
-                      height: 1.1,
-                      color: Colors.black,
-                    ),
-                    hint: const Text(
-                      'Select',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black38,
-                        fontWeight: FontWeight.w700,
-                        height: 1.1,
-                      ),
-                    ),
-                    items: const [
-                      DropdownMenuItem(value: 'Male', child: Text('Male')),
-                      DropdownMenuItem(value: 'Female', child: Text('Female')),
-                      DropdownMenuItem(value: 'Other', child: Text('Other')),
-                    ],
-                  ),
-                ),
-              ),
+            decoration: InputDecoration(
+              isDense: true,
+              contentPadding: _fieldPadding,
+              enabledBorder: _outline(_borderColor, 1.2),
+              focusedBorder: _outline(_borderColor, 1.6),
+              errorBorder: _outline(Colors.red, 1.2),
+              focusedErrorBorder: _outline(Colors.red, 1.6),
             ),
-          ],
+            hint: Text('Select', style: _hintStyle),
+
+            items: genders
+                .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                .toList(),
+
+            // ✅ luôn có onChanged để không bị “disabled/mờ”
+            onChanged: (v) => setState(() => _gender = v),
+
+            validator: required
+                ? (v) => v == null ? 'The Gender field is required.' : null
+                : null,
+          ),
         ),
-      ),
+      ],
     );
   }
 }
@@ -503,11 +614,11 @@ Future<void> showSaveSuccessDialog(BuildContext context) async {
 
       return Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
+        child: const Padding(
+          padding: EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: const [
+            children: [
               Icon(Icons.check_circle, color: Colors.green, size: 56),
               SizedBox(height: 16),
               Text(

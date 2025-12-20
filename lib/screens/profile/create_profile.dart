@@ -1,31 +1,69 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:Care_AI/screens/home/home.dart';
-import 'dart:io';
 import 'package:image_picker/image_picker.dart';
-import 'profile_store.dart'; // ✅ thêm
+import 'profile_store.dart';
 
 class CreateProfileScreen extends StatefulWidget {
-  const CreateProfileScreen({super.key});
+  final String phone;
+  const CreateProfileScreen({super.key, required this.phone});
 
   @override
   State<CreateProfileScreen> createState() => _CreateProfileScreenState();
 }
 
 class _CreateProfileScreenState extends State<CreateProfileScreen> {
-  // ===== CONSTANTS =====
+  // ===== COLORS =====
   static const _blue = Color(0xFF1F6BFF);
   static const _bg = Color(0xFFF3F5F9);
-  static const _fieldBg = Color(0xFFF3F5FF);
+  static const _borderBlue = Color(0xFF1F41BB);
+
+  // ===== UI CONSTANTS (gộp dùng chung) =====
+  static const _labelStyle = TextStyle(
+    fontSize: 14,
+    color: Colors.black54,
+    fontWeight: FontWeight.w400,
+  );
+
+  static const _fieldTextStyle = TextStyle(
+    fontWeight: FontWeight.w500,
+    fontSize: 12,
+    color: Colors.black,
+  );
+
+  static const _hintStyle = TextStyle(
+    fontSize: 12,
+    color: Colors.black38,
+    fontWeight: FontWeight.w400,
+  );
+
+  // ✅ gộp padding dùng chung cho input + gender (không đổi layout, chỉ tái dùng)
+  static const _fieldPadding =
+      EdgeInsets.symmetric(horizontal: 12, vertical: 10);
 
   // ===== FORM =====
   final _formKey = GlobalKey<FormState>();
+  bool _submitted = false;
+
   final _nameCtrl = TextEditingController();
   final _dobCtrl = TextEditingController();
   final _heightCtrl = TextEditingController();
   final _weightCtrl = TextEditingController();
+
+  final _phoneCtrl = TextEditingController();
+  final _emailCtrl = TextEditingController();
+  final _addressCtrl = TextEditingController();
+
   String? _gender;
+
   final _picker = ImagePicker();
   File? _avatarFile;
+
+  @override
+  void initState() {
+    super.initState();
+    _phoneCtrl.text = _formatPhoneForUi(widget.phone);
+  }
 
   @override
   void dispose() {
@@ -33,37 +71,51 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
     _dobCtrl.dispose();
     _heightCtrl.dispose();
     _weightCtrl.dispose();
+    _phoneCtrl.dispose();
+    _emailCtrl.dispose();
+    _addressCtrl.dispose();
     super.dispose();
   }
 
-  // ===== INPUT DECORATION =====
-  InputDecoration _dec(String hint, IconData icon) {
-    return InputDecoration(
-      hintText: hint,
-      filled: true,
-      fillColor: _fieldBg,
-      prefixIcon: Icon(icon, size: 20, color: Colors.black54),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(
-          color: Colors.grey.shade300,
-          width: 1.2,
-        ),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: _blue, width: 1.4),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.red, width: 1.2),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.red, width: 1.4),
-      ),
-    );
+  // ===== HELPERS =====
+  OutlineInputBorder _outline(Color c, double w) => OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: c, width: w),
+      );
+
+  String _formatPhoneForUi(String raw) {
+    final s = raw.trim();
+    final digitsAll = s.replaceAll(RegExp(r'[^0-9]'), '');
+
+    // 1) Nếu có +84 hoặc bắt đầu 84 -> bỏ 84
+    if (s.startsWith('+84') || digitsAll.startsWith('84')) {
+      var local = digitsAll;
+      if (local.startsWith('84')) local = local.substring(2);
+      if (local.startsWith('0')) local = local.substring(1);
+
+      if (local.length >= 9) {
+        final a = local.substring(0, 3);
+        final b = local.substring(3, 6);
+        final c = local.substring(6);
+        return '(+84) $a $b $c';
+      }
+      return '(+84) $local';
+    }
+
+    // 2) Nếu bắt đầu bằng 0 -> bỏ 0 rồi gắn (+84)
+    if (digitsAll.startsWith('0')) {
+      final local = digitsAll.substring(1);
+      if (local.length >= 9) {
+        final a = local.substring(0, 3);
+        final b = local.substring(3, 6);
+        final c = local.substring(6);
+        return '(+84) $a $b $c';
+      }
+      return '(+84) $local';
+    }
+
+    // 3) khác: để nguyên
+    return s;
   }
 
   // ===== ACTIONS =====
@@ -76,8 +128,10 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
       lastDate: now,
     );
     if (picked == null) return;
+
     _dobCtrl.text =
         '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
+    setState(() {});
   }
 
   Future<void> _pickAvatar() async {
@@ -85,24 +139,23 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
       source: ImageSource.gallery,
       imageQuality: 80,
     );
-
     if (picked == null) return;
-
-    setState(() {
-      _avatarFile = File(picked.path);
-    });
+    setState(() => _avatarFile = File(picked.path));
   }
 
   void _onContinue() {
+    setState(() => _submitted = true);
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
-    // ✅ Lưu tạm profile (không cần backend)
     ProfileStore.profile.value = UserProfile(
       fullName: _nameCtrl.text.trim(),
       dob: _dobCtrl.text.trim(),
       gender: _gender ?? '',
       height: _heightCtrl.text.trim(),
       weight: _weightCtrl.text.trim(),
+      phone: _phoneCtrl.text.trim(),
+      email: _emailCtrl.text.trim(),
+      address: _addressCtrl.text.trim(),
       avatarFile: _avatarFile,
     );
 
@@ -120,19 +173,117 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
       appBar: _appBar(context),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 18),
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           child: Form(
             key: _formKey,
+            autovalidateMode: _submitted
+                ? AutovalidateMode.onUserInteraction
+                : AutovalidateMode.disabled,
             child: Column(
               children: [
-                const SizedBox(height: 20),
-                _profileCard(),
-                const SizedBox(height: 20),
-                _sectionTitle(),
                 const SizedBox(height: 10),
-                _formFields(),
-                const SizedBox(height: 24),
+                _profileCard(),
+                const SizedBox(height: 14),
+                _cardSection(
+                  title: 'Basic Information',
+                  child: Column(
+                    children: [
+                      _input(
+                        label: 'Full Name',
+                        controller: _nameCtrl,
+                        required: true,
+                        hint: 'Enter full name',
+                        validator: (v) => (v ?? '').trim().isEmpty
+                            ? 'The Full Name field is required.'
+                            : null,
+                      ),
+                      const SizedBox(height: 10),
+                      _input(
+                        label: 'Date of Birth',
+                        controller: _dobCtrl,
+                        required: true,
+                        hint: 'dd/mm/yyyy',
+                        readOnly: true,
+                        onTap: _pickDob,
+                        suffixIcon: Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: Icon(
+                            Icons.calendar_month,
+                            color: _blue,
+                            size: 20,
+                          ),
+                        ),
+                        validator: (v) => (v ?? '').isEmpty
+                            ? 'The Date of Birth field is required.'
+                            : null,
+                      ),
+                      const SizedBox(height: 10),
+                      _genderDropdown(),
+                      const SizedBox(height: 10),
+                      _input(
+                        label: 'Height',
+                        required: true,
+                        controller: _heightCtrl,
+                        hint: '160',
+                        keyboardType: TextInputType.number,
+                        suffixText: 'cm', // ✅ luôn hiện
+                        validator: (v) => (v ?? '').trim().isEmpty
+                            ? 'The Height field is required.'
+                            : null,
+                      ),
+                      const SizedBox(height: 10),
+                      _input(
+                        label: 'Weight',
+                        controller: _weightCtrl,
+                        required: true,
+                        hint: '45',
+                        keyboardType: TextInputType.number,
+                        suffixText: 'kg', // ✅ luôn hiện
+                        validator: (v) => (v ?? '').trim().isEmpty
+                            ? 'The Weight field is required.'
+                            : null,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+                _cardSection(
+                  title: 'Contact Information',
+                  child: Column(
+                    children: [
+                      _input(
+                        label: 'Phone',
+                        controller: _phoneCtrl,
+                        readOnly: true,
+                        hint: '',
+                      ),
+                      const SizedBox(height: 10),
+                      _input(
+                        label: 'Email',
+                        controller: _emailCtrl,
+                        hint: '',
+                        keyboardType: TextInputType.emailAddress,
+                        validator: (v) {
+                          final s = (v ?? '').trim();
+                          if (s.isEmpty) return null;
+                          if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
+                              .hasMatch(s)) {
+                            return 'Invalid email';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 10),
+                      _input(
+                        label: 'Address',
+                        controller: _addressCtrl,
+                        hint: '',
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 18),
                 _continueButton(),
               ],
             ),
@@ -142,7 +293,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
     );
   }
 
-  // ===== APP BAR =====
+  // ===== APPBAR =====
   PreferredSizeWidget _appBar(BuildContext context) {
     return AppBar(
       backgroundColor: Colors.transparent,
@@ -156,45 +307,53 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
       title: const Text(
         'Create Profile',
         style: TextStyle(
-            fontWeight: FontWeight.w800, fontSize: 24, color: Colors.black),
+          fontWeight: FontWeight.w800,
+          fontSize: 24,
+          color: Colors.black,
+        ),
       ),
     );
   }
 
-  // ===== HEADER =====
+  // ===== PROFILE CARD =====
   Widget _profileCard() {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFFE3E2E2), Color(0xFFD1E3F9)],
+        ),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
         children: [
           Container(
             width: 350,
-            height: 100,
+            height: 90,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.black12),
+              border: Border.all(
+                color: const Color.fromARGB(255, 0, 0, 0),
+                width: 6,
+              ),
             ),
-
-            // ✅ giữ UI như cũ, chỉ thay icon -> ảnh nếu có
             child: ClipOval(
               child: _avatarFile == null
-                  ? const Icon(Icons.person, size: 40)
-                  : Image.file(
-                      _avatarFile!,
-                      fit: BoxFit.cover,
-                    ),
+                  ? const Icon(Icons.person,
+                      size: 80, color: Color.fromARGB(255, 0, 0, 0))
+                  : Image.file(_avatarFile!, fit: BoxFit.cover),
             ),
           ),
           const SizedBox(height: 10),
-          const Text('Username',
-              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 17)),
+          const Text(
+            'Username',
+            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 17),
+          ),
           const SizedBox(height: 8),
           SizedBox(
-            height: 30,
+            height: 25,
             child: OutlinedButton(
               onPressed: _pickAvatar,
               child: const Text('Upload Avatar'),
@@ -205,190 +364,169 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
     );
   }
 
-  // ===== SECTION TITLE =====
-  Widget _sectionTitle() {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Text(
-        'Basic Information',
-        style: TextStyle(
-          fontWeight: FontWeight.w800,
-          fontSize: 17,
-          color: Colors.black.withOpacity(.75),
-        ),
+  // ===== SECTION CARD =====
+  Widget _cardSection({required String title, required Widget child}) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+      decoration: BoxDecoration(
+        color: const Color.fromARGB(250, 240, 240, 240),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        children: [
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: 18,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(height: 14),
+          child,
+        ],
       ),
     );
   }
 
-  // ===== FORM FIELDS =====
-  Widget _formFields() {
+  // ===== INPUT (giữ layout, gọn code) =====
+  Widget _input({
+    required String label,
+    required TextEditingController controller,
+    String hint = '',
+    bool readOnly = false,
+    bool required = false, // ✅ field nào bắt buộc thì truyền true
+    VoidCallback? onTap,
+    TextInputType keyboardType = TextInputType.text,
+    String? suffixText,
+    Widget? suffixIcon, // 👈 THÊM DÒNG NÀY
+    String? Function(String?)? validator,
+  }) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _profileField(
-          label: 'Full Name',
-          icon: Icons.person_outline,
-          controller: _nameCtrl,
+        RichText(
+          text: TextSpan(
+            text: label,
+            style: _labelStyle,
+            children: [
+              if (required)
+                const TextSpan(
+                  text: ' *',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+            ],
+          ),
         ),
-        _profileField(
-          label: 'Date of Birth',
-          icon: Icons.calendar_today_outlined,
-          controller: _dobCtrl,
-          readOnly: true,
-          onTap: _pickDob,
-        ),
-        _genderField(),
-        _profileField(
-          label: 'Height',
-          icon: Icons.height_rounded,
-          controller: _heightCtrl,
-          keyboardType: TextInputType.number,
-        ),
-        _profileField(
-          label: 'Weight',
-          icon: Icons.monitor_weight_outlined,
-          controller: _weightCtrl,
-          keyboardType: TextInputType.number,
+        const SizedBox(height: 4),
+        TextFormField(
+          controller: controller,
+          readOnly: readOnly,
+          onTap: onTap,
+          keyboardType: keyboardType,
+          style: _fieldTextStyle,
+          decoration: InputDecoration(
+            isDense: true,
+            contentPadding: _fieldPadding,
+            hintText: hint,
+            hintStyle: _hintStyle,
+            suffixIcon: suffixIcon ??
+                (suffixText == null || suffixText.isEmpty
+                    ? null
+                    : Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: Text(
+                          suffixText,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: _blue,
+                          ),
+                        ),
+                      )),
+            suffixIconConstraints:
+                const BoxConstraints(minWidth: 0, minHeight: 0),
+            enabledBorder: _outline(_borderBlue, 1.2),
+            focusedBorder: _outline(_borderBlue, 1.6),
+            errorBorder: _outline(Colors.red, 1.2),
+            focusedErrorBorder: _outline(Colors.red, 1.6),
+          ),
+          validator: validator,
         ),
       ],
     );
   }
 
-  Widget _profileField({
-    required String label,
-    required IconData icon,
-    required TextEditingController controller,
-    bool readOnly = false,
-    VoidCallback? onTap,
-    TextInputType keyboardType = TextInputType.text,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-        decoration: BoxDecoration(
-          color: _fieldBg,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Colors.grey.shade300,
-            width: 1.2,
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon, size: 18, color: _blue),
-                const SizedBox(width: 4),
-                Text(
-                  label,
-                  style: const TextStyle(
-                    color: Colors.black54,
-                    fontWeight: FontWeight.w500,
-                    fontSize: 16,
+  // ===== GENDER DROPDOWN (giữ layout, gọn code) =====
+  Widget _genderDropdown({bool required = true}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        RichText(
+          text: TextSpan(
+            text: 'Gender',
+            style: _labelStyle,
+            children: [
+              if (required)
+                const TextSpan(
+                  text: ' *',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Padding(
-              padding: const EdgeInsets.only(left: 24),
-              child: TextFormField(
-                controller: controller,
-                readOnly: readOnly,
-                onTap: onTap,
-                keyboardType: keyboardType,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w800,
-                  height: 1.1,
-                  fontSize: 16,
-                  color: Colors.black,
-                ),
-                decoration: const InputDecoration(
-                  isDense: true,
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.zero,
-                ),
-                validator: (v) =>
-                    (v ?? '').trim().isEmpty ? 'Please enter $label' : null,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    );
-  }
+        const SizedBox(height: 6),
+        DropdownButtonFormField<String>(
+          value: _gender,
+          isExpanded: true,
+          icon: Padding(
+            padding: const EdgeInsets.only(right: 8), // 👈 chỉnh lề icon
+            child: Icon(
+              Icons.arrow_drop_down,
+              color: _blue,
+              size: 22,
+            ),
+          ),
+          // style của item đang chọn / text trong ô
+          style: _fieldTextStyle,
 
-  Widget _genderField() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-        decoration: BoxDecoration(
-          color: _fieldBg,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Colors.grey.shade300,
-            width: 1.2,
+          decoration: InputDecoration(
+            isDense: true,
+            contentPadding: _fieldPadding, // ✅ gộp chung giống input
+            enabledBorder: _outline(_borderBlue, 1.2),
+            focusedBorder: _outline(_borderBlue, 1.6),
+            errorBorder: _outline(Colors.red, 1.2),
+            focusedErrorBorder: _outline(Colors.red, 1.6),
           ),
+
+          // hint "Select" khi chưa chọn
+          hint: Text('Select', style: _hintStyle),
+
+          // style cho từng option (Male/Female/Other) -> sửa ở đây
+          items: ['Male', 'Female', 'Other']
+              .map(
+                (e) => DropdownMenuItem(
+                  value: e,
+                  child: Text(e, style: _fieldTextStyle),
+                ),
+              )
+              .toList(),
+
+          onChanged: (v) => setState(() => _gender = v),
+
+          validator: required
+              ? (v) => v == null ? 'The Gender field is required.' : null
+              : null,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: const [
-                Icon(Icons.wc_outlined, size: 18, color: _blue),
-                SizedBox(width: 4),
-                Text(
-                  'Gender',
-                  style: TextStyle(
-                    color: Colors.black54,
-                    fontWeight: FontWeight.w500,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Padding(
-              padding: const EdgeInsets.only(left: 24),
-              child: DropdownButtonFormField<String>(
-                value: _gender,
-                isExpanded: true,
-                isDense: true,
-                iconSize: 20,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  height: 1.1,
-                  color: Colors.black,
-                ),
-                decoration: const InputDecoration(
-                  isDense: true,
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.zero,
-                ),
-                hint: const Text(
-                  'Select',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.black38,
-                    fontWeight: FontWeight.w700,
-                    height: 1.1,
-                  ),
-                ),
-                items: const [
-                  DropdownMenuItem(value: 'Male', child: Text('Male')),
-                  DropdownMenuItem(value: 'Female', child: Text('Female')),
-                  DropdownMenuItem(value: 'Other', child: Text('Other')),
-                ],
-                onChanged: (v) => setState(() => _gender = v),
-                validator: (v) => v == null ? 'Please choose gender' : null,
-              ),
-            ),
-          ],
-        ),
-      ),
+      ],
     );
   }
 
@@ -396,7 +534,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
   Widget _continueButton() {
     return SizedBox(
       width: double.infinity,
-      height: 56,
+      height: 52,
       child: ElevatedButton(
         onPressed: _onContinue,
         style: ElevatedButton.styleFrom(
@@ -404,11 +542,11 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
           foregroundColor: Colors.white,
           elevation: 0,
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
         child: const Text(
           'Continue',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
         ),
       ),
     );

@@ -14,40 +14,42 @@ import 'data/metric_item.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  // ===== CONSTANTS =====
-  static const _blue = Color(0xFF1F6BFF);
+  static const _blue = Color.fromARGB(255, 31, 65, 187);
   static const _bg = Color(0xFFF3F5F9);
 
-  // ===== DATA =====
   static final List<Map<String, String>> _humans = [
     {
       'name': 'Luna - Nurse',
       'desc': 'Provides compassionate care and medical support.',
-      'img': 'https://images.unsplash.com/photo-1607746882042-944635dfe10e',
+      'img': 'assets/images/Luna.png',
     },
     {
       'name': 'Anna - Lawyer',
       'desc': 'Gives legal advice and document assistance.',
-      'img': 'https://images.unsplash.com/photo-1607746882042-944635dfe10e',
+      'img': 'assets/images/Anna.png',
     },
     {
       'name': 'Nutrition Expert',
       'desc': 'Customized meal plans and nutrition advice.',
-      'img': 'https://images.unsplash.com/photo-1607746882042-944635dfe10e',
+      'img': 'assets/images/Nutrition.png',
+    },
+    {
+      'name': 'Zodiac Expert',
+      'desc': 'Personalized insights based on your zodiac sign.',
+      'img': 'assets/images/Zodiac.png',
     },
     {
       'name': 'Fitness Trainer',
       'desc': 'Exercises adapted to your health condition.',
-      'img': 'https://images.unsplash.com/photo-1607746882042-944635dfe10e',
+      'img': 'assets/images/Fitness.png',
     },
     {
       'name': 'Mindfulness Mentor',
       'desc': 'Meditation and breathing guidance.',
-      'img': 'https://images.unsplash.com/photo-1607746882042-944635dfe10e',
+      'img': 'assets/images/Mindfulness.png',
     },
   ];
 
-  // ===== UI =====
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,6 +58,12 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           children: [
             _header(context),
+            Container(
+              height: 1,
+              width: double.infinity,
+              color: Colors.black.withOpacity(0.08),
+            ),
+            const SizedBox(height: 10),
             _premiumBanner(context),
             const SizedBox(height: 18),
             Expanded(child: _content(context)),
@@ -77,34 +85,27 @@ class HomeScreen extends StatelessWidget {
             style: TextStyle(
               fontSize: 32,
               fontWeight: FontWeight.w800,
-              color: Color(0xFF0D459F),
+              color: Color.fromARGB(255, 31, 65, 187),
             ),
           ),
           const Spacer(),
-
-          // PRO icon -> Premium
           GestureDetector(
             onTap: () => _goPremium(context),
             child: _iconBadge(Icons.auto_awesome),
           ),
-
           const SizedBox(width: 12),
-
-          // Notification icon (badge)
           _notificationIcon(context),
-
           const SizedBox(width: 12),
-
           GestureDetector(
             onTap: () => _go(context, const SettingsScreen()),
-            child: const Icon(Icons.settings_outlined, size: 22),
+            child: const Icon(Icons.settings_outlined, size: 25),
           ),
         ],
       ),
     );
   }
 
-  // ===== PREMIUM BANNER =====
+  // ===== PREMIUM BANNER (FIX icon PRO bị viền/nền trắng) =====
   Widget _premiumBanner(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -114,15 +115,33 @@ class HomeScreen extends StatelessWidget {
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Color(0xFF3B82F6), Color(0xFF1E40AF)],
+              colors: [Color(0xFF1E40AF), Color(0xFF3B82F6)],
             ),
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(16),
           ),
-          child: const Row(
+          child: Row(
             children: [
-              Icon(Icons.smart_toy, color: Colors.white),
-              SizedBox(width: 10),
-              Expanded(
+              // ✅ ICON PRO: tròn trắng
+              Container(
+                width: 40,
+                height: 40,
+                decoration: const BoxDecoration(
+                  color: Colors.white, // 👈 nền TRẮNG
+                  shape: BoxShape.circle,
+                ),
+                padding: const EdgeInsets.all(2),
+                child: ClipOval(
+                  child: Image.asset(
+                    'assets/images/pro.png',
+                    fit: BoxFit.contain,
+                    filterQuality: FilterQuality.high,
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 10),
+
+              const Expanded(
                 child: Text(
                   "Your free 3-day Premium hasn't been claimed yet. Tap to claim.",
                   style: TextStyle(
@@ -131,7 +150,14 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              Icon(Icons.arrow_forward_ios, color: Colors.white, size: 16),
+
+              const SizedBox(width: 10),
+
+              const Icon(
+                Icons.arrow_forward_ios,
+                color: Colors.white,
+                size: 16,
+              ),
             ],
           ),
         ),
@@ -141,7 +167,6 @@ class HomeScreen extends StatelessWidget {
 
   // ===== CONTENT =====
   Widget _content(BuildContext context) {
-    // demo data
     final basicDemo = [
       const MetricItem(
         icon: Icons.favorite,
@@ -251,7 +276,7 @@ class HomeScreen extends StatelessWidget {
             text: 'Basic health data',
             onTap: () => _go(context, BasicHealthDataScreen(items: basicDemo)),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 3),
           _categoryItem(
             icon: Icons.local_fire_department,
             iconColor: Colors.red,
@@ -292,7 +317,10 @@ class HomeScreen extends StatelessWidget {
             onTap: action,
             child: const Text(
               'See All',
-              style: TextStyle(color: _blue, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                  color: Color(0xFF1877F1),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500),
             ),
           ),
       ],
@@ -301,50 +329,73 @@ class HomeScreen extends StatelessWidget {
 
   Widget _iconBadge(IconData icon) {
     return Container(
-      padding: const EdgeInsets.all(6),
+      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 5),
       decoration: BoxDecoration(
-        color: _blue.withOpacity(.1),
-        borderRadius: BorderRadius.circular(20),
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xFF3B82F6),
+            Color(0xFF1E40AF),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(40),
       ),
-      child: Icon(icon, color: _blue, size: 18),
+      child: Icon(icon, color: const Color(0xFFFFFFFF), size: 18),
     );
   }
 
+  // ✅ FIX: asset image + bo góc chuẩn, không tràn
   Widget _humanCard(Map<String, String> h) {
     return Container(
       width: 170,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
-        image: DecorationImage(
-          image: NetworkImage(h['img']!),
-          fit: BoxFit.cover,
+        borderRadius: BorderRadius.circular(25),
+        border: Border.all(
+          color: Colors.black.withOpacity(.6),
+          width: 1.2,
         ),
       ),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          gradient: LinearGradient(
-            begin: Alignment.bottomCenter,
-            end: Alignment.topCenter,
-            colors: [Colors.black.withOpacity(.7), Colors.transparent],
-          ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.start,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(25),
+        child: Stack(
           children: [
-            Text(
-              h['name']!,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w800,
+            // ẢNH – KHÔNG OVERLAY
+            Positioned.fill(
+              child: Image.asset(
+                h['img']!,
+                fit: BoxFit.cover,
               ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              h['desc']!,
-              style: const TextStyle(color: Colors.white70, fontSize: 12),
+
+            // TEXT TRỰC TIẾP (KHÔNG NỀN)
+            Positioned(
+              left: 12,
+              right: 12,
+              bottom: 12,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    h['name']!,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    h['desc']!,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Color.fromARGB(255, 255, 255, 255),
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -377,7 +428,7 @@ class HomeScreen extends StatelessWidget {
                 text,
                 style: const TextStyle(
                   fontWeight: FontWeight.w700,
-                  fontSize: 15,
+                  fontSize: 18,
                 ),
               ),
             ),
@@ -403,7 +454,7 @@ class HomeScreen extends StatelessWidget {
           return Stack(
             clipBehavior: Clip.none,
             children: [
-              const Icon(Icons.notifications_none, size: 22),
+              const Icon(Icons.notifications_none, size: 25),
               if (count > 0)
                 Positioned(
                   right: -2,
@@ -435,8 +486,8 @@ class HomeScreen extends StatelessWidget {
   Widget _bottomNav(BuildContext context) {
     return BottomNavigationBar(
       currentIndex: 0,
-      selectedItemColor: _blue,
-      unselectedItemColor: Colors.grey,
+      selectedItemColor: const Color(0xFF1877F2),
+      unselectedItemColor: const Color(0xFFADADAD),
       type: BottomNavigationBarType.fixed,
       onTap: (index) {
         if (index == 2) {

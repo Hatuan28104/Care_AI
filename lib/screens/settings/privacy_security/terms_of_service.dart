@@ -14,7 +14,7 @@ class TermsOfServiceScreen extends StatelessWidget {
       appBar: _appBar(context),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(18, 12, 18, 24),
+          padding: const EdgeInsets.fromLTRB(32, 12, 32, 24),
           child: const _Content(),
         ),
       ),
@@ -54,28 +54,21 @@ class _Content extends StatelessWidget {
         _Title('Terms of Service'),
         _Title('Acceptance of Terms'),
         _Paragraph(
-          'By creating an account or accessing Elderly Care Digital Human System, '
-          'you agree to comply with these Terms of Service.',
-        ),
+            'By creating an account or accessing Elderly Care Digital Human System, you agree to comply with these Terms of Service. These terms form a binding agreement between you and the platform. If you do not accept them, please stop using the service immediately.'),
         _Title('User Responsibilities'),
         _Paragraph(
-          'You must provide accurate and up-to-date information. '
-          'You are responsible for keeping your account secure and for all activities under your account.',
-        ),
+            'You must provide accurate and up-to-date information. You are responsible for keeping your account details secure and for all activities under your account. Misuse for illegal, harmful, or fraudulent purposes is prohibited. You must always use the platform respectfully and lawfully.'),
         _Title('Service Limitations'),
         _Paragraph(
-          'This system is a supportive tool for elderly care and does not replace professional medical advice, '
-          'diagnosis, or treatment.',
+          'The Elderly Care Digital Human System is a supportive tool for elderly care. It does not replace professional medical advice, diagnosis, or treatment. While the system provides reminders, alerts, and recommendations, users should always consult licensed healthcare professionals for medical issues.',
         ),
         _Title('Account Management'),
         _Paragraph(
-          'You may deactivate or permanently delete your account at any time. '
-          'We reserve the right to suspend or terminate accounts that violate these terms.',
+          'You may deactivate or permanently delete your account at any time via the app settings or by contacting support. The platform reserves the right to suspend or terminate accounts that violate these terms or compromise the safety of others.',
         ),
         _Title('Updates to Terms and Policy'),
         _Paragraph(
-          'We may update these terms periodically. '
-          'You will be notified of significant changes before they take effect.',
+          'These Terms may be updated from time to time to comply with new regulations or improve services. Users will be notified of significant changes before they take effect.',
         ),
       ],
     );
@@ -94,8 +87,8 @@ class _Title extends StatelessWidget {
       child: Text(
         text,
         style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w800,
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );
@@ -113,8 +106,8 @@ class _Paragraph extends StatelessWidget {
       child: Text(
         text,
         style: const TextStyle(
-          fontSize: 14,
-          color: Colors.black54,
+          fontSize: 12,
+          color: Color.fromARGB(255, 0, 0, 0),
           height: 1.5,
         ),
       ),

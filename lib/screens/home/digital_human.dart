@@ -10,37 +10,33 @@ class DigitalHumanAllScreen extends StatelessWidget {
   static const _humans = [
     {
       'name': 'Luna - Nurse',
-      'desc':
-          'Personalized care guidance, medication reminders, and daily health check support.',
-      'img': 'https://images.unsplash.com/photo-1607746882042-944635dfe10e',
+      'desc': 'Provides compassionate care and medical support.',
+      'img': 'assets/images/Luna.png',
     },
     {
       'name': 'Anna - Lawyer',
       'desc': 'Gives legal advice and document assistance.',
-      'img': 'https://images.unsplash.com/photo-1607746882042-944635dfe10e',
+      'img': 'assets/images/Anna.png',
     },
     {
       'name': 'Nutrition Expert',
-      'desc':
-          'Provides customized meal plans and nutrition advice tailored to health conditions and age.',
-      'img': 'https://images.unsplash.com/photo-1607746882042-944635dfe10e',
+      'desc': 'Customized meal plans and nutrition advice.',
+      'img': 'assets/images/Nutrition.png',
     },
     {
       'name': 'Zodiac Expert',
       'desc': 'Personalized insights based on your zodiac sign.',
-      'img': 'https://images.unsplash.com/photo-1607746882042-944635dfe10e',
+      'img': 'assets/images/Zodiac.png',
     },
     {
       'name': 'Fitness Trainer',
-      'desc':
-          'Simple exercises such as stretching, yoga, or walking, adjusted to user health condition.',
-      'img': 'https://images.unsplash.com/photo-1607746882042-944635dfe10e',
+      'desc': 'Exercises adapted to your health condition.',
+      'img': 'assets/images/Fitness.png',
     },
     {
       'name': 'Mindfulness Mentor',
-      'desc':
-          'Guides meditation and breathing techniques to reduce stress and improve sleep quality.',
-      'img': 'https://images.unsplash.com/photo-1607746882042-944635dfe10e',
+      'desc': 'Meditation and breathing guidance.',
+      'img': 'assets/images/Mindfulness.png',
     },
   ];
 
@@ -64,7 +60,7 @@ class DigitalHumanAllScreen extends StatelessWidget {
         icon: const Icon(
           Icons.arrow_back_ios_new_rounded,
           color: Colors.black,
-          size: 18,
+          size: 20,
         ),
         onPressed: () => Navigator.pop(context),
       ),

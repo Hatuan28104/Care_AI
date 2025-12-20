@@ -14,7 +14,6 @@ class PrivacySecurityScreen extends StatefulWidget {
 class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
   static const blue = Color(0xFF1F6BFF);
   static const bg = Color(0xFFF3F5F9);
-  static const _subtle = Color(0xFFF5F6FA);
   bool _twoFA = false;
   bool _biometrics = false;
 
@@ -37,7 +36,7 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
         title: const Text(
           'Privacy & Security',
           style: TextStyle(
-            fontWeight: FontWeight.w900,
+            fontWeight: FontWeight.w800,
             color: Colors.black,
           ),
         ),
@@ -53,6 +52,7 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
             _verifyCard(),
             const SizedBox(height: 14),
             _loginHeader(),
+            const SizedBox(height: 2),
             _loginHistoryCard(),
             const SizedBox(height: 14),
             _sectionTitle('Privacy'),
@@ -71,8 +71,8 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
       child: Text(
         t,
         style: const TextStyle(
-          fontWeight: FontWeight.w800,
-          fontSize: 17, // ✅
+          fontWeight: FontWeight.w600,
+          fontSize: 17,
           color: Colors.black,
         ),
       ),
@@ -87,8 +87,8 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
           const Text(
             'Login History',
             style: TextStyle(
-              fontWeight: FontWeight.w800,
-              fontSize: 17, // ✅
+              fontWeight: FontWeight.w600,
+              fontSize: 17,
               color: Colors.black,
             ),
           ),
@@ -120,7 +120,7 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
                 return Text(
                   show,
                   style: const TextStyle(
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w600,
                     fontSize: 15,
                   ),
                 );
@@ -130,13 +130,10 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
           SizedBox(
             height: 32,
             child: OutlinedButton(
-              onPressed: () {
-                // TODO: change phone
-              },
+              onPressed: _changePhoneDialog, // ✅ BẤM ĐỔI SĐT
               style: OutlinedButton.styleFrom(
-                side: BorderSide(
-                    color: Colors.grey.shade300), // giống button dưới
-                foregroundColor: Colors.grey.shade600,
+                side: BorderSide(color: const Color(0xFF1877F2)),
+                foregroundColor: const Color.fromARGB(255, 0, 0, 0),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
@@ -145,8 +142,8 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
               child: const Text(
                 'Change',
                 style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
             ),
@@ -156,31 +153,79 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
     );
   }
 
-  // ✅ format ra đúng dạng "(+84) 123 456 789"
+  Future<void> _changePhoneDialog() async {
+    final current = AppSettings.phoneNumber.value;
+    final ctrl = TextEditingController(text: current);
+
+    final result = await showDialog<String>(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Text('Change phone number'),
+          content: TextField(
+            controller: ctrl,
+            keyboardType: TextInputType.phone,
+            decoration: const InputDecoration(
+              hintText: 'Example: 0912345678 or +84 912345678',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result == null) return;
+
+    // validate nhẹ: cho trống thì coi như not set
+    final cleaned = result.trim();
+    if (cleaned.isNotEmpty && !_looksLikePhone(cleaned)) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Phone number looks invalid.')),
+      );
+      return;
+    }
+
+    AppSettings.phoneNumber.value = cleaned;
+  }
+
+  bool _looksLikePhone(String s) {
+    // cho nhập +, khoảng trắng, dấu gạch
+    final digits = s.replaceAll(RegExp(r'\D'), '');
+    // VN thường 9-11 digits tuỳ dạng (09xxxxxxxx, +84xxxxxxxxx...)
+    return digits.length >= 9 && digits.length <= 12;
+  }
+
+  // format ra đúng dạng "(+84) 123 456 789"
   String _formatPhoneForUI(String input) {
     final s = input.trim();
     if (s.isEmpty) return '(Not set)';
 
-    // chỉ lấy số
     final digits = s.replaceAll(RegExp(r'\D'), '');
 
-    // +84xxxxxxxxx hoặc 84xxxxxxxxx
     if (digits.startsWith('84') && digits.length >= 11) {
       final national = digits.substring(2);
       return '(+84) ${_groupVN(national)}';
     }
 
-    // 0xxxxxxxxx
     if (digits.length == 10 && digits.startsWith('0')) {
       return '(+84) ${_groupVN(digits.substring(1))}';
     }
 
-    // xxxxxxxxx (9 số)
     if (digits.length == 9) {
       return '(+84) ${_groupVN(digits)}';
     }
 
-    // fallback: để nguyên
     return s;
   }
 
@@ -196,13 +241,14 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
     return _card(
       child: Column(
         children: [
-          _switchOnlyRow(
+          _switchTile(
+            icon: Icons.lock_outline,
             title: 'Two – Factor Authentication (2FA)',
             value: _twoFA,
             onChanged: (v) => setState(() => _twoFA = v),
           ),
           const Divider(height: 18, thickness: 1, color: Color(0x11000000)),
-          _switchRow(
+          _switchTile(
             icon: Icons.fingerprint,
             title: 'Biometrics',
             subtitle: 'Fingerprint or Face Recognition',
@@ -214,80 +260,59 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
     );
   }
 
-  Widget _switchOnlyRow({
-    required String title,
-    required bool value,
-    required ValueChanged<bool> onChanged,
-  }) {
-    return Row(
-      children: [
-        const Icon(
-          Icons.lock_outline,
-          color: blue,
-          size: 22,
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(
-            title,
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: Colors.black,
-            ),
-          ),
-        ),
-        Switch(
-          value: value,
-          onChanged: onChanged,
-          activeTrackColor: const Color.fromARGB(255, 19, 114, 255),
-          inactiveTrackColor: const Color.fromARGB(255, 238, 238, 238),
-        ),
-      ],
-    );
-  }
-
-  Widget _switchRow({
-    required IconData icon,
+  // ✅ GỘP CHUNG: dùng được cả có/không subtitle
+  Widget _switchTile({
+    IconData? icon,
     required String title,
     String? subtitle,
     required bool value,
     required ValueChanged<bool> onChanged,
+    double scale = 0.8,
   }) {
-    return Row(
-      children: [
-        Icon(icon, color: blue),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              if (subtitle != null)
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2), // gọn hơn
+      child: Row(
+        children: [
+          Icon(icon ?? Icons.lock_outline, color: blue, size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 Text(
-                  subtitle,
+                  title,
                   style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.black45,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black,
                   ),
                 ),
-            ],
+                if (subtitle != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.black45,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
-        ),
-        Switch(
-          value: value,
-          onChanged: onChanged,
-          activeTrackColor: const Color.fromARGB(255, 19, 114, 255),
-          inactiveTrackColor: const Color.fromARGB(255, 238, 238, 238),
-        ),
-      ],
+          Transform.scale(
+            scale: scale,
+            child: Switch(
+              value: value,
+              onChanged: onChanged,
+              activeTrackColor: const Color.fromARGB(255, 19, 114, 255),
+              inactiveTrackColor: Colors.grey.shade500,
+              inactiveThumbColor: Colors.white,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -333,7 +358,7 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
 
   Widget _loginRow(LoginHistoryItem item) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start, // ✅ icon lên top
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Padding(
           padding: EdgeInsets.only(top: 2),
@@ -347,7 +372,7 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
               Text(
                 item.device,
                 style: const TextStyle(
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w500,
                   fontSize: 15,
                 ),
               ),
@@ -357,7 +382,7 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
                 style: const TextStyle(
                   fontSize: 12,
                   color: Colors.black45,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w300,
                 ),
               ),
               const SizedBox(height: 2),
@@ -366,7 +391,7 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
                 style: const TextStyle(
                   fontSize: 12,
                   color: Colors.black45,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w300,
                 ),
               ),
             ],
@@ -422,8 +447,8 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
               child: Text(
                 text,
                 style: const TextStyle(
-                  fontSize: 15, // ✅
-                  fontWeight: FontWeight.w700, // ✅
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
@@ -441,7 +466,7 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: child,
     );

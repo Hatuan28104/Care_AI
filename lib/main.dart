@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'screens/welcome_screen.dart';
-import 'app_settings.dart'; // 👈 thêm dòng này
+import 'app_settings.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,29 +12,21 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<double>(
-      valueListenable: AppSettings.textScale, // 👈 nghe textScale toàn app
+      valueListenable: AppSettings.textScale,
       builder: (context, scale, _) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
-          title: 'Care AI',
           theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color(0xFF0D459F),
-            ),
-            useMaterial3: true,
+            fontFamily: 'Poppins', // 👈 CHỈ 1 DÒNG
           ),
-
-          // 🔥 ÁP DỤNG TEXT SIZE TOÀN APP
+          title: 'Care AI',
           builder: (context, child) {
+            final mq = MediaQuery.of(context);
             return MediaQuery(
-              data: MediaQuery.of(context).copyWith(
-                textScaleFactor: scale,
-              ),
-              child: child!,
+              data: mq.copyWith(textScaler: TextScaler.linear(scale)),
+              child: child ?? const SizedBox.shrink(),
             );
           },
-
-          // 👇 KHÔNG TRUYỀN GÌ NỮA
           home: const WelcomeScreen(),
         );
       },

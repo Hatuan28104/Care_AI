@@ -13,7 +13,7 @@ class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
   // ===== CONSTANTS =====
-  static const _bg = Color(0xFFF3F5F9);
+  static const _bg = Color.fromARGB(255, 255, 255, 255);
   static const _blue = Color(0xFF1F6BFF);
 
   // ===== NAV =====
@@ -162,8 +162,8 @@ class SettingsScreen extends StatelessWidget {
   Widget _card(List<Widget> children) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
+        color: const Color(0xF9F0F0F0),
+        borderRadius: BorderRadius.circular(5),
       ),
       child: Column(children: children),
     );
@@ -197,14 +197,25 @@ class SettingsScreen extends StatelessWidget {
     return ValueListenableBuilder<bool>(
       valueListenable: notifier,
       builder: (_, value, __) {
-        return SwitchListTile(
-          value: value,
-          onChanged: (v) => notifier.value = v,
-          secondary: Icon(icon, color: _blue),
-          title:
-              Text(text, style: const TextStyle(fontWeight: FontWeight.w600)),
-          activeTrackColor: const Color.fromARGB(255, 19, 114, 255),
-          inactiveTrackColor: const Color.fromARGB(255, 238, 238, 238), // nền
+        return ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+          leading: Icon(icon, color: _blue),
+          title: Text(
+            text,
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
+
+          // ✅ THU NHỎ SWITCH
+          trailing: Transform.scale(
+            scale: 0.8, // 👈 chỉnh 0.75 – 0.85
+            child: Switch(
+              value: value,
+              onChanged: (v) => notifier.value = v,
+              activeTrackColor: const Color.fromARGB(255, 19, 114, 255),
+              inactiveTrackColor: Colors.grey.shade500,
+              inactiveThumbColor: Colors.white,
+            ),
+          ),
         );
       },
     );
