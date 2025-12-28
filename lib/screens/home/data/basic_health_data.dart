@@ -1,40 +1,79 @@
 import 'package:flutter/material.dart';
-import 'metric_item.dart';
-import 'metric_detail.dart';
+import 'basic_health_item.dart';
+import 'basic_health_detail.dart';
 
 class BasicHealthDataScreen extends StatelessWidget {
-  const BasicHealthDataScreen({
-    super.key,
-    required this.items,
-    this.isLoading = false,
-  });
+  const BasicHealthDataScreen({super.key});
 
-  final List<MetricItem> items;
-  final bool isLoading;
+  static const Color _blue = Color(0xFF1F6BFF);
+  static const Color _bg = Color(0xFFF3F5F9);
 
-  static const _blue = Color(0xFF1F6BFF);
-  static const _bg = Color(0xFFF3F5F9);
+  static const EdgeInsets _pagePadding = EdgeInsets.fromLTRB(18, 2, 18, 18);
+  static const BorderRadius _cardRadius = BorderRadius.all(Radius.circular(10));
+
+  // ===== DEMO DATA (TỰ QUẢN – KHÔNG DÍNH HOME) =====
+  static final List<BasicHealthItem> _items = [
+    BasicHealthItem(
+      icon: Icons.favorite,
+      iconColor: Colors.red,
+      title: 'Heart rate',
+      value: '72',
+      unit: 'BPM',
+      time: '18:30',
+    ),
+    BasicHealthItem(
+      icon: Icons.bloodtype,
+      iconColor: Colors.blue,
+      title: 'Blood pressure',
+      value: '120 / 80',
+      unit: 'mmHg',
+      time: '18:30',
+    ),
+    BasicHealthItem(
+      icon: Icons.monitor_heart,
+      iconColor: Colors.indigo,
+      title: 'Blood oxygen - SpO₂',
+      value: '98',
+      unit: '%',
+      time: '18:30',
+    ),
+    BasicHealthItem(
+      icon: Icons.thermostat,
+      iconColor: Colors.orange,
+      title: 'Body temperature',
+      value: '36.8',
+      unit: '°C',
+      time: '18:30',
+    ),
+    BasicHealthItem(
+      icon: Icons.fitness_center,
+      iconColor: Colors.purple,
+      title: 'BMI',
+      value: '21.5',
+      unit: 'kg/m²',
+      time: '18:30',
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
+    final items = _items;
+
     return Scaffold(
       backgroundColor: _bg,
       body: SafeArea(
         child: Column(
           children: [
-            _header(context, 'Basic health data'),
+            _header(context),
             Expanded(
-              child: isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : items.isEmpty
-                      ? const Center(child: Text('No data yet'))
-                      : ListView.separated(
-                          padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-                          itemCount: items.length,
-                          separatorBuilder: (_, __) =>
-                              const SizedBox(height: 10),
-                          itemBuilder: (_, i) => _tile(context, items[i]),
-                        ),
+              child: items.isEmpty
+                  ? const Center(child: Text('No data yet'))
+                  : ListView.separated(
+                      padding: _pagePadding,
+                      itemCount: items.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 10),
+                      itemBuilder: (_, i) => _tile(context, items[i]),
+                    ),
             ),
           ],
         ),
@@ -42,34 +81,44 @@ class BasicHealthDataScreen extends StatelessWidget {
     );
   }
 
-  Widget _header(BuildContext context, String title) {
+  // ===== HEADER =====
+  Widget _header(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(18, 14, 18, 10),
-      child: Row(
+      padding: const EdgeInsets.fromLTRB(18, 14, 18, 2),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          InkWell(
-            onTap: () => Navigator.pop(context),
-            borderRadius: BorderRadius.circular(999),
-            child: const Padding(
-              padding: EdgeInsets.all(6),
-              child: Icon(Icons.arrow_back_ios_new, size: 18),
-            ),
+          Row(
+            children: [
+              InkWell(
+                onTap: () => Navigator.pop(context),
+                borderRadius: BorderRadius.circular(999),
+                child: const Padding(
+                  padding: EdgeInsets.all(6),
+                  child: Icon(Icons.arrow_back_ios_new, size: 20),
+                ),
+              ),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Text(
+                  'Basic health data',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 34),
+            ],
           ),
-          const SizedBox(width: 10),
-          Text(
-            title,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
-          ),
-          const Spacer(),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: _blue.withOpacity(.10),
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: const Text(
-              'Today',
-              style: TextStyle(color: _blue, fontWeight: FontWeight.w700),
+          const SizedBox(height: 8),
+          const Text(
+            'Today',
+            style: TextStyle(
+              color: _blue,
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],
@@ -77,105 +126,117 @@ class BasicHealthDataScreen extends StatelessWidget {
     );
   }
 
-  // ===== Helpers: lấy min/max demo từ value =====
-  String _extractFirstNumber(String s) {
-    // lấy số đầu tiên trong chuỗi (72, 36.8, "120 / 80" -> 120)
-    final m = RegExp(r'(\d+(\.\d+)?)').firstMatch(s);
-    return m?.group(1) ?? '--';
-  }
-
-  // ===== Tile clickable -> mở màn chi tiết =====
-  Widget _tile(BuildContext context, MetricItem m) {
-    final minD = _extractFirstNumber(m.value);
-    // demo: max = min + 2 nếu parse được, còn không thì "--"
-    String maxD = '--';
-    final parsed = double.tryParse(minD);
-    if (parsed != null) {
-      maxD = (parsed + 2).toStringAsFixed(parsed % 1 == 0 ? 0 : 1);
-    }
+  // ===== TILE =====
+  Widget _tile(BuildContext context, BasicHealthItem m) {
+    final minD = _firstNumber(m.value);
+    final maxD = _calcMax(minD);
 
     return InkWell(
+      borderRadius: _cardRadius,
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => MetricDetailScreen(
+            builder: (_) => BasicHealthDetailScreen(
               title: m.title,
               unit: m.unit,
               minDisplay: minD,
               maxDisplay: maxD,
-              accent: m.iconColor, // lấy màu theo item
+              accent: m.iconColor,
             ),
           ),
         );
       },
-      borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: _cardRadius,
           border: Border.all(color: Colors.black12),
         ),
         child: Row(
           children: [
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: m.iconColor.withOpacity(.12),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(m.icon, color: m.iconColor, size: 20),
-            ),
+            _iconBox(m),
             const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    m.title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      Text(
-                        m.value,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w900,
-                          fontSize: 18,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        m.unit,
-                        style: const TextStyle(
-                          color: Colors.black54,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+            _content(m),
             const SizedBox(width: 10),
-            Text(
-              m.time,
-              style: const TextStyle(
-                color: Colors.black45,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
+            _time(m.time),
             const SizedBox(width: 6),
             const Icon(Icons.chevron_right, color: Colors.black38),
           ],
         ),
       ),
     );
+  }
+
+  Widget _iconBox(BasicHealthItem m) {
+    return Container(
+      width: 38,
+      height: 38,
+      decoration: BoxDecoration(
+        color: m.iconColor.withOpacity(.12),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Icon(m.icon, color: m.iconColor, size: 20),
+    );
+  }
+
+  Widget _content(BasicHealthItem m) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            m.title,
+            style: const TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: 15,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Text(
+                m.value,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 18,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                m.unit,
+                style: const TextStyle(
+                  color: Colors.black54,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _time(String t) {
+    return Text(
+      t,
+      style: const TextStyle(
+        color: Colors.black45,
+        fontWeight: FontWeight.w700,
+      ),
+    );
+  }
+
+  // ===== HELPERS =====
+  static String _firstNumber(String s) {
+    final m = RegExp(r'(\d+(\.\d+)?)').firstMatch(s);
+    return m?.group(1) ?? '--';
+  }
+
+  static String _calcMax(String minD) {
+    final v = double.tryParse(minD);
+    if (v == null) return '--';
+    return (v + 2).toStringAsFixed(v % 1 == 0 ? 0 : 1);
   }
 }

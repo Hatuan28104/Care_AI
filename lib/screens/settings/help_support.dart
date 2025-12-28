@@ -51,9 +51,9 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
             _formCard(context),
 
             // ✅ PHẦN DƯỚI (giống ảnh)
-            const SizedBox(height: 18),
+            const SizedBox(height: 12),
             _contactInfoCard(),
-            const SizedBox(height: 18),
+            const SizedBox(height: 12),
             _faqCard(),
           ],
         ),
@@ -155,30 +155,25 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
           _label('Full Name'),
           const SizedBox(height: 6),
           _input(_nameCtrl, 'Enter your full name'),
-          const SizedBox(height: 12),
-
+          const SizedBox(height: 6),
           _label('Phone Number'),
           const SizedBox(height: 6),
           _input(_phoneCtrl, 'Enter your phone number',
               type: TextInputType.phone),
-          const SizedBox(height: 12),
-
+          const SizedBox(height: 6),
           _label('Email'),
           const SizedBox(height: 6),
           _input(_emailCtrl, 'Enter your email',
               type: TextInputType.emailAddress),
-          const SizedBox(height: 12),
-
+          const SizedBox(height: 6),
           _label('Subject'),
           const SizedBox(height: 6),
-          _subjectDropdown(), // ✅ có icon chọn
-          const SizedBox(height: 12),
-
+          _subjectDropdown(),
+          const SizedBox(height: 6),
           _label('Message'),
           const SizedBox(height: 6),
           _input(_msgCtrl, 'Describe your issue...', lines: 2),
-
-          const SizedBox(height: 18),
+          const SizedBox(height: 6),
           _submitButton(context),
         ],
       ),

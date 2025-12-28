@@ -307,7 +307,7 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
               value: value,
               onChanged: onChanged,
               activeTrackColor: const Color.fromARGB(255, 19, 114, 255),
-              inactiveTrackColor: Colors.grey.shade500,
+              inactiveTrackColor: const Color.fromARGB(255, 218, 217, 217),
               inactiveThumbColor: Colors.white,
             ),
           ),

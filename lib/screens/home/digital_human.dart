@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
+import 'chat.dart';
 
 class DigitalHumanAllScreen extends StatelessWidget {
   const DigitalHumanAllScreen({super.key});
 
-  // ===== CONSTANTS =====
-  static const _bg = Color(0xFFF3F5F9);
+  static const _bg = Color.fromARGB(255, 255, 255, 255);
 
-  // ===== DATA =====
   static const _humans = [
     {
       'name': 'Luna - Nurse',
@@ -40,17 +39,25 @@ class DigitalHumanAllScreen extends StatelessWidget {
     },
   ];
 
-  // ===== UI =====
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _bg,
       appBar: _appBar(context),
-      body: _grid(),
+      body: GridView.builder(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+        itemCount: _humans.length,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          childAspectRatio: 0.78,
+        ),
+        itemBuilder: (_, i) => _HumanCard(h: _humans[i]),
+      ),
     );
   }
 
-  // ===== APP BAR =====
   PreferredSizeWidget _appBar(BuildContext context) {
     return AppBar(
       backgroundColor: Colors.white,
@@ -59,96 +66,92 @@ class DigitalHumanAllScreen extends StatelessWidget {
       leading: IconButton(
         icon: const Icon(
           Icons.arrow_back_ios_new_rounded,
-          color: Colors.black,
           size: 20,
+          color: Colors.black,
         ),
         onPressed: () => Navigator.pop(context),
       ),
       title: const Text(
         'Digital Human',
         style: TextStyle(
-          color: Colors.black,
           fontWeight: FontWeight.w800,
+          color: Colors.black,
         ),
-      ),
-    );
-  }
-
-  // ===== GRID =====
-  Widget _grid() {
-    return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 0.72,
-      ),
-      itemCount: _humans.length,
-      itemBuilder: (_, i) => _HumanGridCard(
-        name: _humans[i]['name']!,
-        desc: _humans[i]['desc']!,
-        img: _humans[i]['img']!,
       ),
     );
   }
 }
 
-// ===== CARD =====
-class _HumanGridCard extends StatelessWidget {
-  final String name;
-  final String desc;
-  final String img;
+// ===== CARD GIỐNG HOME =====
+class _HumanCard extends StatelessWidget {
+  final Map<String, String> h;
 
-  const _HumanGridCard({
-    required this.name,
-    required this.desc,
-    required this.img,
-  });
+  const _HumanCard({required this.h});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
-        image: DecorationImage(
-          image: NetworkImage(img),
-          fit: BoxFit.cover,
-        ),
-      ),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ChatScreen(
+              name: h['name']!,
+              role: h['desc']!,
+              image: h['img']!,
+              intro: "Hello 👋 How can I help you today?",
+            ),
+          ),
+        );
+      },
       child: Container(
-        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          gradient: LinearGradient(
-            begin: Alignment.bottomCenter,
-            end: Alignment.topCenter,
-            colors: [
-              Colors.black.withOpacity(.75),
-              Colors.transparent,
-            ],
+          borderRadius: BorderRadius.circular(25),
+          border: Border.all(
+            color: Colors.black.withOpacity(.6),
+            width: 1.2,
           ),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              name,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w800,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(25),
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: Image.asset(
+                  h['img']!,
+                  fit: BoxFit.cover,
+                ),
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              desc,
-              style: const TextStyle(
-                color: Colors.white70,
-                fontSize: 12,
+              Positioned(
+                left: 12,
+                right: 12,
+                bottom: 12,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      h['name']!,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      h['desc']!,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -111,7 +111,7 @@ class SettingsScreen extends StatelessWidget {
                 ),
               ]),
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
 
               // ===== LOG OUT =====
               _logoutButton(context),
@@ -212,7 +212,7 @@ class SettingsScreen extends StatelessWidget {
               value: value,
               onChanged: (v) => notifier.value = v,
               activeTrackColor: const Color.fromARGB(255, 19, 114, 255),
-              inactiveTrackColor: Colors.grey.shade500,
+              inactiveTrackColor: const Color.fromARGB(255, 218, 217, 217),
               inactiveThumbColor: Colors.white,
             ),
           ),

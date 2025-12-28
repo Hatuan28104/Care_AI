@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../app_settings.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class AlertScreen extends StatefulWidget {
   const AlertScreen({super.key});
@@ -12,7 +13,6 @@ class _AlertScreenState extends State<AlertScreen> {
   static const _bg = Color(0xFFF3F5F9);
   static const _blue = Color(0xFF1F6BFF);
 
-  // ===== DEMO DATA =====
   final List<_AlertItem> _alerts = [
     _AlertItem(
       id: 'a1',
@@ -22,7 +22,6 @@ class _AlertScreenState extends State<AlertScreen> {
       time: '17:35 Today',
       detail:
           'Your heart rate increased abnormally. Consider resting and re-measuring in 5 minutes.',
-      isRead: false,
     ),
     _AlertItem(
       id: 'a2',
@@ -32,7 +31,6 @@ class _AlertScreenState extends State<AlertScreen> {
       time: '14:35 Today',
       detail:
           'We detected signs of negative emotions. Try breathing exercises or talk to someone you trust.',
-      isRead: false,
     ),
     _AlertItem(
       id: 'a3',
@@ -59,14 +57,11 @@ class _AlertScreenState extends State<AlertScreen> {
   @override
   void initState() {
     super.initState();
-    _syncBadge(); // ✅ safe update (post-frame)
+    _syncBadge();
   }
 
-  // ✅ FIX: update badge AFTER build frame, avoid "called during build"
   void _syncBadge() {
     final unread = _alerts.where((e) => !e.isRead).length;
-
-    // tránh set lại nếu không đổi
     if (AppSettings.unreadAlertCount.value == unread) return;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -83,7 +78,7 @@ class _AlertScreenState extends State<AlertScreen> {
         child: Column(
           children: [
             _header(context),
-            Expanded(child: _list(context)),
+            Expanded(child: _list()),
           ],
         ),
       ),
@@ -98,113 +93,113 @@ class _AlertScreenState extends State<AlertScreen> {
         children: [
           InkWell(
             onTap: () => Navigator.pop(context),
-            borderRadius: BorderRadius.circular(999),
-            child: const Padding(
-              padding: EdgeInsets.all(6),
-              child: Icon(Icons.arrow_back_ios_new, size: 18),
-            ),
+            child: const Icon(Icons.arrow_back_ios_new, size: 20),
           ),
-          const SizedBox(width: 10),
-          const Text(
-            'Alert',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
-          ),
-          const Spacer(),
-          TextButton(
-            onPressed: () {
-              setState(() {
-                for (final a in _alerts) {
-                  a.isRead = true;
-                }
-              });
-              _syncBadge(); // ✅ safe
-            },
-            child: const Text(
-              'Mark all read',
-              style: TextStyle(
-                color: _blue,
-                fontWeight: FontWeight.w800,
+          const Expanded(
+            child: Center(
+              child: Text(
+                'Alert',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
               ),
             ),
           ),
+          const SizedBox(width: 20),
         ],
       ),
     );
   }
 
   // ===== LIST =====
-  Widget _list(BuildContext context) {
+  Widget _list() {
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(18, 6, 18, 18),
       itemCount: _alerts.length + 1,
       separatorBuilder: (_, __) => const SizedBox(height: 10),
       itemBuilder: (_, i) {
         if (i == 0) {
-          return const Text(
-            'PREVIOUS 7 DAYS',
-            style: TextStyle(
-              color: Colors.black54,
-              fontWeight: FontWeight.w800,
-              fontSize: 12,
-            ),
+          return Row(
+            children: [
+              const Text(
+                'TODAY',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black54,
+                ),
+              ),
+              const Spacer(),
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    for (final a in _alerts) {
+                      a.isRead = true;
+                    }
+                  });
+                  _syncBadge();
+                },
+                child: const Text(
+                  'Mark all read',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: _blue,
+                  ),
+                ),
+              ),
+            ],
           );
         }
-        final item = _alerts[i - 1];
-        return _tile(context, item);
+        return _tile(context, _alerts[i - 1]);
       },
     );
   }
 
   // ===== ITEM =====
   Widget _tile(BuildContext context, _AlertItem item) {
-    return Dismissible(
+    return Slidable(
       key: ValueKey(item.id),
-      direction: DismissDirection.endToStart,
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        decoration: BoxDecoration(
-          color: Colors.red,
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: const Icon(Icons.delete, color: Colors.white),
+      endActionPane: ActionPane(
+        motion: const DrawerMotion(),
+        extentRatio: 0.25,
+        children: [
+          CustomSlidableAction(
+            onPressed: (_) async {
+              final ok = await _showDeleteConfirm(context);
+              if (ok == true) {
+                setState(() => _alerts.remove(item));
+                _syncBadge();
+                await _showDeletedSuccess(context);
+              }
+            },
+            backgroundColor: Colors.red,
+            borderRadius: BorderRadius.circular(10),
+            child: const Center(
+              child: Icon(
+                Icons.delete,
+                size: 28,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
       ),
-
-      // ✅ POPUP xác nhận trước khi xóa
-      confirmDismiss: (_) async {
-        final ok = await _showDeleteConfirm(context);
-        return ok == true;
-      },
-
-      onDismissed: (_) async {
-        setState(() {
-          _alerts.removeWhere((e) => e.id == item.id);
-        });
-        _syncBadge();
-
-        // ✅ POPUP xóa thành công
-        await _showDeletedSuccess(context);
-      },
-
       child: InkWell(
+        borderRadius: BorderRadius.circular(10),
         onTap: () async {
           await Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (_) => _AlertDetail(item: item),
-            ),
+            MaterialPageRoute(builder: (_) => _AlertDetail(item: item)),
           );
           if (!item.isRead) {
             setState(() => item.isRead = true);
             _syncBadge();
           }
         },
-        borderRadius: BorderRadius.circular(14),
         child: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(10),
             boxShadow: const [
               BoxShadow(
                 blurRadius: 8,
@@ -242,23 +237,22 @@ class _AlertScreenState extends State<AlertScreen> {
                     Text(
                       item.title,
                       style: const TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 15,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       item.time,
                       style: const TextStyle(
-                        color: Colors.black45,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12,
+                        color: Color.fromARGB(200, 0, 0, 0),
+                        fontWeight: FontWeight.w500,
+                        fontSize: 10,
                       ),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right, color: Colors.black38),
             ],
           ),
         ),
@@ -266,59 +260,67 @@ class _AlertScreenState extends State<AlertScreen> {
     );
   }
 
+  // ===== DIALOGS =====
   Future<bool?> _showDeleteConfirm(BuildContext context) {
     return showDialog<bool>(
       context: context,
-      barrierDismissible: true,
       builder: (ctx) {
         return Dialog(
-          insetPadding: const EdgeInsets.symmetric(horizontal: 28),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+            padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width: 54,
-                  height: 54,
+                  width: 56,
+                  height: 56,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(color: Colors.red, width: 2),
                   ),
                   child: const Icon(Icons.priority_high, color: Colors.red),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
                 const Text(
                   'Delete Your Alert',
-                  style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
                 ),
                 const SizedBox(height: 6),
                 const Text(
                   'Your actions may have serious consequences.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Colors.black54,
-                    fontWeight: FontWeight.w600,
+                    color: Color.fromARGB(1, 98, 98, 98),
+                    fontWeight: FontWeight.w400,
+                    fontSize: 15,
                   ),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () => Navigator.pop(ctx, true),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFFC1C1),
-                      foregroundColor: Colors.black87,
+                      backgroundColor: const Color.fromARGB(125, 255, 100, 100),
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child: const Text('Accept',
-                        style: TextStyle(fontWeight: FontWeight.w800)),
+                    child: const Text(
+                      'Accept',
+                      style: TextStyle(
+                        color: Color.fromARGB(221, 140, 24, 35),
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -327,16 +329,20 @@ class _AlertScreenState extends State<AlertScreen> {
                   child: ElevatedButton(
                     onPressed: () => Navigator.pop(ctx, false),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFEDEDED),
-                      foregroundColor: Colors.black87,
+                      backgroundColor: const Color.fromARGB(209, 211, 217, 237),
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child: const Text('Cancel',
-                        style: TextStyle(fontWeight: FontWeight.w800)),
+                    child: const Text(
+                      'Cancel',
+                      style: TextStyle(
+                        color: Colors.black87,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -348,33 +354,35 @@ class _AlertScreenState extends State<AlertScreen> {
   }
 
   Future<void> _showDeletedSuccess(BuildContext context) async {
-    // show
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (ctx) {
         return Dialog(
-          insetPadding: const EdgeInsets.symmetric(horizontal: 28),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(18, 22, 18, 22),
+            padding: const EdgeInsets.all(24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width: 54,
-                  height: 54,
+                  width: 56,
+                  height: 56,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(color: Colors.green, width: 2),
                   ),
                   child: const Icon(Icons.check, color: Colors.green),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
                 const Text(
                   'Deleted Successfully',
-                  style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
                 ),
               ],
             ),
@@ -383,16 +391,14 @@ class _AlertScreenState extends State<AlertScreen> {
       },
     );
 
-    // auto close after 1s
     await Future.delayed(const Duration(seconds: 1));
-    if (mounted) Navigator.pop(context);
+    if (context.mounted) Navigator.pop(context);
   }
 }
 
 // ===== DETAIL SCREEN =====
 class _AlertDetail extends StatelessWidget {
   const _AlertDetail({required this.item});
-
   final _AlertItem item;
 
   @override
@@ -408,66 +414,27 @@ class _AlertDetail extends StatelessWidget {
                 children: [
                   InkWell(
                     onTap: () => Navigator.pop(context),
-                    borderRadius: BorderRadius.circular(999),
-                    child: const Padding(
-                      padding: EdgeInsets.all(6),
-                      child: Icon(Icons.arrow_back_ios_new, size: 18),
+                    child: const Icon(Icons.arrow_back_ios_new),
+                  ),
+                  const Expanded(
+                    child: Center(
+                      child: Text(
+                        'Alert',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  const Text(
-                    'Alert',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
-                  ),
+                  const SizedBox(width: 20),
                 ],
               ),
             ),
+            const SizedBox(height: 100),
             Padding(
               padding: const EdgeInsets.all(18),
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(item.icon, color: item.iconColor),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            item.title,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      item.time,
-                      style: const TextStyle(
-                        color: Colors.black45,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    Text(
-                      item.detail,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        height: 1.5,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              child: _HeartRateCard(item: item),
             ),
           ],
         ),
@@ -476,7 +443,160 @@ class _AlertDetail extends StatelessWidget {
   }
 }
 
-// ===== MODEL (PRIVATE) =====
+// ===== CARD =====
+class _HeartRateCard extends StatelessWidget {
+  const _HeartRateCard({required this.item});
+  final _AlertItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color.fromARGB(255, 173, 173, 173),
+          width: 2,
+        ),
+        boxShadow: const [
+          BoxShadow(
+            blurRadius: 12,
+            color: Color(0x22000000),
+            offset: Offset(0, 6),
+          )
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // icon + title
+          Row(
+            children: [
+              Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFECEC),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(item.icon, color: Colors.red, size: 100),
+              ),
+              const SizedBox(width: 60),
+              const Text(
+                'Heart\nRate',
+                style: TextStyle(
+                  fontSize: 40,
+                  fontWeight: FontWeight.w600,
+                  height: 1.1,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 8),
+
+          // BPM
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic, // 👈 BẮT BUỘC
+            children: const [
+              Text(
+                '140',
+                style: TextStyle(
+                  fontSize: 50,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              SizedBox(width: 6),
+              Text(
+                'BPM',
+                style: TextStyle(
+                  fontSize: 24,
+                  color: Colors.black54,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+
+          // High badge
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 3),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: const Color.fromARGB(208, 244, 67, 54)),
+            ),
+            child: const Text(
+              'High',
+              style: TextStyle(
+                color: const Color.fromARGB(208, 244, 67, 54),
+                fontWeight: FontWeight.w600,
+                fontSize: 15,
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 18),
+
+          // user
+          const Row(
+            children: [
+              Icon(Icons.person, size: 30, color: Colors.black54),
+              SizedBox(width: 8),
+              Text(
+                'Alizabeth Browns',
+                style: TextStyle(
+                  fontWeight: FontWeight.w400,
+                  fontSize: 16,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 10),
+
+          // time + date
+          const Row(
+            children: [
+              Icon(Icons.access_time, size: 30, color: Colors.black54),
+              SizedBox(width: 6),
+              Text('10:30 – 11:00'),
+              SizedBox(width: 20),
+              Icon(Icons.calendar_today, size: 24, color: Colors.black54),
+              SizedBox(width: 6),
+              Text('October 28th, 2025'),
+            ],
+          ),
+
+          const SizedBox(height: 10),
+
+          RichText(
+            text: const TextSpan(
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.black,
+                height: 1.5,
+              ),
+              children: [
+                TextSpan(
+                  text: 'Detailed Description: ',
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
+                TextSpan(
+                  text: 'Unstable heart rate, higher than normal',
+                  style: TextStyle(fontWeight: FontWeight.w400),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ===== MODEL =====
 class _AlertItem {
   final String id;
   final IconData icon;

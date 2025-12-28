@@ -1,40 +1,79 @@
 import 'package:flutter/material.dart';
-import 'metric_item.dart';
-import 'metric_detail.dart';
+import 'activity_item.dart';
+import 'activity_detail.dart';
 
 class ActivityDataScreen extends StatelessWidget {
-  const ActivityDataScreen({
-    super.key,
-    required this.items,
-    this.isLoading = false,
-  });
+  const ActivityDataScreen({super.key});
 
-  final List<MetricItem> items;
-  final bool isLoading;
+  static const Color _blue = Color(0xFF1F6BFF);
+  static const Color _bg = Color(0xFFF3F5F9);
 
-  static const _blue = Color(0xFF1F6BFF);
-  static const _bg = Color(0xFFF3F5F9);
+  static const EdgeInsets _listPadding = EdgeInsets.fromLTRB(18, 2, 18, 18);
+  static const BorderRadius _cardRadius = BorderRadius.all(Radius.circular(10));
+
+  // ===== DEMO DATA (TỰ QUẢN – KHÔNG DÍNH HOME) =====
+  static final List<ActivityItem> _items = [
+    ActivityItem(
+      icon: Icons.directions_walk,
+      iconColor: Colors.red,
+      title: 'Steps',
+      value: 600,
+      unit: 'steps',
+      time: '18:30',
+    ),
+    ActivityItem(
+      icon: Icons.route,
+      iconColor: Colors.orange,
+      title: 'Walking + Running Distance',
+      value: 3,
+      unit: 'km',
+      time: '18:30',
+    ),
+    ActivityItem(
+      icon: Icons.bedtime,
+      iconColor: Colors.indigo,
+      title: 'Sleep duration',
+      value: 7,
+      unit: 'hours',
+      time: '18:30',
+    ),
+    ActivityItem(
+      icon: Icons.auto_graph,
+      iconColor: Colors.blue,
+      title: 'Sleep quality',
+      value: 85,
+      unit: '%',
+      time: '18:30',
+    ),
+    ActivityItem(
+      icon: Icons.local_fire_department,
+      iconColor: Colors.purple,
+      title: 'Exercise level',
+      value: 50,
+      unit: 'minutes',
+      time: '18:30',
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
+    final items = _items;
+
     return Scaffold(
       backgroundColor: _bg,
       body: SafeArea(
         child: Column(
           children: [
-            _header(context, 'Activity data'),
+            _header(context),
             Expanded(
-              child: isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : items.isEmpty
-                      ? const Center(child: Text('No data yet'))
-                      : ListView.separated(
-                          padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-                          itemCount: items.length,
-                          separatorBuilder: (_, __) =>
-                              const SizedBox(height: 10),
-                          itemBuilder: (_, i) => _tile(context, items[i]),
-                        ),
+              child: items.isEmpty
+                  ? const Center(child: Text('No data yet'))
+                  : ListView.separated(
+                      padding: _listPadding,
+                      itemCount: items.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 10),
+                      itemBuilder: (_, i) => _tile(context, items[i]),
+                    ),
             ),
           ],
         ),
@@ -42,34 +81,44 @@ class ActivityDataScreen extends StatelessWidget {
     );
   }
 
-  Widget _header(BuildContext context, String title) {
+  // ===== HEADER =====
+  Widget _header(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(18, 14, 18, 10),
-      child: Row(
+      padding: const EdgeInsets.fromLTRB(18, 14, 18, 2),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          InkWell(
-            onTap: () => Navigator.pop(context),
-            borderRadius: BorderRadius.circular(999),
-            child: const Padding(
-              padding: EdgeInsets.all(6),
-              child: Icon(Icons.arrow_back_ios_new, size: 18),
-            ),
+          Row(
+            children: [
+              InkWell(
+                onTap: () => Navigator.pop(context),
+                borderRadius: BorderRadius.circular(999),
+                child: const Padding(
+                  padding: EdgeInsets.all(6),
+                  child: Icon(Icons.arrow_back_ios_new, size: 20),
+                ),
+              ),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Text(
+                  'Activity data',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 34),
+            ],
           ),
-          const SizedBox(width: 10),
-          Text(
-            title,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
-          ),
-          const Spacer(),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: _blue.withOpacity(.10),
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: const Text(
-              'Today',
-              style: TextStyle(color: _blue, fontWeight: FontWeight.w700),
+          const SizedBox(height: 8),
+          const Text(
+            'Today',
+            style: TextStyle(
+              color: _blue,
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],
@@ -77,103 +126,100 @@ class ActivityDataScreen extends StatelessWidget {
     );
   }
 
-  // ===== Helpers: lấy min/max demo từ value =====
-  String _extractFirstNumber(String s) {
-    final m = RegExp(r'(\d+(\.\d+)?)').firstMatch(s);
-    return m?.group(1) ?? '--';
-  }
-
-  Widget _tile(BuildContext context, MetricItem m) {
-    final minD = _extractFirstNumber(m.value);
-
-    // demo: max = min + 2 nếu parse được
-    String maxD = '--';
-    final parsed = double.tryParse(minD);
-    if (parsed != null) {
-      maxD = (parsed + 2).toStringAsFixed(parsed % 1 == 0 ? 0 : 1);
-    }
-
+  // ===== TILE =====
+  Widget _tile(BuildContext context, ActivityItem m) {
     return InkWell(
+      borderRadius: _cardRadius,
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => MetricDetailScreen(
+            builder: (_) => ActivityDetailScreen(
               title: m.title,
               unit: m.unit,
-              minDisplay: minD,
-              maxDisplay: maxD,
+              value: m.value,
               accent: m.iconColor,
             ),
           ),
         );
       },
-      borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: _cardRadius,
           border: Border.all(color: Colors.black12),
         ),
         child: Row(
           children: [
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: m.iconColor.withOpacity(.12),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(m.icon, color: m.iconColor, size: 20),
-            ),
+            _iconBox(m),
             const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    m.title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      Text(
-                        m.value,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w900,
-                          fontSize: 18,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        m.unit,
-                        style: const TextStyle(
-                          color: Colors.black54,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+            _content(m),
             const SizedBox(width: 10),
-            Text(
-              m.time,
-              style: const TextStyle(
-                color: Colors.black45,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
+            _time(m.time),
             const SizedBox(width: 6),
             const Icon(Icons.chevron_right, color: Colors.black38),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _iconBox(ActivityItem m) {
+    return Container(
+      width: 38,
+      height: 38,
+      decoration: BoxDecoration(
+        color: m.iconColor.withOpacity(.12),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Icon(m.icon, color: m.iconColor, size: 20),
+    );
+  }
+
+  Widget _content(ActivityItem m) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            m.title,
+            style: const TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: 15,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Text(
+                m.value.toString(),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 18,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                m.unit,
+                style: const TextStyle(
+                  color: Colors.black54,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _time(String t) {
+    return Text(
+      t,
+      style: const TextStyle(
+        color: Colors.black45,
+        fontWeight: FontWeight.w700,
       ),
     );
   }

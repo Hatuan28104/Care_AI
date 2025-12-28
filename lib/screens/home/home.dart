@@ -6,15 +6,14 @@ import 'digital_human.dart';
 import 'premium.dart';
 import 'alert.dart';
 import 'decive/device_screen.dart';
+import 'chat.dart';
 
 import 'data/basic_health_data.dart';
 import 'data/activity_data.dart';
-import 'data/metric_item.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  static const _blue = Color.fromARGB(255, 31, 65, 187);
   static const _bg = Color(0xFFF3F5F9);
 
   static final List<Map<String, String>> _humans = [
@@ -167,92 +166,6 @@ class HomeScreen extends StatelessWidget {
 
   // ===== CONTENT =====
   Widget _content(BuildContext context) {
-    final basicDemo = [
-      const MetricItem(
-        icon: Icons.favorite,
-        iconColor: Colors.red,
-        title: 'Heart rate',
-        value: '72',
-        unit: 'BPM',
-        time: '18:30',
-      ),
-      const MetricItem(
-        icon: Icons.bloodtype,
-        iconColor: Colors.blue,
-        title: 'Blood pressure',
-        value: '120 / 80',
-        unit: 'mmHg',
-        time: '18:30',
-      ),
-      const MetricItem(
-        icon: Icons.monitor_heart,
-        iconColor: Colors.indigo,
-        title: 'Blood oxygen - SpO₂',
-        value: '98',
-        unit: '%',
-        time: '18:30',
-      ),
-      const MetricItem(
-        icon: Icons.thermostat,
-        iconColor: Colors.orange,
-        title: 'Body temperature',
-        value: '36.8',
-        unit: '°C',
-        time: '18:30',
-      ),
-      const MetricItem(
-        icon: Icons.fitness_center,
-        iconColor: Colors.purple,
-        title: 'BMI',
-        value: '21.5',
-        unit: 'kg/m²',
-        time: '18:30',
-      ),
-    ];
-
-    final activityDemo = [
-      const MetricItem(
-        icon: Icons.directions_walk,
-        iconColor: Colors.red,
-        title: 'Steps',
-        value: '600',
-        unit: 'steps',
-        time: '18:30',
-      ),
-      const MetricItem(
-        icon: Icons.route,
-        iconColor: Colors.orange,
-        title: 'Walking + Running Distance',
-        value: '3.0',
-        unit: 'km',
-        time: '18:30',
-      ),
-      const MetricItem(
-        icon: Icons.bedtime,
-        iconColor: Colors.indigo,
-        title: 'Sleep duration',
-        value: '7.5',
-        unit: 'hours',
-        time: '18:30',
-      ),
-      const MetricItem(
-        icon: Icons.auto_graph,
-        iconColor: Colors.blue,
-        title: 'Sleep quality',
-        value: '85',
-        unit: '%',
-        time: '18:30',
-      ),
-      const MetricItem(
-        icon: Icons.local_fire_department,
-        iconColor: Colors.purple,
-        title: 'Exercise level',
-        value: '50',
-        unit: 'minutes',
-        time: '18:30',
-      ),
-    ];
-
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 18),
       child: Column(
@@ -274,14 +187,20 @@ class HomeScreen extends StatelessWidget {
             icon: Icons.accessibility_new,
             iconColor: Colors.purple,
             text: 'Basic health data',
-            onTap: () => _go(context, BasicHealthDataScreen(items: basicDemo)),
+            onTap: () => _go(
+              context,
+              const BasicHealthDataScreen(),
+            ),
           ),
           const SizedBox(height: 3),
           _categoryItem(
             icon: Icons.local_fire_department,
             iconColor: Colors.red,
             text: 'Activity data',
-            onTap: () => _go(context, ActivityDataScreen(items: activityDemo)),
+            onTap: () => _go(
+              context,
+              const ActivityDataScreen(),
+            ),
           ),
           const SizedBox(height: 40),
         ],
@@ -298,7 +217,7 @@ class HomeScreen extends StatelessWidget {
         physics: const ClampingScrollPhysics(),
         itemCount: _humans.length,
         separatorBuilder: (_, __) => const SizedBox(width: 12),
-        itemBuilder: (_, i) => _humanCard(_humans[i]),
+        itemBuilder: (context, i) => _humanCard(context, _humans[i]),
       ),
     );
   }
@@ -346,58 +265,70 @@ class HomeScreen extends StatelessWidget {
   }
 
   // ✅ FIX: asset image + bo góc chuẩn, không tràn
-  Widget _humanCard(Map<String, String> h) {
-    return Container(
-      width: 170,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(25),
-        border: Border.all(
-          color: Colors.black.withOpacity(.6),
-          width: 1.2,
+  Widget _humanCard(BuildContext context, Map<String, String> h) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ChatScreen(
+              name: h['name']!, // Luna / Anna / Nutrition / ...
+              role: h['desc']!, // mô tả
+              image: h['img']!, // avatar
+              intro: "Hello 👋 How can I help you today?",
+            ),
+          ),
+        );
+      },
+      child: Container(
+        width: 170,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(25),
+          border: Border.all(
+            color: Colors.black.withOpacity(.6),
+            width: 1.2,
+          ),
         ),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(25),
-        child: Stack(
-          children: [
-            // ẢNH – KHÔNG OVERLAY
-            Positioned.fill(
-              child: Image.asset(
-                h['img']!,
-                fit: BoxFit.cover,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(25),
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: Image.asset(
+                  h['img']!,
+                  fit: BoxFit.cover,
+                ),
               ),
-            ),
-
-            // TEXT TRỰC TIẾP (KHÔNG NỀN)
-            Positioned(
-              left: 12,
-              right: 12,
-              bottom: 12,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    h['name']!,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
+              Positioned(
+                left: 12,
+                right: 12,
+                bottom: 12,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      h['name']!,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    h['desc']!,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Color.fromARGB(255, 255, 255, 255),
-                      fontSize: 12,
+                    const SizedBox(height: 4),
+                    Text(
+                      h['desc']!,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
