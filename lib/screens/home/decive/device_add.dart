@@ -17,7 +17,7 @@ class AddDeviceScreen extends StatelessWidget {
           children: [
             // ===== HEADER =====
             Padding(
-              padding: const EdgeInsets.fromLTRB(18, 14, 18, 10),
+              padding: const EdgeInsets.fromLTRB(18, 14, 18, 12),
               child: Row(
                 children: [
                   const Text(
@@ -45,11 +45,16 @@ class AddDeviceScreen extends StatelessWidget {
                 ],
               ),
             ),
+            Container(
+              height: 1,
+              width: double.infinity,
+              color: Colors.black.withOpacity(0.08),
+            ),
 
             Transform.translate(
               offset: const Offset(0, -12),
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(12, 0, 12, 6),
+                padding: const EdgeInsets.fromLTRB(12, 20, 12, 20),
                 child: Stack(
                   alignment: Alignment.center,
                   children: [

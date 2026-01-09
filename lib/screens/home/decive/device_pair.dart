@@ -15,7 +15,7 @@ class DevicePairScreen extends StatelessWidget {
           children: [
             // ===== HEADER =====
             Padding(
-              padding: const EdgeInsets.fromLTRB(18, 14, 18, 10),
+              padding: const EdgeInsets.fromLTRB(18, 14, 18, 12),
               child: Row(
                 children: [
                   const Text(
@@ -43,10 +43,14 @@ class DevicePairScreen extends StatelessWidget {
                 ],
               ),
             ),
+            Container(
+              height: 1,
+              width: double.infinity,
+              color: Colors.black.withOpacity(0.08),
+            ),
 
-            // ===== ĐẨY ẢNH + TEXT XUỐNG 80px =====
-            Transform.translate(
-              offset: const Offset(0, 80),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 100, 12, 6),
               child: Column(
                 children: [
                   Center(

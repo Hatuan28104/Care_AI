@@ -15,7 +15,7 @@ class AllowDeviceScreen extends StatelessWidget {
           children: [
             // ===== HEADER =====
             Padding(
-              padding: const EdgeInsets.fromLTRB(18, 14, 18, 8),
+              padding: const EdgeInsets.fromLTRB(18, 14, 18, 12),
               child: Row(
                 children: [
                   const Text(
@@ -42,6 +42,11 @@ class AllowDeviceScreen extends StatelessWidget {
                   const Icon(Icons.settings_outlined, size: 22),
                 ],
               ),
+            ),
+            Container(
+              height: 1,
+              width: double.infinity,
+              color: Colors.black.withOpacity(0.08),
             ),
 
             const SizedBox(height: 14),

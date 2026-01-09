@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:Care_AI/screens/home/home.dart';
+import 'package:Care_AI/screens/home/familycenter/familycenter_guardians.dart';
+import 'package:Care_AI/screens/home/history/history_screen.dart';
 
 class DeviceDetailScreen extends StatelessWidget {
   const DeviceDetailScreen({super.key});
@@ -191,33 +193,42 @@ class DeviceDetailScreen extends StatelessWidget {
 
   // ===== HEADER =====
   Widget _header() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(18, 14, 18, 8),
-      child: Row(
-        children: [
-          const Text(
-            'Care AI',
-            style: TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.w800,
-              color: Color(0xFF0D459F),
-            ),
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(18, 14, 18, 12),
+          child: Row(
+            children: [
+              const Text(
+                'Care AI',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF0D459F),
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: _blue.withOpacity(.10),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Icon(Icons.auto_awesome, color: _blue, size: 18),
+              ),
+              const SizedBox(width: 12),
+              const Icon(Icons.notifications_none, size: 22),
+              const SizedBox(width: 12),
+              const Icon(Icons.settings_outlined, size: 22),
+            ],
           ),
-          const Spacer(),
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: _blue.withOpacity(.10),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: const Icon(Icons.auto_awesome, color: _blue, size: 18),
-          ),
-          const SizedBox(width: 12),
-          const Icon(Icons.notifications_none, size: 22),
-          const SizedBox(width: 12),
-          const Icon(Icons.settings_outlined, size: 22),
-        ],
-      ),
+        ),
+        Container(
+          height: 1,
+          width: double.infinity,
+          color: Colors.black.withOpacity(0.08),
+        ),
+      ],
     );
   }
 
@@ -469,20 +480,40 @@ class DeviceDetailScreen extends StatelessWidget {
       unselectedItemColor: Colors.grey,
       type: BottomNavigationBarType.fixed,
       onTap: (index) {
-        if (index == 0) {
-          Navigator.pushAndRemoveUntil(
+        if (index == 1) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const MyGuardiansScreen()),
+          );
+        } else if (index == 0) {
+          Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (_) => const HomeScreen()),
-            (route) => false,
+          );
+        } else if (index == 3) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const HistoryScreen()),
           );
         }
       },
       items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'Home'),
         BottomNavigationBarItem(
-            icon: Icon(Icons.group_outlined), label: 'Family Center'),
-        BottomNavigationBarItem(icon: Icon(Icons.graphic_eq), label: 'Device'),
-        BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
+          icon: Icon(Icons.home_outlined),
+          label: 'Home',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.group_outlined),
+          label: 'Family Center',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.graphic_eq),
+          label: 'Device',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.history),
+          label: 'History',
+        ),
       ],
     );
   }
