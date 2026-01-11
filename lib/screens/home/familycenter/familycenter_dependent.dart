@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'familycenter_guardians.dart';
 import 'familycenter_dependent_proflie.dart';
 import 'package:Care_AI/screens/home/home.dart';
-import 'package:Care_AI/screens/home/decive/device_screen.dart';
+import 'package:Care_AI/screens/home/decive/note.dart';
 import 'package:Care_AI/screens/home/history/history_screen.dart';
 
 class MyDependentsScreen extends StatelessWidget {

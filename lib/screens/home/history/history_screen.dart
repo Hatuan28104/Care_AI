@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'history_detail.dart';
 
 import 'package:Care_AI/screens/home/home.dart';
-import 'package:Care_AI/screens/home/decive/device_screen.dart';
+import 'package:Care_AI/screens/home/decive/note.dart';
 import 'package:Care_AI/screens/home/familycenter/familycenter_guardians.dart';
 
 class HistoryScreen extends StatelessWidget {

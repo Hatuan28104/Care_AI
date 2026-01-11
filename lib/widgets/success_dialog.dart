@@ -3,103 +3,128 @@ import 'package:flutter/material.dart';
 class SuccessDialog extends StatelessWidget {
   final String title;
   final String message;
+  final VoidCallback? onConfirm;
 
   const SuccessDialog({
     super.key,
     required this.title,
-    this.message = 'Wish you have an experience\nwith the application',
+    required this.message,
+    this.onConfirm,
   });
 
+  /// ===== SHOW =====
   static Future<void> show(
     BuildContext context, {
     required String title,
-    String message = 'Wish you have an experience\nwith the application',
-    Duration autoClose = const Duration(seconds: 2),
-    VoidCallback? onClosed,
+    required String message,
+    Duration autoClose = const Duration(seconds: 2), // ✅ 2s
+    VoidCallback? onConfirm,
   }) async {
+    bool closed = false;
+
     // show dialog
-    unawaited(
-      showGeneralDialog(
-        context: context,
-        barrierDismissible: false,
-        barrierLabel: 'success',
-        barrierColor: Colors.black54,
-        transitionDuration: const Duration(milliseconds: 180),
-        pageBuilder: (_, __, ___) {
-          return Center(
-            child: SuccessDialog(title: title, message: message),
-          );
-        },
-        transitionBuilder: (_, anim, __, child) {
-          final t = Curves.easeOut.transform(anim.value);
-          return Transform.scale(
-            scale: 0.96 + (0.04 * t),
-            child: Opacity(opacity: anim.value, child: child),
-          );
-        },
-      ),
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'success',
+      barrierColor: Colors.black.withOpacity(0.55),
+      transitionDuration: const Duration(milliseconds: 200),
+      pageBuilder: (_, __, ___) {
+        return Center(
+          child: SuccessDialog(
+            title: title,
+            message: message,
+            onConfirm: () {
+              if (closed) return;
+              closed = true;
+              Navigator.of(context).pop();
+              onConfirm?.call();
+            },
+          ),
+        );
+      },
+      transitionBuilder: (_, anim, __, child) {
+        final scale = 0.9 + (0.1 * anim.value);
+        return Transform.scale(
+          scale: scale,
+          child: Opacity(opacity: anim.value, child: child),
+        );
+      },
     );
 
-    // auto close
+    // ===== AUTO CLOSE =====
     await Future.delayed(autoClose);
-    if (context.mounted) Navigator.of(context).pop();
-
-    onClosed?.call();
+    if (context.mounted && !closed) {
+      closed = true;
+      Navigator.of(context).pop();
+      onConfirm?.call();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    const green = Color(0xFF21B14B);
+    const black = Color(0xFF000000);
 
     return Material(
       color: Colors.transparent,
-      child: Container(
-        width: 320,
-        padding: const EdgeInsets.fromLTRB(22, 20, 22, 22),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(26),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: green, width: 2),
+      child: GestureDetector(
+        onTap: onConfirm, // ✅ bấm popup là tắt
+        child: Container(
+          width: 360,
+          height: 260,
+          padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // ===== ICON =====
+              Container(
+                width: 72,
+                height: 72,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Color(0xFF1877F2),
+                ),
+                child: const Icon(
+                  Icons.check_rounded,
+                  size: 60,
+                  color: Colors.white,
+                ),
               ),
-              child: const Center(
-                child: Icon(Icons.check_rounded, color: green, size: 34),
+
+              const SizedBox(height: 30),
+
+              // ===== TITLE =====
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: black,
+                ),
               ),
-            ),
-            const SizedBox(height: 14),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w800,
-                color: Colors.black,
+
+              const SizedBox(height: 20),
+
+              // ===== MESSAGE =====
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w400,
+                  height: 1.4,
+                  color: Colors.black87,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Colors.black54,
-                height: 1.35,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
-
-/// helper để khỏi warning unawaited
-void unawaited(Future<void> f) {}

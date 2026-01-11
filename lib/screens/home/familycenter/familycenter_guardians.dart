@@ -3,7 +3,7 @@ import 'familycenter_dependent.dart';
 import 'familycenter_guardian_add.dart';
 import 'familycenter_guardian_profile.dart';
 import 'package:Care_AI/screens/home/home.dart';
-import 'package:Care_AI/screens/home/decive/device_screen.dart';
+import 'package:Care_AI/screens/home/decive/note.dart';
 import 'package:Care_AI/screens/home/history/history_screen.dart';
 
 class MyGuardiansScreen extends StatelessWidget {

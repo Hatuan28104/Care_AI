@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:Care_AI/screens/home/home.dart';
 import 'package:image_picker/image_picker.dart';
 import 'profile_store.dart';
+import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 
 class CreateProfileScreen extends StatefulWidget {
   final String phone;
@@ -14,8 +15,8 @@ class CreateProfileScreen extends StatefulWidget {
 
 class _CreateProfileScreenState extends State<CreateProfileScreen> {
   // ===== COLORS =====
-  static const _blue = Color(0xFF1F6BFF);
-  static const _bg = Color(0xFFF3F5F9);
+  static const _blue = Color(0xFF1877F2);
+  static const _bg = Color(0xFFF6F6F6);
   static const _borderBlue = Color(0xFF1F41BB);
 
   // ===== UI CONSTANTS (gộp dùng chung) =====
@@ -37,7 +38,6 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
     fontWeight: FontWeight.w400,
   );
 
-  // ✅ gộp padding dùng chung cho input + gender (không đổi layout, chỉ tái dùng)
   static const _fieldPadding =
       EdgeInsets.symmetric(horizontal: 12, vertical: 10);
 
@@ -62,7 +62,11 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _phoneCtrl.text = _formatPhoneForUi(widget.phone);
+    _phoneCtrl.text = normalizePhone(widget.phone);
+
+    _nameCtrl.addListener(() {
+      setState(() {});
+    });
   }
 
   @override
@@ -83,55 +87,39 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
         borderSide: BorderSide(color: c, width: w),
       );
 
-  String _formatPhoneForUi(String raw) {
-    final s = raw.trim();
-    final digitsAll = s.replaceAll(RegExp(r'[^0-9]'), '');
+  String normalizePhone(String raw) {
+    final digits = raw.replaceAll(RegExp(r'\D'), '');
 
-    // 1) Nếu có +84 hoặc bắt đầu 84 -> bỏ 84
-    if (s.startsWith('+84') || digitsAll.startsWith('84')) {
-      var local = digitsAll;
-      if (local.startsWith('84')) local = local.substring(2);
-      if (local.startsWith('0')) local = local.substring(1);
-
-      if (local.length >= 9) {
-        final a = local.substring(0, 3);
-        final b = local.substring(3, 6);
-        final c = local.substring(6);
-        return '(+84) $a $b $c';
-      }
-      return '(+84) $local';
+    if (digits.length == 10) {
+      return digits;
     }
 
-    // 2) Nếu bắt đầu bằng 0 -> bỏ 0 rồi gắn (+84)
-    if (digitsAll.startsWith('0')) {
-      final local = digitsAll.substring(1);
-      if (local.length >= 9) {
-        final a = local.substring(0, 3);
-        final b = local.substring(3, 6);
-        final c = local.substring(6);
-        return '(+84) $a $b $c';
-      }
-      return '(+84) $local';
+    if (digits.length == 9) {
+      return '0$digits';
     }
 
-    // 3) khác: để nguyên
-    return s;
+    return raw;
   }
 
   // ===== ACTIONS =====
-  Future<void> _pickDob() async {
+  void _pickDob() {
     final now = DateTime.now();
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime(now.year - 18),
-      firstDate: DateTime(1900),
-      lastDate: now,
+    final minAgeDate = DateTime(
+      now.year - 16,
+      now.month,
+      now.day,
     );
-    if (picked == null) return;
 
-    _dobCtrl.text =
-        '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
-    setState(() {});
+    DatePicker.showDatePicker(
+      context,
+      minTime: DateTime(1900),
+      maxTime: minAgeDate,
+      onConfirm: (d) {
+        _dobCtrl.text =
+            '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
+        setState(() {});
+      },
+    );
   }
 
   Future<void> _pickAvatar() async {
@@ -186,62 +174,94 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
                 _profileCard(),
                 const SizedBox(height: 14),
                 _cardSection(
-                  title: 'Basic Information',
+                  title: 'Thông tin cá nhân',
                   child: Column(
                     children: [
                       _input(
-                        label: 'Full Name',
+                        label: 'Họ và tên',
                         controller: _nameCtrl,
                         required: true,
-                        hint: 'Enter full name',
+                        hint: 'Nguyen Van A',
                         validator: (v) => (v ?? '').trim().isEmpty
-                            ? 'The Full Name field is required.'
+                            ? 'Trường Họ và tên là bắt buộc.'
                             : null,
                       ),
                       const SizedBox(height: 10),
                       _input(
-                        label: 'Date of Birth',
+                        label: 'Ngày sinh',
                         controller: _dobCtrl,
                         required: true,
                         hint: 'dd/mm/yyyy',
-                        readOnly: true,
-                        onTap: _pickDob,
-                        suffixIcon: Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: Icon(
-                            Icons.calendar_month,
-                            color: _blue,
-                            size: 20,
+                        keyboardType: TextInputType.datetime,
+                        suffixIcon: GestureDetector(
+                          onTap: _pickDob,
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: Icon(
+                              Icons.calendar_month,
+                              color: _blue,
+                              size: 18,
+                            ),
                           ),
                         ),
-                        validator: (v) => (v ?? '').isEmpty
-                            ? 'The Date of Birth field is required.'
-                            : null,
+                        validator: (v) {
+                          if (v == null || v.isEmpty) {
+                            return 'Trường Ngày sinh là bắt buộc.';
+                          }
+
+                          // parse dd/mm/yyyy
+                          final parts = v.split('/');
+                          if (parts.length != 3)
+                            return 'Ngày sinh không đúng định dạng.';
+
+                          final day = int.tryParse(parts[0]);
+                          final month = int.tryParse(parts[1]);
+                          final year = int.tryParse(parts[2]);
+                          if (day == null || month == null || year == null) {
+                            return 'Ngày sinh không hợp lệ.';
+                          }
+
+                          final dob = DateTime(year, month, day);
+                          final now = DateTime.now();
+                          final age = now.year -
+                              dob.year -
+                              ((now.month < dob.month ||
+                                      (now.month == dob.month &&
+                                          now.day < dob.day))
+                                  ? 1
+                                  : 0);
+
+                          if (age < 16) {
+                            return 'Bạn phải đủ 16 tuổi trở lên.';
+                          }
+
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 10),
                       _genderDropdown(),
                       const SizedBox(height: 10),
                       _input(
-                        label: 'Height',
+                        label: 'Chiều cao',
                         required: true,
                         controller: _heightCtrl,
                         hint: '160',
                         keyboardType: TextInputType.number,
-                        suffixText: 'cm', // ✅ luôn hiện
+                        suffixText: 'cm',
                         validator: (v) => (v ?? '').trim().isEmpty
-                            ? 'The Height field is required.'
+                            ? 'Trường Chiều cao là bắt buộc.'
                             : null,
                       ),
                       const SizedBox(height: 10),
                       _input(
-                        label: 'Weight',
+                        label: 'Cân nặng',
                         controller: _weightCtrl,
                         required: true,
                         hint: '45',
                         keyboardType: TextInputType.number,
-                        suffixText: 'kg', // ✅ luôn hiện
+                        suffixText: 'kg',
                         validator: (v) => (v ?? '').trim().isEmpty
-                            ? 'The Weight field is required.'
+                            ? 'Trường Cân nặng là bắt buộc.'
                             : null,
                       ),
                     ],
@@ -249,11 +269,11 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
                 ),
                 const SizedBox(height: 14),
                 _cardSection(
-                  title: 'Contact Information',
+                  title: 'Thông tin liên hệ',
                   child: Column(
                     children: [
                       _input(
-                        label: 'Phone',
+                        label: 'Số điện thoại',
                         controller: _phoneCtrl,
                         readOnly: true,
                         hint: '',
@@ -269,14 +289,14 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
                           if (s.isEmpty) return null;
                           if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
                               .hasMatch(s)) {
-                            return 'Invalid email';
+                            return 'Email không hợp lệ.';
                           }
                           return null;
                         },
                       ),
                       const SizedBox(height: 10),
                       _input(
-                        label: 'Address',
+                        label: 'Địa chỉ',
                         controller: _addressCtrl,
                         hint: '',
                       ),
@@ -305,7 +325,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
             color: Colors.black, size: 20),
       ),
       title: const Text(
-        'Create Profile',
+        'Hồ sơ cá nhân',
         style: TextStyle(
           fontWeight: FontWeight.w800,
           fontSize: 24,
@@ -329,34 +349,69 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
       ),
       child: Column(
         children: [
-          Container(
+          // ===== NỀN NGOÀI =====
+          SizedBox(
             width: 350,
             height: 90,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: const Color.fromARGB(255, 0, 0, 0),
-                width: 6,
+            child: Center(
+              // ===== AVATAR RIÊNG =====
+              child: Container(
+                width: 90,
+                height: 90,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.black,
+                    width: 2,
+                  ),
+                ),
+                child: ClipOval(
+                  child: _avatarFile == null
+                      ? const Icon(
+                          Icons.person,
+                          size: 60,
+                          color: Colors.black,
+                        )
+                      : Image.file(
+                          _avatarFile!,
+                          fit: BoxFit.cover, // ✅ ảnh fill avatar
+                        ),
+                ),
               ),
-            ),
-            child: ClipOval(
-              child: _avatarFile == null
-                  ? const Icon(Icons.person,
-                      size: 80, color: Color.fromARGB(255, 0, 0, 0))
-                  : Image.file(_avatarFile!, fit: BoxFit.cover),
             ),
           ),
           const SizedBox(height: 10),
-          const Text(
-            'Username',
-            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 17),
+          Text(
+            _nameCtrl.text.isEmpty ? 'Họ và tên' : _nameCtrl.text,
+            style: const TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: 17,
+            ),
           ),
+
           const SizedBox(height: 8),
           SizedBox(
             height: 25,
             child: OutlinedButton(
               onPressed: _pickAvatar,
-              child: const Text('Upload Avatar'),
+              style: OutlinedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: const Color(0xFF626262),
+                side: const BorderSide(
+                  color: Color(0xFF1F41BB),
+                  width: 1,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: const Text(
+                'Thêm ảnh',
+                style: TextStyle(
+                  fontWeight: FontWeight.w400,
+                  fontSize: 13,
+                ),
+              ),
             ),
           ),
         ],
@@ -469,7 +524,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
       children: [
         RichText(
           text: TextSpan(
-            text: 'Gender',
+            text: 'Giới tính',
             style: _labelStyle,
             children: [
               if (required)
@@ -484,47 +539,60 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
           ),
         ),
         const SizedBox(height: 6),
-        DropdownButtonFormField<String>(
-          value: _gender,
-          isExpanded: true,
-          icon: Padding(
-            padding: const EdgeInsets.only(right: 8), // 👈 chỉnh lề icon
-            child: Icon(
-              Icons.arrow_drop_down,
-              color: _blue,
-              size: 22,
+        GestureDetector(
+          onTapDown: (d) async {
+            final v = await showMenu<String>(
+              context: context,
+              position: RelativeRect.fromLTRB(
+                d.globalPosition.dx + 200,
+                d.globalPosition.dy + 40,
+                12,
+                0,
+              ),
+              items: const [
+                PopupMenuItem(
+                  value: 'Nam',
+                  height: 32,
+                  child: Text('Nam'),
+                ),
+                PopupMenuItem(
+                  value: 'Nữ',
+                  height: 32,
+                  child: Text('Nữ'),
+                ),
+                PopupMenuItem(
+                  value: 'Khác',
+                  height: 32,
+                  child: Text('Khác'),
+                ),
+              ],
+            );
+
+            if (v != null) setState(() => _gender = v);
+          },
+          child: AbsorbPointer(
+            child: TextFormField(
+              controller: TextEditingController(text: _gender),
+              style: _fieldTextStyle,
+              decoration: InputDecoration(
+                hintText: 'Chọn giới tính',
+                hintStyle: _hintStyle, // (tuỳ chọn nhưng nên có)
+
+                isDense: true,
+                contentPadding: _fieldPadding,
+                enabledBorder: _outline(_borderBlue, 1.2),
+                focusedBorder: _outline(_borderBlue, 1.6),
+                errorBorder: _outline(Colors.red, 1.2),
+                focusedErrorBorder: _outline(Colors.red, 1.6),
+                suffixIcon: Icon(Icons.arrow_drop_down, color: _blue),
+              ),
+              validator: required
+                  ? (v) => (v == null || v.isEmpty)
+                      ? 'Trường giới tính là bắt buộc.'
+                      : null
+                  : null,
             ),
           ),
-          // style của item đang chọn / text trong ô
-          style: _fieldTextStyle,
-
-          decoration: InputDecoration(
-            isDense: true,
-            contentPadding: _fieldPadding, // ✅ gộp chung giống input
-            enabledBorder: _outline(_borderBlue, 1.2),
-            focusedBorder: _outline(_borderBlue, 1.6),
-            errorBorder: _outline(Colors.red, 1.2),
-            focusedErrorBorder: _outline(Colors.red, 1.6),
-          ),
-
-          // hint "Select" khi chưa chọn
-          hint: Text('Select', style: _hintStyle),
-
-          // style cho từng option (Male/Female/Other) -> sửa ở đây
-          items: ['Male', 'Female', 'Other']
-              .map(
-                (e) => DropdownMenuItem(
-                  value: e,
-                  child: Text(e, style: _fieldTextStyle),
-                ),
-              )
-              .toList(),
-
-          onChanged: (v) => setState(() => _gender = v),
-
-          validator: required
-              ? (v) => v == null ? 'The Gender field is required.' : null
-              : null,
         ),
       ],
     );
@@ -545,7 +613,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
         child: const Text(
-          'Continue',
+          'Tiếp tục',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
         ),
       ),

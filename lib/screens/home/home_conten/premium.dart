@@ -26,8 +26,6 @@ class _PremiumScreenState extends State<PremiumScreen> {
       TextStyle(fontSize: 16, fontWeight: FontWeight.w700);
   static const TextStyle _itemText =
       TextStyle(fontSize: 16, fontWeight: FontWeight.w400);
-  static const TextStyle _muted =
-      TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: _textMuted);
 
   // ===== STATE =====
   bool _freeTrial = false;

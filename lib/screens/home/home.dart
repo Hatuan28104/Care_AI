@@ -2,51 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:Care_AI/app_settings.dart';
 import 'package:Care_AI/screens/settings/settings.dart';
 
-import 'digital_human.dart';
-import 'premium.dart';
-import 'alert.dart';
-import 'decive/device_screen.dart';
-import 'chat.dart';
+import 'home_conten/home_tab.dart';
+import 'familycenter/family_tab.dart';
+import 'decive/device_tab.dart';
+import 'history/history_tab.dart';
 
-import 'data/basic_health_data.dart';
-import 'data/activity_data.dart';
+import 'home_conten/premium.dart';
+import 'home_conten/alert.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
-  static const _bg = Color(0xFFF3F5F9);
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
 
-  static final List<Map<String, String>> _humans = [
-    {
-      'name': 'Luna - Nurse',
-      'desc': 'Provides compassionate care and medical support.',
-      'img': 'assets/images/Luna.png',
-    },
-    {
-      'name': 'Anna - Lawyer',
-      'desc': 'Gives legal advice and document assistance.',
-      'img': 'assets/images/Anna.png',
-    },
-    {
-      'name': 'Nutrition Expert',
-      'desc': 'Customized meal plans and nutrition advice.',
-      'img': 'assets/images/Nutrition.png',
-    },
-    {
-      'name': 'Zodiac Expert',
-      'desc': 'Personalized insights based on your zodiac sign.',
-      'img': 'assets/images/Zodiac.png',
-    },
-    {
-      'name': 'Fitness Trainer',
-      'desc': 'Exercises adapted to your health condition.',
-      'img': 'assets/images/Fitness.png',
-    },
-    {
-      'name': 'Mindfulness Mentor',
-      'desc': 'Meditation and breathing guidance.',
-      'img': 'assets/images/Mindfulness.png',
-    },
+class _HomeScreenState extends State<HomeScreen> {
+  static const _bg = Color(0xFFF6F6F6);
+
+  int _currentIndex = 0;
+
+  final _tabs = const [
+    HomeTab(),
+    FamilyTab(),
+    DeviceTab(),
+    HistoryTab(),
   ];
 
   @override
@@ -62,14 +42,16 @@ class HomeScreen extends StatelessWidget {
               width: double.infinity,
               color: Colors.black.withOpacity(0.08),
             ),
-            const SizedBox(height: 10),
-            _premiumBanner(context),
-            const SizedBox(height: 18),
-            Expanded(child: _content(context)),
+            Expanded(
+              child: IndexedStack(
+                index: _currentIndex,
+                children: _tabs,
+              ),
+            ),
           ],
         ),
       ),
-      bottomNavigationBar: _bottomNav(context),
+      bottomNavigationBar: _bottomNav(),
     );
   }
 
@@ -84,7 +66,7 @@ class HomeScreen extends StatelessWidget {
             style: TextStyle(
               fontSize: 32,
               fontWeight: FontWeight.w800,
-              color: Color.fromARGB(255, 31, 65, 187),
+              color: Color(0xFF1F41BB),
             ),
           ),
           const Spacer(),
@@ -104,148 +86,6 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // ===== PREMIUM BANNER (FIX icon PRO bị viền/nền trắng) =====
-  Widget _premiumBanner(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 18),
-      child: GestureDetector(
-        onTap: () => _goPremium(context),
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF1E40AF), Color(0xFF3B82F6)],
-            ),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Row(
-            children: [
-              // ✅ ICON PRO: tròn trắng
-              Container(
-                width: 40,
-                height: 40,
-                decoration: const BoxDecoration(
-                  color: Colors.white, // 👈 nền TRẮNG
-                  shape: BoxShape.circle,
-                ),
-                padding: const EdgeInsets.all(2),
-                child: ClipOval(
-                  child: Image.asset(
-                    'assets/images/pro.png',
-                    fit: BoxFit.contain,
-                    filterQuality: FilterQuality.high,
-                  ),
-                ),
-              ),
-
-              const SizedBox(width: 10),
-
-              const Expanded(
-                child: Text(
-                  "Your free 3-day Premium hasn't been claimed yet. Tap to claim.",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-
-              const SizedBox(width: 10),
-
-              const Icon(
-                Icons.arrow_forward_ios,
-                color: Colors.white,
-                size: 16,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ===== CONTENT =====
-  Widget _content(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _sectionHeader(
-            title: 'Digital Human',
-            action: () => _go(context, const DigitalHumanAllScreen()),
-          ),
-          const SizedBox(height: 12),
-          _digitalHumanList(),
-          const SizedBox(height: 22),
-          const Text(
-            'Health Categories',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 12),
-          _categoryItem(
-            icon: Icons.accessibility_new,
-            iconColor: Colors.purple,
-            text: 'Basic health data',
-            onTap: () => _go(
-              context,
-              const BasicHealthDataScreen(),
-            ),
-          ),
-          const SizedBox(height: 3),
-          _categoryItem(
-            icon: Icons.local_fire_department,
-            iconColor: Colors.red,
-            text: 'Activity data',
-            onTap: () => _go(
-              context,
-              const ActivityDataScreen(),
-            ),
-          ),
-          const SizedBox(height: 40),
-        ],
-      ),
-    );
-  }
-
-  // ===== DIGITAL HUMAN LIST =====
-  Widget _digitalHumanList() {
-    return SizedBox(
-      height: 230,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        physics: const ClampingScrollPhysics(),
-        itemCount: _humans.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
-        itemBuilder: (context, i) => _humanCard(context, _humans[i]),
-      ),
-    );
-  }
-
-  // ===== COMPONENTS =====
-  Widget _sectionHeader({required String title, VoidCallback? action}) {
-    return Row(
-      children: [
-        Text(
-          title,
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
-        ),
-        const Spacer(),
-        if (action != null)
-          GestureDetector(
-            onTap: action,
-            child: const Text(
-              'See All',
-              style: TextStyle(
-                  color: Color(0xFF1877F1),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500),
-            ),
-          ),
-      ],
-    );
-  }
-
   Widget _iconBadge(IconData icon) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 5),
@@ -255,130 +95,17 @@ class HomeScreen extends StatelessWidget {
             Color(0xFF3B82F6),
             Color(0xFF1E40AF),
           ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(40),
       ),
-      child: Icon(icon, color: const Color(0xFFFFFFFF), size: 18),
+      child: Icon(icon, color: Colors.white, size: 18),
     );
   }
 
-  // ✅ FIX: asset image + bo góc chuẩn, không tràn
-  Widget _humanCard(BuildContext context, Map<String, String> h) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => ChatScreen(
-              name: h['name']!, // Luna / Anna / Nutrition / ...
-              role: h['desc']!, // mô tả
-              image: h['img']!, // avatar
-              intro: "Hello 👋 How can I help you today?",
-            ),
-          ),
-        );
-      },
-      child: Container(
-        width: 170,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(25),
-          border: Border.all(
-            color: Colors.black.withOpacity(.6),
-            width: 1.2,
-          ),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(25),
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: Image.asset(
-                  h['img']!,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              Positioned(
-                left: 12,
-                right: 12,
-                bottom: 12,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      h['name']!,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      h['desc']!,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _categoryItem({
-    required IconData icon,
-    required Color iconColor,
-    required String text,
-    VoidCallback? onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(10),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: Colors.black12),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: iconColor),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                text,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 18,
-                ),
-              ),
-            ),
-            const Icon(Icons.chevron_right),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ===== NOTIFICATION ICON =====
+  // ===== NOTIFICATION =====
   Widget _notificationIcon(BuildContext context) {
     return GestureDetector(
-      onTap: () async {
-        await Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const AlertScreen()),
-        );
-      },
+      onTap: () => _go(context, const AlertScreen()),
       child: ValueListenableBuilder<int>(
         valueListenable: AppSettings.unreadAlertCount,
         builder: (_, count, __) {
@@ -414,16 +141,14 @@ class HomeScreen extends StatelessWidget {
   }
 
   // ===== BOTTOM NAV =====
-  Widget _bottomNav(BuildContext context) {
+  Widget _bottomNav() {
     return BottomNavigationBar(
-      currentIndex: 0,
+      currentIndex: _currentIndex,
       selectedItemColor: const Color(0xFF1877F2),
       unselectedItemColor: const Color(0xFFADADAD),
       type: BottomNavigationBarType.fixed,
       onTap: (index) {
-        if (index == 2) {
-          _go(context, const DeviceScreen());
-        }
+        setState(() => _currentIndex = index);
       },
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'Home'),

@@ -1,61 +1,29 @@
 import 'package:flutter/material.dart';
-import 'login/login.dart';
-import 'register/register.dart';
-import '../ui.dart';
+import 'AuthScreen/auth.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
 
+  static const _primaryColor = Color(0xFF1F41BB);
+  static const _buttonColor = Color(0xFF1877F2);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: UI.bg,
+      backgroundColor: const Color(0xFFF6F6F6),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             children: [
               const SizedBox(height: 100),
-              Image.asset(
-                'assets/images/Logo.png',
-                height: 260,
-              ),
+              _logo(),
               const SizedBox(height: 30),
-              Text(
-                'Welcome, Care AI',
-                textAlign: TextAlign.center,
-                style: UI.primaryTitle.copyWith(
-                  color: const Color(0xFF0D459F),
-                ),
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                "Your digital friend, your family's peace of mind.",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
-                  height: 1.5,
-                ),
-              ),
+              _title(),
+              const SizedBox(height: 4),
+              _subtitle(),
               const Spacer(),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 120),
-                child: Column(
-                  children: [
-                    _button(
-                      text: 'Login',
-                      filled: true,
-                      onTap: () => _go(context, const LoginScreen()),
-                    ),
-                    const SizedBox(height: 16),
-                    _button(
-                      text: 'Register',
-                      filled: false,
-                      onTap: () => _go(context, const RegisterScreen()),
-                    ),
-                  ],
-                ),
-              ),
+              _actions(context),
             ],
           ),
         ),
@@ -63,18 +31,91 @@ class WelcomeScreen extends StatelessWidget {
     );
   }
 
-  static void _go(BuildContext context, Widget page) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => page),
+  /// ===== Widgets =====
+
+  Widget _logo() {
+    return Hero(
+      tag: 'care-logo',
+      child: Image.asset(
+        'assets/images/Logo.png',
+        height: 260,
+      ),
     );
   }
+
+  Widget _title() {
+    return const Hero(
+      tag: 'care-text',
+      child: Material(
+        color: Colors.transparent,
+        child: Text(
+          'Care AI, xin chào',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 35,
+            fontWeight: FontWeight.w600,
+            height: 2,
+            color: _primaryColor,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _subtitle() {
+    return const Text(
+      'Người bạn số của bạn, sự an tâm cho cả gia đình.',
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontSize: 14,
+        height: 1,
+      ),
+    );
+  }
+
+  Widget _actions(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 120),
+      child: Column(
+        children: [
+          _button(
+            text: 'Đăng nhập',
+            filled: true,
+            onTap: () => _go(context, AuthTab.login),
+          ),
+          const SizedBox(height: 16),
+          _button(
+            text: 'Đăng ký',
+            filled: false,
+            onTap: () => _go(context, AuthTab.register),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// ===== Navigation =====
+
+  static void _go(BuildContext context, AuthTab tab) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AuthScreen(initialTab: tab),
+      ),
+    );
+  }
+
+  /// ===== Button =====
 
   static Widget _button({
     required String text,
     required bool filled,
     required VoidCallback onTap,
   }) {
+    final shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(10),
+    );
+
     return SizedBox(
       width: double.infinity,
       height: 52,
@@ -82,38 +123,32 @@ class WelcomeScreen extends StatelessWidget {
           ? ElevatedButton(
               onPressed: onTap,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1F6BFF),
+                backgroundColor: _buttonColor,
                 elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
+                shape: shape,
               ),
-              child: Text(
-                text,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
-              ),
+              child: _buttonText(text, Colors.white),
             )
           : OutlinedButton(
               onPressed: onTap,
               style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF0D459F),
-                side: const BorderSide(color: Color(0xFF0D459F)),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
+                foregroundColor: _primaryColor,
+                side: const BorderSide(color: _primaryColor),
+                shape: shape,
               ),
-              child: Text(
-                text,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
+              child: _buttonText(text),
             ),
+    );
+  }
+
+  static Widget _buttonText(String text, [Color? color]) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
+        color: color,
+      ),
     );
   }
 }

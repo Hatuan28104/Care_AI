@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Care_AI/screens/home/home.dart';
-import 'package:Care_AI/screens/home/decive/device_screen.dart';
+import 'package:Care_AI/screens/home/decive/note.dart';
 import 'package:Care_AI/screens/home/history/history_screen.dart';
 import 'familycenter_health_data.dart';
 import 'familycenter_conversation.dart';

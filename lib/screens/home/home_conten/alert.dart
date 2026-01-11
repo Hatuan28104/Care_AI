@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../app_settings.dart';
+import '../../../app_settings.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
 class AlertScreen extends StatefulWidget {

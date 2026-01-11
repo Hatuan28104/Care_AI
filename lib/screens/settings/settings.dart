@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:Care_AI/screens/profile/my_profile.dart';
+import 'package:Care_AI/screens/settings/profile/my_profile.dart';
 import 'package:Care_AI/screens/welcome_screen.dart';
 import '../../app_settings.dart';
 
