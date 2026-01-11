@@ -1,45 +1,68 @@
 import 'package:flutter/material.dart';
+import 'package:Care_AI/app_settings.dart';
 import 'package:Care_AI/screens/settings/settings.dart';
+
 import 'digital_human.dart';
 import 'premium.dart';
-import 'package:Care_AI/screens/home/decive/device_screen.dart';
-import 'package:Care_AI/screens/home/familycenter/familycenter_guardians.dart';
-import 'package:Care_AI/screens/home/history/history_screen.dart';
+import 'alert.dart';
+import 'decive/device_screen.dart';
+import 'chat.dart';
+
+import 'data/basic_health_data.dart';
+import 'data/activity_data.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  // ===== CONSTANTS =====
-  static const Color blue = Color(0xFF1F6BFF);
-  static const Color bg = Color(0xFFF3F5F9);
+  static const _bg = Color(0xFFF3F5F9);
 
-  // ===== DATA =====
   static final List<Map<String, String>> _humans = [
     {
       'name': 'Luna - Nurse',
       'desc': 'Provides compassionate care and medical support.',
-      'img': 'https://images.unsplash.com/photo-1607746882042-944635dfe10e',
+      'img': 'assets/images/Luna.png',
     },
     {
       'name': 'Anna - Lawyer',
       'desc': 'Gives legal advice and document assistance.',
-      'img': 'https://images.unsplash.com/photo-1607746882042-944635dfe10e',
+      'img': 'assets/images/Anna.png',
     },
     {
       'name': 'Nutrition Expert',
       'desc': 'Customized meal plans and nutrition advice.',
-      'img': 'https://images.unsplash.com/photo-1607746882042-944635dfe10e',
+      'img': 'assets/images/Nutrition.png',
+    },
+    {
+      'name': 'Zodiac Expert',
+      'desc': 'Personalized insights based on your zodiac sign.',
+      'img': 'assets/images/Zodiac.png',
+    },
+    {
+      'name': 'Fitness Trainer',
+      'desc': 'Exercises adapted to your health condition.',
+      'img': 'assets/images/Fitness.png',
+    },
+    {
+      'name': 'Mindfulness Mentor',
+      'desc': 'Meditation and breathing guidance.',
+      'img': 'assets/images/Mindfulness.png',
     },
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: _bg,
       body: SafeArea(
         child: Column(
           children: [
             _header(context),
+            Container(
+              height: 1,
+              width: double.infinity,
+              color: Colors.black.withOpacity(0.08),
+            ),
+            const SizedBox(height: 10),
             _premiumBanner(context),
             const SizedBox(height: 18),
             Expanded(child: _content(context)),
@@ -52,75 +75,72 @@ class HomeScreen extends StatelessWidget {
 
   // ===== HEADER =====
   Widget _header(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(18, 14, 18, 12),
-          child: Row(
-            children: [
-              const Text(
-                'Care AI',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF0D459F),
-                ),
-              ),
-              const Spacer(),
-              GestureDetector(
-                onTap: () => _goPremium(context),
-                child: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: blue.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Icon(
-                    Icons.auto_awesome,
-                    size: 18,
-                    color: blue,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 14),
-              const Icon(Icons.notifications_none, size: 22),
-              const SizedBox(width: 14),
-              GestureDetector(
-                onTap: () => _go(context, const SettingsScreen()),
-                child: const Icon(Icons.settings_outlined, size: 22),
-              ),
-            ],
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(18, 14, 18, 10),
+      child: Row(
+        children: [
+          const Text(
+            'Care AI',
+            style: TextStyle(
+              fontSize: 32,
+              fontWeight: FontWeight.w800,
+              color: Color.fromARGB(255, 31, 65, 187),
+            ),
           ),
-        ),
-        Container(
-          height: 1,
-          width: double.infinity,
-          color: Colors.black.withOpacity(0.08),
-        ),
-      ],
+          const Spacer(),
+          GestureDetector(
+            onTap: () => _goPremium(context),
+            child: _iconBadge(Icons.auto_awesome),
+          ),
+          const SizedBox(width: 12),
+          _notificationIcon(context),
+          const SizedBox(width: 12),
+          GestureDetector(
+            onTap: () => _go(context, const SettingsScreen()),
+            child: const Icon(Icons.settings_outlined, size: 25),
+          ),
+        ],
+      ),
     );
   }
 
-  // ===== PREMIUM BANNER =====
+  // ===== PREMIUM BANNER (FIX icon PRO bị viền/nền trắng) =====
   Widget _premiumBanner(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(18, 14, 18, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 18),
       child: GestureDetector(
         onTap: () => _goPremium(context),
         child: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Color(0xFF3B82F6), Color(0xFF1E40AF)],
+              colors: [Color(0xFF1E40AF), Color(0xFF3B82F6)],
             ),
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(16),
           ),
-          child: const Row(
+          child: Row(
             children: [
-              Icon(Icons.smart_toy, color: Colors.white),
-              SizedBox(width: 10),
-              Expanded(
+              // ✅ ICON PRO: tròn trắng
+              Container(
+                width: 40,
+                height: 40,
+                decoration: const BoxDecoration(
+                  color: Colors.white, // 👈 nền TRẮNG
+                  shape: BoxShape.circle,
+                ),
+                padding: const EdgeInsets.all(2),
+                child: ClipOval(
+                  child: Image.asset(
+                    'assets/images/pro.png',
+                    fit: BoxFit.contain,
+                    filterQuality: FilterQuality.high,
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 10),
+
+              const Expanded(
                 child: Text(
                   "Your free 3-day Premium hasn't been claimed yet. Tap to claim.",
                   style: TextStyle(
@@ -129,7 +149,14 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              Icon(Icons.arrow_forward_ios, color: Colors.white, size: 16),
+
+              const SizedBox(width: 10),
+
+              const Icon(
+                Icons.arrow_forward_ios,
+                color: Colors.white,
+                size: 16,
+              ),
             ],
           ),
         ),
@@ -160,12 +187,20 @@ class HomeScreen extends StatelessWidget {
             icon: Icons.accessibility_new,
             iconColor: Colors.purple,
             text: 'Basic health data',
+            onTap: () => _go(
+              context,
+              const BasicHealthDataScreen(),
+            ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 3),
           _categoryItem(
             icon: Icons.local_fire_department,
             iconColor: Colors.red,
             text: 'Activity data',
+            onTap: () => _go(
+              context,
+              const ActivityDataScreen(),
+            ),
           ),
           const SizedBox(height: 40),
         ],
@@ -173,15 +208,16 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // ===== LIST =====
+  // ===== DIGITAL HUMAN LIST =====
   Widget _digitalHumanList() {
     return SizedBox(
       height: 230,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
+        physics: const ClampingScrollPhysics(),
         itemCount: _humans.length,
         separatorBuilder: (_, __) => const SizedBox(width: 12),
-        itemBuilder: (_, i) => _humanCard(_humans[i]),
+        itemBuilder: (context, i) => _humanCard(context, _humans[i]),
       ),
     );
   }
@@ -200,50 +236,99 @@ class HomeScreen extends StatelessWidget {
             onTap: action,
             child: const Text(
               'See All',
-              style: TextStyle(color: blue, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                  color: Color(0xFF1877F1),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500),
             ),
           ),
       ],
     );
   }
 
-  Widget _humanCard(Map<String, String> h) {
+  Widget _iconBadge(IconData icon) {
     return Container(
-      width: 170,
+      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 5),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
-        image: DecorationImage(
-          image: NetworkImage(h['img']!),
-          fit: BoxFit.cover,
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xFF3B82F6),
+            Color(0xFF1E40AF),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
+        borderRadius: BorderRadius.circular(40),
       ),
+      child: Icon(icon, color: const Color(0xFFFFFFFF), size: 18),
+    );
+  }
+
+  // ✅ FIX: asset image + bo góc chuẩn, không tràn
+  Widget _humanCard(BuildContext context, Map<String, String> h) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ChatScreen(
+              name: h['name']!, // Luna / Anna / Nutrition / ...
+              role: h['desc']!, // mô tả
+              image: h['img']!, // avatar
+              intro: "Hello 👋 How can I help you today?",
+            ),
+          ),
+        );
+      },
       child: Container(
-        padding: const EdgeInsets.all(12),
+        width: 170,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          gradient: LinearGradient(
-            begin: Alignment.bottomCenter,
-            end: Alignment.topCenter,
-            colors: [Colors.black.withOpacity(.7), Colors.transparent],
+          borderRadius: BorderRadius.circular(25),
+          border: Border.all(
+            color: Colors.black.withOpacity(.6),
+            width: 1.2,
           ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Text(
-              h['name']!,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w800,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(25),
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: Image.asset(
+                  h['img']!,
+                  fit: BoxFit.cover,
+                ),
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              h['desc']!,
-              style: const TextStyle(color: Colors.white70, fontSize: 12),
-            ),
-          ],
+              Positioned(
+                left: 12,
+                right: 12,
+                bottom: 12,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      h['name']!,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      h['desc']!,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -253,29 +338,77 @@ class HomeScreen extends StatelessWidget {
     required IconData icon,
     required Color iconColor,
     required String text,
+    VoidCallback? onTap,
   }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.black12),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: iconColor),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              text,
-              style: const TextStyle(
-                fontWeight: FontWeight.w700,
-                fontSize: 15,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.black12),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: iconColor),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                text,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 18,
+                ),
               ),
             ),
-          ),
-          const Icon(Icons.chevron_right),
-        ],
+            const Icon(Icons.chevron_right),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ===== NOTIFICATION ICON =====
+  Widget _notificationIcon(BuildContext context) {
+    return GestureDetector(
+      onTap: () async {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const AlertScreen()),
+        );
+      },
+      child: ValueListenableBuilder<int>(
+        valueListenable: AppSettings.unreadAlertCount,
+        builder: (_, count, __) {
+          return Stack(
+            clipBehavior: Clip.none,
+            children: [
+              const Icon(Icons.notifications_none, size: 25),
+              if (count > 0)
+                Positioned(
+                  right: -2,
+                  top: -2,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF1F6BFF),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      count > 9 ? '9+' : '$count',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 9,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -284,44 +417,20 @@ class HomeScreen extends StatelessWidget {
   Widget _bottomNav(BuildContext context) {
     return BottomNavigationBar(
       currentIndex: 0,
-      selectedItemColor: blue,
-      unselectedItemColor: Colors.grey,
+      selectedItemColor: const Color(0xFF1877F2),
+      unselectedItemColor: const Color(0xFFADADAD),
       type: BottomNavigationBarType.fixed,
       onTap: (index) {
-        if (index == 1) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const MyGuardiansScreen()),
-          );
-        } else if (index == 2) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const DeviceScreen()),
-          );
-        } else if (index == 3) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const HistoryScreen()),
-          );
+        if (index == 2) {
+          _go(context, const DeviceScreen());
         }
       },
       items: const [
+        BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'Home'),
         BottomNavigationBarItem(
-          icon: Icon(Icons.home_outlined),
-          label: 'Home',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.group_outlined),
-          label: 'Family Center',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.graphic_eq),
-          label: 'Device',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.history),
-          label: 'History',
-        ),
+            icon: Icon(Icons.group_outlined), label: 'Family Center'),
+        BottomNavigationBarItem(icon: Icon(Icons.graphic_eq), label: 'Device'),
+        BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
       ],
     );
   }
