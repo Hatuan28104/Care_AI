@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Font + icon -->
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <h2 class="logo">Admin Panel</h2>
+
+    <nav>
+      <a class="active"><i class="fa-solid fa-grid"></i> Dashboard</a>
+      <a><i class="fa-solid fa-clock-rotate-left"></i> Transaction history</a>
+      <a><i class="fa-solid fa-users"></i> Users</a>
+      <a><i class="fa-solid fa-box"></i> Service Package</a>
+      <a><i class="fa-solid fa-user-doctor"></i> Digital Human</a>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- HEADER -->
+    <header class="header">
+      <div class="brand">
+        <img src="../assets/images/logo.png" />
+        <span>Care AI</span>
+      </div>
+      <div class="avatar">AD</div>
+    </header>
+
+    <!-- CONTENT -->
+    <section class="content">
+
+      <h1>Dashboard</h1>
+      <p class="subtitle">
+        Welcome to the admin dashboard. Here's what's happening with your app today.
+      </p>
+
+      <!-- STATS -->
+      <div class="stats">
+        <div class="card">
+          <p>Total Users</p>
+          <h2>2</h2>
+        </div>
+        <div class="card">
+          <p>Total interactions</p>
+          <h2>3</h2>
+        </div>
+        <div class="card">
+          <p>General warning</p>
+          <h2>0</h2>
+        </div>
+        <div class="card">
+          <p>Total Revenue</p>
+          <h2>90</h2>
+        </div>
+      </div>
+
+      <!-- ANALYTICS -->
+      <div class="analytics">
+        <h2>Analytics Overview</h2>
+        <p>Users trends from 01/11/2025 to 30/11/2025</p>
+
+        <div class="tabs">
+          <button class="active">Users</button>
+          <button>Interact</button>
+          <button>Warning</button>
+          <button>Revenue</button>
+          <button class="export"><i class="fa-solid fa-download"></i> Export</button>
+        </div>
+
+        <div class="chart-placeholder">
+          <!-- sau này gắn chart.js -->
+          <p>Chart here</p>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+</div>
+
+<script src="dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+html, body {
+  font-family: 'Poppins', sans-serif;
+}
+
+h1 {
+  font-weight: 600;
+}
+
+button {
+  font-weight: 600;
+}
+
+.subtitle {
+  font-weight: 500;
+}
+
+label {
+  font-weight: 400;
+}
