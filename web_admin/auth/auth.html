@@ -4,20 +4,20 @@
   <meta charset="UTF-8" />
   <title>Admin Login</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-/>
 
-  <link rel="stylesheet" href="../../css/main.css">
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  />
 
-  <link rel="stylesheet" href="../../css/auth.css">
+  <link rel="stylesheet" href="../main.css">
+  <link rel="stylesheet" href="auth.css">
 </head>
 
 <body>
   <div class="login-wrapper">
     <div class="login-card">
-      <img src="../../assets/images/logo.png" alt="Logo" class="logo">
+      <img src="../assets/images/logo.png" alt="Logo" class="logo">
 
       <h1>Admin Login</h1>
       <p class="subtitle">Enter your credentials to access the admin panel</p>
@@ -30,9 +30,9 @@
       <div class="form-group password-group">
         <label>Password</label>
         <input type="password" id="password" />
-<span class="toggle" onclick="togglePassword()">
-  <i class="fa-solid fa-eye"></i>
-</span>
+        <span class="toggle" onclick="togglePassword()">
+          <i class="fa-solid fa-eye"></i>
+        </span>
       </div>
 
       <button onclick="login()">Login</button>
@@ -43,6 +43,6 @@
     </div>
   </div>
 
-  <script src="../../js/auth.js"></script>
+  <script src="auth.js"></script>
 </body>
 </html>
