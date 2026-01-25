@@ -2,32 +2,146 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>User</title>
+  <title>Users</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-/>
 
+  <!-- Font Awesome -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  />
+
+  <!-- Layout chung -->
   <link rel="stylesheet" href="../layout/layout.css" />
+
+  <!-- Users CSS -->
+  <link rel="stylesheet" href="./user.css" />
 </head>
+
 <body data-page="user">
-
-<body>
-
 <div class="layout">
   <div id="sidebar"></div>
 
   <div class="main">
     <div id="header"></div>
 
-    <main class="content">
-      <h1>User</h1>
-      <p>Content trống – chỉ để test layout</p>
+    <main class="content users-page">
+      <h1 class="page-title">Users</h1>
+
+      <!-- SEARCH -->
+      <div class="filter-bar">
+        <div class="search">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" placeholder="Search users..." />
+        </div>
+      </div>
+
+      <!-- TABLE -->
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Full Name</th>
+              <th>Phone</th>
+              <th>Date of birth</th>
+              <th>Created at</th>
+              <th class="th-action">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <!-- USER 1 -->
+            <tr data-id="1">
+              <td>1</td>
+              <td>Nguyen Thi Mai</td>
+              <td>0123456789</td>
+              <td>13/07/1967</td>
+              <td>09/11/2025</td>
+              <td class="actions">
+                <i class="fa-solid fa-ellipsis-vertical action-toggle"></i>
+                <!-- JS sẽ render menu vào đây -->
+                <div class="action-menu"></div>
+              </td>
+            </tr>
+
+            <!-- USER 2 -->
+            <tr data-id="2">
+              <td>2</td>
+              <td>Tran Hoai Anh</td>
+              <td>0356278479</td>
+              <td>04/06/1974</td>
+              <td>10/11/2025</td>
+              <td class="actions">
+                <i class="fa-solid fa-ellipsis-vertical action-toggle"></i>
+                <div class="action-menu"></div>
+              </td>
+            </tr>
+
+            <!-- USER 3 -->
+            <tr data-id="3">
+              <td>3</td>
+              <td>Nguyen Duc Thinh</td>
+              <td>0374879876</td>
+              <td>25/10/1966</td>
+              <td>11/11/2025</td>
+              <td class="actions">
+                <i class="fa-solid fa-ellipsis-vertical action-toggle"></i>
+                <div class="action-menu"></div>
+              </td>
+            </tr>
+
+            <!-- USER 4 -->
+            <tr data-id="4">
+              <td>4</td>
+              <td>Hoang Thi Huong</td>
+              <td>0985758375</td>
+              <td>10/01/1959</td>
+              <td>09/11/2025</td>
+              <td class="actions">
+                <i class="fa-solid fa-ellipsis-vertical action-toggle"></i>
+                <div class="action-menu"></div>
+              </td>
+            </tr>
+
+            <!-- USER 5 -->
+            <tr data-id="5">
+              <td>5</td>
+              <td>Le Van Tam</td>
+              <td>0748574836</td>
+              <td>19/12/1960</td>
+              <td>07/11/2025</td>
+              <td class="actions">
+                <i class="fa-solid fa-ellipsis-vertical action-toggle"></i>
+                <div class="action-menu"></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </main>
   </div>
 </div>
 
+<!-- MODAL + TOAST (dùng chung) -->
+<div id="deleteModal" class="modal hidden">
+  <div class="modal-box">
+    <h3>Confirm Deletion</h3>
+    <p>Are you sure you want to delete this user?</p>
+    <div class="modal-actions">
+      <button id="confirmDelete" class="btn-danger">Delete</button>
+      <button id="cancelDelete" class="btn-light">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden">
+  <i class="fa-solid fa-circle-check"></i>
+  <span>Deleted successfully</span>
+</div>
+
+<!-- JS -->
+<script src="./user.js"></script>
 <script src="../layout/layout.js"></script>
 </body>
 </html>

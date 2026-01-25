@@ -4,30 +4,121 @@
   <meta charset="UTF-8" />
   <title>Digital Human</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-/>
 
+  <!-- Font Awesome -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  />
+
+  <!-- Layout chung -->
   <link rel="stylesheet" href="../layout/layout.css" />
+  <!-- Digital CSS -->
+  <link rel="stylesheet" href="./digital.css" />
 </head>
+
 <body data-page="digital">
+  <div class="layout">
+    <div id="sidebar"></div>
 
-<body>
+    <div class="main">
+      <div id="header"></div>
 
-<div class="layout">
-  <div id="sidebar"></div>
+      <main class="content">
 
-  <div class="main">
-    <div id="header"></div>
+        <!-- HEADER -->
+        <div class="page-header">
+          <h1>Digital Human</h1>
+          <button class="btn-add">
+            <i class="fa-solid fa-plus"></i>
+            Add
+          </button>
+        </div>
 
-    <main class="content">
-      <h1>Digital Human</h1>
-      <p>Content trống – chỉ để test layout</p>
-    </main>
+        <!-- CARD -->
+        <div class="card">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Job</th>
+                  <th>Avatar</th>
+                  <th>Gender</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <tr>
+                  <td>DH01</td>
+                  <td>Nurse</td>
+                  <td>
+                    <img src="https://i.pravatar.cc/80?img=47" class="avatar" />
+                  </td>
+                  <td>Female</td>
+                  <td class="actions">
+                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>DH02</td>
+                  <td>Lawyer</td>
+                  <td>
+                    <img src="https://i.pravatar.cc/80?img=32" class="avatar" />
+                  </td>
+                  <td>Female</td>
+                  <td class="actions">
+                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>DH03</td>
+                  <td>Nutrition Expert</td>
+                  <td>
+                    <img src="https://i.pravatar.cc/80?img=12" class="avatar" />
+                  </td>
+                  <td>Male</td>
+                  <td class="actions">
+                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>DH04</td>
+                  <td>Zodiac Expert</td>
+                  <td>
+                    <img src="https://i.pravatar.cc/80?img=56" class="avatar" />
+                  </td>
+                  <td>Female</td>
+                  <td class="actions">
+                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>DH05</td>
+                  <td>Fitness Trainer</td>
+                  <td>
+                    <img src="https://i.pravatar.cc/80?img=15" class="avatar" />
+                  </td>
+                  <td>Male</td>
+                  <td class="actions">
+                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                  </td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </main>
+    </div>
   </div>
-</div>
 
-<script src="../layout/layout.js"></script>
+  <script src="../layout/layout.js"></script>
 </body>
 </html>

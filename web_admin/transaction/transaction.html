@@ -2,32 +2,128 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Transaction</title>
+  <title>Transaction History</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-/>
 
+  <!-- Font Awesome -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  />
+
+  <!-- Layout dùng chung -->
   <link rel="stylesheet" href="../layout/layout.css" />
+  <!-- Transaction CSS -->
+  <link rel="stylesheet" href="./transaction.css" />
 </head>
+
 <body data-page="transaction">
+  <div class="layout">
+    <div id="sidebar"></div>
 
-<body>
+    <div class="main">
+      <div id="header"></div>
 
-<div class="layout">
-  <div id="sidebar"></div>
+      <main class="content transaction-page">
 
-  <div class="main">
-    <div id="header"></div>
+        <h1 class="page-title">Transaction History</h1>
 
-    <main class="content">
-      <h1>Transaction</h1>
-      <p>Content trống – chỉ để test layout</p>
-    </main>
+        <!-- STATS -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <p class="stat-label">Total Users</p>
+            <h2 class="stat-value">20</h2>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">Total interactions</p>
+            <h2 class="stat-value">150</h2>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">General warning</p>
+            <h2 class="stat-value">10</h2>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">Total Revenue</p>
+            <h2 class="stat-value">626</h2>
+          </div>
+        </div>
+
+        <!-- TABLE CARD -->
+        <div class="table-wrapper">
+
+          <!-- TABLE HEADER -->
+          <div class="table-header">
+            <div class="search">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" placeholder="Search transactions..." />
+            </div>
+
+            <div class="status-filter">
+              <i class="fa-solid fa-filter"></i>
+              <select>
+                <option value="" disabled selected hidden>
+                  Filter by status
+                </option>
+                <option value="active">Active</option>
+                <option value="expired">Expired</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- TABLE -->
+          <table>
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Package Name</th>
+                <th>Subscriber Name</th>
+                <th>Registration Date</th>
+                <th>Expiry Date</th>
+                <th>Total Amount</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td>Pro Access – Yearly</td>
+                <td>Edsel Smith</td>
+                <td>Oct 1, 2025</td>
+                <td>Oct 1, 2026</td>
+                <td>1,500,000đ / year</td>
+                <td><span class="status active">Active</span></td>
+              </tr>
+
+              <tr>
+                <td>2</td>
+                <td>Pro Access – Weekly</td>
+                <td>Nams</td>
+                <td>Oct 5, 2025</td>
+                <td>Oct 12, 2025</td>
+                <td>150,000đ / week</td>
+                <td><span class="status active">Active</span></td>
+              </tr>
+
+              <tr>
+                <td>3</td>
+                <td>Smart Care Pro</td>
+                <td>Alizabeth Browns</td>
+                <td>Oct 12, 2025</td>
+                <td>Oct 12, 2026</td>
+                <td>2,000,000đ / year</td>
+                <td><span class="status expired">Expired</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </main>
+    </div>
   </div>
-</div>
 
-<script src="../layout/layout.js"></script>
+  <!-- JS -->
+  <script src="../layout/layout.js"></script>
+  <script src="./transaction.js"></script>
 </body>
 </html>
