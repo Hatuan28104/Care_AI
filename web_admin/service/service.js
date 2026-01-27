@@ -3,63 +3,56 @@ document.addEventListener("DOMContentLoaded", () => {
   let rowToDelete = null;
 
   /* ===============================
-     LOAD SIDEBAR
+     COMMON CONFIRM POPUPS
      =============================== */
-  fetch("../layout/sidebar.html")
-    .then(res => res.text())
-    .then(html => {
-      const sidebar = document.getElementById("sidebar");
-      if (sidebar) sidebar.innerHTML = html;
+  function confirmServiceSave(onConfirm) {
+    openModal({
+      title: "Confirm acceptance",
+      desc: "Are you sure you want to save this service?",
+      primaryText: "Confirm",
+      primaryClass: "btn-save",
+      onConfirm
     });
+  }
+
+  function confirmServiceDelete(onConfirm) {
+    openModal({
+      title: "Confirm deletion",
+      desc: "Are you sure you want to delete this service?",
+      primaryText: "Delete",
+      primaryClass: "btn-delete",
+      onConfirm
+    });
+  }
+/* ===============================
+   ADD BUTTON (LIST PAGE)
+   =============================== */
+if (page === "service") {
+  document.getElementById("btnAdd")?.addEventListener("click", () => {
+    window.location.href = "./service-add.html";
+  });
+}
 
   /* ===============================
-     LOAD HEADER
-     =============================== */
-  fetch("../layout/header.html")
-    .then(res => res.text())
-    .then(html => {
-      const header = document.getElementById("header");
-      if (header) header.innerHTML = html;
-
-      if (page === "service") {
-        document.getElementById("btnAdd")?.addEventListener("click", () => {
-          window.location.href = "./service-add.html";
-        });
-      }
-    });
-
-  /* ===============================
-     SAVE FLOW (ADD + EDIT)
+     SAVE (ADD + EDIT)
      =============================== */
   if (page === "service-add" || page === "service-edit") {
-    const btnSave = document.getElementById("btnSave");
-    const btnCancel = document.getElementById("btnCancel");
+    document.getElementById("btnSave")?.addEventListener("click", () => {
+      confirmServiceSave(() => {
+        showToast(
+          page === "service-add"
+            ? "Added successfully"
+            : "Updated successfully"
+        );
 
-    const modal = document.getElementById("saveModal");
-    const confirmSave = document.getElementById("confirmSave");
-    const cancelSave = document.getElementById("cancelSave");
-    const toast = document.getElementById("saveToast");
-
-    btnSave?.addEventListener("click", () => {
-      modal?.classList.remove("hidden");
+        setTimeout(() => {
+          window.location.href = "./service.html";
+        }, 1500);
+      });
     });
 
-    btnCancel?.addEventListener("click", () => {
+    document.getElementById("btnCancel")?.addEventListener("click", () => {
       window.location.href = "./service.html";
-    });
-
-    cancelSave?.addEventListener("click", () => {
-      modal?.classList.add("hidden");
-    });
-
-    confirmSave?.addEventListener("click", () => {
-      modal?.classList.add("hidden");
-      toast?.classList.remove("hidden");
-
-      setTimeout(() => {
-        toast?.classList.add("hidden");
-        window.location.href = "./service.html";
-      }, 1800);
     });
   }
 
@@ -85,61 +78,47 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".action-toggle").forEach(toggle => {
       toggle.addEventListener("click", e => {
         e.stopPropagation();
-        const menu = toggle.nextElementSibling;
 
         document.querySelectorAll(".action-menu").forEach(m => {
-          if (m !== menu) m.style.display = "none";
+          if (m !== toggle.nextElementSibling) m.style.display = "none";
         });
 
-        menu.style.display = menu.style.display === "block" ? "none" : "block";
+        const menu = toggle.nextElementSibling;
+        menu.style.display =
+          menu.style.display === "block" ? "none" : "block";
       });
-    });
-
-    document.addEventListener("click", e => {
-      const item = e.target.closest(".action-item");
-      if (!item) return;
-
-      const row = item.closest("tr");
-      const id = row?.dataset.id;
-
-      if (item.dataset.action === "view") {
-        window.location.href = `service-view.html?id=${id}`;
-      }
-
-      if (item.dataset.action === "edit") {
-        window.location.href = `service-edit.html?id=${id}`;
-      }
-
-      if (item.dataset.action === "delete") {
-        rowToDelete = row;
-        document.getElementById("deleteModal")?.classList.remove("hidden");
-      }
     });
   }
 
   /* ===============================
-     DELETE CONFIRM (LIST + VIEW)
+     ACTION CLICK (LIST PAGE)
      =============================== */
-  const deleteModal = document.getElementById("deleteModal");
-  const confirmDelete = document.getElementById("confirmDelete");
-  const cancelDelete = document.getElementById("cancelDelete");
-  const toast = document.getElementById("saveToast");
+  document.addEventListener("click", e => {
+    if (page !== "service") return;
 
-  cancelDelete?.addEventListener("click", () => {
-    deleteModal?.classList.add("hidden");
-    rowToDelete = null;
-  });
+    const item = e.target.closest(".action-item");
+    if (!item) return;
 
-  confirmDelete?.addEventListener("click", () => {
-    if (rowToDelete) rowToDelete.remove();
+    const row = item.closest("tr");
+    const id = row?.dataset.id;
 
-    deleteModal?.classList.add("hidden");
-    toast?.classList.remove("hidden");
+    if (item.dataset.action === "view") {
+      window.location.href = `service-view.html?id=${id}`;
+    }
 
-    setTimeout(() => {
-      toast?.classList.add("hidden");
-      window.location.href = "./service.html";
-    }, 1500);
+    if (item.dataset.action === "edit") {
+      window.location.href = `service-edit.html?id=${id}`;
+    }
+
+    if (item.dataset.action === "delete") {
+      rowToDelete = row;
+
+      confirmServiceDelete(() => {
+        rowToDelete.remove();
+        showToast("Deleted successfully");
+        rowToDelete = null;
+      });
+    }
   });
 
   /* ===============================
@@ -153,7 +132,21 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     document.getElementById("btnDelete")?.addEventListener("click", () => {
-      document.getElementById("deleteModal")?.classList.remove("hidden");
+      confirmServiceDelete(() => {
+        showToast("Deleted successfully");
+        setTimeout(() => {
+          window.location.href = "./service.html";
+        }, 1200);
+      });
     });
   }
+
+  /* ===============================
+     CLICK OUTSIDE → CLOSE ACTION MENU
+     =============================== */
+  document.addEventListener("click", () => {
+    document.querySelectorAll(".action-menu").forEach(m => {
+      m.style.display = "none";
+    });
+  });
 });

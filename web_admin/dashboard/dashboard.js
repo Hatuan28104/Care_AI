@@ -13,12 +13,11 @@ tabs.forEach(tab => {
 // ===== EXPORT TOAST =====
 const exportBtn = document.querySelector(".tabs .export");
 const toast = document.getElementById("toast");
-
 exportBtn.addEventListener("click", () => {
-  toast.classList.add("show");
+  toast.classList.remove("hidden");
 
   setTimeout(() => {
-    toast.classList.remove("show");
+    toast.classList.add("hidden");
   }, 3000);
 });
 

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Add Digital Human</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="../layout/layout.css" />
+  <link rel="stylesheet" href="./digital.css" />
+</head>
+
+<body data-page="digital-add" class="digital-page">
+<div class="layout">
+  <div id="sidebar"></div>
+
+  <div class="main">
+    <div id="header"></div>
+
+    <main class="content">
+      <div class="page-back" id="btnBack">
+        <i class="fa-solid fa-chevron-left"></i>
+        <h1>Add Digital Human</h1>
+      </div>
+
+      <div class="form-card">
+        <div class="form-grid">
+          <div class="form-item">
+            <label>ID <span>*</span></label>
+            <input type="text" placeholder="Enter ID" />
+          </div>
+
+          <div class="form-item">
+            <label>Name <span>*</span></label>
+            <input type="text" placeholder="Enter name" />
+          </div>
+
+          <div class="form-item">
+            <label>Gender <span>*</span></label>
+             <select required>
+              <option value="" disabled selected hidden></option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </div>
+
+          <div class="form-item">
+            <label>Job <span>*</span></label>
+            <input type="text" placeholder="Enter job" />
+          </div>
+        </div>
+
+        <div class="form-item full">
+          <label>Appearance <span>*</span></label>
+          <textarea placeholder="Description of appearance ..."></textarea>
+        </div>
+
+        <div class="form-item full">
+          <label>Detailed description <span>*</span></label>
+          <textarea placeholder="Description ..."></textarea>
+        </div>
+
+        <div class="form-item full">
+          <label>Avatar <span>*</span></label>
+          <div class="upload-box" id="avatarBox">
+            <img
+              id="avatarPreview"
+              class="preview-avatar hidden"
+              alt="Avatar preview"
+            />
+            <i class="fa-solid fa-cloud-arrow-up" id="uploadIcon"></i>
+            <p id="uploadText">Click to upload or drag & drop</p>
+          </div>
+
+          <input
+            type="file"
+            id="avatarInput"
+            accept="image/*"
+            hidden
+          />
+        </div>
+        <div class="form-actions">
+          <button class="btn-save" id="btnSave">Save</button>
+          <button class="btn-cancel" id="btnCancel">Cancel</button>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<div id="popup"></div>
+<script src="../layout/layout.js"></script>
+<script src="./digital.js"></script>
+</body>
+</html>

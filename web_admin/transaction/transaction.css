@@ -1,57 +1,52 @@
-* {
-  box-sizing: border-box;
+/* ===== CONTENT ===== */
+.transaction-page .content {
+  padding: 0 24px;
 }
 
-/* PAGE */
-.transaction-page {
-  padding: 0px 24px;
-}
-
-/* TITLE */
-.page-title {
+/* ===== TITLE ===== */
+.transaction-page .page-title {
   font-size: 40px;
   font-weight: 600;
   color: #0F172A;
   margin-bottom: 24px;
 }
 
-.stats-grid {
+/* ===== STATS ===== */
+.transaction-page .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 32px;
   margin-bottom: 24px;
 }
 
-.stat-card {
+.transaction-page .stat-card {
   background: #FFFFFF;
   border: 1px solid #E2E8F0;
   border-radius: 10px;
   padding: 2px 20px;
 }
 
-.stat-label {
+.transaction-page .stat-label {
   font-size: 20px;
   font-weight: 500;
   color: #64748B;
 }
 
-.stat-value {
+.transaction-page .stat-value {
   font-size: 35px;
   font-weight: 700;
   color: #0F172A;
-  line-height: 0.5;   
+  line-height: 0.5;
 }
 
-/* ===============================
-   TABLE CARD
-   =============================== */
-.table-wrapper {
+/* ===== TABLE CARD ===== */
+.transaction-page .table-wrapper {
   background: #FFFFFF;
   border: 1px solid #E2E8F0;
   overflow: hidden;
 }
 
-.table-header {
+.transaction-page .table-header {
   display: flex;
   align-items: center;
   gap: 16px;
@@ -59,7 +54,7 @@
   border-bottom: 1px solid #E5E7EB;
 }
 
-.table-header .search {
+.transaction-page .table-header .search {
   flex: 1;
   display: flex;
   align-items: center;
@@ -69,16 +64,16 @@
   border-radius: 10px;
 }
 
-.table-header .search input {
+.transaction-page .table-header .search input {
   border: none;
   outline: none;
   width: 100%;
   font-size: 18px;
   font-weight: 400;
-  color:#64748B;
+  color: #64748B;
 }
 
-.table-header .status-filter {
+.transaction-page .table-header .status-filter {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -87,35 +82,37 @@
   border-radius: 10px;
   background: #fff;
 }
-.table-header .status-filter select {
-  border: none;              
-  outline: none;              
+
+.transaction-page .table-header .status-filter select {
+  border: none;
+  outline: none;
   background: transparent;
   font-size: 18px;
   font-weight: 400;
-  color:#64748B;
+  color: #64748B;
   cursor: pointer;
 
-  appearance: none;         
+  appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
 }
 
-.table-header .status-filter select:focus {
+.transaction-page .table-header .status-filter select:focus {
   outline: none;
   box-shadow: none;
 }
 
-table {
+/* ===== TABLE ===== */
+.transaction-page table {
   width: 100%;
   border-collapse: collapse;
 }
 
-thead {
+.transaction-page thead {
   background: #F8FAFC;
 }
 
-thead th {
+.transaction-page thead th {
   padding: 16px 30px;
   font-size: 15px;
   font-weight: 600;
@@ -123,7 +120,7 @@ thead th {
   text-align: left;
 }
 
-tbody td {
+.transaction-page tbody td {
   padding: 16px 30px;
   font-size: 15px;
   color: #0F172A;
@@ -131,11 +128,12 @@ tbody td {
   border-top: 1px solid #E5E7EB;
 }
 
-tbody tr:hover {
+.transaction-page tbody tr:hover {
   background: #F9FAFB;
 }
 
-.status {
+/* ===== STATUS ===== */
+.transaction-page .status {
   display: inline-block;
   padding: 6px 14px;
   border-radius: 999px;
@@ -143,12 +141,12 @@ tbody tr:hover {
   font-weight: 500;
 }
 
-.status.active {
+.transaction-page .status.active {
   background: #DCFCE7;
   color: #15803D;
 }
 
-.status.expired {
+.transaction-page .status.expired {
   background: #FEE2E2;
   color: #B91C1C;
 }

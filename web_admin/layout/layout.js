@@ -1,74 +1,121 @@
-function loadHTML(id, file) {
+/* ===============================
+   LOAD HTML HELPER
+   =============================== */
+function loadHTML(id, file, callback) {
   fetch(file)
     .then(res => res.text())
     .then(html => {
-      document.getElementById(id).innerHTML = html;
-      setActiveMenu();
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.innerHTML = html;
+      callback && callback();
     })
     .catch(err => console.error("Load error:", err));
 }
 
+/* ===============================
+   LOAD LAYOUT PARTS
+   =============================== */
+loadHTML("sidebar", "../layout/sidebar.html", setActiveMenu);
+loadHTML("header", "../layout/header.html", initAvatar);
+loadHTML("popup", "../layout/popup.html");
+
+/* ===============================
+   ACTIVE MENU
+   =============================== */
 function setActiveMenu() {
   const page = document.body.dataset.page;
   if (!page) return;
 
   document.querySelectorAll(".sidebar a").forEach(a => {
-    if (a.dataset.page === page) {
-      a.classList.add("active");
-    }
+    a.classList.toggle("active", a.dataset.page === page);
   });
 }
-document.addEventListener("click", function (e) {
-  const avatarBtn = document.getElementById("avatarBtn");
-  const avatarMenu = document.getElementById("avatarMenu");
 
-  if (!avatarBtn || !avatarMenu) return;
+/* ===============================
+   AVATAR DROPDOWN
+   =============================== */
+function initAvatar() {
+  const avatar = document.querySelector(".avatar");
+  const menu = document.querySelector(".avatar-menu");
+  if (!avatar || !menu) return;
 
-  // Click avatar -> toggle menu
-  if (avatarBtn.contains(e.target)) {
-    avatarMenu.classList.toggle("show");
-    return;
-  }
+  avatar.addEventListener("click", e => {
+    e.stopPropagation();
+    menu.classList.toggle("show");
+  });
 
-  // Click ngoài -> đóng menu
-  if (!avatarMenu.contains(e.target)) {
-    avatarMenu.classList.remove("show");
-  }
-});
+  document.addEventListener("click", () => {
+    menu.classList.remove("show");
+  });
+}
 
-// LOGOUT
-document.addEventListener("click", function (e) {
+/* ===============================
+   LOGOUT
+   =============================== */
+document.addEventListener("click", e => {
   if (e.target.closest("#logoutBtn")) {
-    // clear login state
     localStorage.removeItem("loggedIn");
-
-    // redirect về login
     window.location.href = "../auth/auth.html";
   }
 });
 
-loadHTML("sidebar", "../layout/sidebar.html");
-loadHTML("header", "../layout/header.html");
-// load sidebar
-fetch("/layout/sidebar.html")
-  .then(res => res.text())
-  .then(html => {
-    document.getElementById("sidebar").innerHTML = html;
-  });
+/* ===============================
+   GLOBAL MODAL API
+   =============================== */
+window.openModal = function ({
+  title,
+  desc,
+  primaryText = "Confirm",
+  primaryClass = "btn-delete",
+  onConfirm
+}) {
+  const modal = document.getElementById("confirmModal");
+  if (!modal) return;
 
-// load header
-fetch("/layout/header.html")
-  .then(res => res.text())
-  .then(html => {
-    document.getElementById("header").innerHTML = html;
+  const titleEl = document.getElementById("modalTitle");
+  const descEl = document.getElementById("modalDesc");
+  const confirmBtn = document.getElementById("modalConfirm");
+  const cancelBtn = document.getElementById("modalCancel");
 
-    // avatar dropdown
-    const avatar = document.querySelector(".avatar");
-    const menu = document.querySelector(".avatar-menu");
+  titleEl.innerText = title;
+  descEl.innerText = desc;
 
-    if (avatar && menu) {
-      avatar.addEventListener("click", () => {
-        menu.classList.toggle("show");
-      });
-    }
-  });
+  confirmBtn.innerText = primaryText;
+  confirmBtn.className = "";          // reset class
+  confirmBtn.classList.add(primaryClass);
+
+  modal.classList.remove("hidden");
+
+  const close = () => modal.classList.add("hidden");
+
+  confirmBtn.onclick = () => {
+    close();
+    onConfirm && onConfirm();
+  };
+
+  cancelBtn.onclick = close;
+document.addEventListener("click", e => {
+  if (e.target.classList.contains("modal-close")) {
+    e.target.closest(".modal").classList.add("hidden");
+  }
+});
+document.addEventListener("click", e => {
+  if (e.target.classList.contains("modal")) {
+    e.target.classList.add("hidden");
+  }
+});
+
+};
+/* ===============================
+   TOAST
+   =============================== */
+window.showToast = function (text) {
+  const toast = document.getElementById("toast");
+  if (!toast) return;
+
+  document.getElementById("toastText").innerText = text;
+  toast.classList.remove("hidden");
+
+  setTimeout(() => toast.classList.add("hidden"), 1500);
+};
