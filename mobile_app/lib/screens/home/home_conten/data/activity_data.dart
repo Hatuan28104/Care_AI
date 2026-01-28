@@ -101,7 +101,7 @@ class ActivityDataScreen extends StatelessWidget {
               const SizedBox(width: 10),
               const Expanded(
                 child: Text(
-                  'Activity data',
+                  'Dữ liệu sức khỏe',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 24,
@@ -112,15 +112,7 @@ class ActivityDataScreen extends StatelessWidget {
               const SizedBox(width: 34),
             ],
           ),
-          const SizedBox(height: 8),
-          const Text(
-            'Today',
-            style: TextStyle(
-              color: _blue,
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
+          const SizedBox(height: 20),
         ],
       ),
     );

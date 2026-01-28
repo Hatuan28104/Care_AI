@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:intl_phone_field/phone_number.dart' as ipn;
+import 'package:Care_AI/screens/settings/privacy_security/terms_of_service.dart';
+import 'package:Care_AI/screens/settings/privacy_security/privacy_policy.dart';
 
 class RegisterForm extends StatefulWidget {
   final void Function(String phoneE164, String displayPhone) onOtp;
@@ -126,6 +129,7 @@ class _RegisterFormState extends State<RegisterForm> {
                 IntlPhoneField(
                   initialCountryCode: 'VN',
                   disableLengthCheck: true,
+                  searchText: 'Tìm kiếm quốc gia',
                   decoration: InputDecoration(
                     hintText: 'Số điện thoại',
                     hintStyle: _hintStyle,
@@ -195,25 +199,45 @@ class _RegisterFormState extends State<RegisterForm> {
       padding: const EdgeInsets.only(top: 16),
       child: RichText(
         textAlign: TextAlign.center,
-        text: const TextSpan(
-          style: TextStyle(
+        text: TextSpan(
+          style: const TextStyle(
             fontSize: 16,
             color: Colors.black,
             fontWeight: FontWeight.w500,
             height: 1.4,
           ),
           children: [
-            TextSpan(text: 'Khi đăng ký, bạn xác nhận đã đồng ý với các\n'),
+            const TextSpan(
+              text: 'Khi đăng ký, bạn xác nhận đã đồng ý với các\n',
+            ),
             TextSpan(
               text: 'điều khoản',
-              style: TextStyle(color: Color(0xFF1877F2)),
+              style: const TextStyle(color: Color(0xFF1877F2)),
+              recognizer: TapGestureRecognizer()
+                ..onTap = () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const TermsOfServiceScreen(),
+                    ),
+                  );
+                },
             ),
-            TextSpan(text: ' và '),
+            const TextSpan(text: ' và '),
             TextSpan(
               text: 'chính sách bảo mật',
-              style: TextStyle(color: Color(0xFF1877F2)),
+              style: const TextStyle(color: Color(0xFF1877F2)),
+              recognizer: TapGestureRecognizer()
+                ..onTap = () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const PrivacyPolicyScreen(),
+                    ),
+                  );
+                },
             ),
-            TextSpan(text: ' của Care AI.'),
+            const TextSpan(text: ' của Care AI.'),
           ],
         ),
       ),

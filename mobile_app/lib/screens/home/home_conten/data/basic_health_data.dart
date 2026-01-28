@@ -101,7 +101,7 @@ class BasicHealthDataScreen extends StatelessWidget {
               const SizedBox(width: 10),
               const Expanded(
                 child: Text(
-                  'Basic health data',
+                  'Dữ liệu hoạt động',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 24,
@@ -112,15 +112,7 @@ class BasicHealthDataScreen extends StatelessWidget {
               const SizedBox(width: 34),
             ],
           ),
-          const SizedBox(height: 8),
-          const Text(
-            'Today',
-            style: TextStyle(
-              color: _blue,
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
+          const SizedBox(height: 20),
         ],
       ),
     );

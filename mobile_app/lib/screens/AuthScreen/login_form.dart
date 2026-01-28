@@ -111,6 +111,7 @@ class _LoginFormState extends State<LoginForm> {
                 IntlPhoneField(
                   initialCountryCode: 'VN',
                   disableLengthCheck: true,
+                  searchText: 'Tìm kiếm quốc gia',
                   decoration: InputDecoration(
                     hintText: 'Số điện thoại',
                     hintStyle: const TextStyle(

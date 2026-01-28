@@ -7,10 +7,10 @@
 }
 
 .page-header h1 {
-  font-size: 36px;
-  font-weight: 700;
+  font-size: 40px;
+  font-weight: 600;
   color: #0F172A;
-  margin-top: 10px;
+  margin-top: 0px;
   margin-bottom: 10px;
 }
 
@@ -155,8 +155,8 @@ tbody tr:hover {
 }
 
 .detail-header h1 {
-  font-size: 36px;
-  font-weight: 700;
+  font-size: 32px;
+  font-weight: 600;
   margin: 0;          
 }
 

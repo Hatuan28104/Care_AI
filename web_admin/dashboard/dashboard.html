@@ -5,19 +5,14 @@
   <title>Admin Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Font + icon -->
   <link
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
   />
 
-  <!-- CSS RIÊNG DASHBOARD (GIỮ NGUYÊN) -->
   <link rel="stylesheet" href="dashboard.css" />
-
-  <!-- CSS LAYOUT DÙNG CHUNG -->
   <link rel="stylesheet" href="../layout/layout.css" />
 
-  <!-- FLATPICKR -->
   <link
     rel="stylesheet"
     href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
@@ -28,17 +23,11 @@
 <body data-page="dashboard" class="dashboard-page">
 
 <div class="layout">
-
-  <!-- SIDEBAR DÙNG CHUNG -->
   <div id="sidebar"></div>
 
-  <!-- MAIN -->
   <main class="main">
 
-    <!-- HEADER DÙNG CHUNG -->
     <div id="header"></div>
-
-    <!-- CONTENT -->
     <section class="content">
 
       <h1>Dashboard</h1>
@@ -46,7 +35,6 @@
         Welcome to the admin dashboard. Here's what's happening with your app today.
       </p>
 
-      <!-- DATE FILTER -->
       <div class="date-filter">
         <div class="date-pill">
           <i class="fa-regular fa-calendar"></i>
@@ -54,7 +42,6 @@
         </div>
       </div>
 
-      <!-- STATS -->
       <div class="stats">
         <div class="card">
           <p>Total Users</p>
@@ -74,7 +61,6 @@
         </div>
       </div>
 
-      <!-- ANALYTICS -->
       <div class="analytics">
         <h2>Analytics Overview</h2>
         <p>
@@ -124,10 +110,7 @@
   <i class="fa-solid fa-check"></i>
   <span>File exported successfully</span>
 </div>
-<!-- JS LAYOUT DÙNG CHUNG -->
 <script src="../layout/layout.js"></script>
-
-<!-- JS RIÊNG DASHBOARD (GIỮ NGUYÊN LOGIC) -->
 <script src="dashboard.js"></script>
 
 </body>

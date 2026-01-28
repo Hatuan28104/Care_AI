@@ -29,7 +29,8 @@ class PhoneField extends StatelessWidget {
             children: [
               Text('🇻🇳', style: TextStyle(fontSize: 18)),
               SizedBox(width: 6),
-              Text('+84', style: TextStyle(fontWeight: FontWeight.w600)),
+              Text('+84',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
             ],
           ),
         ),

@@ -38,75 +38,75 @@ class SettingsScreen extends StatelessWidget {
             children: [
               // ===== ACCOUNT =====
               _section(
-                'Account',
+                'Tài khoản',
                 fontSize: 18,
               ),
               _card([
                 _item(
                   icon: Icons.person_outline,
-                  text: 'My Profile',
+                  text: 'Hồ sơ của tôi',
                   onTap: () => _go(context, const MyProfileScreen()),
                 ),
                 _item(
                   icon: Icons.lock_outline,
-                  text: 'Privacy & Security',
+                  text: 'Quyền riêng tư & bảo mật',
                   onTap: () => _go(context, const PrivacySecurityScreen()),
                 ),
               ]),
 
               // ===== DISPLAY =====
-              _section('Display'),
+              _section('Trưng bày'),
               _card([
                 _item(
                   icon: Icons.text_fields,
-                  text: 'Text Size',
+                  text: 'Cỡ chữ',
                   subtitle: _textSizeLabel(AppSettings.textScale.value),
                   onTap: () => _go(context, const TextSizeScreen()),
                 ),
                 _item(
                   icon: Icons.language,
-                  text: 'Language',
-                  subtitle: 'English',
+                  text: 'Ngôn ngữ',
+                  subtitle: 'Tiếng Việt',
                   onTap: () => _go(context, const LanguageScreen()),
                 ),
               ]),
 
               // ===== NOTIFICATIONS =====
-              _section('Notifications'),
+              _section('Thông báo'),
               _card([
                 _switchItem(
                   icon: Icons.notifications_none,
-                  text: 'Notification',
+                  text: 'Thông báo',
                   notifier: AppSettings.notificationOn,
                 ),
                 _item(
                   icon: Icons.volume_up_outlined,
-                  text: 'Sound & Vibration',
+                  text: 'Âm thanh & rung',
                   onTap: () => _go(context, const SoundVibrationScreen()),
                 ),
               ]),
 
               // ===== DEVICE =====
-              _section('Device'),
+              _section('Thiết bị'),
               _card([
                 _switchItem(
                   icon: Icons.health_and_safety_outlined,
-                  text: 'Health Alerts',
+                  text: 'Cảnh báo sức khỏe',
                   notifier: AppSettings.healthAlertOn,
                 ),
                 _switchItem(
                   icon: Icons.sync,
-                  text: 'Sync Data',
+                  text: 'Đồng bộ dữ liệu',
                   notifier: AppSettings.syncDataOn,
                 ),
               ]),
 
               // ===== SUPPORT =====
-              _section('Support'),
+              _section('Hỗ trợ'),
               _card([
                 _item(
                   icon: Icons.help_outline,
-                  text: 'Help & Support',
+                  text: 'Trợ giúp & hỗ trợ',
                   onTap: () => _go(context, const HelpSupportScreen()),
                 ),
               ]),
@@ -134,7 +134,7 @@ class SettingsScreen extends StatelessWidget {
         onPressed: () => Navigator.pop(context),
       ),
       title: const Text(
-        'Settings',
+        'Cài đặt',
         style: TextStyle(
             fontWeight: FontWeight.w800, fontSize: 24, color: Colors.black),
       ),
@@ -144,7 +144,7 @@ class SettingsScreen extends StatelessWidget {
   // ===== SECTIONS =====
   Widget _section(
     String text, {
-    double fontSize = 16, // 👈 thêm named parameter
+    double fontSize = 16,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8, top: 16),
@@ -242,7 +242,7 @@ class SettingsScreen extends StatelessWidget {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
         child: const Text(
-          'Log out',
+          'Đăng xuất',
           style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
         ),
       ),
