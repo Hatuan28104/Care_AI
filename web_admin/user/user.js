@@ -7,9 +7,9 @@ document.addEventListener("DOMContentLoaded", () => {
      ========================== */
   function confirmUserSave(onConfirm) {
     openModal({
-      title: "Confirm acceptance",
-      desc: "Are you sure you want to save the modified information?",
-      primaryText: "Confirm",
+      title: "Xác nhận lưu",
+      desc: "Bạn có chắc chắn muốn lưu các thay đổi này không?",
+      primaryText: "Xác nhận",
       primaryClass: "btn-save",
       onConfirm
     });
@@ -17,9 +17,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function confirmUserDelete(onConfirm) {
     openModal({
-      title: "Confirm deletion",
-      desc: "Are you sure you want to delete this user?",
-      primaryText: "Delete",
+      title: "Xác nhận xoá",
+      desc: "Bạn có chắc chắn muốn xoá người dùng này không?",
+      primaryText: "Xoá",
       primaryClass: "btn-delete",
       onConfirm
     });
@@ -46,9 +46,9 @@ document.addEventListener("DOMContentLoaded", () => {
      ========================== */
   if (page === "user") {
     const ACTIONS = [
-      { key: "view", icon: "eye", label: "View" },
-      { key: "edit", icon: "pen", label: "Edit" },
-      { key: "delete", icon: "trash", label: "Delete" }
+      { key: "view", icon: "eye", label: "Xem" },
+      { key: "edit", icon: "pen", label: "Chỉnh sửa" },
+      { key: "delete", icon: "trash", label: "Xoá" }
     ];
 
     document.querySelectorAll(".action-menu").forEach(menu => {
@@ -100,7 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
       rowToDelete = row;
       confirmUserDelete(() => {
         rowToDelete.remove();
-        showToast("Deleted successfully");
+        showToast("Xoá thành công");
         rowToDelete = null;
       });
     }
@@ -112,7 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (page === "user-detail") {
     document.querySelector(".btn-delete")?.addEventListener("click", () => {
       confirmUserDelete(() => {
-        showToast("Deleted successfully");
+        showToast("Xoá thành công");
         setTimeout(() => {
           window.location.href = "./user.html";
         }, 1200);
@@ -126,7 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (page === "user-edit") {
     document.querySelector(".btn-save")?.addEventListener("click", () => {
       confirmUserSave(() => {
-        showToast("Updated successfully");
+        showToast("Cập nhật thành công");
         setTimeout(() => {
           window.location.href = "./user.html";
         }, 1500);
@@ -136,33 +136,31 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelector(".btn-cancel")?.addEventListener("click", () => {
       window.location.href = "./user.html";
     });
-  const input = document.getElementById("avatarInput");
-  const preview = document.getElementById("avatarPreview");
-  const btnChange = document.getElementById("btnChangeAvatar");
 
-  // bấm Change avatar → mở file
-  btnChange?.addEventListener("click", () => {
-    input.click();
-  });
+    const input = document.getElementById("avatarInput");
+    const preview = document.getElementById("avatarPreview");
+    const btnChange = document.getElementById("btnChangeAvatar");
 
-  // chọn file → preview ảnh
-  input?.addEventListener("change", () => {
-    const file = input.files[0];
-    if (!file) return;
+    btnChange?.addEventListener("click", () => {
+      input.click();
+    });
 
-    // chỉ cho phép ảnh
-    if (!file.type.startsWith("image/")) {
-      alert("Vui lòng chọn file ảnh");
-      input.value = "";
-      return;
-    }
+    input?.addEventListener("change", () => {
+      const file = input.files[0];
+      if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = e => {
-      preview.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  });
+      if (!file.type.startsWith("image/")) {
+        alert("Vui lòng chọn file ảnh");
+        input.value = "";
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = e => {
+        preview.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
   }
 
   /* ==========================

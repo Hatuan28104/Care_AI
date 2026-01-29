@@ -95,7 +95,7 @@
 /*ACTION COLUMN*/
 .digital-page th:last-child,
 .digital-page td:last-child {
-  width: 60px;
+  width: 130px;
   text-align: center;
 }
 
@@ -375,7 +375,7 @@ body[data-page="digital-view"] .form-item select {
 
 .digital-page .info-text strong {
   display: inline-block;
-  width: 100px;
+  width: 120px;
 }
 
 

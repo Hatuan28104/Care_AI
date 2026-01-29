@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>Add Digital Human</title>
+  <title>Thêm nhân vật số</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
@@ -20,56 +20,56 @@
     <main class="content">
       <div class="page-back" id="btnBack">
         <i class="fa-solid fa-chevron-left"></i>
-        <h1>Add Digital Human</h1>
+        <h1>Thêm nhân vật số</h1>
       </div>
 
       <div class="form-card">
         <div class="form-grid">
           <div class="form-item">
-            <label>ID <span>*</span></label>
-            <input type="text" placeholder="Enter ID" />
+            <label>Mã <span>*</span></label>
+            <input type="text" placeholder="Nhập mã" />
           </div>
 
           <div class="form-item">
-            <label>Name <span>*</span></label>
-            <input type="text" placeholder="Enter name" />
+            <label>Tên <span>*</span></label>
+            <input type="text" placeholder="Nhập tên" />
           </div>
 
           <div class="form-item">
-            <label>Gender <span>*</span></label>
-             <select required>
+            <label>Giới tính <span>*</span></label>
+            <select required>
               <option value="" disabled selected hidden></option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
+              <option value="male">Nam</option>
+              <option value="female">Nữ</option>
             </select>
           </div>
 
           <div class="form-item">
-            <label>Job <span>*</span></label>
-            <input type="text" placeholder="Enter job" />
+            <label>Nghề nghiệp <span>*</span></label>
+            <input type="text" placeholder="Nhập nghề nghiệp" />
           </div>
         </div>
 
         <div class="form-item full">
-          <label>Appearance <span>*</span></label>
-          <textarea placeholder="Description of appearance ..."></textarea>
+          <label>Ngoại hình <span>*</span></label>
+          <textarea placeholder="Mô tả ngoại hình..."></textarea>
         </div>
 
         <div class="form-item full">
-          <label>Detailed description <span>*</span></label>
-          <textarea placeholder="Description ..."></textarea>
+          <label>Mô tả chi tiết <span>*</span></label>
+          <textarea placeholder="Nhập mô tả..."></textarea>
         </div>
 
         <div class="form-item full">
-          <label>Avatar <span>*</span></label>
+          <label>Ảnh đại diện <span>*</span></label>
           <div class="upload-box" id="avatarBox">
             <img
               id="avatarPreview"
               class="preview-avatar hidden"
-              alt="Avatar preview"
+              alt="Xem trước ảnh đại diện"
             />
             <i class="fa-solid fa-cloud-arrow-up" id="uploadIcon"></i>
-            <p id="uploadText">Click to upload or drag & drop</p>
+            <p id="uploadText">Nhấn để tải lên hoặc kéo & thả</p>
           </div>
 
           <input
@@ -79,15 +79,18 @@
             hidden
           />
         </div>
+
         <div class="form-actions">
-          <button class="btn-save" id="btnSave">Save</button>
-          <button class="btn-cancel" id="btnCancel">Cancel</button>
+          <button class="btn-save" id="btnSave">Lưu</button>
+          <button class="btn-cancel" id="btnCancel">Hủy</button>
         </div>
       </div>
     </main>
   </div>
 </div>
+
 <div id="popup"></div>
+
 <script src="../layout/layout.js"></script>
 <script src="./digital.js"></script>
 </body>

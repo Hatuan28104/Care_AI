@@ -125,7 +125,7 @@ tbody tr:hover {
 }
 
 .detail-header .btn-delete {
-  width: 90px;
+  width: 110px;
   background: #EF4444;
   color: #fff;
   border: none;
@@ -137,8 +137,8 @@ tbody tr:hover {
 }
 
 .btn-edit {
-  width: 90px; 
-  border: 1px solid #E2E8F0;
+  width: 110px; 
+  border: 2px solid #E2E8F0;
   padding: 8px 16px;
   border-radius: 8px;
   color: #000000;

@@ -1,104 +1,95 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>Edit Digital Human</title>
+  <title>Chỉnh sửa nhân vật số</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Font Awesome -->
   <link
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
   />
 
-  <!-- Layout chung -->
   <link rel="stylesheet" href="../layout/layout.css" />
-  <!-- Digital CSS (chung cho list / add / view / edit) -->
   <link rel="stylesheet" href="./digital.css" />
 </head>
 
 <body data-page="digital-edit" class="digital-page">
 <div class="layout">
 
-  <!-- SIDEBAR (load bằng layout.js) -->
   <div id="sidebar"></div>
 
   <div class="main">
-    <!-- HEADER (load bằng layout.js) -->
     <div id="header"></div>
 
     <main class="content">
 
-      <!-- PAGE HEADER -->
       <div class="page-back" id="btnBack">
         <i class="fa-solid fa-chevron-left"></i>
-        <h1>Edit Digital Human</h1>
+        <h1>Chỉnh sửa nhân vật số</h1>
       </div>
 
-      <!-- FORM CARD -->
       <div class="form-card">
 
-        <!-- BASIC INFO -->
         <div class="form-grid">
           <div class="form-item">
-            <label>ID <span>*</span></label>
+            <label>Mã <span>*</span></label>
             <input type="text" value="DH01" disabled />
           </div>
 
           <div class="form-item">
-            <label>Name <span>*</span></label>
+            <label>Tên <span>*</span></label>
             <input type="text" value="Luna" />
           </div>
 
           <div class="form-item">
-            <label>Gender <span>*</span></label>
+            <label>Giới tính <span>*</span></label>
             <select>
-              <option>Male</option>
-              <option selected>Female</option>
+              <option>Nam</option>
+              <option selected>Nữ</option>
             </select>
           </div>
 
           <div class="form-item">
-            <label>Job <span>*</span></label>
-            <input type="text" value="Nurse" />
+            <label>Nghề nghiệp <span>*</span></label>
+            <input type="text" value="Y tá" />
           </div>
         </div>
 
-        <!-- APPEARANCE -->
         <div class="form-item full">
-          <label>Appearance <span>*</span></label>
+          <label>Ngoại hình <span>*</span></label>
           <textarea>
-She is a young nurse around 25 years old, wearing clean and neatly fitted hospital scrubs. She has a bright, friendly smile that creates a sense of comfort and trust. Her appearance is gentle, caring, and full of positive energy.          </textarea>
+Cô là một y tá trẻ khoảng 25 tuổi, mặc đồng phục bệnh viện gọn gàng và sạch sẽ. Cô có nụ cười tươi tắn, thân thiện, tạo cảm giác tin cậy và thoải mái. Ngoại hình toát lên vật dịu dàng, tận tâm và nguồn năng lượng tích cực.
+          </textarea>
         </div>
 
-        <!-- DESCRIPTION -->
         <div class="form-item full">
-          <label>Detailed description <span>*</span></label>
+          <label>Mô tả chi tiết <span>*</span></label>
           <textarea>
-This role provides personalized care instructions tailored to each patient's needs, including medication reminders to ensure timely and safe usage. It also offers daily health monitoring support to help maintain wellness and detect any early warning signs. The goal is to assist users in managing their health with confidence and consistency.          </textarea>
+Vai trò này cung cấp hướng dẫn chăm sóc cá nhân hoá theo nhu cầu của từng bệnh nhân, bao gồm nhắc nhở uống thuốc nhằm đảm bảo sử dụng đúng thời điểm và an toàn. Đồng thời, hệ thống hỗ trợ theo dõi sức khỏe hằng ngày để duy trì thể trạng và phát hiện sớm các dấu hiệu bất thường. Mục tiêu là giúp người dùng quản lý sức khỏe một cách chủ động và hiệu quả.
+          </textarea>
         </div>
 
         <!-- AVATAR -->
         <div class="form-item full">
-          <label>Avatar <span>*</span></label>
+          <label>Ảnh đại diện <span>*</span></label>
           <div class="upload-box" id="avatarBox">
             <img
               id="avatarPreview"
               class="preview-avatar hidden"
-              alt="Avatar preview"
+              alt="Xem trước ảnh đại diện"
             />
 
             <i class="fa-solid fa-cloud-arrow-up" id="uploadIcon"></i>
 
-            <p id="uploadText">Click to upload or drag & drop</p>
+            <p id="uploadText">Nhấn để tải lên hoặc kéo & thả</p>
 
-            <!-- REMOVE nằm trong box -->
             <button
               type="button"
               class="remove-avatar hidden"
               id="btnRemoveAvatar"
             >
-              Remove image
+              Xóa ảnh
             </button>
           </div>
 
@@ -110,17 +101,17 @@ This role provides personalized care instructions tailored to each patient's nee
           />
         </div>
 
-        <!-- ACTIONS -->
         <div class="form-actions">
-          <button class="btn-save" id="btnSave">Save</button>
-          <button class="btn-cancel" id="btnCancel">Cancel</button>
+          <button class="btn-save" id="btnSave">Lưu</button>
+          <button class="btn-cancel" id="btnCancel">Hủy</button>
         </div>
       </div>
     </main>
   </div>
 </div>
+
 <div id="popup"></div>
-<!-- JS -->
+
 <script src="../layout/layout.js"></script>
 <script src="./digital.js"></script>
 </body>

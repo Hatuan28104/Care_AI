@@ -29,8 +29,8 @@ html, body {
 }
 
 .sidebar h2 {
-  font-size: 32px;
-  margin:14px 10px 80px 20px;
+  font-size: 30px;
+  margin:14px 10px 80px 10px;
 }
 
 .sidebar nav {
@@ -137,7 +137,7 @@ html, body {
 }
 
 .avatar-menu button {
-  width: 100%;
+  width: 100px;
   background: none;
   border: none;
   padding: 6px;
@@ -145,7 +145,7 @@ html, body {
   cursor: pointer;
   display: flex;       
   align-items: center; 
-  gap:8px;
+  gap:10px;
 }
 /* ===== CONTENT (GLOBAL) ===== */
 .content {

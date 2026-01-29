@@ -7,9 +7,9 @@ document.addEventListener("DOMContentLoaded", () => {
      =============================== */
   function confirmSave(onConfirm) {
     openModal({
-      title: "Confirm Acceptance",
-      desc: "Are you sure you want to save the modified information?",
-      primaryText: "Confirm",
+      title: "Xác nhận lưu",
+      desc: "Bạn có chắc chắn muốn lưu các thay đổi này không?",
+      primaryText: "Xác nhận",
       primaryClass: "btn-save",
       onConfirm
     });
@@ -17,9 +17,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function confirmDelete(onConfirm) {
     openModal({
-      title: "Confirm deletion",
-      desc: "Are you sure you want to delete this Digital Human?",
-      primaryText: "Delete",
+      title: "Xác nhận xoá",
+      desc: "Bạn có chắc chắn muốn xoá nhân sự số này không?",
+      primaryText: "Xoá",
       primaryClass: "btn-delete",
       onConfirm
     });
@@ -55,8 +55,8 @@ document.addEventListener("DOMContentLoaded", () => {
       confirmSave(() => {
         showToast(
           page === "digital-add"
-            ? "Added successfully"
-            : "Updated successfully"
+            ? "Thêm thành công"
+            : "Cập nhật thành công"
         );
 
         setTimeout(() => {
@@ -75,9 +75,9 @@ document.addEventListener("DOMContentLoaded", () => {
      =============================== */
   if (page === "digital") {
     const ACTIONS = [
-      { key: "view", icon: "eye", label: "View" },
-      { key: "edit", icon: "pen", label: "Edit" },
-      { key: "delete", icon: "trash", label: "Delete" }
+      { key: "view", icon: "eye", label: "Xem" },
+      { key: "edit", icon: "pen", label: "Chỉnh sửa" },
+      { key: "delete", icon: "trash", label: "Xoá" }
     ];
 
     document.querySelectorAll(".action-menu").forEach(menu => {
@@ -133,7 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       confirmDelete(() => {
         rowToDelete.remove();
-        showToast("Deleted successfully");
+        showToast("Xoá thành công");
       });
     }
   });
@@ -150,7 +150,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("btnDelete")?.addEventListener("click", () => {
       confirmDelete(() => {
-        showToast("Deleted successfully");
+        showToast("Xoá thành công");
         setTimeout(() => {
           window.location.href = "./digital.html";
         }, 1200);
@@ -158,6 +158,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+
 /* ===============================
    AVATAR UPLOAD (ADD + EDIT)
    =============================== */
@@ -169,12 +170,10 @@ const uploadText = document.getElementById("uploadText");
 const btnRemoveAvatar = document.getElementById("btnRemoveAvatar");
 
 if (avatarBox && avatarInput) {
-  // click avatar → mở file
   avatarBox.addEventListener("click", () => {
     avatarInput.click();
   });
 
-  // chọn file → preview
   avatarInput.addEventListener("change", () => {
     const file = avatarInput.files[0];
     if (!file) return;

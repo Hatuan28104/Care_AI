@@ -5,16 +5,12 @@
   <title>Users</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Font Awesome -->
   <link
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
   />
 
-  <!-- Layout chung -->
   <link rel="stylesheet" href="../layout/layout.css" />
-
-  <!-- Users CSS -->
   <link rel="stylesheet" href="./user.css" />
 </head>
 <body data-page="user" class="user-page">
@@ -25,32 +21,29 @@
     <div id="header"></div>
 
     <main class="content users-page">
-      <h1 class="page-title">Users</h1>
+      <h1 class="page-title">Người dùng</h1>
 
-      <!-- SEARCH -->
       <div class="filter-bar">
         <div class="search">
           <i class="fa-solid fa-magnifying-glass"></i>
-          <input type="text" placeholder="Search users..." />
+          <input type="text" placeholder="Tìm kiếm người dùng..." />
         </div>
       </div>
 
-      <!-- TABLE -->
       <div class="table-wrapper">
         <table>
           <thead>
             <tr>
-              <th>No</th>
-              <th>Full Name</th>
-              <th>Phone</th>
-              <th>Date of birth</th>
-              <th>Created at</th>
-              <th class="th-action">Action</th>
+              <th>STT</th>
+              <th>Họ và tên</th>
+              <th>Số điện thoại</th>
+              <th>Ngày sinh</th>
+              <th>Ngày tạo</th>
+              <th class="th-action">Thao tác</th>
             </tr>
           </thead>
 
           <tbody>
-            <!-- USER 1 -->
             <tr data-id="1">
               <td>1</td>
               <td>Nguyen Thi Mai</td>
@@ -59,12 +52,10 @@
               <td>09/11/2025</td>
               <td class="actions">
                 <i class="fa-solid fa-ellipsis-vertical action-toggle"></i>
-                <!-- JS sẽ render menu vào đây -->
                 <div class="action-menu"></div>
               </td>
             </tr>
 
-            <!-- USER 2 -->
             <tr data-id="2">
               <td>2</td>
               <td>Tran Hoai Anh</td>
@@ -77,7 +68,6 @@
               </td>
             </tr>
 
-            <!-- USER 3 -->
             <tr data-id="3">
               <td>3</td>
               <td>Nguyen Duc Thinh</td>
@@ -90,7 +80,6 @@
               </td>
             </tr>
 
-            <!-- USER 4 -->
             <tr data-id="4">
               <td>4</td>
               <td>Hoang Thi Huong</td>
@@ -103,7 +92,6 @@
               </td>
             </tr>
 
-            <!-- USER 5 -->
             <tr data-id="5">
               <td>5</td>
               <td>Le Van Tam</td>
@@ -123,7 +111,6 @@
 </div>
 
 <div id="popup"></div>
-<!-- JS -->
   <script src="../layout/layout.js"></script>
   <script src="./user.js"></script>
 </body>

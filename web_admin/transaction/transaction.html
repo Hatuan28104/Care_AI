@@ -5,15 +5,12 @@
   <title>Transaction History</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Font Awesome -->
   <link
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
   />
 
-  <!-- Layout dùng chung -->
   <link rel="stylesheet" href="../layout/layout.css" />
-  <!-- Transaction CSS -->
   <link rel="stylesheet" href="./transaction.css" />
 </head>
 <body data-page="transaction" class="transaction-page">
@@ -25,61 +22,57 @@
 
       <main class="content transaction-page">
 
-        <h1 class="page-title">Transaction History</h1>
+        <h1 class="page-title">Lịch sử giao dịch</h1>
 
-        <!-- STATS -->
         <div class="stats-grid">
           <div class="stat-card">
-            <p class="stat-label">Total Users</p>
+            <p class="stat-label">Tổng số người dùng</p>
             <h2 class="stat-value">20</h2>
           </div>
           <div class="stat-card">
-            <p class="stat-label">Total interactions</p>
+            <p class="stat-label">Tổng số lượt tương tác</p>
             <h2 class="stat-value">150</h2>
           </div>
           <div class="stat-card">
-            <p class="stat-label">General warning</p>
+            <p class="stat-label">Cảnh báo chung</p>
             <h2 class="stat-value">10</h2>
           </div>
           <div class="stat-card">
-            <p class="stat-label">Total Revenue</p>
+            <p class="stat-label">Tổng doanh thu</p>
             <h2 class="stat-value">626</h2>
           </div>
         </div>
 
-        <!-- TABLE CARD -->
         <div class="table-wrapper">
 
-          <!-- TABLE HEADER -->
           <div class="table-header">
             <div class="search">
               <i class="fa-solid fa-magnifying-glass"></i>
-              <input type="text" placeholder="Search transactions..." />
+              <input type="text" placeholder="Tìm kiếm giao dịch..." />
             </div>
 
             <div class="status-filter">
               <i class="fa-solid fa-filter"></i>
               <select>
                 <option value="" disabled selected hidden>
-                  Filter by status
+                  Lọc theo trạng thái
                 </option>
-                <option value="active">Active</option>
-                <option value="expired">Expired</option>
+                <option value="active">Đang hoạt động</option>
+                <option value="expired">Hết hạn</option>
               </select>
             </div>
           </div>
 
-          <!-- TABLE -->
           <table>
             <thead>
               <tr>
-                <th>No</th>
-                <th>Package Name</th>
-                <th>Subscriber Name</th>
-                <th>Registration Date</th>
-                <th>Expiry Date</th>
-                <th>Total Amount</th>
-                <th>Status</th>
+                <th>STT</th>
+                <th>Tên gói</th>
+                <th>Tên người đăng ký</th>
+                <th>Ngày đăng ký</th>
+                <th>Ngày hết hạn</th>
+                <th>Tổng tiền</th>
+                <th>Trạng thái</th>
               </tr>
             </thead>
 
@@ -91,7 +84,7 @@
                 <td>Oct 1, 2025</td>
                 <td>Oct 1, 2026</td>
                 <td>1,500,000đ / year</td>
-                <td><span class="status active">Active</span></td>
+                <td><span class="status active">Đang hoạt động</span></td>
               </tr>
 
               <tr>
@@ -101,7 +94,7 @@
                 <td>Oct 5, 2025</td>
                 <td>Oct 12, 2025</td>
                 <td>150,000đ / week</td>
-                <td><span class="status active">Active</span></td>
+                <td><span class="status active">Đang hoạt động</span></td>
               </tr>
 
               <tr>
@@ -111,7 +104,7 @@
                 <td>Oct 12, 2025</td>
                 <td>Oct 12, 2026</td>
                 <td>2,000,000đ / year</td>
-                <td><span class="status expired">Expired</span></td>
+                <td><span class="status expired">Hết hạn</span></td>
               </tr>
             </tbody>
           </table>
@@ -121,7 +114,6 @@
     </div>
   </div>
 
-  <!-- JS -->
   <script src="../layout/layout.js"></script>
   <script src="./transaction.js"></script>
 </body>

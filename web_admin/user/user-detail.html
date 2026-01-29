@@ -1,20 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>User Details</title>
+  <title>Chi tiết người dùng</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Font Awesome -->
   <link
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
   />
 
-  <!-- Layout chung -->
   <link rel="stylesheet" href="../layout/layout.css" />
-
-  <!-- User CSS dùng chung -->
   <link rel="stylesheet" href="./user.css" />
 </head>
 
@@ -27,90 +23,94 @@
 
       <main class="content users-page">
 
-        <!-- HEADER -->
         <div class="detail-header">
           <a href="./user.html" class="back-btn">
             <i class="fa-solid fa-chevron-left"></i>
           </a>
-          <h1>User Details</h1>
+          <h1>Chi tiết người dùng</h1>
 
           <div class="header-actions">
-            <button class="btn-delete">Delete</button>
-            <a href="./user-edit.html" class="btn-edit">Edit</a>
+            <button class="btn-delete">Xóa</button>
+            <a href="./user-edit.html" class="btn-edit">Chỉnh sửa</a>
           </div>
         </div>
 
         <!-- CARD -->
         <div class="detail-card">
           <div class="profile">
-            <img src="https://i.pravatar.cc/120?img=65" alt="avatar" />
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRvvl3MAXZkSMW7mGJmL2_IFu3LQAXL_UAo7w&s" alt="avatar" />
             <div>
-              <h2>Nguyen Thi Mai</h2>
-              <p class="updated">• Last updated: Nov 11, 2025</p>
+              <h2>Nguyễn Thị Mai</h2>
+              <p class="updated">• Cập nhật lần cuối: 11/11/2025</p>
             </div>
           </div>
 
           <div class="block">
-            <h3>About you:</h3>
-            <div class="box muted">No description provided.</div>
+            <h3>Giới thiệu về bạn:</h3>
+            <div class="box muted">Chưa có mô tả</div>
           </div>
 
           <div class="block">
-            <h3>Looking for:</h3>
-            <div class="box muted">No description provided.</div>
+            <h3>Bạn đang tìm kiếm:</h3>
+            <div class="box muted">Chưa có mô tả</div>
           </div>
 
           <div class="block">
-            <h3>Information</h3>
-            <p class="sub">Basic Information</p>
+            <h3>Thông tin</h3>
+            <p class="sub">Thông tin cơ bản</p>
 
             <div class="info-item">
-              <span>Full Name</span>
-              <strong>Nguyen Thi Mai</strong>
+              <span>Họ và tên</span>
+              <strong>Nguyễn Thị Mai</strong>
             </div>
 
             <div class="info-item">
-              <span>Date of Birth</span>
+              <span>Ngày sinh</span>
               <strong>28/10/1952</strong>
             </div>
 
             <div class="info-item">
-              <span>Gender</span>
-              <strong>Female</strong>
+              <span>Giới tính</span>
+              <strong>Nữ</strong>
             </div>
 
             <div class="info-item">
-              <span>Height</span>
+              <span>Chiều cao</span>
               <strong>1m60</strong>
             </div>
+
             <div class="info-item">
-                <span>Weight</span>
-                <strong>45kg</strong>
+              <span>Cân nặng</span>
+              <strong>45 kg</strong>
             </div>
           </div>
+
           <div class="block">
-            <p class="sub">Contact Information</p>
+            <p class="sub">Thông tin liên hệ</p>
+
             <div class="info-item">
-                <span>Phone Number</span>
-                <strong>(+84) 123 456 789</strong>
+              <span>Số điện thoại</span>
+              <strong>(+84) 123 456 789</strong>
             </div>
 
             <div class="info-item">
-                <span>Email</span>
-                <strong>mainguyen@email.com</strong>
+              <span>Email</span>
+              <strong>mainguyen@email.com</strong>
             </div>
 
             <div class="info-item">
-                <span>Address</span>
-                <strong>123 Le Loi Street, Ho Chi Minh City</strong>
+              <span>Địa chỉ</span>
+              <strong>123 Lê Lợi, TP. Hồ Chí Minh</strong>
             </div>
-            </div>
+          </div>
         </div>
 
       </main>
     </div>
   </div>
+
   <div id="popup"></div>
+
   <script src="../layout/layout.js"></script>
   <script src="./user.js"></script>
 </body>
