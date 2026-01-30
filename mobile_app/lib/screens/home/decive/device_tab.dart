@@ -73,7 +73,7 @@ class DeviceTab extends StatelessWidget {
                 ),
               ),
               child: const Text(
-                'Scanner',
+                'Quét',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
@@ -101,7 +101,7 @@ class DeviceTab extends StatelessWidget {
                 ),
               ),
               child: const Text(
-                'Add device',
+                'Thêm mới',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,

@@ -7,7 +7,6 @@ import 'familycenter/family_tab.dart';
 import 'decive/device_tab.dart';
 import 'history/history_tab.dart';
 
-import 'home_conten/premium.dart';
 import 'home_conten/alert.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -18,8 +17,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  static const _bg = Color(0xFFF6F6F6);
-
   int _currentIndex = 0;
 
   final _tabs = const [
@@ -32,7 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: Color(0xFFF6F6F6),
       body: SafeArea(
         child: Column(
           children: [
@@ -70,10 +67,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const Spacer(),
-          GestureDetector(
-            onTap: () => _goPremium(context),
-            child: _iconBadge(Icons.auto_awesome),
-          ),
           const SizedBox(width: 12),
           _notificationIcon(context),
           const SizedBox(width: 12),
@@ -83,22 +76,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _iconBadge(IconData icon) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 5),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [
-            Color(0xFF3B82F6),
-            Color(0xFF1E40AF),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(40),
-      ),
-      child: Icon(icon, color: Colors.white, size: 18),
     );
   }
 
@@ -120,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(4),
                     decoration: const BoxDecoration(
-                      color: Color(0xFF1F6BFF),
+                      color: Color(0xFF1877F2),
                       shape: BoxShape.circle,
                     ),
                     child: Text(
@@ -151,27 +128,18 @@ class _HomeScreenState extends State<HomeScreen> {
         setState(() => _currentIndex = index);
       },
       items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'Home'),
         BottomNavigationBarItem(
-            icon: Icon(Icons.group_outlined), label: 'Family Center'),
-        BottomNavigationBarItem(icon: Icon(Icons.graphic_eq), label: 'Device'),
-        BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
+            icon: Icon(Icons.home_outlined), label: 'Trang chủ'),
+        BottomNavigationBarItem(
+            icon: Icon(Icons.group_outlined), label: 'Gia đình'),
+        BottomNavigationBarItem(
+            icon: Icon(Icons.graphic_eq), label: 'Thiết bị'),
+        BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Lịch sử'),
       ],
     );
   }
 
-  // ===== NAV HELPERS =====
   static void _go(BuildContext context, Widget page) {
     Navigator.push(context, MaterialPageRoute(builder: (_) => page));
-  }
-
-  static void _goPremium(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        fullscreenDialog: true,
-        builder: (_) => const PremiumScreen(),
-      ),
-    );
   }
 }

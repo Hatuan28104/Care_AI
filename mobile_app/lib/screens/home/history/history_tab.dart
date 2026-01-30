@@ -7,7 +7,7 @@ class HistoryTab extends StatelessWidget {
   // ===== COLORS (theo Home) =====
   static const Color primary = Color(0xFF1F41BB);
   static const Color accent = Color(0xFF1877F2);
-  static const Color bgItem = Color(0xFFF4F6FB);
+  static const Color bgItem = Color(0xFFF6F6F6);
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +25,7 @@ class HistoryTab extends StatelessWidget {
     return const Padding(
       padding: EdgeInsets.fromLTRB(18, 10, 18, 12),
       child: Text(
-        'History',
+        'Lịch sử',
         style: TextStyle(
           fontSize: 24,
           fontWeight: FontWeight.w600,
@@ -40,17 +40,17 @@ class HistoryTab extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 18),
       children: [
-        _sectionTitle('TODAY'),
+        _sectionTitle('Hôm nay'),
         _historyItem(
           context,
-          title: 'Nora - News',
+          title: 'Nora - Tin tức',
           time: '20.10.2025   12:58',
         ),
         const SizedBox(height: 16),
-        _sectionTitle('PREVIOUS 7 DAYS'),
+        _sectionTitle('7 ngày trước'),
         _historyItem(
           context,
-          title: 'Mira - Story',
+          title: 'Mira - Câu chuyện',
           time: '11.10.2025   12:58',
         ),
         const SizedBox(height: 40),
@@ -146,7 +146,7 @@ class HistoryTab extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: const [
               Text(
-                'Choose Action',
+                'Chọn hành động',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,

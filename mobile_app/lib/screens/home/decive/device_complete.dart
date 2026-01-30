@@ -4,55 +4,22 @@ import 'package:Care_AI/screens/home/decive/device_detail.dart';
 class DeviceCompleteScreen extends StatelessWidget {
   const DeviceCompleteScreen({super.key});
 
-  static const blue = Color(0xFF1F6BFF);
+  static const blue = Color(0xFF1877F2);
   static const green = Color(0xFF45C46D);
+  static const bg = Color(0xFFF6F6F6);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: bg,
       body: SafeArea(
         child: Column(
           children: [
-            // ===== HEADER =====
-            Padding(
-              padding: const EdgeInsets.fromLTRB(18, 14, 18, 12),
-              child: Row(
-                children: [
-                  const Text(
-                    'Care AI',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w800,
-                      color: Color.fromARGB(255, 13, 69, 159),
-                    ),
-                  ),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: blue.withOpacity(.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child:
-                        const Icon(Icons.auto_awesome, color: blue, size: 18),
-                  ),
-                  const SizedBox(width: 12),
-                  const Icon(Icons.notifications_none, size: 22),
-                  const SizedBox(width: 12),
-                  const Icon(Icons.settings_outlined, size: 22),
-                ],
-              ),
-            ),
-            Container(
-              height: 1,
-              width: double.infinity,
-              color: Colors.black.withOpacity(0.08),
-            ),
+            // ❌ HEADER ĐÃ BỎ
 
             const Spacer(),
 
-            // ===== ICON + TEXT =====
+            // ===== ICON + TEXT (GIỮ NGUYÊN LAYOUT) =====
             Transform.translate(
               offset: const Offset(0, -70),
               child: Column(
@@ -61,7 +28,7 @@ class DeviceCompleteScreen extends StatelessWidget {
                     width: 116,
                     height: 116,
                     decoration: const BoxDecoration(
-                      color: Color.fromARGB(255, 86, 210, 125),
+                      color: green,
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -72,7 +39,7 @@ class DeviceCompleteScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   const Text(
-                    'Setup Complete!',
+                    'Thiết lập hoàn tất!',
                     style: TextStyle(
                       fontSize: 30,
                       fontWeight: FontWeight.w800,
@@ -84,7 +51,7 @@ class DeviceCompleteScreen extends StatelessWidget {
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 36),
                     child: Text(
-                      'Your Apple Watch Series Demo is ready to use',
+                      'Thiết bị Apple Watch Series Demo của bạn đã sẵn sàng sử dụng',
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.black54,
@@ -99,7 +66,7 @@ class DeviceCompleteScreen extends StatelessWidget {
 
             const Spacer(),
 
-            // ===== BUTTON DONE =====
+            // ===== BUTTON DONE (GIỮ NGUYÊN LAYOUT) =====
             Transform.translate(
               offset: const Offset(0, -50),
               child: Padding(
@@ -125,7 +92,7 @@ class DeviceCompleteScreen extends StatelessWidget {
                       elevation: 4,
                     ),
                     child: const Text(
-                      'Done',
+                      'Hoàn tất',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,

@@ -8,43 +8,40 @@ class SoundVibrationScreen extends StatefulWidget {
 }
 
 class _SoundVibrationScreenState extends State<SoundVibrationScreen> {
-  // ===== COLORS =====
-  static const _pageBg = Color(0xFFFFFFFF);
   static const _cardBg = Color(0xFFF2F2F2);
-  static const _primary = Color(0xFF1F6BFF);
-  static const _muted = Color.fromARGB(255, 189, 189, 189);
+  static const _primary = Color(0xFF1877F2);
 
-  // ===== STATE =====
   bool _soundOn = true;
   bool _vibrationOn = true;
 
   double _volume = 0.60;
-  String _soundStyle = 'Sound 2';
-  String _vibrationLevel = 'Medium';
+  String _soundStyle = 'Âm thanh 2';
+  String _vibrationLevel = 'Trung bình';
 
   static const _sounds = [
-    'Sound 1',
-    'Sound 2',
-    'Sound 3',
-    'Sound 4',
-    'Sound 5'
+    'Âm thanh 1',
+    'Âm thanh 2',
+    'Âm thanh 3',
+    'Âm thanh 4',
+    'Âm thanh 5',
   ];
-  static const _vibrations = ['Low', 'Medium', 'High'];
+
+  static const _vibrations = ['Thấp', 'Trung bình', 'Cao'];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _pageBg,
+      backgroundColor: Color(0xFFF6F6F6),
       appBar: _appBar(context),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 10, 20, 17),
         children: [
           const SizedBox(height: 12),
-          const _BigSectionTitle('Notification Sound'),
+          const _BigSectionTitle('Âm thanh thông báo'),
           const SizedBox(height: 6),
           _notificationCard(),
           const SizedBox(height: 24),
-          const _BigSectionTitle('Vibration'),
+          const _BigSectionTitle('Rung'),
           const SizedBox(height: 6),
           _vibrationCard(),
         ],
@@ -52,7 +49,6 @@ class _SoundVibrationScreenState extends State<SoundVibrationScreen> {
     );
   }
 
-  // ===== APP BAR =====
   PreferredSizeWidget _appBar(BuildContext context) {
     return AppBar(
       backgroundColor: Colors.transparent,
@@ -64,17 +60,16 @@ class _SoundVibrationScreenState extends State<SoundVibrationScreen> {
         onPressed: () => Navigator.pop(context),
       ),
       title: const Text(
-        'Sound & Vibration',
+        'Âm thanh & Rung',
         style: TextStyle(
-          fontWeight: FontWeight.w800,
-          fontSize: 24, // 👈 to như ảnh
+          fontWeight: FontWeight.w700,
+          fontSize: 24,
           color: Colors.black,
         ),
       ),
     );
   }
 
-  // ===== CARDS =====
   Widget _notificationCard() {
     return _card(
       child: Column(
@@ -82,13 +77,13 @@ class _SoundVibrationScreenState extends State<SoundVibrationScreen> {
         children: [
           _switchRow(
             icon: Icons.volume_up_outlined,
-            title: 'Sound',
+            title: 'Âm thanh',
             value: _soundOn,
             onChanged: (v) => setState(() => _soundOn = v),
           ),
           if (_soundOn) ...[
             const SizedBox(height: 4),
-            const _LabelText('Sound Style'),
+            const _LabelText('Kiểu âm thanh'),
             const SizedBox(height: 4),
             ..._sounds.map((s) => _checkRow(
                   icon: Icons.music_note_outlined,
@@ -97,7 +92,7 @@ class _SoundVibrationScreenState extends State<SoundVibrationScreen> {
                   onTap: () => setState(() => _soundStyle = s),
                 )),
             const SizedBox(height: 6),
-            const _LabelText('Volume'),
+            const _LabelText('Âm lượng'),
             const SizedBox(height: 6),
             Row(
               children: [
@@ -136,13 +131,13 @@ class _SoundVibrationScreenState extends State<SoundVibrationScreen> {
         children: [
           _switchRow(
             icon: Icons.vibration,
-            title: 'Vibration',
+            title: 'Rung',
             value: _vibrationOn,
             onChanged: (v) => setState(() => _vibrationOn = v),
           ),
           if (_vibrationOn) ...[
             const SizedBox(height: 4),
-            const _LabelText('Vibration Level'),
+            const _LabelText('Mức độ rung'),
             const SizedBox(height: 4),
             ..._vibrations.map((v) => _checkRow(
                   icon: Icons.vibration,
@@ -156,14 +151,13 @@ class _SoundVibrationScreenState extends State<SoundVibrationScreen> {
     );
   }
 
-  // ===== PIECES =====
   Widget _card({required Widget child}) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(18, 10, 18, 10),
       decoration: BoxDecoration(
         color: _cardBg,
-        borderRadius: BorderRadius.circular(10), // 👈 bo giống ảnh
+        borderRadius: BorderRadius.circular(10),
       ),
       child: child,
     );
@@ -183,14 +177,14 @@ class _SoundVibrationScreenState extends State<SoundVibrationScreen> {
           child: Text(
             title,
             style: const TextStyle(
-              fontSize: 17, // 👈 to như ảnh
+              fontSize: 17,
               fontWeight: FontWeight.w400,
               color: Colors.black,
             ),
           ),
         ),
         Transform.scale(
-          scale: 0.8, // 👈 switch to hơn chút
+          scale: 0.8,
           child: Switch(
             value: value,
             onChanged: onChanged,
@@ -222,7 +216,7 @@ class _SoundVibrationScreenState extends State<SoundVibrationScreen> {
               child: Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 17, // 👈 to như ảnh
+                  fontSize: 17,
                   fontWeight: FontWeight.w400,
                   color: Colors.black,
                 ),
@@ -245,8 +239,6 @@ class _SoundVibrationScreenState extends State<SoundVibrationScreen> {
   }
 }
 
-// ===== SMALL TEXTS =====
-
 class _BigSectionTitle extends StatelessWidget {
   final String text;
   const _BigSectionTitle(this.text);
@@ -256,7 +248,7 @@ class _BigSectionTitle extends StatelessWidget {
     return Text(
       text,
       style: const TextStyle(
-        fontSize: 17, // 👈 to như ảnh
+        fontSize: 17,
         fontWeight: FontWeight.w700,
         color: Colors.black,
       ),
@@ -273,7 +265,7 @@ class _LabelText extends StatelessWidget {
     return Text(
       text,
       style: const TextStyle(
-        fontSize: 16, // 👈 label lớn như ảnh
+        fontSize: 16,
         fontWeight: FontWeight.w400,
         color: Colors.black,
       ),

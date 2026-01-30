@@ -258,7 +258,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
       title: const Text(
         'Hồ sơ cá nhân',
         style: TextStyle(
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w700,
           fontSize: 24,
           color: Colors.black,
         ),

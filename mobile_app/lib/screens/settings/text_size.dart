@@ -9,24 +9,21 @@ class TextSizeScreen extends StatefulWidget {
 }
 
 class _TextSizeScreenState extends State<TextSizeScreen> {
-  // ===== CONSTANTS =====
-  static const _bg = Color(0xFFF3F5F9);
-  static const _blue = Color(0xFF1F6BFF);
+  static const _blue = Color(0xFF1877F2);
 
-  // ===== STATE =====
   late double _scale;
 
   @override
   void initState() {
     super.initState();
-    _scale = AppSettings.textScale.value; // lấy từ global
+    _scale = AppSettings.textScale.value;
   }
 
   // ===== UI =====
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: Color(0xFFF6F6F6),
       appBar: _appBar(context),
       body: SafeArea(
         child: Padding(
@@ -43,11 +40,11 @@ class _TextSizeScreenState extends State<TextSizeScreen> {
     );
   }
 
-  // ===== APP BAR =====
   PreferredSizeWidget _appBar(BuildContext context) {
     return AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
+      centerTitle: true,
       leading: IconButton(
         icon: const Icon(
           Icons.arrow_back_ios_new_rounded,
@@ -57,17 +54,17 @@ class _TextSizeScreenState extends State<TextSizeScreen> {
         onPressed: () => Navigator.pop(context),
       ),
       title: const Text(
-        'Text Size',
-        style: TextStyle(fontWeight: FontWeight.w800, color: Colors.black),
+        'Cỡ chữ',
+        style: TextStyle(
+            fontSize: 24, fontWeight: FontWeight.w700, color: Colors.black),
       ),
     );
   }
 
-  // ===== PREVIEW =====
   Widget _previewText() {
     return Text(
-      'Apps that support Dynamic Type will adjust to your preferred reading size below',
-      textAlign: TextAlign.center,
+      'Các ứng dụng hỗ trợ cỡ chữ động sẽ tự điều chỉnh theo kích thước chữ bạn chọn bên dưới',
+      textAlign: TextAlign.justify,
       style: TextStyle(
         fontSize: 14 * _scale,
         height: 1.5,
@@ -75,7 +72,6 @@ class _TextSizeScreenState extends State<TextSizeScreen> {
     );
   }
 
-  // ===== SLIDER =====
   Widget _slider() {
     return Row(
       children: [
@@ -96,9 +92,9 @@ class _TextSizeScreenState extends State<TextSizeScreen> {
     );
   }
 
-  // ===== ACTION =====
+  // ===== Update =====
   void _onChanged(double v) {
     setState(() => _scale = v);
-    AppSettings.textScale.value = v; // 🔥 update toàn app
+    AppSettings.textScale.value = v;
   }
 }

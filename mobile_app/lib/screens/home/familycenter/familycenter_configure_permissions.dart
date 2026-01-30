@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:Care_AI/screens/home/home.dart';
-import 'package:Care_AI/screens/home/decive/note.dart';
-import 'package:Care_AI/screens/home/history/history_screen.dart';
 import 'familycenter_health_data.dart';
 import 'familycenter_conversation.dart';
 
 class ConfigurePermissionsScreen extends StatelessWidget {
   const ConfigurePermissionsScreen({super.key});
 
-  // ===== CONSTANTS =====
-  static const Color _blue = Color(0xFF1F6BFF);
-  static const Color _bg = Color(0xFFF3F5F9);
+  static const Color _blue = Color(0xFF1877F2);
+  static const Color _bg = Color(0xFFF6F6F6);
 
   @override
   Widget build(BuildContext context) {
@@ -19,55 +15,11 @@ class ConfigurePermissionsScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            _header(),
             _titleBar(context),
             Expanded(child: _content(context)),
           ],
         ),
       ),
-      bottomNavigationBar: _bottomNav(context),
-    );
-  }
-
-  // ================= HEADER =================
-
-  Widget _header() {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(18, 14, 18, 12),
-          child: Row(
-            children: [
-              const Text(
-                'Care AI',
-                style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.w800,
-                  color: Color.fromARGB(255, 31, 65, 187),
-                ),
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: _blue.withOpacity(.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Icon(Icons.auto_awesome, color: _blue, size: 18),
-              ),
-              const SizedBox(width: 12),
-              const Icon(Icons.notifications_none),
-              const SizedBox(width: 12),
-              const Icon(Icons.settings_outlined),
-            ],
-          ),
-        ),
-        Container(
-          height: 1,
-          width: double.infinity,
-          color: Colors.black.withOpacity(0.08),
-        ),
-      ],
     );
   }
 
@@ -84,7 +36,7 @@ class ConfigurePermissionsScreen extends StatelessWidget {
           const Expanded(
             child: Center(
               child: Text(
-                'Configure Permissions',
+                'Thiết lập quyền',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
@@ -105,9 +57,9 @@ class ConfigurePermissionsScreen extends StatelessWidget {
       children: [
         _permissionCard(
           icon: Icons.chat_bubble_outline,
-          title: 'Conversation History',
-          desc: 'Select which conversations you want to share',
-          buttonText: 'Select Conversations',
+          title: 'Lịch sử trò chuyện',
+          desc: 'Chọn những cuộc trò chuyện bạn muốn chia sẻ',
+          buttonText: 'Chọn cuộc trò chuyện',
           onPressed: () {
             Navigator.push(
               context,
@@ -121,9 +73,9 @@ class ConfigurePermissionsScreen extends StatelessWidget {
         _permissionCard(
           icon: Icons.favorite,
           iconColor: Colors.redAccent,
-          title: 'Basic Health Data',
-          desc: 'Share essential health information with your caregiver',
-          buttonText: 'Select Health Data',
+          title: 'Dữ liệu sức khỏe cơ bản',
+          desc: 'Chia sẻ các thông tin sức khỏe quan trọng với người chăm sóc',
+          buttonText: 'Chọn dữ liệu sức khỏe',
           onPressed: () {
             Navigator.push(
               context,
@@ -219,41 +171,6 @@ class ConfigurePermissionsScreen extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  // ================= BOTTOM NAV =================
-  Widget _bottomNav(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: 1,
-      selectedItemColor: _blue,
-      unselectedItemColor: Colors.grey,
-      type: BottomNavigationBarType.fixed,
-      onTap: (index) {
-        if (index == 0) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const HomeScreen()),
-          );
-        } else if (index == 2) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const DeviceScreen()),
-          );
-        } else if (index == 3) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const HistoryScreen()),
-          );
-        }
-      },
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'Home'),
-        BottomNavigationBarItem(
-            icon: Icon(Icons.group_outlined), label: 'Family Center'),
-        BottomNavigationBarItem(icon: Icon(Icons.graphic_eq), label: 'Device'),
-        BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
-      ],
     );
   }
 }

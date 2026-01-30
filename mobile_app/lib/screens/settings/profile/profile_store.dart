@@ -7,8 +7,8 @@ class UserProfile {
   final String gender;
   final String height;
   final String weight;
-  final String phone;   // ✅ thêm
-  final String email;   // ✅ thêm
+  final String phone;   
+  final String email;   
   final String address; 
   final File? avatarFile;
 
@@ -18,8 +18,8 @@ class UserProfile {
     required this.gender,
     required this.height,
     required this.weight,
-    required this.phone,    // ✅ thêm
-    required this.email,    // ✅ thêm
+    required this.phone,    
+    required this.email,  
     required this.address,
     this.avatarFile,
   });

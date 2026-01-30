@@ -15,8 +15,8 @@ class ChatDetailScreen extends StatefulWidget {
 }
 
 class _ChatDetailScreenState extends State<ChatDetailScreen> {
-  static const Color _blue = Color(0xFF1F6BFF);
-  static const Color _bg = Color(0xFFF3F5F9);
+  static const Color _blue = Color(0xFF1877F2);
+  static const Color _bg = Color(0xFFF6F6F6);
 
   final FocusNode _inputFocus = FocusNode();
   bool _isFocused = false;
@@ -44,56 +44,12 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            _header(),
             _chatHeader(),
             Expanded(child: _chatBody()),
             _inputBar(),
           ],
         ),
       ),
-    );
-  }
-
-  // ================= HEADER =================
-  Widget _header() {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(18, 14, 18, 10),
-          child: Row(
-            children: [
-              const Text(
-                'Care AI',
-                style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.w800,
-                  color: Color.fromARGB(255, 31, 65, 187),
-                ),
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: _blue.withOpacity(.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Icon(Icons.auto_awesome, color: _blue, size: 18),
-              ),
-              const SizedBox(width: 12),
-              const Icon(Icons.notifications_none),
-              const SizedBox(width: 12),
-              const Icon(Icons.settings_outlined),
-            ],
-          ),
-        ),
-
-        // Divider
-        Container(
-          height: 1,
-          width: double.infinity,
-          color: Colors.black.withOpacity(0.08),
-        ),
-      ],
     );
   }
 
@@ -224,7 +180,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
             child: TextField(
               focusNode: _inputFocus,
               decoration: InputDecoration(
-                hintText: _isFocused ? null : 'Ask anything...',
+                hintText: _isFocused ? null : 'Hỏi bất cứ điều gì...',
                 filled: true,
                 fillColor: _bg,
                 contentPadding:

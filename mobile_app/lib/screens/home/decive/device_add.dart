@@ -4,145 +4,113 @@ import 'device_connect.dart';
 class AddDeviceScreen extends StatelessWidget {
   const AddDeviceScreen({super.key});
 
-  static const blue = Color(0xFF1F6BFF);
+  static const Color blue = Color(0xFF1877F2);
+  static const Color background = Color(0xFFF6F6F6);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: background,
       body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            // ===== HEADER =====
+            // ===== TITLE BAR =====
             Padding(
-              padding: const EdgeInsets.fromLTRB(18, 14, 18, 12),
-              child: Row(
+              padding: const EdgeInsets.fromLTRB(12, 16, 12, 12),
+              child: Stack(
+                alignment: Alignment.center,
                 children: [
-                  const Text(
-                    'Care AI',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w800,
-                      color: Color.fromARGB(255, 13, 69, 159),
-                    ),
-                  ),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: blue.withOpacity(.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child:
-                        const Icon(Icons.auto_awesome, color: blue, size: 18),
-                  ),
-                  const SizedBox(width: 12),
-                  const Icon(Icons.notifications_none, size: 22),
-                  const SizedBox(width: 12),
-                  const Icon(Icons.settings_outlined, size: 22),
-                ],
-              ),
-            ),
-            Container(
-              height: 1,
-              width: double.infinity,
-              color: Colors.black.withOpacity(0.08),
-            ),
-
-            Transform.translate(
-              offset: const Offset(0, -12),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(12, 20, 12, 20),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: IconButton(
-                        icon: const Icon(
-                          Icons.arrow_back_ios,
-                          size: 20,
-                          color: Colors.black87,
-                        ),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ),
-                    const Text(
-                      'Device',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back_ios,
+                        size: 20,
                         color: Colors.black87,
                       ),
+                      onPressed: () => Navigator.pop(context),
                     ),
-                  ],
-                ),
+                  ),
+                  const Text(
+                    'Thiết bị',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
               ),
             ),
 
             Expanded(
-              child: Transform.translate(
-                offset: const Offset(0, -32),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 30),
-                    const Text(
-                      'Bluetooth scanning',
-                      style: TextStyle(
-                        fontSize: 36,
-                        fontWeight: FontWeight.w800,
-                        color: blue,
-                      ),
+              child: Column(
+                children: [
+                  const SizedBox(height: 20),
+
+                  // ===== TITLE =====
+                  const Text(
+                    'Đang quét Bluetooth',
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w800,
+                      color: blue,
                     ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Make sure your device is nearby and',
-                      style: TextStyle(fontSize: 14, color: Colors.black54),
-                      textAlign: TextAlign.center,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Hãy đảm bảo thiết bị của bạn ở gần',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.black54,
                     ),
-                    const Text(
-                      'discoverable',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF1F6BFF),
-                        decoration: TextDecoration.underline,
-                      ),
-                      textAlign: TextAlign.center,
+                    textAlign: TextAlign.center,
+                  ),
+                  const Text(
+                    'và đang bật chế độ hiển thị',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: blue,
+                      decoration: TextDecoration.underline,
                     ),
-                    const SizedBox(height: 30),
-                    const CircularProgressIndicator(
-                      color: Colors.grey,
-                      strokeWidth: 2,
+                    textAlign: TextAlign.center,
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  // ===== LOADING =====
+                  const CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.grey,
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // ===== DEVICE LIST =====
+                  Expanded(
+                    child: ListView.separated(
+                      padding: const EdgeInsets.symmetric(horizontal: 18),
+                      itemCount: 1,
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (context, index) {
+                        return _deviceCard(
+                          name: 'Apple Watch (Demo)',
+                          mac: '23:12:D1:E3:12:18',
+                          battery: 100,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const ConnectDeviceScreen(),
+                              ),
+                            );
+                          },
+                        );
+                      },
                     ),
-                    const SizedBox(height: 40),
-                    Expanded(
-                      child: ListView.separated(
-                        padding: const EdgeInsets.symmetric(horizontal: 18),
-                        itemCount: 1,
-                        separatorBuilder: (_, __) => const SizedBox(height: 12),
-                        itemBuilder: (context, index) {
-                          return _deviceCard(
-                            name: 'Apple Watch Series Demo',
-                            mac: '23:12:D1:E3:12:18',
-                            battery: 100,
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const ConnectDeviceScreen(),
-                                ),
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -151,12 +119,15 @@ class AddDeviceScreen extends StatelessWidget {
     );
   }
 
+  // ===== DEVICE CARD =====
   static Widget _deviceCard({
     required String name,
     required String mac,
     required int battery,
     VoidCallback? onTap,
   }) {
+    final bool batteryOk = battery > 20;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -166,16 +137,19 @@ class AddDeviceScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              spreadRadius: 1,
-              blurRadius: 5,
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 6,
               offset: const Offset(0, 3),
             ),
           ],
         ),
         child: Row(
           children: [
-            const Icon(Icons.watch, size: 30, color: Colors.black54),
+            const Icon(
+              Icons.watch,
+              size: 32,
+              color: Colors.black54,
+            ),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
@@ -192,7 +166,10 @@ class AddDeviceScreen extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     mac,
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
+                    ),
                   ),
                 ],
               ),
@@ -201,7 +178,7 @@ class AddDeviceScreen extends StatelessWidget {
               width: 10,
               height: 10,
               decoration: BoxDecoration(
-                color: battery > 20 ? Colors.green : Colors.red,
+                color: batteryOk ? Colors.green : Colors.red,
                 shape: BoxShape.circle,
               ),
             ),
@@ -211,7 +188,7 @@ class AddDeviceScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: battery > 20 ? Colors.green : Colors.red,
+                color: batteryOk ? Colors.green : Colors.red,
               ),
             ),
           ],

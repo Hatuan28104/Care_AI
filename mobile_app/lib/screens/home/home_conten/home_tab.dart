@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'digital_human.dart';
-import 'premium.dart';
 import 'chat.dart';
 import 'data/basic_health_data.dart';
 import 'data/activity_data.dart';
@@ -11,33 +10,33 @@ class HomeTab extends StatelessWidget {
 
   static final List<Map<String, String>> _humans = [
     {
-      'name': 'Luna - Nurse',
-      'desc': 'Provides compassionate care and medical support.',
+      'name': 'Luna – Y tá',
+      'desc': 'Hỗ trợ chăm sóc tận tình và tư vấn y tế.',
       'img': 'assets/images/Luna.png',
     },
     {
-      'name': 'Anna - Lawyer',
-      'desc': 'Gives legal advice and document assistance.',
+      'name': 'Anna – Luật sư',
+      'desc': 'Tư vấn pháp lý và hỗ trợ giấy tờ.',
       'img': 'assets/images/Anna.png',
     },
     {
-      'name': 'Nutrition Expert',
-      'desc': 'Customized meal plans and nutrition advice.',
+      'name': 'Chuyên gia dinh dưỡng',
+      'desc': 'Lập thực đơn và tư vấn dinh dưỡng phù hợp.',
       'img': 'assets/images/Nutrition.png',
     },
     {
-      'name': 'Zodiac Expert',
-      'desc': 'Personalized insights based on your zodiac sign.',
+      'name': 'Chuyên gia cung hoàng đạo',
+      'desc': 'Tư vấn cá nhân dựa trên cung hoàng đạo.',
       'img': 'assets/images/Zodiac.png',
     },
     {
-      'name': 'Fitness Trainer',
-      'desc': 'Exercises adapted to your health condition.',
+      'name': 'Huấn luyện viên thể chất',
+      'desc': 'Bài tập phù hợp với tình trạng sức khỏe.',
       'img': 'assets/images/Fitness.png',
     },
     {
-      'name': 'Mindfulness Mentor',
-      'desc': 'Meditation and breathing guidance.',
+      'name': 'Hướng dẫn thiền',
+      'desc': 'Hướng dẫn thiền định và hít thở thư giãn.',
       'img': 'assets/images/Mindfulness.png',
     },
   ];
@@ -46,79 +45,20 @@ class HomeTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const SizedBox(height: 10),
-        _premiumBanner(context),
-        const SizedBox(height: 18),
+        const SizedBox(height: 20),
         Expanded(child: _content(context)),
       ],
     );
   }
 
-  // ===== PREMIUM BANNER (FIX icon PRO bị viền/nền trắng) =====
-  Widget _premiumBanner(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 18),
-      child: GestureDetector(
-        onTap: () => _goPremium(context),
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF1E40AF), Color(0xFF3B82F6)],
-            ),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                ),
-                padding: const EdgeInsets.all(2),
-                child: ClipOval(
-                  child: Image.asset(
-                    'assets/images/pro.png',
-                    fit: BoxFit.contain,
-                    filterQuality: FilterQuality.high,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 6),
-              const Expanded(
-                child: Text(
-                  "Gói dùng thử Premium 3 ngày của bạn chưa được kích hoạt. Nhấp vào đây để kích hoạt.",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w500,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 2),
-              const Icon(
-                Icons.arrow_forward_ios,
-                color: Colors.white,
-                size: 12,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ===== CONTENT =====
   Widget _content(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 18),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _sectionHeader(
-            title: 'Digital Human',
+            title: 'Nhân vật số',
             action: () => _go(context, const DigitalHumanAllScreen()),
           ),
           const SizedBox(height: 12),
@@ -126,7 +66,7 @@ class HomeTab extends StatelessWidget {
           const SizedBox(height: 22),
           const Text(
             'Danh mục sức khỏe',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 12),
           _categoryItem(
@@ -154,7 +94,6 @@ class HomeTab extends StatelessWidget {
     );
   }
 
-  // ===== DIGITAL HUMAN LIST =====
   Widget _digitalHumanList() {
     return SizedBox(
       height: 230,
@@ -168,13 +107,12 @@ class HomeTab extends StatelessWidget {
     );
   }
 
-  // ===== COMPONENTS =====
   Widget _sectionHeader({required String title, VoidCallback? action}) {
     return Row(
       children: [
         Text(
           title,
-          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
         ),
         const Spacer(),
         if (action != null)
@@ -184,7 +122,7 @@ class HomeTab extends StatelessWidget {
               'Tất cả',
               style: TextStyle(
                   color: Color(0xFF1877F2),
-                  fontSize: 16,
+                  fontSize: 15,
                   fontWeight: FontWeight.w500),
             ),
           ),
@@ -192,7 +130,6 @@ class HomeTab extends StatelessWidget {
     );
   }
 
-  // ✅ FIX: asset image + bo góc chuẩn, không tràn
   Widget _humanCard(BuildContext context, Map<String, String> h) {
     return GestureDetector(
       onTap: () {
@@ -200,10 +137,10 @@ class HomeTab extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder: (_) => ChatScreen(
-              name: h['name']!, // Luna / Anna / Nutrition / ...
-              role: h['desc']!, // mô tả
-              image: h['img']!, // avatar
-              intro: "Hello 👋 How can I help you today?",
+              name: h['name']!,
+              role: h['desc']!,
+              image: h['img']!,
+              intro: "Xin chào 👋 Tôi có thể hỗ trợ bạn hôm nay như thế nào?",
             ),
           ),
         );
@@ -298,18 +235,7 @@ class HomeTab extends StatelessWidget {
     );
   }
 
-  // ===== NAV HELPERS =====
   static void _go(BuildContext context, Widget page) {
     Navigator.push(context, MaterialPageRoute(builder: (_) => page));
-  }
-
-  static void _goPremium(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        fullscreenDialog: true,
-        builder: (_) => const PremiumScreen(),
-      ),
-    );
   }
 }

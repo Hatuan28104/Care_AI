@@ -30,7 +30,7 @@ class ActivityDetailScreen extends StatefulWidget {
 }
 
 class _ActivityDetailScreenState extends State<ActivityDetailScreen> {
-  static const _bg = Color(0xFFF3F5F9);
+  static const _bg = Color(0xFFF6F6F6);
 
   ActivityRange _range = ActivityRange.h;
   late List<double> _values;
@@ -66,8 +66,6 @@ class _ActivityDetailScreenState extends State<ActivityDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final latest = _values.isNotEmpty ? _values.last : 0.0;
-
     return Scaffold(
       backgroundColor: _bg,
       body: SafeArea(
@@ -108,7 +106,7 @@ class _ActivityDetailScreenState extends State<ActivityDetailScreen> {
                 widget.title,
                 style: const TextStyle(
                   fontSize: 24,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),

@@ -4,73 +4,65 @@ import 'package:Care_AI/screens/home/decive/device_syncing.dart';
 class AllowDeviceScreen extends StatelessWidget {
   const AllowDeviceScreen({super.key});
 
-  static const blue = Color(0xFF1F6BFF);
+  static const Color blue = Color(0xFF1877F2);
+  static const Color background = Color(0xFFF6F6F6);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: background,
       body: SafeArea(
         child: Column(
           children: [
-            // ===== HEADER =====
+            // ===== TITLE BAR =====
             Padding(
-              padding: const EdgeInsets.fromLTRB(18, 14, 18, 12),
+              padding: const EdgeInsets.fromLTRB(12, 16, 12, 12),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  IconButton(
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    icon: const Icon(
+                      Icons.arrow_back_ios,
+                      size: 20,
+                      color: Colors.black87,
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                  ),
                   const Text(
-                    'Care AI',
+                    'Back',
                     style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w800,
-                      color: Color.fromARGB(255, 13, 69, 159),
+                      fontSize: 18,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xFF1877F2),
                     ),
                   ),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: blue.withOpacity(.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child:
-                        const Icon(Icons.auto_awesome, color: blue, size: 18),
-                  ),
-                  const SizedBox(width: 12),
-                  const Icon(Icons.notifications_none, size: 22),
-                  const SizedBox(width: 12),
-                  const Icon(Icons.settings_outlined, size: 22),
                 ],
               ),
             ),
-            Container(
-              height: 1,
-              width: double.infinity,
-              color: Colors.black.withOpacity(0.08),
-            ),
 
-            const SizedBox(height: 14),
-
-            // ===== TITLE =====
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 22),
+            // ===== MAIN CONTENT =====
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 22),
               child: Column(
-                children: [
+                children: const [
                   Text(
-                    'Get Notifications\nAbout Your Health',
+                    'Nhận thông báo\nvề sức khỏe của bạn',
                     style: TextStyle(
-                      fontSize: 36,
+                      fontSize: 32,
                       fontWeight: FontWeight.w800,
-                      color: Color(0xFF1F6BFF),
+                      color: blue,
                       height: 1.2,
                     ),
                     textAlign: TextAlign.center,
                   ),
                   SizedBox(height: 10),
                   Text(
-                    "Receive a notification when there's\nsomething you need to know.",
+                    'Nhận thông báo khi có điều quan trọng\nmà bạn cần biết.',
                     style: TextStyle(
-                      fontSize: 12.5,
+                      fontSize: 13,
                       color: Colors.black54,
                       height: 1.35,
                     ),
@@ -80,11 +72,11 @@ class AllowDeviceScreen extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 26),
+            const SizedBox(height: 30),
 
-            // ===== CARD (ĐẨY XUỐNG) =====
+            // ===== INFO CARD =====
             Transform.translate(
-              offset: const Offset(0, 60),
+              offset: const Offset(0, 40),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 22),
                 child: Container(
@@ -92,6 +84,7 @@ class AllowDeviceScreen extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.black12),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.06),
@@ -99,7 +92,6 @@ class AllowDeviceScreen extends StatelessWidget {
                         offset: const Offset(0, 8),
                       ),
                     ],
-                    border: Border.all(color: Colors.black12),
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -109,7 +101,7 @@ class AllowDeviceScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Health Alerts',
+                              'Cảnh báo sức khỏe',
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w800,
@@ -117,13 +109,13 @@ class AllowDeviceScreen extends StatelessWidget {
                             ),
                             SizedBox(height: 8),
                             Text(
-                              'Your smartwatch can warn you if unusual\n'
-                              'patterns are detected in your heart rate,\n'
-                              'blood pressure, or other vital signs. These\n'
-                              'notifications can help you take timely action\n'
-                              'or inform caregivers when needed.',
+                              'Đồng hồ thông minh có thể cảnh báo khi phát '
+                              'hiện các dấu hiệu bất thường về nhịp tim, '
+                              'huyết áp hoặc các chỉ số quan trọng khác.\n\n'
+                              'Những thông báo này giúp bạn kịp thời xử lý '
+                              'hoặc thông báo cho người thân khi cần thiết.',
                               style: TextStyle(
-                                fontSize: 12.3,
+                                fontSize: 12.5,
                                 color: Colors.black54,
                                 height: 1.35,
                               ),
@@ -139,8 +131,11 @@ class AllowDeviceScreen extends StatelessWidget {
                           color: blue,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.check,
-                            size: 14, color: Colors.white),
+                        child: const Icon(
+                          Icons.check,
+                          size: 14,
+                          color: Colors.white,
+                        ),
                       ),
                     ],
                   ),
@@ -150,8 +145,9 @@ class AllowDeviceScreen extends StatelessWidget {
 
             const Spacer(),
 
+            // ===== ACTION BUTTONS =====
             Transform.translate(
-              offset: const Offset(0, -50),
+              offset: const Offset(0, -40),
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(22, 0, 22, 26),
                 child: Row(
@@ -177,8 +173,10 @@ class AllowDeviceScreen extends StatelessWidget {
                             ),
                           ),
                           child: const Text(
-                            'Not now',
-                            style: TextStyle(fontWeight: FontWeight.w700),
+                            'Để sau',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
                       ),
@@ -205,8 +203,10 @@ class AllowDeviceScreen extends StatelessWidget {
                             ),
                           ),
                           child: const Text(
-                            'Allow',
-                            style: TextStyle(fontWeight: FontWeight.w800),
+                            'Cho phép',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                            ),
                           ),
                         ),
                       ),

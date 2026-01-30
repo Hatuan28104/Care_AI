@@ -8,51 +8,47 @@ class LanguageScreen extends StatefulWidget {
 }
 
 class _LanguageScreenState extends State<LanguageScreen> {
-  // ===== THEME =====
-  static const _bg = Color.fromARGB(255, 255, 255, 255);
-  static const _primary = Color(0xFF1F6BFF);
+  static const _primary = Color(0xFF1877F2);
   static const _border = Color(0xFFD6DAE3);
 
-  // ===== STATE =====
   final _searchCtrl = TextEditingController();
-  String _selected = 'English';
+  String _selected = 'Tiếng Việt';
   String _query = '';
   bool _dirty = false;
 
   static const List<Map<String, String>> _languages = [
-    {'name': 'English', 'code': 'en', 'flag': '🇺🇸'},
-    {'name': 'Vietnamese', 'code': 'vi', 'flag': '🇻🇳'},
-    {'name': 'German', 'code': 'de', 'flag': '🇩🇪'},
-    {'name': 'French', 'code': 'fr', 'flag': '🇫🇷'},
-    {'name': 'Spanish', 'code': 'es', 'flag': '🇪🇸'},
-    {'name': 'Italian', 'code': 'it', 'flag': '🇮🇹'},
-    {'name': 'Portuguese', 'code': 'pt', 'flag': '🇵🇹'},
-    {'name': 'Russian', 'code': 'ru', 'flag': '🇷🇺'},
-    {'name': 'Chinese (Simplified)', 'code': 'zh', 'flag': '🇨🇳'},
-    {'name': 'Chinese (Traditional)', 'code': 'zh-Hant', 'flag': '🇹🇼'},
-    {'name': 'Japanese', 'code': 'ja', 'flag': '🇯🇵'},
-    {'name': 'Korean', 'code': 'ko', 'flag': '🇰🇷'},
-    {'name': 'Thai', 'code': 'th', 'flag': '🇹🇭'},
-    {'name': 'Indonesian', 'code': 'id', 'flag': '🇮🇩'},
-    {'name': 'Malay', 'code': 'ms', 'flag': '🇲🇾'},
-    {'name': 'Filipino', 'code': 'fil', 'flag': '🇵🇭'},
-    {'name': 'Hindi', 'code': 'hi', 'flag': '🇮🇳'},
-    {'name': 'Arabic', 'code': 'ar', 'flag': '🇸🇦'},
-    {'name': 'Turkish', 'code': 'tr', 'flag': '🇹🇷'},
-    {'name': 'Dutch', 'code': 'nl', 'flag': '🇳🇱'},
-    {'name': 'Swedish', 'code': 'sv', 'flag': '🇸🇪'},
-    {'name': 'Norwegian', 'code': 'no', 'flag': '🇳🇴'},
-    {'name': 'Danish', 'code': 'da', 'flag': '🇩🇰'},
-    {'name': 'Finnish', 'code': 'fi', 'flag': '🇫🇮'},
-    {'name': 'Polish', 'code': 'pl', 'flag': '🇵🇱'},
-    {'name': 'Ukrainian', 'code': 'uk', 'flag': '🇺🇦'},
-    {'name': 'Czech', 'code': 'cs', 'flag': '🇨🇿'},
-    {'name': 'Hungarian', 'code': 'hu', 'flag': '🇭🇺'},
-    {'name': 'Romanian', 'code': 'ro', 'flag': '🇷🇴'},
-    {'name': 'Greek', 'code': 'el', 'flag': '🇬🇷'},
-    {'name': 'Hebrew', 'code': 'he', 'flag': '🇮🇱'},
+    {'name': 'Tiếng Anh', 'code': 'en', 'flag': '🇺🇸'},
+    {'name': 'Tiếng Việt', 'code': 'vi', 'flag': '🇻🇳'},
+    {'name': 'Tiếng Đức', 'code': 'de', 'flag': '🇩🇪'},
+    {'name': 'Tiếng Pháp', 'code': 'fr', 'flag': '🇫🇷'},
+    {'name': 'Tiếng Tây Ban Nha', 'code': 'es', 'flag': '🇪🇸'},
+    {'name': 'Tiếng Ý', 'code': 'it', 'flag': '🇮🇹'},
+    {'name': 'Tiếng Bồ Đào Nha', 'code': 'pt', 'flag': '🇵🇹'},
+    {'name': 'Tiếng Nga', 'code': 'ru', 'flag': '🇷🇺'},
+    {'name': 'Tiếng Trung (Giản thể)', 'code': 'zh', 'flag': '🇨🇳'},
+    {'name': 'Tiếng Trung (Phồn thể)', 'code': 'zh-Hant', 'flag': '🇹🇼'},
+    {'name': 'Tiếng Nhật', 'code': 'ja', 'flag': '🇯🇵'},
+    {'name': 'Tiếng Hàn', 'code': 'ko', 'flag': '🇰🇷'},
+    {'name': 'Tiếng Thái', 'code': 'th', 'flag': '🇹🇭'},
+    {'name': 'Tiếng Indonesia', 'code': 'id', 'flag': '🇮🇩'},
+    {'name': 'Tiếng Mã Lai', 'code': 'ms', 'flag': '🇲🇾'},
+    {'name': 'Tiếng Filipino', 'code': 'fil', 'flag': '🇵🇭'},
+    {'name': 'Tiếng Hindi', 'code': 'hi', 'flag': '🇮🇳'},
+    {'name': 'Tiếng Ả Rập', 'code': 'ar', 'flag': '🇸🇦'},
+    {'name': 'Tiếng Thổ Nhĩ Kỳ', 'code': 'tr', 'flag': '🇹🇷'},
+    {'name': 'Tiếng Hà Lan', 'code': 'nl', 'flag': '🇳🇱'},
+    {'name': 'Tiếng Thụy Điển', 'code': 'sv', 'flag': '🇸🇪'},
+    {'name': 'Tiếng Na Uy', 'code': 'no', 'flag': '🇳🇴'},
+    {'name': 'Tiếng Đan Mạch', 'code': 'da', 'flag': '🇩🇰'},
+    {'name': 'Tiếng Phần Lan', 'code': 'fi', 'flag': '🇫🇮'},
+    {'name': 'Tiếng Ba Lan', 'code': 'pl', 'flag': '🇵🇱'},
+    {'name': 'Tiếng Ukraina', 'code': 'uk', 'flag': '🇺🇦'},
+    {'name': 'Tiếng Séc', 'code': 'cs', 'flag': '🇨🇿'},
+    {'name': 'Tiếng Hungary', 'code': 'hu', 'flag': '🇭🇺'},
+    {'name': 'Tiếng Romania', 'code': 'ro', 'flag': '🇷🇴'},
+    {'name': 'Tiếng Hy Lạp', 'code': 'el', 'flag': '🇬🇷'},
+    {'name': 'Tiếng Do Thái', 'code': 'he', 'flag': '🇮🇱'},
   ];
-
   @override
   void dispose() {
     _searchCtrl.dispose();
@@ -64,7 +60,7 @@ class _LanguageScreenState extends State<LanguageScreen> {
     final list = _filteredLanguages();
 
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: Color(0xFFF6F6F6),
       appBar: _appBar(context),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(28, 14, 28, 24),
@@ -72,7 +68,7 @@ class _LanguageScreenState extends State<LanguageScreen> {
           _searchBar(),
           const SizedBox(height: 12),
           const Text(
-            'Select Language',
+            'Chọn ngôn ngữ',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
@@ -87,7 +83,6 @@ class _LanguageScreenState extends State<LanguageScreen> {
     );
   }
 
-  // ===== APP BAR =====
   PreferredSizeWidget _appBar(BuildContext context) {
     return AppBar(
       backgroundColor: Colors.transparent,
@@ -99,9 +94,9 @@ class _LanguageScreenState extends State<LanguageScreen> {
         onPressed: () => Navigator.pop(context),
       ),
       title: const Text(
-        'Language',
+        'Ngôn ngữ',
         style: TextStyle(
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w700,
           fontSize: 24,
           color: Colors.black,
         ),
@@ -122,7 +117,6 @@ class _LanguageScreenState extends State<LanguageScreen> {
     );
   }
 
-  // ===== SEARCH =====
   Widget _searchBar() {
     return Container(
       height: 45,
@@ -144,7 +138,7 @@ class _LanguageScreenState extends State<LanguageScreen> {
               textAlignVertical: TextAlignVertical.center,
               style: const TextStyle(fontSize: 14),
               decoration: const InputDecoration(
-                hintText: 'Search',
+                hintText: 'Tìm kiếm',
                 border: InputBorder.none,
                 isDense: true,
                 contentPadding: EdgeInsets.zero,
@@ -166,7 +160,6 @@ class _LanguageScreenState extends State<LanguageScreen> {
     }).toList();
   }
 
-  // ===== ITEM UI (card giống ảnh) =====
   Widget _languageCard(Map<String, String> lang) {
     final name = lang['name'] ?? '';
     final flag = lang['flag'] ?? '🏳️';
@@ -197,7 +190,6 @@ class _LanguageScreenState extends State<LanguageScreen> {
                 ),
               ),
             ),
-            // radio tròn bên phải
             Container(
               width: 20,
               height: 20,
@@ -237,11 +229,9 @@ class _LanguageScreenState extends State<LanguageScreen> {
   }
 
   void _onSave() {
-    // TODO: lưu thật vào AppSettings / SharedPreferences / Provider...
-    // ví dụ demo:
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Saved: $_selected'),
+        content: Text('Lưu: $_selected'),
         duration: const Duration(seconds: 1),
       ),
     );

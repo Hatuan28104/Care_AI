@@ -4,37 +4,35 @@ import 'chat.dart';
 class DigitalHumanAllScreen extends StatelessWidget {
   const DigitalHumanAllScreen({super.key});
 
-  static const _bg = Color.fromARGB(255, 255, 255, 255);
-
   static const _humans = [
     {
-      'name': 'Luna - Nurse',
-      'desc': 'Provides compassionate care and medical support.',
+      'name': 'Luna – Y tá',
+      'desc': 'Hỗ trợ chăm sóc tận tình và tư vấn y tế.',
       'img': 'assets/images/Luna.png',
     },
     {
-      'name': 'Anna - Lawyer',
-      'desc': 'Gives legal advice and document assistance.',
+      'name': 'Anna – Luật sư',
+      'desc': 'Tư vấn pháp lý và hỗ trợ giấy tờ.',
       'img': 'assets/images/Anna.png',
     },
     {
-      'name': 'Nutrition Expert',
-      'desc': 'Customized meal plans and nutrition advice.',
+      'name': 'Chuyên gia dinh dưỡng',
+      'desc': 'Lập thực đơn và tư vấn dinh dưỡng phù hợp.',
       'img': 'assets/images/Nutrition.png',
     },
     {
-      'name': 'Zodiac Expert',
-      'desc': 'Personalized insights based on your zodiac sign.',
+      'name': 'Chuyên gia cung hoàng đạo',
+      'desc': 'Tư vấn cá nhân dựa trên cung hoàng đạo.',
       'img': 'assets/images/Zodiac.png',
     },
     {
-      'name': 'Fitness Trainer',
-      'desc': 'Exercises adapted to your health condition.',
+      'name': 'Huấn luyện viên thể chất',
+      'desc': 'Bài tập phù hợp với tình trạng sức khỏe.',
       'img': 'assets/images/Fitness.png',
     },
     {
-      'name': 'Mindfulness Mentor',
-      'desc': 'Meditation and breathing guidance.',
+      'name': 'Hướng dẫn thiền',
+      'desc': 'Hướng dẫn thiền định và hít thở thư giãn.',
       'img': 'assets/images/Mindfulness.png',
     },
   ];
@@ -42,7 +40,7 @@ class DigitalHumanAllScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: Color(0xFFF6F6F6),
       appBar: _appBar(context),
       body: GridView.builder(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
@@ -72,9 +70,9 @@ class DigitalHumanAllScreen extends StatelessWidget {
         onPressed: () => Navigator.pop(context),
       ),
       title: const Text(
-        'Digital Human',
+        'Nhân vật số',
         style: TextStyle(
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w700,
           color: Colors.black,
         ),
       ),

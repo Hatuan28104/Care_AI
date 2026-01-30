@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-import 'premium.dart';
-import 'package:Care_AI/screens/settings/settings.dart';
-
 class ChatScreen extends StatefulWidget {
   final String name;
   final String role;
@@ -18,8 +15,8 @@ class ChatScreen extends StatefulWidget {
     required this.intro,
   });
 
-  static const _blue = Color(0xFF1F6BFF);
-  static const _bg = Color(0xFFF5F6FA);
+  static const _blue = Color(0xFF1877F2);
+  static const _bg = Color(0xFFF6F6F6);
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -74,7 +71,7 @@ class _ChatScreenState extends State<ChatScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.photo),
-              title: const Text("Photo"),
+              title: const Text("Ảnh"),
               onTap: () {
                 Navigator.pop(context);
                 _pickImage();
@@ -91,7 +88,7 @@ class _ChatScreenState extends State<ChatScreen> {
     final XFile? img = await _picker.pickImage(source: ImageSource.gallery);
     if (img != null) {
       setState(() {
-        _messages.add(_Msg("📷 Image selected", true));
+        _messages.add(_Msg("📷 Đã chọn ảnh", true));
       });
     }
   }
@@ -101,7 +98,7 @@ class _ChatScreenState extends State<ChatScreen> {
     setState(() => _isRecording = !_isRecording);
 
     if (!_isRecording) {
-      _messages.add(_Msg("🎤 Voice message", true));
+      _messages.add(_Msg("🎤 Tin nhắn thoại", true));
     }
   }
 
@@ -113,7 +110,6 @@ class _ChatScreenState extends State<ChatScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            _header(context),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.only(bottom: 20),
@@ -149,60 +145,6 @@ class _ChatScreenState extends State<ChatScreen> {
             color: m.isUser ? Colors.white : Colors.black,
           ),
         ),
-      ),
-    );
-  }
-
-  // ===== HEADER =====
-  Widget _header(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(18, 6, 18, 6),
-      child: Row(
-        children: [
-          const Text(
-            'Care AI',
-            style: TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.w800,
-              color: Color.fromARGB(255, 31, 65, 187),
-            ),
-          ),
-          const Spacer(),
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  fullscreenDialog: true,
-                  builder: (_) => const PremiumScreen(),
-                ),
-              );
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 4),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF3B82F6), Color(0xFF1E40AF)],
-                ),
-                borderRadius: BorderRadius.circular(40),
-              ),
-              child:
-                  const Icon(Icons.auto_awesome, color: Colors.white, size: 18),
-            ),
-          ),
-          const SizedBox(width: 12),
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const SettingsScreen(),
-                ),
-              );
-            },
-            child: const Icon(Icons.settings_outlined, size: 25),
-          ),
-        ],
       ),
     );
   }
@@ -261,7 +203,7 @@ class _ChatScreenState extends State<ChatScreen> {
             borderRadius: BorderRadius.circular(6),
           ),
           child: const Text(
-            "Hi, I'm Care AI 💙\nNice to meet you today. Would you like to share how you've been feeling lately?",
+            "Chào bạn, mình là Care AI 💙\nRất vui được gặp bạn hôm nay. Bạn có muốn chia sẻ gần đây bạn cảm thấy thế nào không?",
             style: TextStyle(fontSize: 15),
           ),
         ),
@@ -312,7 +254,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       controller: _controller,
                       onSubmitted: (_) => _send(),
                       decoration: const InputDecoration(
-                        hintText: "Ask anything...",
+                        hintText: "Hỏi bất cứ điều gì...",
                         border: InputBorder.none,
                         isDense: true,
                         contentPadding:

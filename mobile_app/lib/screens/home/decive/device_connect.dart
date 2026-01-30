@@ -10,7 +10,8 @@ class ConnectDeviceScreen extends StatefulWidget {
 }
 
 class _ConnectDeviceScreenState extends State<ConnectDeviceScreen> {
-  static const blue = Color(0xFF1F6BFF);
+  static const blue = Color(0xFF1877F2);
+  static const bg = Color(0xFFF6F6F6);
   Timer? _timer;
 
   @override
@@ -46,7 +47,7 @@ class _ConnectDeviceScreenState extends State<ConnectDeviceScreen> {
               children: [
                 const SizedBox(height: 14),
                 const Text(
-                  'Bluetooth Pairing Request',
+                  'Yêu cầu ghép đôi Bluetooth',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                   textAlign: TextAlign.center,
                 ),
@@ -54,9 +55,9 @@ class _ConnectDeviceScreenState extends State<ConnectDeviceScreen> {
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16),
                   child: Text(
-                    '“Apple Watch Series Demo” would like to pair with your iPhone. '
-                    'Confirm that this code is shown on “Apple Watch Series Demo”. '
-                    'Do not enter this code on any accessory.',
+                    '“Apple Watch Series Demo” muốn ghép đôi với iPhone của bạn. '
+                    'Vui lòng xác nhận mã này cũng hiển thị trên “Apple Watch Series Demo”. '
+                    'Không nhập mã này trên bất kỳ phụ kiện nào khác.',
                     style: TextStyle(fontSize: 12.5, height: 1.3),
                     textAlign: TextAlign.center,
                   ),
@@ -87,7 +88,7 @@ class _ConnectDeviceScreenState extends State<ConnectDeviceScreen> {
                           },
                           child: const Center(
                             child: Text(
-                              'Cancel',
+                              'Hủy',
                               style: TextStyle(
                                 fontSize: 20,
                                 color: Color(0xFF007AFF),
@@ -114,7 +115,7 @@ class _ConnectDeviceScreenState extends State<ConnectDeviceScreen> {
                           },
                           child: const Center(
                             child: Text(
-                              'Pair',
+                              'Ghép đôi',
                               style: TextStyle(
                                 fontSize: 20,
                                 color: Color(0xFF007AFF),
@@ -138,45 +139,11 @@ class _ConnectDeviceScreenState extends State<ConnectDeviceScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: bg,
       body: SafeArea(
         child: Column(
           children: [
-            // HEADER
-            Padding(
-              padding: const EdgeInsets.fromLTRB(18, 14, 18, 12),
-              child: Row(
-                children: [
-                  const Text(
-                    'Care AI',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w800,
-                      color: Color.fromARGB(255, 13, 69, 159),
-                    ),
-                  ),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: blue.withOpacity(.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child:
-                        const Icon(Icons.auto_awesome, color: blue, size: 18),
-                  ),
-                  const SizedBox(width: 12),
-                  const Icon(Icons.notifications_none, size: 22),
-                  const SizedBox(width: 12),
-                  const Icon(Icons.settings_outlined, size: 22),
-                ],
-              ),
-            ),
-            Container(
-              height: 1,
-              width: double.infinity,
-              color: Colors.black.withOpacity(0.08),
-            ),
+            // ❌ HEADER ĐÃ BỎ
 
             Transform.translate(
               offset: const Offset(0, -12),
@@ -188,13 +155,16 @@ class _ConnectDeviceScreenState extends State<ConnectDeviceScreen> {
                     Align(
                       alignment: Alignment.centerLeft,
                       child: IconButton(
-                        icon: const Icon(Icons.arrow_back_ios,
-                            size: 20, color: Colors.black87),
+                        icon: const Icon(
+                          Icons.arrow_back_ios,
+                          size: 20,
+                          color: Colors.black87,
+                        ),
                         onPressed: () => Navigator.pop(context),
                       ),
                     ),
                     const Text(
-                      'Device',
+                      'Thiết bị',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
@@ -207,7 +177,7 @@ class _ConnectDeviceScreenState extends State<ConnectDeviceScreen> {
 
             const SizedBox(height: 30),
             const Text(
-              'Connect device',
+              'Kết nối thiết bị',
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.w800,
@@ -233,7 +203,7 @@ class _ConnectDeviceScreenState extends State<ConnectDeviceScreen> {
             ),
             const SizedBox(height: 10),
             const Text(
-              'Connecting...',
+              'Đang kết nối...',
               style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
 

@@ -12,11 +12,8 @@ import 'help_support.dart';
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
-  // ===== CONSTANTS =====
-  static const _bg = Color.fromARGB(255, 255, 255, 255);
-  static const _blue = Color(0xFF1F6BFF);
+  static const _blue = Color(0xFF1877F2);
 
-  // ===== NAV =====
   static void _go(BuildContext context, Widget page) {
     Navigator.push(
       context,
@@ -24,11 +21,10 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  // ===== UI =====
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: Color(0xFFF6F6F6),
       appBar: _appBar(context),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -36,7 +32,6 @@ class SettingsScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ===== ACCOUNT =====
               _section(
                 'Tài khoản',
                 fontSize: 18,
@@ -53,8 +48,6 @@ class SettingsScreen extends StatelessWidget {
                   onTap: () => _go(context, const PrivacySecurityScreen()),
                 ),
               ]),
-
-              // ===== DISPLAY =====
               _section('Trưng bày'),
               _card([
                 _item(
@@ -70,8 +63,6 @@ class SettingsScreen extends StatelessWidget {
                   onTap: () => _go(context, const LanguageScreen()),
                 ),
               ]),
-
-              // ===== NOTIFICATIONS =====
               _section('Thông báo'),
               _card([
                 _switchItem(
@@ -85,8 +76,6 @@ class SettingsScreen extends StatelessWidget {
                   onTap: () => _go(context, const SoundVibrationScreen()),
                 ),
               ]),
-
-              // ===== DEVICE =====
               _section('Thiết bị'),
               _card([
                 _switchItem(
@@ -100,8 +89,6 @@ class SettingsScreen extends StatelessWidget {
                   notifier: AppSettings.syncDataOn,
                 ),
               ]),
-
-              // ===== SUPPORT =====
               _section('Hỗ trợ'),
               _card([
                 _item(
@@ -110,10 +97,7 @@ class SettingsScreen extends StatelessWidget {
                   onTap: () => _go(context, const HelpSupportScreen()),
                 ),
               ]),
-
               const SizedBox(height: 20),
-
-              // ===== LOG OUT =====
               _logoutButton(context),
             ],
           ),
@@ -122,7 +106,6 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  // ===== APP BAR =====
   PreferredSizeWidget _appBar(BuildContext context) {
     return AppBar(
       backgroundColor: Colors.transparent,
@@ -136,12 +119,11 @@ class SettingsScreen extends StatelessWidget {
       title: const Text(
         'Cài đặt',
         style: TextStyle(
-            fontWeight: FontWeight.w800, fontSize: 24, color: Colors.black),
+            fontWeight: FontWeight.w700, fontSize: 24, color: Colors.black),
       ),
     );
   }
 
-  // ===== SECTIONS =====
   Widget _section(
     String text, {
     double fontSize = 16,
@@ -169,7 +151,6 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  // ===== ITEMS =====
   Widget _item({
     required IconData icon,
     required String text,
@@ -204,10 +185,8 @@ class SettingsScreen extends StatelessWidget {
             text,
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),
-
-          // ✅ THU NHỎ SWITCH
           trailing: Transform.scale(
-            scale: 0.8, // 👈 chỉnh 0.75 – 0.85
+            scale: 0.8,
             child: Switch(
               value: value,
               onChanged: (v) => notifier.value = v,
@@ -249,12 +228,12 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  // ===== HELPERS =====
+  // ===== Text Size =====
   String _textSizeLabel(double scale) {
-    if (scale <= 0.8) return 'Small';
-    if (scale <= 0.9) return 'Default';
-    if (scale <= 1) return 'Medium';
-    if (scale <= 1.1) return 'Large';
-    return 'Extra Large';
+    if (scale <= 0.8) return 'Nhỏ';
+    if (scale <= 1.0) return 'Mặc định';
+    if (scale <= 1.2) return 'Vừa';
+    if (scale <= 1.4) return 'Lớn';
+    return 'Mặc định';
   }
 }

@@ -1,234 +1,61 @@
 import 'package:flutter/material.dart';
-import 'familycenter_dependent.dart';
 import 'familycenter_guardian_add.dart';
 import 'familycenter_guardian_profile.dart';
-import 'package:Care_AI/screens/home/home.dart';
-import 'package:Care_AI/screens/home/decive/note.dart';
-import 'package:Care_AI/screens/home/history/history_screen.dart';
 
 class MyGuardiansScreen extends StatelessWidget {
   const MyGuardiansScreen({super.key});
 
-  // ===== CONSTANTS =====
-  static const Color _blue = Color(0xFF1F6BFF);
-  static const Color _bg = Color(0xFFF3F5F9);
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _bg,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _header(),
-            _tabs(context),
-            _addButton(context),
-            Expanded(child: _content()),
-          ],
-        ),
-      ),
-      bottomNavigationBar: _bottomNav(context),
-    );
-  }
-
-  // ================= HEADER =================
-  Widget _header() {
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(18, 14, 18, 12),
-          child: Row(
-            children: [
-              const Text(
-                'Care AI',
-                style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.w800,
-                  color: Color.fromARGB(255, 31, 65, 187),
-                ),
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: _blue.withOpacity(.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Icon(Icons.auto_awesome, color: _blue, size: 18),
-              ),
-              const SizedBox(width: 12),
-              const Icon(Icons.notifications_none),
-              const SizedBox(width: 12),
-              const Icon(Icons.settings_outlined),
-            ],
-          ),
-        ),
-
-        // Divider
-        Container(
-          height: 1,
-          width: double.infinity,
-          color: Colors.black.withOpacity(0.08),
-        ),
+        _addButton(context),
+        Expanded(child: _content()),
       ],
     );
   }
+}
 
-  // ================= TABS =================
-  Widget _tabs(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(18, 30, 18, 0),
-      child: Row(
-        children: [
-          Expanded(
-            child: _tabItem(
-              icon: Icons.group_outlined,
-              text: 'My Guardians',
-              active: true,
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: GestureDetector(
-              onTap: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const MyDependentsScreen(),
-                  ),
-                );
-              },
-              child: _tabItem(
-                icon: Icons.favorite_border,
-                text: 'My Dependents',
-                active: false,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _tabItem({
-    required IconData icon,
-    required String text,
-    required bool active,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(
-        color: active ? Colors.white : Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
-        border: active ? null : Border.all(color: Colors.black12),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 18, color: active ? _blue : Colors.grey),
-          const SizedBox(width: 6),
-          Text(
-            text,
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              color: active ? Colors.black : Colors.grey,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ================= ADD BUTTON =================
-  Widget _addButton(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(18, 12, 18, 6),
-      child: Align(
-        alignment: Alignment.centerRight,
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const AddGuardians(),
-              ),
-            );
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFE24F4F),
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-          ),
-          child: const Text(
-            'Add',
-            style: TextStyle(fontWeight: FontWeight.w700),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ================= CONTENT =================
-  Widget _content() {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(18, 8, 18, 18),
-      children: const [
-        GuardianCard(
-          name: 'Tú Anh',
-          date: '23/09/2025',
-        ),
-      ],
-    );
-  }
-
-  // ================= BOTTOM NAV =================
-  Widget _bottomNav(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: 1,
-      selectedItemColor: _blue,
-      unselectedItemColor: Colors.grey,
-      type: BottomNavigationBarType.fixed,
-      onTap: (index) {
-        if (index == 0) {
-          Navigator.pushReplacement(
+// ================= ADD BUTTON =================
+Widget _addButton(BuildContext context) {
+  return Padding(
+    padding: const EdgeInsets.fromLTRB(10, 12, 18, 6),
+    child: Align(
+      alignment: Alignment.centerRight,
+      child: ElevatedButton(
+        onPressed: () {
+          Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const HomeScreen()),
+            MaterialPageRoute(builder: (_) => const AddGuardians()),
           );
-        } else if (index == 2) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const DeviceScreen()),
-          );
-        } else if (index == 3) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const HistoryScreen()),
-          );
-        }
-      },
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home_outlined),
-          label: 'Home',
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFFFE4343),
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.group_outlined),
-          label: 'Family Center',
+        child: const Text(
+          'Thêm',
+          style: TextStyle(fontWeight: FontWeight.w700),
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.graphic_eq),
-          label: 'Device',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.history),
-          label: 'History',
-        ),
-      ],
-    );
-  }
+      ),
+    ),
+  );
+}
+
+// ================= CONTENT =================
+Widget _content() {
+  return ListView(
+    padding: const EdgeInsets.fromLTRB(18, 8, 18, 18),
+    children: const [
+      GuardianCard(
+        name: 'Tú Anh',
+        date: '23/09/2025',
+      ),
+    ],
+  );
 }
 
 // ================= GUARDIAN CARD =================
@@ -248,9 +75,7 @@ class GuardianCard extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => const GuardianProfile(),
-          ),
+          MaterialPageRoute(builder: (_) => const GuardianProfile()),
         );
       },
       child: Container(
@@ -273,12 +98,12 @@ class GuardianCard extends StatelessWidget {
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                color: const Color(0xFF1F6BFF).withOpacity(.1),
+                color: const Color(0xFF1877F2).withOpacity(.1),
                 borderRadius: BorderRadius.circular(14),
               ),
               child: const Icon(
                 Icons.person,
-                color: Color(0xFF1F6BFF),
+                color: Color(0xFF1877F2),
                 size: 36,
               ),
             ),
@@ -296,7 +121,7 @@ class GuardianCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Join date: $date',
+                  'Ngày tham gia: $date',
                   style: const TextStyle(
                     fontSize: 12,
                     color: Colors.grey,

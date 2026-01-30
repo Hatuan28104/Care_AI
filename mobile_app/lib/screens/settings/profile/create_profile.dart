@@ -14,12 +14,11 @@ class CreateProfileScreen extends StatefulWidget {
 }
 
 class _CreateProfileScreenState extends State<CreateProfileScreen> {
-  // ===== COLORS =====
   static const _blue = Color(0xFF1877F2);
   static const _bg = Color(0xFFF6F6F6);
   static const _borderBlue = Color(0xFF1F41BB);
 
-  // ===== UI CONSTANTS (gộp dùng chung) =====
+  // ===== UI CONSTANTS =====
   static const _labelStyle = TextStyle(
     fontSize: 14,
     color: Colors.black54,
@@ -81,7 +80,6 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
     super.dispose();
   }
 
-  // ===== HELPERS =====
   OutlineInputBorder _outline(Color c, double w) => OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
         borderSide: BorderSide(color: c, width: w),
@@ -101,7 +99,6 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
     return raw;
   }
 
-  // ===== ACTIONS =====
   void _pickDob() {
     final now = DateTime.now();
     final minAgeDate = DateTime(
@@ -208,8 +205,6 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
                           if (v == null || v.isEmpty) {
                             return 'Trường Ngày sinh là bắt buộc.';
                           }
-
-                          // parse dd/mm/yyyy
                           final parts = v.split('/');
                           if (parts.length != 3)
                             return 'Ngày sinh không đúng định dạng.';
@@ -313,7 +308,6 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
     );
   }
 
-  // ===== APPBAR =====
   PreferredSizeWidget _appBar(BuildContext context) {
     return AppBar(
       backgroundColor: Colors.transparent,
@@ -327,7 +321,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
       title: const Text(
         'Hồ sơ cá nhân',
         style: TextStyle(
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w700,
           fontSize: 24,
           color: Colors.black,
         ),
@@ -335,7 +329,6 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
     );
   }
 
-  // ===== PROFILE CARD =====
   Widget _profileCard() {
     return Container(
       padding: const EdgeInsets.all(14),
@@ -349,12 +342,10 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
       ),
       child: Column(
         children: [
-          // ===== NỀN NGOÀI =====
           SizedBox(
             width: 350,
             height: 90,
             child: Center(
-              // ===== AVATAR RIÊNG =====
               child: Container(
                 width: 90,
                 height: 90,
@@ -374,7 +365,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
                         )
                       : Image.file(
                           _avatarFile!,
-                          fit: BoxFit.cover, // ✅ ảnh fill avatar
+                          fit: BoxFit.cover, 
                         ),
                 ),
               ),
@@ -419,7 +410,6 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
     );
   }
 
-  // ===== SECTION CARD =====
   Widget _cardSection({required String title, required Widget child}) {
     return Container(
       width: double.infinity,
@@ -446,17 +436,16 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
     );
   }
 
-  // ===== INPUT (giữ layout, gọn code) =====
   Widget _input({
     required String label,
     required TextEditingController controller,
     String hint = '',
     bool readOnly = false,
-    bool required = false, // ✅ field nào bắt buộc thì truyền true
+    bool required = false, 
     VoidCallback? onTap,
     TextInputType keyboardType = TextInputType.text,
     String? suffixText,
-    Widget? suffixIcon, // 👈 THÊM DÒNG NÀY
+    Widget? suffixIcon, 
     String? Function(String?)? validator,
   }) {
     return Column(
@@ -517,7 +506,6 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
     );
   }
 
-  // ===== GENDER DROPDOWN (giữ layout, gọn code) =====
   Widget _genderDropdown({bool required = true}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -576,7 +564,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
               style: _fieldTextStyle,
               decoration: InputDecoration(
                 hintText: 'Chọn giới tính',
-                hintStyle: _hintStyle, // (tuỳ chọn nhưng nên có)
+                hintStyle: _hintStyle, 
 
                 isDense: true,
                 contentPadding: _fieldPadding,

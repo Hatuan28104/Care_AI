@@ -10,7 +10,7 @@ class PhoneField extends StatelessWidget {
     super.key,
     required this.controller,
     this.validator,
-    this.hintText = 'Phone number',
+    this.hintText = 'Số điện thoại',
   });
 
   @override

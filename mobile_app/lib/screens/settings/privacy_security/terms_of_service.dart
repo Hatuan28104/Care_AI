@@ -3,14 +3,11 @@ import 'package:flutter/material.dart';
 class TermsOfServiceScreen extends StatelessWidget {
   const TermsOfServiceScreen({super.key});
 
-  // ===== CONSTANTS =====
-  static const _bg = Color(0xFFF3F5F9);
-
   // ===== UI =====
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: Color(0xFFF6F6F6),
       appBar: _appBar(context),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -21,7 +18,6 @@ class TermsOfServiceScreen extends StatelessWidget {
     );
   }
 
-  // ===== APP BAR =====
   PreferredSizeWidget _appBar(BuildContext context) {
     return AppBar(
       backgroundColor: Colors.transparent,
@@ -35,14 +31,14 @@ class TermsOfServiceScreen extends StatelessWidget {
         onPressed: () => Navigator.pop(context),
       ),
       title: const Text(
-        'Terms of Service',
-        style: TextStyle(fontWeight: FontWeight.w800, color: Colors.black),
+        'Điều khoản sử dụng',
+        style: TextStyle(
+            fontSize: 24, fontWeight: FontWeight.w700, color: Colors.black),
       ),
     );
   }
 }
 
-// ===== CONTENT =====
 class _Content extends StatelessWidget {
   const _Content();
 
@@ -51,31 +47,47 @@ class _Content extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: const [
-        _Title('Terms of Service'),
-        _Title('Acceptance of Terms'),
+        _Title('Điều khoản sử dụng'),
+        _Title('Chấp nhận điều khoản'),
         _Paragraph(
-            'By creating an account or accessing Elderly Care Digital Human System, you agree to comply with these Terms of Service. These terms form a binding agreement between you and the platform. If you do not accept them, please stop using the service immediately.'),
-        _Title('User Responsibilities'),
-        _Paragraph(
-            'You must provide accurate and up-to-date information. You are responsible for keeping your account details secure and for all activities under your account. Misuse for illegal, harmful, or fraudulent purposes is prohibited. You must always use the platform respectfully and lawfully.'),
-        _Title('Service Limitations'),
-        _Paragraph(
-          'The Elderly Care Digital Human System is a supportive tool for elderly care. It does not replace professional medical advice, diagnosis, or treatment. While the system provides reminders, alerts, and recommendations, users should always consult licensed healthcare professionals for medical issues.',
+          'Bằng việc tạo tài khoản hoặc truy cập Hệ thống hỗ trợ theo dõi sức khỏe, '
+          'bạn đồng ý tuân thủ các Điều khoản sử dụng này. Các điều khoản này tạo thành một thỏa thuận '
+          'ràng buộc pháp lý giữa bạn và nền tảng. Nếu bạn không đồng ý với các điều khoản này, '
+          'vui lòng ngừng sử dụng dịch vụ ngay lập tức.',
         ),
-        _Title('Account Management'),
+        _Title('Trách nhiệm của người dùng'),
         _Paragraph(
-          'You may deactivate or permanently delete your account at any time via the app settings or by contacting support. The platform reserves the right to suspend or terminate accounts that violate these terms or compromise the safety of others.',
+          'Bạn phải cung cấp thông tin chính xác và được cập nhật. Bạn chịu trách nhiệm bảo mật '
+          'thông tin tài khoản của mình và mọi hoạt động diễn ra dưới tài khoản đó. '
+          'Nghiêm cấm việc sử dụng nền tảng cho các mục đích trái pháp luật, gây hại hoặc gian lận. '
+          'Người dùng phải luôn sử dụng hệ thống một cách tôn trọng và đúng quy định pháp luật.',
         ),
-        _Title('Updates to Terms and Policy'),
+        _Title('Giới hạn của dịch vụ'),
         _Paragraph(
-          'These Terms may be updated from time to time to comply with new regulations or improve services. Users will be notified of significant changes before they take effect.',
+          'Hệ thống Nhân sự số Chăm sóc Người cao tuổi là công cụ hỗ trợ trong việc chăm sóc người cao tuổi '
+          'và không thay thế cho tư vấn, chẩn đoán hoặc điều trị y tế chuyên nghiệp. '
+          'Mặc dù hệ thống có thể cung cấp các nhắc nhở, cảnh báo và gợi ý, '
+          'người dùng vẫn cần tham khảo ý kiến của các chuyên gia y tế được cấp phép '
+          'đối với các vấn đề liên quan đến sức khỏe.',
+        ),
+        _Title('Quản lý tài khoản'),
+        _Paragraph(
+          'Bạn có thể tạm ngưng hoặc xóa vĩnh viễn tài khoản của mình bất kỳ lúc nào '
+          'thông qua cài đặt ứng dụng hoặc bằng cách liên hệ với bộ phận hỗ trợ. '
+          'Nền tảng có quyền tạm khóa hoặc chấm dứt tài khoản nếu phát hiện vi phạm các điều khoản này '
+          'hoặc gây ảnh hưởng đến sự an toàn của người khác.',
+        ),
+        _Title('Cập nhật điều khoản và chính sách'),
+        _Paragraph(
+          'Các Điều khoản sử dụng này có thể được cập nhật theo thời gian nhằm tuân thủ '
+          'các quy định pháp luật mới hoặc cải thiện chất lượng dịch vụ. '
+          'Người dùng sẽ được thông báo trước về những thay đổi quan trọng trước khi chúng có hiệu lực.',
         ),
       ],
     );
   }
 }
 
-// ===== SHARED COMPONENTS =====
 class _Title extends StatelessWidget {
   final String text;
   const _Title(this.text);

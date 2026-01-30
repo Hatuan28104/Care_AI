@@ -33,7 +33,7 @@ class BasicHealthDetailScreen extends StatefulWidget {
 }
 
 class _BasicHealthDetailScreenState extends State<BasicHealthDetailScreen> {
-  static const _bg = Color(0xFFF3F5F9);
+  static const _bg = Color(0xFFF6F6F6);
 
   MetricRange _range = MetricRange.h;
   late List<double> _values;
@@ -116,7 +116,7 @@ class _BasicHealthDetailScreenState extends State<BasicHealthDetailScreen> {
                 widget.title,
                 style: const TextStyle(
                   fontSize: 24,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),

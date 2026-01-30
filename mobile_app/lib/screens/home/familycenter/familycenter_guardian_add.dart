@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:Care_AI/screens/home/home.dart';
-import 'package:Care_AI/screens/home/decive/note.dart';
-import 'package:Care_AI/screens/home/history/history_screen.dart';
 
 class AddGuardians extends StatelessWidget {
   const AddGuardians({super.key});
 
-  static const Color blue = Color(0xFF1F6BFF);
+  static const Color blue = Color(0xFF1877F2);
   static const Color textDark = Color.fromARGB(255, 13, 69, 159);
-  static const Color bg = Color(0xFFF3F5F9);
+  static const Color bg = Color(0xFFF6F6F6);
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +15,6 @@ class AddGuardians extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _header(),
             _subHeader(context),
             _description(),
             _phoneInput(),
@@ -27,48 +23,6 @@ class AddGuardians extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: _bottomNav(context),
-    );
-  }
-
-  // ================= HEADER =================
-  Widget _header() {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(18, 14, 18, 12),
-          child: Row(
-            children: [
-              const Text(
-                'Care AI',
-                style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.w800,
-                  color: Color.fromARGB(255, 31, 65, 187),
-                ),
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: blue.withOpacity(.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Icon(Icons.auto_awesome, color: blue, size: 18),
-              ),
-              const SizedBox(width: 12),
-              const Icon(Icons.notifications_none),
-              const SizedBox(width: 12),
-              const Icon(Icons.settings_outlined),
-            ],
-          ),
-        ),
-        Container(
-          height: 1,
-          width: double.infinity,
-          color: Colors.black.withOpacity(0.08),
-        ),
-      ],
     );
   }
 
@@ -84,7 +38,7 @@ class AddGuardians extends StatelessWidget {
           ),
           const SizedBox(width: 2),
           const Text(
-            'Add Member',
+            'Thêm mới',
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w700,
@@ -100,7 +54,7 @@ class AddGuardians extends StatelessWidget {
     return const Padding(
       padding: EdgeInsets.fromLTRB(18, 0, 18, 10),
       child: Text(
-        'Type the phone number of your guardian',
+        'Nhập số điện thoại của người giám hộ của bạn',
         style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w600,
@@ -186,9 +140,9 @@ class AddGuardians extends StatelessWidget {
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      _actionBtn('Invite', blue),
+                      _actionBtn('Gửi lời mời', blue),
                       const SizedBox(width: 14),
-                      _actionBtn('Cancel', Colors.redAccent),
+                      _actionBtn('Hủy', Colors.redAccent),
                     ],
                   ),
                 ],
@@ -216,41 +170,6 @@ class AddGuardians extends StatelessWidget {
           fontWeight: FontWeight.w600,
         ),
       ),
-    );
-  }
-
-  // ================= BOTTOM NAV =================
-  Widget _bottomNav(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: 1, // Family Center
-      selectedItemColor: blue,
-      unselectedItemColor: Colors.grey,
-      type: BottomNavigationBarType.fixed,
-      onTap: (index) {
-        if (index == 0) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const HomeScreen()),
-          );
-        } else if (index == 2) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const DeviceScreen()),
-          );
-        } else if (index == 3) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const HistoryScreen()),
-          );
-        }
-      },
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'Home'),
-        BottomNavigationBarItem(
-            icon: Icon(Icons.group_outlined), label: 'Family Center'),
-        BottomNavigationBarItem(icon: Icon(Icons.graphic_eq), label: 'Device'),
-        BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
-      ],
     );
   }
 }

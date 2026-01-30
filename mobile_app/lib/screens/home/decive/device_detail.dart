@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:Care_AI/screens/home/home.dart';
-import 'package:Care_AI/screens/home/familycenter/familycenter_guardians.dart';
-import 'package:Care_AI/screens/home/history/history_screen.dart';
 
 class DeviceDetailScreen extends StatelessWidget {
   const DeviceDetailScreen({super.key});
 
-  static const _blue = Color(0xFF1F6BFF);
-  static const _bg = Color(0xFFF3F5F9);
+  static const _blue = Color(0xFF1877F2);
+  static const _bg = Color(0xFFF6F6F6);
 
   void _showDisconnectDialog(BuildContext context) {
     showDialog(
@@ -49,7 +46,7 @@ class DeviceDetailScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 14),
                 const Text(
-                  'Confirm Deletion',
+                  'Xác nhận xóa',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
@@ -58,7 +55,7 @@ class DeviceDetailScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 const Text(
-                  'Are you sure you want to delete\nthis device?',
+                  'Bạn có chắc chắn muốn xóa\nthiết bị này không?',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 13,
@@ -68,7 +65,7 @@ class DeviceDetailScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
 
-                // Delete
+                // DELETE
                 SizedBox(
                   width: double.infinity,
                   height: 44,
@@ -86,14 +83,14 @@ class DeviceDetailScreen extends StatelessWidget {
                       ),
                     ),
                     child: const Text(
-                      'Delete',
+                      'Xóa thiết bị',
                       style: TextStyle(fontWeight: FontWeight.w800),
                     ),
                   ),
                 ),
                 const SizedBox(height: 10),
 
-                // Cancel
+                // CANCEL
                 SizedBox(
                   width: double.infinity,
                   height: 44,
@@ -108,7 +105,7 @@ class DeviceDetailScreen extends StatelessWidget {
                       ),
                     ),
                     child: const Text(
-                      'Cancel',
+                      'Hủy',
                       style: TextStyle(fontWeight: FontWeight.w800),
                     ),
                   ),
@@ -128,7 +125,8 @@ class DeviceDetailScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            _header(),
+            // ❌ HEADER ĐÃ BỎ
+
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
@@ -140,7 +138,7 @@ class DeviceDetailScreen extends StatelessWidget {
                     _goodHealthCard(),
                     const SizedBox(height: 16),
                     const Text(
-                      "Today's Health Data",
+                      'Dữ liệu sức khỏe hôm nay',
                       style:
                           TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
                     ),
@@ -150,7 +148,7 @@ class DeviceDetailScreen extends StatelessWidget {
                     _barTile(
                       icon: Icons.opacity,
                       iconColor: _blue,
-                      title: 'Blood oxygen – SpO₂',
+                      title: 'Nồng độ oxy trong máu – SpO₂',
                       valueRight: '98%',
                       progress: 0.82,
                     ),
@@ -158,7 +156,7 @@ class DeviceDetailScreen extends StatelessWidget {
                     _barTile(
                       icon: Icons.local_fire_department,
                       iconColor: Colors.red,
-                      title: 'Calories burned',
+                      title: 'Lượng calo tiêu thụ',
                       valueRight: '210 kcal',
                       progress: 0.35,
                     ),
@@ -166,7 +164,7 @@ class DeviceDetailScreen extends StatelessWidget {
                     _barTile(
                       icon: Icons.accessibility_new,
                       iconColor: Colors.red,
-                      title: 'Body temperature',
+                      title: 'Nhiệt độ cơ thể',
                       valueRight: '36.8°C',
                       progress: 0.62,
                     ),
@@ -174,7 +172,7 @@ class DeviceDetailScreen extends StatelessWidget {
                     _barTile(
                       icon: Icons.sentiment_satisfied_alt,
                       iconColor: Colors.orange,
-                      title: 'Stress level',
+                      title: 'Mức độ căng thẳng',
                       valueRight: '45',
                       progress: 0.45,
                     ),
@@ -187,48 +185,6 @@ class DeviceDetailScreen extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: _bottomNav(context),
-    );
-  }
-
-  // ===== HEADER =====
-  Widget _header() {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(18, 14, 18, 12),
-          child: Row(
-            children: [
-              const Text(
-                'Care AI',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF0D459F),
-                ),
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: _blue.withOpacity(.10),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Icon(Icons.auto_awesome, color: _blue, size: 18),
-              ),
-              const SizedBox(width: 12),
-              const Icon(Icons.notifications_none, size: 22),
-              const SizedBox(width: 12),
-              const Icon(Icons.settings_outlined, size: 22),
-            ],
-          ),
-        ),
-        Container(
-          height: 1,
-          width: double.infinity,
-          color: Colors.black.withOpacity(0.08),
-        ),
-      ],
     );
   }
 
@@ -270,7 +226,7 @@ class DeviceDetailScreen extends StatelessWidget {
                     Icon(Icons.bluetooth, size: 16, color: Colors.black54),
                     SizedBox(width: 6),
                     Text(
-                      'Connected',
+                      'Đã kết nối',
                       style: TextStyle(color: Colors.black54, fontSize: 13),
                     ),
                   ],
@@ -310,7 +266,7 @@ class DeviceDetailScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Good health',
+                  'Sức khỏe tốt',
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
                     color: Colors.green,
@@ -319,7 +275,9 @@ class DeviceDetailScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 6),
                 Text(
-                  'Your numbers are all within the normal\nrange. Continue to maintain a healthy\nlifestyle!',
+                  'Các chỉ số của bạn đều nằm trong\n'
+                  'ngưỡng bình thường. Hãy tiếp tục\n'
+                  'duy trì lối sống lành mạnh!',
                   style: TextStyle(
                     color: Colors.black54,
                     height: 1.3,
@@ -344,14 +302,14 @@ class DeviceDetailScreen extends StatelessWidget {
               _MiniStatCard(
                 icon: Icons.favorite_border,
                 iconColor: Colors.red,
-                title: 'Heart Rate',
+                title: 'Nhịp tim',
                 value: '72 BPM',
               ),
               SizedBox(height: 10),
               _MiniStatCard(
                 icon: Icons.directions_walk,
                 iconColor: _blue,
-                title: 'Steps',
+                title: 'Số bước',
                 value: '3,247',
               ),
             ],
@@ -364,14 +322,14 @@ class DeviceDetailScreen extends StatelessWidget {
               _MiniStatCard(
                 icon: Icons.monitor_heart_outlined,
                 iconColor: Colors.red,
-                title: 'Blood pressure',
+                title: 'Huyết áp',
                 value: '120/80',
               ),
               SizedBox(height: 10),
               _MiniStatCard(
                 icon: Icons.bedtime_outlined,
                 iconColor: _blue,
-                title: 'Sleep',
+                title: 'Giấc ngủ',
                 value: '7h 23m',
               ),
             ],
@@ -461,7 +419,7 @@ class DeviceDetailScreen extends StatelessWidget {
         onPressed: () => _showDisconnectDialog(context),
         icon: const Icon(Icons.logout, color: Colors.white),
         label: const Text(
-          'Disconnect Device',
+          'Ngắt kết nối thiết bị',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w800,
@@ -469,52 +427,6 @@ class DeviceDetailScreen extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-
-  // ===== BOTTOM NAV =====
-  Widget _bottomNav(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: 2,
-      selectedItemColor: _blue,
-      unselectedItemColor: Colors.grey,
-      type: BottomNavigationBarType.fixed,
-      onTap: (index) {
-        if (index == 1) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const MyGuardiansScreen()),
-          );
-        } else if (index == 0) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const HomeScreen()),
-          );
-        } else if (index == 3) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const HistoryScreen()),
-          );
-        }
-      },
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home_outlined),
-          label: 'Home',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.group_outlined),
-          label: 'Family Center',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.graphic_eq),
-          label: 'Device',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.history),
-          label: 'History',
-        ),
-      ],
     );
   }
 }

@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:Care_AI/screens/home/home.dart';
-import 'package:Care_AI/screens/home/decive/note.dart';
-import 'package:Care_AI/screens/home/history/history_screen.dart';
 
 class DependentProfileScreen extends StatelessWidget {
   const DependentProfileScreen({super.key});
 
   // ===== CONSTANTS =====
-  static const Color _blue = Color(0xFF1F6BFF);
-  static const Color _bg = Color(0xFFF3F5F9);
+  static const Color _blue = Color(0xFF1877F2);
+  static const Color _bg = Color(0xFFF6F6F6);
   static const Color _itemBg = Color(0xFFF6F7FB);
 
   @override
@@ -18,55 +15,12 @@ class DependentProfileScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            _header(),
             _profileHeader(context),
             const SizedBox(height: 16),
             Expanded(child: _content()),
           ],
         ),
       ),
-      bottomNavigationBar: _bottomNav(context),
-    );
-  }
-
-  // ================= HEADER =================
-  Widget _header() {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(18, 14, 18, 12),
-          child: Row(
-            children: [
-              const Text(
-                'Care AI',
-                style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.w800,
-                  color: Color.fromARGB(255, 31, 65, 187),
-                ),
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: _blue.withOpacity(.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Icon(Icons.auto_awesome, color: _blue, size: 18),
-              ),
-              const SizedBox(width: 12),
-              const Icon(Icons.notifications_none),
-              const SizedBox(width: 12),
-              const Icon(Icons.settings_outlined),
-            ],
-          ),
-        ),
-        Container(
-          height: 1,
-          width: double.infinity,
-          color: Colors.black.withOpacity(0.08),
-        ),
-      ],
     );
   }
 
@@ -105,13 +59,13 @@ class DependentProfileScreen extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(18, 8, 18, 18),
       children: [
-        _infoItem('Full name', 'Rober Joshon'),
-        _infoItem('Date of birth', '20/01/1978'),
-        _infoItem('Gender', 'Male'),
-        _infoItem('Join date', '23/09/2025'),
+        _infoItem('Họ và tên', 'Rober Joshon'),
+        _infoItem('Ngày sinh', '20/01/1978'),
+        _infoItem('Giới tính', 'Male'),
+        _infoItem('Ngày tham gia', '23/09/2025'),
         const SizedBox(height: 8),
         const Text(
-          'Report',
+          'Báo cáo',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w700,
@@ -120,11 +74,11 @@ class DependentProfileScreen extends StatelessWidget {
         const SizedBox(height: 12),
         Row(
           children: [
-            Expanded(child: _reportItem('Day')),
+            Expanded(child: _reportItem('Ngày')),
             const SizedBox(width: 12),
-            Expanded(child: _reportItem('Week')),
+            Expanded(child: _reportItem('Tuần')),
             const SizedBox(width: 12),
-            Expanded(child: _reportItem('Month')),
+            Expanded(child: _reportItem('Tháng')),
           ],
         ),
       ],
@@ -201,41 +155,6 @@ class DependentProfileScreen extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  // ================= BOTTOM NAV =================
-  Widget _bottomNav(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: 1,
-      selectedItemColor: _blue,
-      unselectedItemColor: Colors.grey,
-      type: BottomNavigationBarType.fixed,
-      onTap: (index) {
-        if (index == 0) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const HomeScreen()),
-          );
-        } else if (index == 2) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const DeviceScreen()),
-          );
-        } else if (index == 3) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const HistoryScreen()),
-          );
-        }
-      },
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'Home'),
-        BottomNavigationBarItem(
-            icon: Icon(Icons.group_outlined), label: 'Family Center'),
-        BottomNavigationBarItem(icon: Icon(Icons.graphic_eq), label: 'Device'),
-        BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
-      ],
     );
   }
 }

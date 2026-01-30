@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:Care_AI/screens/home/home.dart';
-import 'package:Care_AI/screens/home/decive/note.dart';
-import 'package:Care_AI/screens/home/history/history_screen.dart';
 
 class ConversationScreen extends StatefulWidget {
   const ConversationScreen({super.key});
@@ -12,24 +9,24 @@ class ConversationScreen extends StatefulWidget {
 
 class _ConversationSharingScreenState extends State<ConversationScreen> {
   // ===== CONSTANTS =====
-  static const Color _blue = Color(0xFF1F6BFF);
-  static const Color _bg = Color(0xFFF3F5F9);
+  static const Color _blue = Color(0xFF1877F2);
+  static const Color _bg = Color(0xFFF6F6F6);
 
   // ===== MOCK DATA =====
   final List<Map<String, dynamic>> _users = [
     {
-      'name': 'Alex - Doctor',
-      'last': 'Last message: September 27, 2025',
+      'name': 'Alex - Bác sĩ',
+      'last': 'Tin nhắn gần nhất: September 27, 2025',
       'enabled': false,
     },
     {
-      'name': 'Anna - Lawyer',
-      'last': 'Last message: September 26, 2025',
+      'name': 'Anna - Luật sư',
+      'last': 'Tin nhắn gần nhất: September 26, 2025',
       'enabled': false,
     },
     {
-      'name': 'Luna - Nurse',
-      'last': 'Last message: September 23, 2025',
+      'name': 'Luna - Y tá',
+      'last': 'Tin nhắn gần nhất: September 23, 2025',
       'enabled': false,
     },
   ];
@@ -41,54 +38,11 @@ class _ConversationSharingScreenState extends State<ConversationScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            _header(),
             _titleBar(context),
             Expanded(child: _content()),
           ],
         ),
       ),
-      bottomNavigationBar: _bottomNav(context),
-    );
-  }
-
-  // ================= HEADER =================
-  Widget _header() {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(18, 14, 18, 12),
-          child: Row(
-            children: [
-              const Text(
-                'Care AI',
-                style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.w800,
-                  color: Color.fromARGB(255, 31, 65, 187),
-                ),
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: _blue.withOpacity(.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Icon(Icons.auto_awesome, color: _blue, size: 18),
-              ),
-              const SizedBox(width: 12),
-              const Icon(Icons.notifications_none),
-              const SizedBox(width: 12),
-              const Icon(Icons.settings_outlined),
-            ],
-          ),
-        ),
-        Container(
-          height: 1,
-          width: double.infinity,
-          color: Colors.black.withOpacity(0.08),
-        ),
-      ],
     );
   }
 
@@ -105,7 +59,7 @@ class _ConversationSharingScreenState extends State<ConversationScreen> {
           const Expanded(
             child: Center(
               child: Text(
-                'Configure Permissions',
+                'Thiết lập quyền chia sẻ',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
@@ -126,7 +80,7 @@ class _ConversationSharingScreenState extends State<ConversationScreen> {
       children: [
         const Center(
           child: Text(
-            'Conversation History\nSharing',
+            'Chia sẻ lịch sử trò chuyện',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 27,
@@ -205,12 +159,14 @@ class _ConversationSharingScreenState extends State<ConversationScreen> {
           // Switch
           Switch(
             value: user['enabled'],
-            activeColor: _blue,
-            onChanged: (value) {
+            onChanged: (v) {
               setState(() {
-                _users[index]['enabled'] = value;
+                _users[index]['enabled'] = v;
               });
             },
+            activeTrackColor: const Color.fromARGB(255, 19, 114, 255),
+            inactiveTrackColor: const Color.fromARGB(255, 218, 217, 217),
+            inactiveThumbColor: Colors.white,
           ),
         ],
       ),
@@ -234,7 +190,7 @@ class _ConversationSharingScreenState extends State<ConversationScreen> {
             ),
           ),
           child: const Text(
-            'Save',
+            'Lưu',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w700,
@@ -243,41 +199,6 @@ class _ConversationSharingScreenState extends State<ConversationScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  // ================= BOTTOM NAV =================
-  Widget _bottomNav(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: 1,
-      selectedItemColor: _blue,
-      unselectedItemColor: Colors.grey,
-      type: BottomNavigationBarType.fixed,
-      onTap: (index) {
-        if (index == 0) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const HomeScreen()),
-          );
-        } else if (index == 2) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const DeviceScreen()),
-          );
-        } else if (index == 3) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const HistoryScreen()),
-          );
-        }
-      },
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'Home'),
-        BottomNavigationBarItem(
-            icon: Icon(Icons.group_outlined), label: 'Family Center'),
-        BottomNavigationBarItem(icon: Icon(Icons.graphic_eq), label: 'Device'),
-        BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
-      ],
     );
   }
 }

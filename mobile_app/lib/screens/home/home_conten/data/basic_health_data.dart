@@ -5,8 +5,7 @@ import 'basic_health_detail.dart';
 class BasicHealthDataScreen extends StatelessWidget {
   const BasicHealthDataScreen({super.key});
 
-  static const Color _blue = Color(0xFF1F6BFF);
-  static const Color _bg = Color(0xFFF3F5F9);
+  static const Color _bg = Color(0xFFF6F6F6);
 
   static const EdgeInsets _pagePadding = EdgeInsets.fromLTRB(18, 2, 18, 18);
   static const BorderRadius _cardRadius = BorderRadius.all(Radius.circular(10));
@@ -105,7 +104,7 @@ class BasicHealthDataScreen extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 24,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),

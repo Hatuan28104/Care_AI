@@ -10,8 +10,8 @@ class AlertScreen extends StatefulWidget {
 }
 
 class _AlertScreenState extends State<AlertScreen> {
-  static const _bg = Color(0xFFF3F5F9);
-  static const _blue = Color(0xFF1F6BFF);
+  static const _bg = Color(0xFFF6F6F6);
+  static const _blue = Color(0xFF1877F2);
 
   final List<_AlertItem> _alerts = [
     _AlertItem(
@@ -99,7 +99,7 @@ class _AlertScreenState extends State<AlertScreen> {
             child: Center(
               child: Text(
                 'Alert',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
               ),
             ),
           ),

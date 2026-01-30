@@ -4,50 +4,17 @@ import 'package:Care_AI/screens/home/decive/device_complete.dart';
 class DeviceSyncingScreen extends StatelessWidget {
   const DeviceSyncingScreen({super.key});
 
-  static const blue = Color(0xFF1F6BFF);
+  static const blue = Color(0xFF1877F2);
+  static const bg = Color(0xFFF6F6F6);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: bg,
       body: SafeArea(
         child: Column(
           children: [
-            // ===== HEADER =====
-            Padding(
-              padding: const EdgeInsets.fromLTRB(18, 14, 18, 12),
-              child: Row(
-                children: [
-                  const Text(
-                    'Care AI',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w800,
-                      color: Color.fromARGB(255, 13, 69, 159),
-                    ),
-                  ),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: blue.withOpacity(.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child:
-                        const Icon(Icons.auto_awesome, color: blue, size: 18),
-                  ),
-                  const SizedBox(width: 12),
-                  const Icon(Icons.notifications_none, size: 22),
-                  const SizedBox(width: 12),
-                  const Icon(Icons.settings_outlined, size: 22),
-                ],
-              ),
-            ),
-            Container(
-              height: 1,
-              width: double.infinity,
-              color: Colors.black.withOpacity(0.08),
-            ),
+            // ❌ HEADER ĐÃ BỎ
 
             const SizedBox(height: 8),
 
@@ -56,7 +23,7 @@ class DeviceSyncingScreen extends StatelessWidget {
               child: const Column(
                 children: [
                   Text(
-                    'Device Syncing',
+                    'Đang đồng bộ thiết bị',
                     style: TextStyle(
                       fontSize: 36,
                       fontWeight: FontWeight.w800,
@@ -66,13 +33,16 @@ class DeviceSyncingScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 10),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 40),
+                    padding: EdgeInsets.symmetric(horizontal: 40),
                     child: Text(
-                      "We're preparing your health data for the best experience. "
-                      "This may take a moment. Keep your watch close to your phone "
-                      "to ensure a smooth sync. You'll receive a notification once it's done.",
+                      'Chúng tôi đang chuẩn bị dữ liệu sức khỏe để mang lại '
+                      'trải nghiệm tốt nhất cho bạn. Quá trình này có thể '
+                      'mất một chút thời gian.\n\n'
+                      'Hãy giữ đồng hồ ở gần điện thoại để đảm bảo việc '
+                      'đồng bộ diễn ra suôn sẻ. Bạn sẽ nhận được thông báo '
+                      'khi quá trình hoàn tất.',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         color: Colors.black54,
                         height: 1.5,
@@ -92,21 +62,34 @@ class DeviceSyncingScreen extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.smartphone,
-                          size: 142, color: Colors.black38),
+                      const Icon(
+                        Icons.smartphone,
+                        size: 142,
+                        color: Colors.black38,
+                      ),
                       const SizedBox(width: 10),
                       Column(
                         mainAxisSize: MainAxisSize.min,
                         children: const [
-                          Icon(Icons.arrow_back,
-                              size: 36, color: Colors.black26),
+                          Icon(
+                            Icons.arrow_back,
+                            size: 36,
+                            color: Colors.black26,
+                          ),
                           SizedBox(height: 0),
-                          Icon(Icons.arrow_forward,
-                              size: 36, color: Colors.black26),
+                          Icon(
+                            Icons.arrow_forward,
+                            size: 36,
+                            color: Colors.black26,
+                          ),
                         ],
                       ),
                       const SizedBox(width: 10),
-                      const Icon(Icons.watch, size: 132, color: Colors.black38),
+                      const Icon(
+                        Icons.watch,
+                        size: 132,
+                        color: Colors.black38,
+                      ),
                     ],
                   ),
                 ),
@@ -138,9 +121,11 @@ class DeviceSyncingScreen extends StatelessWidget {
                       elevation: 4,
                     ),
                     child: const Text(
-                      'Continue',
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                      'Tiếp tục',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ),

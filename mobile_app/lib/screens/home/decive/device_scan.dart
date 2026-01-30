@@ -6,11 +6,11 @@ class ScanScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF6F6F6),
       appBar: AppBar(
         title: const Text(
-          'Device',
-          style: TextStyle(fontWeight: FontWeight.w800, color: Colors.black),
+          'Thiết bị',
+          style: TextStyle(fontWeight: FontWeight.w700, color: Colors.black),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -40,7 +40,7 @@ class ScanScreen extends StatelessWidget {
             ),
             const SizedBox(height: 60),
             const Text(
-              'Hold the Smart Watch up',
+              'Giữ đồng hồ thông minh',
               style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -48,7 +48,7 @@ class ScanScreen extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const Text(
-              'to the Camera',
+              'trước camera',
               style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -57,25 +57,30 @@ class ScanScreen extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             const Text(
-              'Align it with the viewfinder',
+              'Căn chỉnh đồng hồ vào khung quét',
               style: TextStyle(fontSize: 14, color: Colors.black54),
               textAlign: TextAlign.center,
             ),
             const Text(
-              'above.',
+              'ở phía trên.',
               style: TextStyle(fontSize: 14, color: Colors.black54),
               textAlign: TextAlign.center,
             ),
-            const Spacer(),
-            const Padding(
-              padding: EdgeInsets.only(bottom: 250),
-              child: Text(
-                'Can\'t find QR code? Try bluetooth connection',
-                style: TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFFFACC15),
-                    fontWeight: FontWeight.w600),
-                textAlign: TextAlign.center,
+            Expanded(
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 24),
+                  child: Text(
+                    'Không tìm thấy mã QR? Hãy thử kết nối bằng Bluetooth',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFFFACC15),
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
               ),
             ),
           ],

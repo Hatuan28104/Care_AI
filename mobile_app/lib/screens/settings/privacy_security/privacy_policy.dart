@@ -3,12 +3,10 @@ import 'package:flutter/material.dart';
 class PrivacyPolicyScreen extends StatelessWidget {
   const PrivacyPolicyScreen({super.key});
 
-  static const _bg = Color(0xFFF3F5F9);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: Color(0xFFF6F6F6),
       appBar: _appBar(context),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -17,50 +15,47 @@ class PrivacyPolicyScreen extends StatelessWidget {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 500),
               child: Padding(
-                padding:
-                    const EdgeInsets.fromLTRB(32, 0, 32, 24), // 👈 lề 2 bên
+                padding: const EdgeInsets.fromLTRB(32, 0, 32, 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
                     SizedBox(height: 18),
-                    _Title('Privacy policy'),
+                    _Title('Chính sách quyền riêng tư'),
                     SizedBox(height: 8),
                     _Paragraph(
-                      'Welcome to Elderly Care Digital Human System. '
-                      'This Privacy Policy applies to all services of Elderly Care Digital Human System, '
-                      'including applications, websites, software, and related platforms.',
+                      'Chào mừng bạn đến với Hệ thống hỗ trợ theo dõi sức khỏe. '
+                      'Chính sách quyền riêng tư này áp dụng cho tất cả các dịch vụ của hệ thống, '
+                      'bao gồm ứng dụng, website, phần mềm và các nền tảng liên quan.',
                     ),
                     _Paragraph(
-                      'We are committed to protecting your privacy. This Policy explains how we collect, use, share, and safeguard your personal information. By using the platform, you agree to the practices described below. If you do not agree, please stop using the service.',
+                      'Chúng tôi cam kết bảo vệ quyền riêng tư của bạn. Chính sách này giải thích cách '
+                      'chúng tôi thu thập, sử dụng, chia sẻ và bảo vệ thông tin cá nhân của bạn. '
+                      'Khi sử dụng nền tảng, bạn đồng ý với các nội dung được mô tả dưới đây. '
+                      'Nếu bạn không đồng ý, vui lòng ngừng sử dụng dịch vụ.',
                     ),
-
                     SizedBox(height: 20),
-
-                    // ✅ BỎ KHỐI XÁM: để bullet thường
-                    _Bullet('Information We Collect'),
-                    _Bullet('How We Use Your Information'),
-                    _Bullet('Sharing of Information'),
-                    _Bullet('Data Protection'),
-                    _Bullet('Your Rights'),
-
+                    _Bullet('Thông tin chúng tôi thu thập'),
+                    _Bullet('Cách chúng tôi sử dụng thông tin'),
+                    _Bullet('Chia sẻ thông tin'),
+                    _Bullet('Bảo mật dữ liệu'),
+                    _Bullet('Quyền của bạn'),
                     SizedBox(height: 20),
-                    _Title('Your information is used to:'),
+                    _Title('Thông tin của bạn được sử dụng để:'),
                     _Bullet(
-                        'Provide health monitoring, reminders, and caregiver support.'),
+                        'Cung cấp các dịch vụ theo dõi sức khỏe, nhắc nhở và hỗ trợ chăm sóc.'),
                     _Bullet(
-                        'Send alerts to guardians or healthcare professionals.'),
+                        'Gửi cảnh báo cho người giám hộ hoặc nhân viên y tế khi cần thiết.'),
                     _Bullet(
-                        'Improve system reliability and personalize user experience.'),
+                        'Cải thiện độ ổn định của hệ thống và cá nhân hóa trải nghiệm người dùng.'),
                     _Bullet(
-                        'Ensure safety, compliance, and lawful use of the platform.'),
-
+                        'Đảm bảo an toàn, tuân thủ quy định pháp luật và sử dụng đúng mục đích.'),
                     SizedBox(height: 16),
                     _Title(
-                        'We only share your information in the following cases:'),
+                        'Chúng tôi chỉ chia sẻ thông tin của bạn trong các trường hợp sau:'),
                     _Bullet(
-                        'With guardians or family members when you grant permission.'),
+                        'Với người giám hộ hoặc thành viên gia đình khi có sự cho phép của bạn.'),
                     _Bullet(
-                        'With healthcare providers, only if authorized or in emergencies.'),
+                        'Với các cơ sở y tế, khi được ủy quyền hoặc trong trường hợp khẩn cấp.'),
                   ],
                 ),
               ),
@@ -81,15 +76,13 @@ class PrivacyPolicyScreen extends StatelessWidget {
         onPressed: () => Navigator.pop(context),
       ),
       title: const Text(
-        'Privacy policy',
-        style: TextStyle(fontWeight: FontWeight.w800, color: Colors.black),
+        'Chính sách quyền riêng tư',
+        style: TextStyle(fontWeight: FontWeight.w700, color: Colors.black),
       ),
       centerTitle: true,
     );
   }
 }
-
-// ===== UI COMPONENTS =====
 
 class _Title extends StatelessWidget {
   final String text;

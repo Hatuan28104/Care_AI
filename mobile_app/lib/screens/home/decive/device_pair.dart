@@ -4,50 +4,17 @@ import 'package:Care_AI/screens/home/decive/device_allow.dart';
 class DevicePairScreen extends StatelessWidget {
   const DevicePairScreen({super.key});
 
-  static const blue = Color(0xFF1F6BFF);
+  static const blue = Color(0xFF1877F2);
+  static const bg = Color(0xFFF6F6F6);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: bg,
       body: SafeArea(
         child: Column(
           children: [
-            // ===== HEADER =====
-            Padding(
-              padding: const EdgeInsets.fromLTRB(18, 14, 18, 12),
-              child: Row(
-                children: [
-                  const Text(
-                    'Care AI',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w800,
-                      color: Color.fromARGB(255, 13, 69, 159),
-                    ),
-                  ),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: blue.withOpacity(.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child:
-                        const Icon(Icons.auto_awesome, color: blue, size: 18),
-                  ),
-                  const SizedBox(width: 12),
-                  const Icon(Icons.notifications_none, size: 22),
-                  const SizedBox(width: 12),
-                  const Icon(Icons.settings_outlined, size: 22),
-                ],
-              ),
-            ),
-            Container(
-              height: 1,
-              width: double.infinity,
-              color: Colors.black.withOpacity(0.08),
-            ),
+            // ❌ HEADER ĐÃ BỎ
 
             Padding(
               padding: const EdgeInsets.fromLTRB(12, 100, 12, 6),
@@ -65,7 +32,7 @@ class DevicePairScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   const Text(
-                    'Device Paired!',
+                    'Đã ghép đôi thiết bị!',
                     style: TextStyle(
                       fontSize: 26,
                       fontWeight: FontWeight.w800,
@@ -76,8 +43,8 @@ class DevicePairScreen extends StatelessWidget {
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 34),
                     child: Text(
-                      'The device is now connected.\n'
-                      'You can continue with the initial setup.',
+                      'Thiết bị đã được kết nối thành công.\n'
+                      'Bạn có thể tiếp tục quá trình thiết lập ban đầu.',
                       style: TextStyle(
                         fontSize: 13,
                         color: Colors.black54,
@@ -92,7 +59,7 @@ class DevicePairScreen extends StatelessWidget {
 
             const Spacer(),
 
-            // ===== SET UP BUTTON (ĐẨY LÊN 30px) =====
+            // ===== SET UP BUTTON (GIỮ NGUYÊN LAYOUT) =====
             Transform.translate(
               offset: const Offset(0, -50),
               child: Padding(
@@ -118,7 +85,7 @@ class DevicePairScreen extends StatelessWidget {
                       elevation: 4,
                     ),
                     child: const Text(
-                      'Set up',
+                      'Thiết lập',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,

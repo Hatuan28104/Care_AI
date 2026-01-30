@@ -12,19 +12,18 @@ class PrivacySecurityScreen extends StatefulWidget {
 }
 
 class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
-  static const blue = Color(0xFF1F6BFF);
-  static const bg = Color(0xFFF3F5F9);
+  static const blue = Color(0xFF1877F2);
   bool _twoFA = false;
   bool _biometrics = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: Color(0xFFF6F6F6),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        centerTitle: true,
+        centerTitle: false,
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios_new_rounded,
@@ -34,9 +33,9 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          'Privacy & Security',
+          'Quyền riêng tư & Bảo mật',
           style: TextStyle(
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w700,
             color: Colors.black,
           ),
         ),
@@ -45,25 +44,23 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(18, 12, 18, 24),
           children: [
-            _sectionTitle('Phone Number'),
+            _sectionTitle('Số điện thoại'),
             _phoneCard(),
             const SizedBox(height: 14),
-            _sectionTitle('Verify'),
+            _sectionTitle('Xác minh'),
             _verifyCard(),
             const SizedBox(height: 14),
             _loginHeader(),
             const SizedBox(height: 2),
             _loginHistoryCard(),
             const SizedBox(height: 14),
-            _sectionTitle('Privacy'),
+            _sectionTitle('Quyền riêng tư'),
             _privacyCard(context),
           ],
         ),
       ),
     );
   }
-
-  // ===== HEADERS =====
 
   Widget _sectionTitle(String t) {
     return Padding(
@@ -85,7 +82,7 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
       child: Row(
         children: [
           const Text(
-            'Login History',
+            'Lịch sử đăng nhập',
             style: TextStyle(
               fontWeight: FontWeight.w600,
               fontSize: 17,
@@ -103,8 +100,6 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
       ),
     );
   }
-
-  // ===== PHONE =====
 
   Widget _phoneCard() {
     return _card(
@@ -130,7 +125,7 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
           SizedBox(
             height: 32,
             child: OutlinedButton(
-              onPressed: _changePhoneDialog, // ✅ BẤM ĐỔI SĐT
+              onPressed: _changePhoneDialog,
               style: OutlinedButton.styleFrom(
                 side: BorderSide(color: const Color(0xFF1877F2)),
                 foregroundColor: const Color.fromARGB(255, 0, 0, 0),
@@ -140,7 +135,7 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 14),
               ),
               child: const Text(
-                'Change',
+                'Thay đổi',
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w400,
@@ -162,22 +157,22 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
       barrierDismissible: true,
       builder: (ctx) {
         return AlertDialog(
-          title: const Text('Change phone number'),
+          title: const Text('Thay đổi số điện thoại'),
           content: TextField(
             controller: ctrl,
             keyboardType: TextInputType.phone,
             decoration: const InputDecoration(
-              hintText: 'Example: 0912345678 or +84 912345678',
+              hintText: 'Ví dụ: 0912345678 hoặc +84 912345678',
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel'),
+              child: const Text('Hủy'),
             ),
             ElevatedButton(
               onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
-              child: const Text('Save'),
+              child: const Text('Lưu'),
             ),
           ],
         );
@@ -186,12 +181,11 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
 
     if (result == null) return;
 
-    // validate nhẹ: cho trống thì coi như not set
     final cleaned = result.trim();
     if (cleaned.isNotEmpty && !_looksLikePhone(cleaned)) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Phone number looks invalid.')),
+        const SnackBar(content: Text('Số điện thoại không hợp lệ.')),
       );
       return;
     }
@@ -200,16 +194,13 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
   }
 
   bool _looksLikePhone(String s) {
-    // cho nhập +, khoảng trắng, dấu gạch
     final digits = s.replaceAll(RegExp(r'\D'), '');
-    // VN thường 9-11 digits tuỳ dạng (09xxxxxxxx, +84xxxxxxxxx...)
     return digits.length >= 9 && digits.length <= 12;
   }
 
-  // format ra đúng dạng "(+84) 123 456 789"
   String _formatPhoneForUI(String input) {
     final s = input.trim();
-    if (s.isEmpty) return '(Not set)';
+    if (s.isEmpty) return '(Chưa thiết lập)';
 
     final digits = s.replaceAll(RegExp(r'\D'), '');
 
@@ -235,23 +226,21 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
     return '${d.substring(0, 3)} ${d.substring(3, 6)} ${d.substring(6, 9)}';
   }
 
-  // ===== VERIFY =====
-
   Widget _verifyCard() {
     return _card(
       child: Column(
         children: [
           _switchTile(
             icon: Icons.lock_outline,
-            title: 'Two – Factor Authentication (2FA)',
+            title: 'Xác thực hai lớp (2FA)',
             value: _twoFA,
             onChanged: (v) => setState(() => _twoFA = v),
           ),
           const Divider(height: 18, thickness: 1, color: Color(0x11000000)),
           _switchTile(
             icon: Icons.fingerprint,
-            title: 'Biometrics',
-            subtitle: 'Fingerprint or Face Recognition',
+            title: 'Sinh trắc học',
+            subtitle: 'Vân tay hoặc nhận diện khuôn mặt',
             value: _biometrics,
             onChanged: (v) => setState(() => _biometrics = v),
           ),
@@ -260,7 +249,6 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
     );
   }
 
-  // ✅ GỘP CHUNG: dùng được cả có/không subtitle
   Widget _switchTile({
     IconData? icon,
     required String title,
@@ -270,7 +258,7 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
     double scale = 0.8,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2), // gọn hơn
+      padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         children: [
           Icon(icon ?? Icons.lock_outline, color: blue, size: 20),
@@ -316,8 +304,6 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
     );
   }
 
-  // ===== LOGIN HISTORY =====
-
   Widget _loginHistoryCard() {
     return _card(
       child: ValueListenableBuilder<List<LoginHistoryItem>>(
@@ -327,13 +313,13 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
               ? <LoginHistoryItem>[
                   const LoginHistoryItem(
                     device: 'iPhone 13',
-                    location: 'Ho Chi Minh City',
-                    time: 'Today, 10:30AM',
+                    location: 'TP. Hồ Chí Minh',
+                    time: 'Hôm nay, 10:30',
                   ),
                   const LoginHistoryItem(
                     device: 'iPad Pro',
-                    location: 'Ho Chi Minh City',
-                    time: '2 days ago, 9:00AM',
+                    location: 'TP. Hồ Chí Minh',
+                    time: '2 ngày trước, 9:00',
                   ),
                 ]
               : list;
@@ -401,15 +387,13 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
     );
   }
 
-  // ===== PRIVACY =====
-
   Widget _privacyCard(BuildContext context) {
     return _card(
       child: Column(
         children: [
           _arrowRow(
             icon: Icons.privacy_tip_outlined,
-            text: 'Privacy Policy',
+            text: 'Chính sách quyền riêng tư',
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen()),
@@ -418,7 +402,7 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
           const Divider(height: 18, thickness: 1, color: Color(0x11000000)),
           _arrowRow(
             icon: Icons.description_outlined,
-            text: 'Terms of Service',
+            text: 'Điều khoản sử dụng',
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const TermsOfServiceScreen()),
@@ -458,8 +442,6 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
       ),
     );
   }
-
-  // ===== CARD BASE =====
 
   Widget _card({required Widget child}) {
     return Container(
