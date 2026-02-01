@@ -2,12 +2,18 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:Care_AI/screens/home/home.dart';
 import 'package:image_picker/image_picker.dart';
-import 'profile_store.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class CreateProfileScreen extends StatefulWidget {
+  final String nguoiDungId;
   final String phone;
-  const CreateProfileScreen({super.key, required this.phone});
+  const CreateProfileScreen({
+    super.key,
+    required this.nguoiDungId,
+    required this.phone,
+  });
 
   @override
   State<CreateProfileScreen> createState() => _CreateProfileScreenState();
@@ -62,11 +68,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _phoneCtrl.text = normalizePhone(widget.phone);
-
-    _nameCtrl.addListener(() {
-      setState(() {});
-    });
+    _phoneCtrl.text = widget.phone;
   }
 
   @override
@@ -86,20 +88,6 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
         borderRadius: BorderRadius.circular(8),
         borderSide: BorderSide(color: c, width: w),
       );
-
-  String normalizePhone(String raw) {
-    final digits = raw.replaceAll(RegExp(r'\D'), '');
-
-    if (digits.length == 10) {
-      return digits;
-    }
-
-    if (digits.length == 9) {
-      return '0$digits';
-    }
-
-    return raw;
-  }
 
   void _pickDob() {
     final now = DateTime.now();
@@ -130,26 +118,49 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
     setState(() => _avatarFile = File(picked.path));
   }
 
-  void _onContinue() {
+  String toIso(String s) {
+    final p = s.split('/');
+    return DateTime(
+      int.parse(p[2]),
+      int.parse(p[1]),
+      int.parse(p[0]),
+    ).toIso8601String();
+  }
+
+  Future<void> _onContinue() async {
     setState(() => _submitted = true);
+
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
-    ProfileStore.profile.value = UserProfile(
-      fullName: _nameCtrl.text.trim(),
-      dob: _dobCtrl.text.trim(),
-      gender: _gender ?? '',
-      height: _heightCtrl.text.trim(),
-      weight: _weightCtrl.text.trim(),
-      phone: _phoneCtrl.text.trim(),
-      email: _emailCtrl.text.trim(),
-      address: _addressCtrl.text.trim(),
-      avatarFile: _avatarFile,
-    );
+    try {
+      await ProfileApi.updateProfile(
+        nguoiDungId: widget.nguoiDungId,
+        tenND: _nameCtrl.text.trim(),
+        ngaySinh: toIso(_dobCtrl.text),
+        gioiTinh: _gender == 'Nam'
+            ? 1
+            : _gender == 'Nữ'
+                ? 0
+                : null,
+        chieuCao: double.parse(_heightCtrl.text),
+        canNang: double.parse(_weightCtrl.text),
+        email: _emailCtrl.text.trim(),
+        diaChi: _addressCtrl.text.trim(),
+      );
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
-    );
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Dữ liệu không hợp lệ'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   // ===== UI =====
@@ -181,9 +192,12 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
                         controller: _nameCtrl,
                         required: true,
                         hint: 'Nguyen Van A',
-                        validator: (v) => (v ?? '').trim().isEmpty
-                            ? 'Trường Họ và tên là bắt buộc.'
-                            : null,
+                        validator: (v) {
+                          if ((v ?? '').trim().isEmpty) {
+                            return 'Trường Họ và tên là bắt buộc.';
+                          }
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 10),
                       _input(
@@ -245,9 +259,12 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
                         hint: '160',
                         keyboardType: TextInputType.number,
                         suffixText: 'cm',
-                        validator: (v) => (v ?? '').trim().isEmpty
-                            ? 'Trường Chiều cao là bắt buộc.'
-                            : null,
+                        validator: (v) {
+                          if ((v ?? '').trim().isEmpty) {
+                            return 'Trường Chiều cao là bắt buộc.';
+                          }
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 10),
                       _input(
@@ -257,9 +274,12 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
                         hint: '45',
                         keyboardType: TextInputType.number,
                         suffixText: 'kg',
-                        validator: (v) => (v ?? '').trim().isEmpty
-                            ? 'Trường Cân nặng là bắt buộc.'
-                            : null,
+                        validator: (v) {
+                          if ((v ?? '').trim().isEmpty) {
+                            return 'Trường Cân nặng là bắt buộc.';
+                          }
+                          return null;
+                        },
                       ),
                     ],
                   ),
@@ -554,11 +574,12 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
                 errorBorder: _outline(Colors.red, 1.2),
                 focusedErrorBorder: _outline(Colors.red, 1.6),
               ),
-              validator: required
-                  ? (v) => (v == null || v.isEmpty)
-                      ? 'Trường giới tính là bắt buộc.'
-                      : null
-                  : null,
+              validator: (v) {
+                if (v == null || v.isEmpty) {
+                  return 'Trường giới tính là bắt buộc.';
+                }
+                return null;
+              },
             ),
           ),
         ),
@@ -622,5 +643,40 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
         ),
       ),
     );
+  }
+}
+
+class ProfileApi {
+  static const _baseUrl = 'http://10.0.2.2:3000';
+
+  static Future<void> updateProfile({
+    required String nguoiDungId,
+    required String tenND,
+    required String ngaySinh,
+    int? gioiTinh,
+    required double chieuCao,
+    required double canNang,
+    String? email,
+    String? diaChi,
+  }) async {
+    final res = await http.put(
+      Uri.parse('$_baseUrl/profile/update'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'nguoiDungId': nguoiDungId,
+        'tenND': tenND,
+        'ngaySinh': ngaySinh,
+        'gioiTinh': gioiTinh,
+        'chieuCao': chieuCao,
+        'canNang': canNang,
+        'email': email,
+        'diaChi': diaChi,
+      }),
+    );
+
+    final data = jsonDecode(res.body);
+    if (res.statusCode != 200 || data['success'] != true) {
+      throw Exception(data['message'] ?? 'Cập nhật thất bại');
+    }
   }
 }

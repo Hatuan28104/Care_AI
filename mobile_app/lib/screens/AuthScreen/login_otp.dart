@@ -85,7 +85,7 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
 
     try {
       // 🔥 VERIFY LOGIN OTP
-      await AuthApi.verifyOtp(
+      final user = await AuthApi.verifyOtp(
         widget.phoneE164,
         otp,
       );
@@ -96,7 +96,8 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
         context,
         MaterialPageRoute(
           builder: (_) => CreateProfileScreen(
-            phone: widget.displayPhone,
+            nguoiDungId: user.nguoiDungId,
+            phone: user.soDienThoai,
           ),
         ),
       );
