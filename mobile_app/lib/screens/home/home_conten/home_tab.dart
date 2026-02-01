@@ -45,30 +45,38 @@ class HomeTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const SizedBox(height: 20),
+        const SizedBox(height: 10),
         Expanded(child: _content(context)),
       ],
     );
   }
 
+  // ===== CONTENT =====
   Widget _content(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _welcomeCard(context),
+          const SizedBox(height: 10),
+
           _sectionHeader(
-            title: 'Nhân vật số',
+            title: 'Digital Human',
             action: () => _go(context, const DigitalHumanAllScreen()),
           ),
           const SizedBox(height: 12),
           _digitalHumanList(),
-          const SizedBox(height: 22),
+
+          const SizedBox(height: 26),
+
+          // ===== HEALTH CATEGORY =====
           const Text(
             'Danh mục sức khỏe',
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 12),
+
           _categoryItem(
             icon: Icons.accessibility_new,
             iconColor: Colors.purple,
@@ -78,7 +86,7 @@ class HomeTab extends StatelessWidget {
               const BasicHealthDataScreen(),
             ),
           ),
-          const SizedBox(height: 3),
+          const SizedBox(height: 6),
           _categoryItem(
             icon: Icons.local_fire_department,
             iconColor: Colors.red,
@@ -88,12 +96,84 @@ class HomeTab extends StatelessWidget {
               const ActivityDataScreen(),
             ),
           ),
+
           const SizedBox(height: 40),
         ],
       ),
     );
   }
 
+  // ===== WELCOME CARD =====
+  Widget _welcomeCard(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xFF1F41BB),
+            Color(0xFF1877F2),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                Text(
+                  'Xin chào 👋',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                SizedBox(height: 2),
+                Text(
+                  'Hôm nay bạn muốn\nđược hỗ trợ điều gì?',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: Color(0xFF1F41BB),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            onPressed: () {
+              _go(
+                context,
+                ChatScreen(
+                  name: 'Luna – Y tá',
+                  role: 'Hỗ trợ chăm sóc tận tình và tư vấn y tế.',
+                  image: 'assets/images/Luna.png',
+                  intro:
+                      'Xin chào 👋 Tôi có thể hỗ trợ bạn hôm nay như thế nào?',
+                ),
+              );
+            },
+            child: const Text(
+              'Bắt đầu',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ===== DIGITAL HUMAN LIST =====
   Widget _digitalHumanList() {
     return SizedBox(
       height: 230,
@@ -107,6 +187,7 @@ class HomeTab extends StatelessWidget {
     );
   }
 
+  // ===== SECTION HEADER =====
   Widget _sectionHeader({required String title, VoidCallback? action}) {
     return Row(
       children: [
@@ -121,27 +202,27 @@ class HomeTab extends StatelessWidget {
             child: const Text(
               'Tất cả',
               style: TextStyle(
-                  color: Color(0xFF1877F2),
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500),
+                color: Color(0xFF1877F2),
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
       ],
     );
   }
 
+  // ===== HUMAN CARD =====
   Widget _humanCard(BuildContext context, Map<String, String> h) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
+        _go(
           context,
-          MaterialPageRoute(
-            builder: (_) => ChatScreen(
-              name: h['name']!,
-              role: h['desc']!,
-              image: h['img']!,
-              intro: "Xin chào 👋 Tôi có thể hỗ trợ bạn hôm nay như thế nào?",
-            ),
+          ChatScreen(
+            name: h['name']!,
+            role: h['desc']!,
+            image: h['img']!,
+            intro: 'Xin chào 👋 Tôi có thể hỗ trợ bạn hôm nay như thế nào?',
           ),
         );
       },
@@ -199,6 +280,7 @@ class HomeTab extends StatelessWidget {
     );
   }
 
+  // ===== CATEGORY ITEM =====
   Widget _categoryItem({
     required IconData icon,
     required Color iconColor,
@@ -235,7 +317,11 @@ class HomeTab extends StatelessWidget {
     );
   }
 
+  // ===== NAVIGATION =====
   static void _go(BuildContext context, Widget page) {
-    Navigator.push(context, MaterialPageRoute(builder: (_) => page));
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => page),
+    );
   }
 }

@@ -51,6 +51,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   final _phoneCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _addressCtrl = TextEditingController();
+  final _genderCtrl = TextEditingController();
 
   String? _gender;
 
@@ -71,6 +72,8 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     _nameCtrl.text = p.fullName;
     _dobCtrl.text = p.dob;
     _gender = p.gender.isEmpty ? null : p.gender;
+    _genderCtrl.text = _gender ?? '';
+
     _heightCtrl.text = p.height;
     _weightCtrl.text = p.weight;
     _phoneCtrl.text = p.phone;
@@ -88,6 +91,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     _phoneCtrl.dispose();
     _emailCtrl.dispose();
     _addressCtrl.dispose();
+    _genderCtrl.dispose();
     super.dispose();
   }
 
@@ -447,7 +451,6 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     );
   }
 
-  // ===== GENDER (GIỐNG CREATE 100%) =====
   Widget _genderDropdown({bool required = true}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -460,49 +463,86 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
               if (required)
                 const TextSpan(
                   text: ' *',
-                  style: TextStyle(color: Colors.red),
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
             ],
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 4),
         GestureDetector(
-          onTapDown: !_isEditing
-              ? null
-              : (d) async {
-                  final v = await showMenu<String>(
-                    context: context,
-                    position: RelativeRect.fromLTRB(
-                      d.globalPosition.dx + 200,
-                      d.globalPosition.dy + 40,
-                      12,
-                      0,
-                    ),
-                    items: const [
-                      PopupMenuItem(value: 'Nam', child: Text('Nam')),
-                      PopupMenuItem(value: 'Nữ', child: Text('Nữ')),
-                      PopupMenuItem(value: 'Khác', child: Text('Khác')),
-                    ],
-                  );
-                  if (v != null) setState(() => _gender = v);
-                },
+          onTapDown: (d) => _showGenderMenu(d),
           child: AbsorbPointer(
             child: TextFormField(
-              controller: TextEditingController(text: _gender),
+              controller: _genderCtrl,
+              readOnly: true,
               style: _fieldTextStyle,
               decoration: InputDecoration(
                 hintText: 'Chọn giới tính',
                 hintStyle: _hintStyle,
                 isDense: true,
                 contentPadding: _fieldPadding,
+                suffixIcon: Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: Icon(
+                    Icons.arrow_drop_down,
+                    color: _blue,
+                  ),
+                ),
+                suffixIconConstraints:
+                    const BoxConstraints(minWidth: 0, minHeight: 0),
                 enabledBorder: _outline(_borderBlue, 1.2),
                 focusedBorder: _outline(_borderBlue, 1.6),
-                suffixIcon: Icon(Icons.arrow_drop_down, color: _blue),
+                errorBorder: _outline(Colors.red, 1.2),
+                focusedErrorBorder: _outline(Colors.red, 1.6),
               ),
+              validator: required
+                  ? (v) => (v == null || v.isEmpty)
+                      ? 'Trường giới tính là bắt buộc.'
+                      : null
+                  : null,
             ),
           ),
         ),
       ],
     );
+  }
+
+  void _showGenderMenu(TapDownDetails d) async {
+    final selected = await showMenu<String>(
+      context: context,
+      position: RelativeRect.fromLTRB(
+        d.globalPosition.dx,
+        d.globalPosition.dy + 20,
+        0,
+        0,
+      ),
+      items: const [
+        PopupMenuItem(
+          value: 'Nam',
+          height: 32,
+          child: Text('Nam'),
+        ),
+        PopupMenuItem(
+          value: 'Nữ',
+          height: 32,
+          child: Text('Nữ'),
+        ),
+        PopupMenuItem(
+          value: 'Khác',
+          height: 32,
+          child: Text('Khác'),
+        ),
+      ],
+    );
+
+    if (selected != null) {
+      setState(() {
+        _gender = selected;
+        _genderCtrl.text = selected;
+      });
+    }
   }
 }

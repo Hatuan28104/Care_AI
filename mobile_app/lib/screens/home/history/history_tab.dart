@@ -4,9 +4,8 @@ import 'history_detail.dart';
 class HistoryTab extends StatelessWidget {
   const HistoryTab({super.key});
 
-  // ===== COLORS (theo Home) =====
+  // ===== COLORS =====
   static const Color primary = Color(0xFF1F41BB);
-  static const Color accent = Color(0xFF1877F2);
   static const Color bgItem = Color(0xFFF6F6F6);
 
   @override
@@ -28,7 +27,7 @@ class HistoryTab extends StatelessWidget {
         'Lịch sử',
         style: TextStyle(
           fontSize: 24,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
           color: primary,
         ),
       ),
@@ -85,7 +84,10 @@ class HistoryTab extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => ChatDetailScreen(title: title, subtitle: time),
+            builder: (_) => ChatDetailScreen(
+              title: title,
+              subtitle: time,
+            ),
           ),
         );
       },
@@ -122,7 +124,10 @@ class HistoryTab extends StatelessWidget {
             ),
             GestureDetector(
               onTap: () => _showActions(context),
-              child: const Icon(Icons.more_vert, color: Colors.grey),
+              child: const Icon(
+                Icons.more_vert,
+                color: Colors.grey,
+              ),
             ),
           ],
         ),
@@ -137,25 +142,85 @@ class HistoryTab extends StatelessWidget {
       backgroundColor: Colors.transparent,
       builder: (_) {
         return Container(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           decoration: const BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(20),
+            ),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: const [
-              Text(
-                'Chọn hành động',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
+            children: [
+              // ===== HANDLE =====
+              Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
                 ),
+              ),
+              // ===== VIEW DETAILS =====
+              _actionItem(
+                icon: Icons.visibility_outlined,
+                text: 'Xem',
+                color: Colors.black,
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
+
+              const SizedBox(height: 10),
+
+              // ===== DELETE =====
+              _actionItem(
+                icon: Icons.delete_outline,
+                text: 'Xóa',
+                color: Colors.red,
+                onTap: () {
+                  Navigator.pop(context);
+                },
               ),
             ],
           ),
         );
       },
+    );
+  }
+
+  // ===== ACTION ITEM =====
+  static Widget _actionItem({
+    required IconData icon,
+    required String text,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+        decoration: BoxDecoration(
+          color: bgItem,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: color),
+            const SizedBox(width: 12),
+            Text(
+              text,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

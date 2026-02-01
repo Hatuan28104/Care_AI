@@ -111,7 +111,7 @@ class _Paragraph extends StatelessWidget {
       child: Text(
         text,
         style: const TextStyle(
-          fontSize: 12,
+          fontSize: 14,
           fontWeight: FontWeight.w400,
           color: Colors.black,
           height: 1.5,
@@ -138,7 +138,7 @@ class _Bullet extends StatelessWidget {
             child: Text(
               text,
               style: const TextStyle(
-                fontSize: 12,
+                fontSize: 14,
                 color: Colors.black,
                 height: 1.5,
               ),

@@ -118,7 +118,7 @@ class _Paragraph extends StatelessWidget {
       child: Text(
         text,
         style: const TextStyle(
-          fontSize: 12,
+          fontSize: 14,
           color: Color.fromARGB(255, 0, 0, 0),
           height: 1.5,
         ),

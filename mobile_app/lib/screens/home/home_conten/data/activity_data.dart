@@ -2,28 +2,35 @@ import 'package:flutter/material.dart';
 import 'activity_item.dart';
 import 'activity_detail.dart';
 
-class ActivityDataScreen extends StatelessWidget {
+class ActivityDataScreen extends StatefulWidget {
   const ActivityDataScreen({super.key});
 
-  static const Color _bg = Color(0xFFF6F6F6);
+  @override
+  State<ActivityDataScreen> createState() => _ActivityDataScreenState();
+}
 
+class _ActivityDataScreenState extends State<ActivityDataScreen> {
+  static const Color _bg = Color(0xFFF6F6F6);
   static const EdgeInsets _listPadding = EdgeInsets.fromLTRB(18, 2, 18, 18);
   static const BorderRadius _cardRadius = BorderRadius.all(Radius.circular(10));
 
-  // ===== DEMO DATA (TỰ QUẢN – KHÔNG DÍNH HOME) =====
-  static final List<ActivityItem> _items = [
+  final TextEditingController _searchCtrl = TextEditingController();
+  String _keyword = '';
+
+  // ===== DEMO DATA =====
+  final List<ActivityItem> _items = [
     ActivityItem(
       icon: Icons.directions_walk,
       iconColor: Colors.red,
-      title: 'Steps',
+      title: 'Số bước',
       value: 600,
-      unit: 'steps',
+      unit: 'bước',
       time: '18:30',
     ),
     ActivityItem(
       icon: Icons.route,
       iconColor: Colors.orange,
-      title: 'Walking + Running Distance',
+      title: 'Quãng đường đi bộ + chạy',
       value: 3,
       unit: 'km',
       time: '18:30',
@@ -31,15 +38,15 @@ class ActivityDataScreen extends StatelessWidget {
     ActivityItem(
       icon: Icons.bedtime,
       iconColor: Colors.indigo,
-      title: 'Sleep duration',
+      title: 'Thời gian ngủ',
       value: 7,
-      unit: 'hours',
+      unit: 'giờ',
       time: '18:30',
     ),
     ActivityItem(
       icon: Icons.auto_graph,
       iconColor: Colors.blue,
-      title: 'Sleep quality',
+      title: 'Chất lượng giấc ngủ',
       value: 85,
       unit: '%',
       time: '18:30',
@@ -47,16 +54,18 @@ class ActivityDataScreen extends StatelessWidget {
     ActivityItem(
       icon: Icons.local_fire_department,
       iconColor: Colors.purple,
-      title: 'Exercise level',
+      title: 'Thời gian vận động',
       value: 50,
-      unit: 'minutes',
+      unit: 'phút',
       time: '18:30',
     ),
   ];
 
   @override
   Widget build(BuildContext context) {
-    final items = _items;
+    final filteredItems = _items.where((e) {
+      return e.title.toLowerCase().contains(_keyword.toLowerCase());
+    }).toList();
 
     return Scaffold(
       backgroundColor: _bg,
@@ -64,14 +73,15 @@ class ActivityDataScreen extends StatelessWidget {
         child: Column(
           children: [
             _header(context),
+            _searchBox(),
             Expanded(
-              child: items.isEmpty
-                  ? const Center(child: Text('No data yet'))
+              child: filteredItems.isEmpty
+                  ? const Center(child: Text('Không có dữ liệu'))
                   : ListView.separated(
                       padding: _listPadding,
-                      itemCount: items.length,
+                      itemCount: filteredItems.length,
                       separatorBuilder: (_, __) => const SizedBox(height: 10),
-                      itemBuilder: (_, i) => _tile(context, items[i]),
+                      itemBuilder: (_, i) => _tile(context, filteredItems[i]),
                     ),
             ),
           ],
@@ -83,36 +93,55 @@ class ActivityDataScreen extends StatelessWidget {
   // ===== HEADER =====
   Widget _header(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(18, 14, 18, 2),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.fromLTRB(18, 14, 18, 6),
+      child: Row(
         children: [
-          Row(
-            children: [
-              InkWell(
-                onTap: () => Navigator.pop(context),
-                borderRadius: BorderRadius.circular(999),
-                child: const Padding(
-                  padding: EdgeInsets.all(6),
-                  child: Icon(Icons.arrow_back_ios_new, size: 20),
-                ),
-              ),
-              const SizedBox(width: 10),
-              const Expanded(
-                child: Text(
-                  'Dữ liệu sức khỏe',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 34),
-            ],
+          InkWell(
+            onTap: () => Navigator.pop(context),
+            borderRadius: BorderRadius.circular(999),
+            child: const Padding(
+              padding: EdgeInsets.all(6),
+              child: Icon(Icons.arrow_back_ios_new, size: 20),
+            ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(width: 10),
+          const Expanded(
+            child: Text(
+              'Dữ liệu sức khỏe',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          const SizedBox(width: 34),
+          const SizedBox(height: 50),
         ],
+      ),
+    );
+  }
+
+  // ===== SEARCH =====
+  Widget _searchBox() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(18, 0, 18, 12),
+      child: TextField(
+        controller: _searchCtrl,
+        onChanged: (v) {
+          setState(() => _keyword = v);
+        },
+        decoration: InputDecoration(
+          hintText: 'Tìm kiếm dữ liệu...',
+          prefixIcon: const Icon(Icons.search),
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+        ),
       ),
     );
   }
@@ -135,7 +164,7 @@ class ActivityDataScreen extends StatelessWidget {
         );
       },
       child: Container(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: _cardRadius,
@@ -158,8 +187,8 @@ class ActivityDataScreen extends StatelessWidget {
 
   Widget _iconBox(ActivityItem m) {
     return Container(
-      width: 38,
-      height: 38,
+      width: 46,
+      height: 46,
       decoration: BoxDecoration(
         color: m.iconColor.withOpacity(.12),
         borderRadius: BorderRadius.circular(10),

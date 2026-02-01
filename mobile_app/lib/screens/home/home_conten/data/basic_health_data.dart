@@ -2,20 +2,27 @@ import 'package:flutter/material.dart';
 import 'basic_health_item.dart';
 import 'basic_health_detail.dart';
 
-class BasicHealthDataScreen extends StatelessWidget {
+class BasicHealthDataScreen extends StatefulWidget {
   const BasicHealthDataScreen({super.key});
 
-  static const Color _bg = Color(0xFFF6F6F6);
+  @override
+  State<BasicHealthDataScreen> createState() => _BasicHealthDataScreenState();
+}
 
+class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
+  static const Color _bg = Color(0xFFF6F6F6);
   static const EdgeInsets _pagePadding = EdgeInsets.fromLTRB(18, 2, 18, 18);
   static const BorderRadius _cardRadius = BorderRadius.all(Radius.circular(10));
 
-  // ===== DEMO DATA (TỰ QUẢN – KHÔNG DÍNH HOME) =====
-  static final List<BasicHealthItem> _items = [
+  final TextEditingController _searchCtrl = TextEditingController();
+  String _keyword = '';
+
+  // ===== DEMO DATA =====
+  final List<BasicHealthItem> _items = [
     BasicHealthItem(
       icon: Icons.favorite,
       iconColor: Colors.red,
-      title: 'Heart rate',
+      title: 'Nhịp tim',
       value: '72',
       unit: 'BPM',
       time: '18:30',
@@ -23,7 +30,7 @@ class BasicHealthDataScreen extends StatelessWidget {
     BasicHealthItem(
       icon: Icons.bloodtype,
       iconColor: Colors.blue,
-      title: 'Blood pressure',
+      title: 'Huyết áp',
       value: '120 / 80',
       unit: 'mmHg',
       time: '18:30',
@@ -31,7 +38,7 @@ class BasicHealthDataScreen extends StatelessWidget {
     BasicHealthItem(
       icon: Icons.monitor_heart,
       iconColor: Colors.indigo,
-      title: 'Blood oxygen - SpO₂',
+      title: 'Nồng độ oxy máu (SpO₂)',
       value: '98',
       unit: '%',
       time: '18:30',
@@ -39,7 +46,7 @@ class BasicHealthDataScreen extends StatelessWidget {
     BasicHealthItem(
       icon: Icons.thermostat,
       iconColor: Colors.orange,
-      title: 'Body temperature',
+      title: 'Nhiệt độ cơ thể',
       value: '36.8',
       unit: '°C',
       time: '18:30',
@@ -47,7 +54,7 @@ class BasicHealthDataScreen extends StatelessWidget {
     BasicHealthItem(
       icon: Icons.fitness_center,
       iconColor: Colors.purple,
-      title: 'BMI',
+      title: 'Chỉ số BMI',
       value: '21.5',
       unit: 'kg/m²',
       time: '18:30',
@@ -55,8 +62,16 @@ class BasicHealthDataScreen extends StatelessWidget {
   ];
 
   @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final items = _items;
+    final filteredItems = _items.where((e) {
+      return e.title.toLowerCase().contains(_keyword.toLowerCase());
+    }).toList();
 
     return Scaffold(
       backgroundColor: _bg,
@@ -64,14 +79,15 @@ class BasicHealthDataScreen extends StatelessWidget {
         child: Column(
           children: [
             _header(context),
+            _searchBox(),
             Expanded(
-              child: items.isEmpty
-                  ? const Center(child: Text('No data yet'))
+              child: filteredItems.isEmpty
+                  ? const Center(child: Text('Không có dữ liệu'))
                   : ListView.separated(
                       padding: _pagePadding,
-                      itemCount: items.length,
+                      itemCount: filteredItems.length,
                       separatorBuilder: (_, __) => const SizedBox(height: 10),
-                      itemBuilder: (_, i) => _tile(context, items[i]),
+                      itemBuilder: (_, i) => _tile(context, filteredItems[i]),
                     ),
             ),
           ],
@@ -83,36 +99,55 @@ class BasicHealthDataScreen extends StatelessWidget {
   // ===== HEADER =====
   Widget _header(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(18, 14, 18, 2),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.fromLTRB(18, 14, 18, 6),
+      child: Row(
         children: [
-          Row(
-            children: [
-              InkWell(
-                onTap: () => Navigator.pop(context),
-                borderRadius: BorderRadius.circular(999),
-                child: const Padding(
-                  padding: EdgeInsets.all(6),
-                  child: Icon(Icons.arrow_back_ios_new, size: 20),
-                ),
-              ),
-              const SizedBox(width: 10),
-              const Expanded(
-                child: Text(
-                  'Dữ liệu hoạt động',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 34),
-            ],
+          InkWell(
+            onTap: () => Navigator.pop(context),
+            borderRadius: BorderRadius.circular(999),
+            child: const Padding(
+              padding: EdgeInsets.all(6),
+              child: Icon(Icons.arrow_back_ios_new, size: 20),
+            ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(width: 10),
+          const Expanded(
+            child: Text(
+              'Dữ liệu hoạt động',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          const SizedBox(width: 34),
+          const SizedBox(height: 50),
         ],
+      ),
+    );
+  }
+
+  // ===== SEARCH =====
+  Widget _searchBox() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(18, 0, 18, 12),
+      child: TextField(
+        controller: _searchCtrl,
+        onChanged: (v) {
+          setState(() => _keyword = v);
+        },
+        decoration: InputDecoration(
+          hintText: 'Tìm kiếm dữ liệu...',
+          prefixIcon: const Icon(Icons.search),
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+        ),
       ),
     );
   }
