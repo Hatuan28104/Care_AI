@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:intl_phone_field/phone_number.dart' as ipn;
+import 'package:Care_AI/api/auth_api.dart';
 
 class LoginForm extends StatefulWidget {
   final void Function(String phoneE164, String displayPhone) onOtp;
@@ -20,6 +21,7 @@ class _LoginFormState extends State<LoginForm> {
   static const _buttonColor = Color(0xFF1877F2);
   static const _fieldBg = Color(0xFFF6F6F6);
   static const _errorMsg = 'Vui lòng kiểm tra và nhập đúng số điện thoại!';
+  String? _serverError;
 
   static const _borderSide = BorderSide(
     color: Color(0xFFCFCECE),
@@ -49,17 +51,25 @@ class _LoginFormState extends State<LoginForm> {
     return p.completeNumber;
   }
 
-  void _goOtp() {
+  Future<void> _goOtp() async {
     setState(() => _submitted = true);
 
     if (!(_formKey.currentState?.validate() ?? false)) return;
     if (_phone == null) return;
 
-    // ✅ TRẢ DATA VỀ AUTH (KHÔNG NAVIGATOR)
-    widget.onOtp(
-      _buildE164(_phone!),
-      _rawNumber,
-    );
+    final phone = _buildE164(_phone!);
+
+    try {
+      await AuthApi.requestLoginOtp(phone);
+
+      widget.onOtp(phone, _rawNumber);
+    } catch (e) {
+      setState(() {
+        _serverError = e.toString().replaceFirst('Exception: ', '');
+      });
+
+      _formKey.currentState?.validate();
+    }
   }
 
   // ===== UI =====
@@ -93,6 +103,8 @@ class _LoginFormState extends State<LoginForm> {
               : AutovalidateMode.disabled,
           child: FormField<ipn.PhoneNumber>(
             validator: (value) {
+              if (_serverError != null) return _serverError;
+
               if (value == null) return _errorMsg;
 
               final raw = value.number.trim();
@@ -129,6 +141,7 @@ class _LoginFormState extends State<LoginForm> {
                   onChanged: (p) {
                     _phone = p;
                     _rawNumber = p.number.trim();
+                    _serverError = null;
                     state.didChange(p);
                   },
                 ),

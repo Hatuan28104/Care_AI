@@ -1,14 +1,17 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:Care_AI/api/auth_api.dart';
 
 import 'package:Care_AI/screens/settings/profile/create_profile.dart';
 
 class LoginOtpScreen extends StatefulWidget {
+  final String phoneE164;
   final String displayPhone;
   final VoidCallback onBack;
 
   const LoginOtpScreen({
     super.key,
+    required this.phoneE164,
     required this.displayPhone,
     required this.onBack,
   });
@@ -22,8 +25,6 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
   static const _button = Color(0xFF1877F2);
   static const _otpBg = Color(0xFFF6F6F6);
   static const _border = Color(0xFFCFCECE);
-
-  static const _mockOtp = '123456'; // dev only
 
   final _controllers = List.generate(6, (_) => TextEditingController());
   final _focusNodes = List.generate(6, (_) => FocusNode());
@@ -70,8 +71,8 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
   Future<void> _onContinue() async {
     final otp = _controllers.map((e) => e.text).join();
 
-    if (!RegExp(r'^\d{6}$').hasMatch(otp) || otp != _mockOtp) {
-      setState(() => _errorText = 'Mã OTP nhập không chính xác!');
+    if (!RegExp(r'^\d{6}$').hasMatch(otp)) {
+      setState(() => _errorText = 'Mã OTP không hợp lệ');
       return;
     }
 
@@ -83,6 +84,12 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
     });
 
     try {
+      // 🔥 VERIFY LOGIN OTP
+      await AuthApi.verifyOtp(
+        widget.phoneE164,
+        otp,
+      );
+
       if (!mounted) return;
 
       Navigator.pushReplacement(
@@ -93,19 +100,35 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
           ),
         ),
       );
+    } catch (e) {
+      setState(() {
+        _errorText = e.toString().replaceFirst('Exception: ', '');
+      });
     } finally {
       if (mounted) setState(() => _loading = false);
     }
   }
 
-  void _onResend() {
+  Future<void> _onResend() async {
     if (_secondsLeft > 0) return;
 
-    for (final c in _controllers) {
-      c.clear();
+    try {
+      // 🔥 LOGIN resend
+      await AuthApi.requestLoginOtp(widget.phoneE164);
+
+      for (final c in _controllers) {
+        c.clear();
+      }
+      _focusNodes.first.requestFocus();
+      _startTimer();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(
+          e.toString().replaceFirst('Exception: ', ''),
+        )),
+      );
     }
-    _focusNodes.first.requestFocus();
-    _startTimer();
   }
 
   // ===== UI (COPY TỪ REGISTER OTP) =====

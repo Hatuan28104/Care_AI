@@ -4,6 +4,7 @@ import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:intl_phone_field/phone_number.dart' as ipn;
 import 'package:Care_AI/screens/settings/privacy_security/terms_of_service.dart';
 import 'package:Care_AI/screens/settings/privacy_security/privacy_policy.dart';
+import 'package:Care_AI/api/auth_api.dart';
 
 class RegisterForm extends StatefulWidget {
   final void Function(String phoneE164, String displayPhone) onOtp;
@@ -23,6 +24,7 @@ class _RegisterFormState extends State<RegisterForm> {
   static const _buttonColor = Color(0xFF1877F2);
   static const _fieldBg = Color(0xFFF6F6F6);
   static const _errorMsg = 'Vui lòng kiểm tra và nhập đúng số điện thoại!';
+  String? _serverError;
 
   static const _borderSide = BorderSide(
     color: Color(0xFFCFCECE),
@@ -58,7 +60,7 @@ class _RegisterFormState extends State<RegisterForm> {
     return p.completeNumber;
   }
 
-  void _onContinue() {
+  Future<void> _onContinue() async {
     setState(() => _submitted = true);
 
     if (!(_formKey.currentState?.validate() ?? false)) return;
@@ -66,8 +68,17 @@ class _RegisterFormState extends State<RegisterForm> {
 
     final phone = _buildE164(_phone!);
 
-    // ✅ CHỈ BÁO AUTH – KHÔNG PUSH
-    widget.onOtp(phone, _rawNumber);
+    try {
+      await AuthApi.requestRegisterOtp(phone);
+
+      widget.onOtp(phone, _rawNumber);
+    } catch (e) {
+      setState(() {
+        _serverError = e.toString().replaceFirst('Exception: ', '');
+      });
+
+      _formKey.currentState?.validate(); 
+    }
   }
 
   // ===== UI =====
@@ -111,6 +122,8 @@ class _RegisterFormState extends State<RegisterForm> {
               : AutovalidateMode.disabled,
           child: FormField<ipn.PhoneNumber>(
             validator: (value) {
+              if (_serverError != null) return _serverError;
+
               if (value == null) return _errorMsg;
 
               final raw = value.number.trim();
@@ -143,6 +156,7 @@ class _RegisterFormState extends State<RegisterForm> {
                   onChanged: (p) {
                     _phone = p;
                     _rawNumber = p.number.trim();
+                    _serverError = null;
                     state.didChange(p);
                   },
                 ),

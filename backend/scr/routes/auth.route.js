@@ -1,31 +1,25 @@
 import express from "express";
-import { requestOtp, verifyOtp } from "../repos/auth.repo.js";
+import {
+  requestRegisterOtp,
+  requestLoginOtp,
+  verifyOtp,
+} from "../repos/auth.repo.js";
 
 const router = express.Router();
 
-/**
- * =============================
- * GỬI OTP
- * POST /auth/request-otp
- * body: { phone }
- * =============================
- */
-router.post("/request-otp", async (req, res) => {
+/* =========================
+   REGISTER – REQUEST OTP
+========================= */
+router.post("/register/request-otp", async (req, res) => {
   try {
     const { phone } = req.body;
+    if (!phone) throw new Error("Thiếu số điện thoại");
 
-    if (!phone) {
-      return res.status(400).json({
-        success: false,
-        message: "Thiếu số điện thoại",
-      });
-    }
-
-    await requestOtp(phone);
+    await requestRegisterOtp(phone);
 
     res.json({
       success: true,
-      message: "OTP đã được gửi",
+      message: "OTP đăng ký đã được gửi",
     });
   } catch (e) {
     res.status(400).json({
@@ -35,26 +29,39 @@ router.post("/request-otp", async (req, res) => {
   }
 });
 
-/**
- * =============================
- * XÁC THỰC OTP
- * POST /auth/verify-otp
- * body: { phone, otp }
- * =============================
- */
+/* =========================
+   LOGIN – REQUEST OTP
+========================= */
+router.post("/login/request-otp", async (req, res) => {
+  try {
+    const { phone } = req.body;
+    if (!phone) throw new Error("Thiếu số điện thoại");
+
+    await requestLoginOtp(phone);
+
+    res.json({
+      success: true,
+      message: "OTP đăng nhập đã được gửi",
+    });
+  } catch (e) {
+    res.status(400).json({
+      success: false,
+      message: e.message,
+    });
+  }
+});
+
+/* =========================
+   VERIFY OTP (CHUNG)
+========================= */
 router.post("/verify-otp", async (req, res) => {
   try {
     const { phone, otp } = req.body;
-
     if (!phone || !otp) {
-      return res.status(400).json({
-        success: false,
-        message: "Thiếu số điện thoại hoặc OTP",
-      });
+      throw new Error("Thiếu số điện thoại hoặc OTP");
     }
 
     const result = await verifyOtp(phone, otp);
-
     res.json(result);
   } catch (e) {
     res.status(401).json({

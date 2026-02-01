@@ -153,11 +153,13 @@ class _AuthScreenState extends State<AuthScreen> {
       child: _tab == AuthTab.login
           ? LoginOtpScreen(
               key: const ValueKey('login-otp'),
+              phoneE164: _phoneE164,
               displayPhone: _displayPhone,
               onBack: () => setState(() => _step = AuthStep.form),
             )
           : RegisterOtp(
               key: const ValueKey('register-otp'),
+              phoneE164: _phoneE164,
               displayPhone: _displayPhone,
               onBack: () => setState(() => _step = AuthStep.form),
             ),

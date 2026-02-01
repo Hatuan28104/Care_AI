@@ -2,13 +2,16 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:Care_AI/widgets/success_dialog.dart';
 import 'package:Care_AI/screens/welcome_screen.dart';
+import 'package:Care_AI/api/auth_api.dart';
 
 class RegisterOtp extends StatefulWidget {
+  final String phoneE164; // 🔥 thêm
   final String displayPhone;
   final VoidCallback onBack;
 
   const RegisterOtp({
     super.key,
+    required this.phoneE164,
     required this.displayPhone,
     required this.onBack,
   });
@@ -23,8 +26,6 @@ class _RegisterOtpState extends State<RegisterOtp> {
   static const _button = Color(0xFF1877F2);
   static const _otpBg = Color(0xFFF6F6F6);
   static const _border = Color(0xFFCFCECE);
-
-  static const _mockOtp = '123456'; // ✅ OTP đúng tạm thời
 
   final _controllers = List.generate(6, (_) => TextEditingController());
   final _focusNodes = List.generate(6, (_) => FocusNode());
@@ -71,10 +72,9 @@ class _RegisterOtpState extends State<RegisterOtp> {
   Future<void> _onContinue() async {
     final otp = _controllers.map((e) => e.text).join();
 
-    // ❌ Sai OTP
-    if (!RegExp(r'^\d{6}$').hasMatch(otp) || otp != _mockOtp) {
+    if (!RegExp(r'^\d{6}$').hasMatch(otp)) {
       setState(() {
-        _errorText = 'Mã OTP nhập không chính xác!';
+        _errorText = 'Mã OTP không hợp lệ';
       });
       return;
     }
@@ -87,6 +87,14 @@ class _RegisterOtpState extends State<RegisterOtp> {
     });
 
     try {
+      // 🔥 GỌI BACKEND VERIFY OTP
+      await AuthApi.verifyOtp(
+        widget.phoneE164,
+        otp,
+      );
+
+      if (!mounted) return;
+
       await SuccessDialog.show(
         context,
         title: 'Đăng ký thành công',
@@ -101,19 +109,32 @@ class _RegisterOtpState extends State<RegisterOtp> {
           builder: (_) => const WelcomeScreen(),
         ),
       );
+    } catch (e) {
+      setState(() {
+        _errorText = e.toString();
+      });
     } finally {
       if (mounted) setState(() => _loading = false);
     }
   }
 
-  void _onResend() {
+  Future<void> _onResend() async {
     if (_secondsLeft > 0) return;
 
-    for (final c in _controllers) {
-      c.clear();
+    try {
+      // 🔥 GỬI LẠI OTP ĐĂNG KÝ
+      await AuthApi.requestRegisterOtp(widget.phoneE164);
+
+      for (final c in _controllers) {
+        c.clear();
+      }
+      _focusNodes.first.requestFocus();
+      _startTimer();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
     }
-    _focusNodes.first.requestFocus();
-    _startTimer();
   }
 
   // ===== UI =====
