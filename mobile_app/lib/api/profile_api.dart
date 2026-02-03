@@ -1,39 +1,95 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'dart:io';
 
 class ProfileApi {
   static const _baseUrl = 'http://10.0.2.2:3000';
 
+  /* =========================
+     UPDATE PROFILE
+  ========================= */
   static Future<void> updateProfile({
     required String nguoiDungId,
     required String tenND,
     required String ngaySinh,
-    int? gioiTinh,
+    required int gioiTinh,
     required double chieuCao,
     required double canNang,
     String? email,
     String? diaChi,
+    File? avatarFile, // 🔥 THÊM
   }) async {
-    final res = await http.put(
+    final req = http.MultipartRequest(
+      'PUT',
       Uri.parse('$_baseUrl/profile/update'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'nguoiDungId': nguoiDungId,
-        'tenND': tenND,
-        'ngaySinh': ngaySinh,
-        'gioiTinh': gioiTinh,
-        'chieuCao': chieuCao,
-        'canNang': canNang,
-        'email': email,
-        'diaChi': diaChi,
-      }),
     );
 
-    final data = jsonDecode(res.body);
+    // ===== fields =====
+    req.fields.addAll({
+      'nguoiDungId': nguoiDungId,
+      'tenND': tenND,
+      'ngaySinh': ngaySinh,
+      'gioiTinh': gioiTinh.toString(),
+      'chieuCao': chieuCao.toString(),
+      'canNang': canNang.toString(),
+      if (email != null) 'email': email,
+      if (diaChi != null) 'diaChi': diaChi,
+    });
+
+    // ===== avatar =====
+    if (avatarFile != null) {
+      req.files.add(
+        await http.MultipartFile.fromPath(
+          'avatar', // 🔥 PHẢI ĐÚNG TÊN BE upload.single("avatar")
+          avatarFile.path,
+        ),
+      );
+    }
+
+    final res = await req.send();
+    final body = await res.stream.bytesToString();
+    final data = jsonDecode(body);
 
     if (res.statusCode != 200 || data['success'] != true) {
-      // ❗ PHẢI THROW CẢ JSON
-      throw Exception(jsonEncode(data));
+      throw Exception(data['message'] ?? 'Cập nhật thất bại');
+    }
+  }
+
+  /* =========================
+     GET PROFILE
+  ========================= */
+  static Future<Map<String, dynamic>?> getProfile(String nguoiDungId) async {
+    try {
+      final res = await http.get(
+        Uri.parse('$_baseUrl/profile/$nguoiDungId'),
+      );
+
+      if (res.statusCode == 404) return null;
+
+      if (res.body.isEmpty) return null;
+
+      final body = jsonDecode(res.body);
+
+      if (res.statusCode != 200 || body['success'] != true) {
+        return null; // 🔥 KHÔNG THROW
+      }
+
+      final raw = body['data'];
+
+      return {
+        'nguoiDungId': raw['NguoiDung_ID'],
+        'tenND': raw['TenND'],
+        'ngaySinh': raw['NgaySinh'],
+        'gioiTinh': raw['GioiTinh'] == 1 || raw['GioiTinh'] == true ? 1 : 0,
+        'chieuCao': (raw['ChieuCao'] as num?)?.toDouble(),
+        'canNang': (raw['CanNang'] as num?)?.toDouble(),
+        'email': raw['Email'],
+        'diaChi': raw['DiaChi'],
+        'avatarUrl': raw['AvatarUrl'],
+      };
+    } catch (e) {
+      // 🔥 LOGIN FLOW → NUỐT LỖI
+      return null;
     }
   }
 }

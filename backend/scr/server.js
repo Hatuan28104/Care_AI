@@ -4,13 +4,17 @@ import profileRoute from "./routes/profile.route.js";
 
 const app = express();
 
-app.use(express.json());
+// ❌ KHÔNG parse JSON GLOBAL
+// app.use(express.json());
 
-// Routes
-app.use("/auth", authRoute);
+// profile có upload → multer tự xử lý
 app.use("/profile", profileRoute);
 
-// Health check
+// auth chỉ dùng JSON → parse tại đây
+app.use("/auth", express.json(), authRoute);
+
+app.use("/uploads", express.static("uploads"));
+
 app.get("/", (req, res) => {
   res.send("CareAI Backend running");
 });

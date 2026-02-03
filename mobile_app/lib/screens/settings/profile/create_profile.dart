@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:Care_AI/api/profile_api.dart' as ProfileApi;
 
 class CreateProfileScreen extends StatefulWidget {
   final String nguoiDungId;
@@ -133,20 +134,16 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     try {
-      await ProfileApi.updateProfile(
-        nguoiDungId: widget.nguoiDungId,
-        tenND: _nameCtrl.text.trim(),
-        ngaySinh: toIso(_dobCtrl.text),
-        gioiTinh: _gender == 'Nam'
-            ? 1
-            : _gender == 'Nữ'
-                ? 0
-                : null,
-        chieuCao: double.parse(_heightCtrl.text),
-        canNang: double.parse(_weightCtrl.text),
-        email: _emailCtrl.text.trim(),
-        diaChi: _addressCtrl.text.trim(),
-      );
+      await ProfileApi.ProfileApi.updateProfile(
+          nguoiDungId: widget.nguoiDungId,
+          tenND: _nameCtrl.text.trim(),
+          ngaySinh: toIso(_dobCtrl.text),
+          gioiTinh: _gender == 'Nam' ? 1 : 0,
+          chieuCao: double.parse(_heightCtrl.text),
+          canNang: double.parse(_weightCtrl.text),
+          email: _emailCtrl.text.trim(),
+          diaChi: _addressCtrl.text.trim(),
+          avatarFile: _avatarFile);
 
       if (!mounted) return;
       Navigator.pushReplacement(
@@ -643,40 +640,5 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
         ),
       ),
     );
-  }
-}
-
-class ProfileApi {
-  static const _baseUrl = 'http://10.0.2.2:3000';
-
-  static Future<void> updateProfile({
-    required String nguoiDungId,
-    required String tenND,
-    required String ngaySinh,
-    int? gioiTinh,
-    required double chieuCao,
-    required double canNang,
-    String? email,
-    String? diaChi,
-  }) async {
-    final res = await http.put(
-      Uri.parse('$_baseUrl/profile/update'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'nguoiDungId': nguoiDungId,
-        'tenND': tenND,
-        'ngaySinh': ngaySinh,
-        'gioiTinh': gioiTinh,
-        'chieuCao': chieuCao,
-        'canNang': canNang,
-        'email': email,
-        'diaChi': diaChi,
-      }),
-    );
-
-    final data = jsonDecode(res.body);
-    if (res.statusCode != 200 || data['success'] != true) {
-      throw Exception(data['message'] ?? 'Cập nhật thất bại');
-    }
   }
 }

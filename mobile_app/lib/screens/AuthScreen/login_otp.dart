@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:Care_AI/api/auth_api.dart';
+import 'package:Care_AI/api/profile_api.dart' as profile_api;
+import 'package:Care_AI/models/current_user.dart';
+import 'package:Care_AI/screens/home/home.dart';
 
 import 'package:Care_AI/screens/settings/profile/create_profile.dart';
 
@@ -69,6 +72,8 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
 
   // ===== ACTION =====
   Future<void> _onContinue() async {
+    if (_loading) return; // 🔒 chặn double call
+
     final otp = _controllers.map((e) => e.text).join();
 
     if (!RegExp(r'^\d{6}$').hasMatch(otp)) {
@@ -76,37 +81,65 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
       return;
     }
 
-    if (_loading) return;
-
     setState(() {
       _loading = true;
       _errorText = null;
     });
 
     try {
-      // 🔥 VERIFY LOGIN OTP
-      final user = await AuthApi.verifyOtp(
-        widget.phoneE164,
-        otp,
-      );
+      // 1️⃣ Verify OTP
+      final user = await AuthApi.verifyOtp(widget.phoneE164, otp);
+      if (!mounted) return;
+
+      // 2️⃣ Lưu user
+      CurrentUser.user = user;
+
+      // 3️⃣ Check profile
+      Map<String, dynamic>? profile;
+
+      try {
+        print('🟡 CHECK PROFILE ID = ${user.nguoiDungId}');
+
+        profile = await profile_api.ProfileApi.getProfile(user.nguoiDungId);
+
+        print('🟢 PROFILE RESULT = $profile');
+      } catch (e, s) {
+        print('🔴 GET PROFILE ERROR = $e');
+        print('📌 STACKTRACE = $s');
+
+        profile = null; // 🔥 coi như chưa có profile
+      }
 
       if (!mounted) return;
 
+      if (profile == null) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => CreateProfileScreen(
+              nguoiDungId: user.nguoiDungId,
+              phone: user.soDienThoai,
+            ),
+          ),
+        );
+        return;
+      }
+
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (_) => CreateProfileScreen(
-            nguoiDungId: user.nguoiDungId,
-            phone: user.soDienThoai,
-          ),
-        ),
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
       );
+
+      return; // 🔥 BẮT BUỘC
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _errorText = e.toString().replaceFirst('Exception: ', '');
       });
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() => _loading = false);
+      }
     }
   }
 
@@ -210,7 +243,8 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
                   _focusNodes[i - 1].requestFocus();
                 }
 
-                if (i == 5 && v.isNotEmpty) {
+                if (i == 5 && v.isNotEmpty && !_loading) {
+                  FocusScope.of(context).unfocus();
                   _onContinue();
                 }
               },

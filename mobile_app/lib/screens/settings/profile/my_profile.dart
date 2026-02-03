@@ -2,7 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
-import 'profile_store.dart';
+import 'package:Care_AI/api/profile_api.dart' as profile_api;
+import 'package:Care_AI/models/current_user.dart';
 
 class MyProfileScreen extends StatefulWidget {
   const MyProfileScreen({super.key});
@@ -41,7 +42,6 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
 
   // ===== STATE =====
   bool _isEditing = false;
-  UserProfile? _backupProfile;
 
   // ===== CONTROLLERS =====
   final _nameCtrl = TextEditingController();
@@ -52,6 +52,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   final _emailCtrl = TextEditingController();
   final _addressCtrl = TextEditingController();
   final _genderCtrl = TextEditingController();
+  String? _avatarNetworkUrl;
 
   String? _gender;
 
@@ -61,25 +62,47 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _loadProfile();
+    _fetchProfileFromBE();
     _nameCtrl.addListener(() => setState(() {}));
   }
 
-  void _loadProfile() {
-    final p = ProfileStore.profile.value;
-    if (p == null) return;
+  Future<void> _fetchProfileFromBE() async {
+    try {
+      final user = CurrentUser.user;
+      if (user == null) return;
 
-    _nameCtrl.text = p.fullName;
-    _dobCtrl.text = p.dob;
-    _gender = p.gender.isEmpty ? null : p.gender;
-    _genderCtrl.text = _gender ?? '';
+      final data = await profile_api.ProfileApi.getProfile(user.nguoiDungId);
 
-    _heightCtrl.text = p.height;
-    _weightCtrl.text = p.weight;
-    _phoneCtrl.text = p.phone;
-    _emailCtrl.text = p.email;
-    _addressCtrl.text = p.address;
-    _avatarFile = p.avatarFile;
+      if (data == null) return; // 🔥 CHƯA CÓ PROFILE
+
+      _nameCtrl.text = data['tenND'] ?? '';
+      _dobCtrl.text = data['ngaySinh']?.substring(0, 10) ?? '';
+
+      _gender = data['gioiTinh'] == 1
+          ? 'Nam'
+          : data['gioiTinh'] == 0
+              ? 'Nữ'
+              : null;
+      _genderCtrl.text = _gender ?? '';
+
+      _heightCtrl.text = data['chieuCao']?.toString() ?? '';
+      _weightCtrl.text = data['canNang']?.toString() ?? '';
+      _emailCtrl.text = data['email'] ?? '';
+      _addressCtrl.text = data['diaChi'] ?? '';
+
+      // 📌 Số điện thoại (readonly)
+      _phoneCtrl.text = user.soDienThoai ?? '';
+
+      if (data['avatarUrl'] != null) {
+        _avatarFile = null;
+        _avatarNetworkUrl = 'http://10.0.2.2:3000${data['avatarUrl']}';
+      }
+
+      setState(() {});
+    } catch (e, s) {
+      debugPrint('❌ Load profile error: $e');
+      debugPrint('$s');
+    }
   }
 
   @override
@@ -121,42 +144,67 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
       maxTime: minAgeDate,
       onConfirm: (d) {
         _dobCtrl.text =
-            '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
+            '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
         setState(() {});
       },
     );
   }
 
-  void _save() {
-    ProfileStore.profile.value = UserProfile(
-      fullName: _nameCtrl.text.trim(),
-      dob: _dobCtrl.text.trim(),
-      gender: _gender ?? '',
-      height: _heightCtrl.text.trim(),
-      weight: _weightCtrl.text.trim(),
-      phone: _phoneCtrl.text.trim(),
-      email: _emailCtrl.text.trim(),
-      address: _addressCtrl.text.trim(),
-      avatarFile: _avatarFile,
-    );
-    setState(() => _isEditing = false);
+  Future<void> _save() async {
+    try {
+      final user = CurrentUser.user;
+      if (user == null) return;
+
+      final height = double.tryParse(_heightCtrl.text);
+      final weight = double.tryParse(_weightCtrl.text);
+
+      if (height == null || weight == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Chiều cao / cân nặng không hợp lệ')),
+        );
+        return;
+      }
+
+      final gioiTinh = _gender == 'Nam'
+          ? 1
+          : _gender == 'Nữ'
+              ? 0
+              : null;
+
+      if (gioiTinh == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Vui lòng chọn giới tính hợp lệ')),
+        );
+        return;
+      }
+
+      await profile_api.ProfileApi.updateProfile(
+        nguoiDungId: user.nguoiDungId,
+        tenND: _nameCtrl.text.trim(),
+        ngaySinh: _dobCtrl.text.trim(),
+        gioiTinh: gioiTinh,
+        chieuCao: height,
+        canNang: weight,
+        email: _emailCtrl.text.trim(),
+        diaChi: _addressCtrl.text.trim(),
+        avatarFile: _avatarFile,
+      );
+
+      setState(() => _isEditing = false);
+      await _fetchProfileFromBE();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Đã lưu hồ sơ thành công')),
+      );
+    } catch (e, s) {
+      debugPrint('❌ Save profile error: $e');
+      debugPrint('$s');
+    }
   }
 
-  void _cancelEdit() {
-    if (_backupProfile == null) return;
-
-    final p = _backupProfile!;
-    _nameCtrl.text = p.fullName;
-    _dobCtrl.text = p.dob;
-    _gender = p.gender.isEmpty ? null : p.gender;
-    _heightCtrl.text = p.height;
-    _weightCtrl.text = p.weight;
-    _phoneCtrl.text = p.phone;
-    _emailCtrl.text = p.email;
-    _addressCtrl.text = p.address;
-    _avatarFile = p.avatarFile;
-
+  Future<void> _cancelEdit() async {
     setState(() => _isEditing = false);
+    await _fetchProfileFromBE();
   }
 
   // ===== UI =====
@@ -296,7 +344,6 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
               : InkWell(
                   borderRadius: BorderRadius.circular(20),
                   onTap: () {
-                    _backupProfile = ProfileStore.profile.value;
                     setState(() => _isEditing = true);
                   },
                   child: const Padding(
@@ -335,9 +382,14 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                   border: Border.all(color: Colors.black, width: 2),
                 ),
                 child: ClipOval(
-                  child: _avatarFile == null
-                      ? const Icon(Icons.person, size: 60)
-                      : Image.file(_avatarFile!, fit: BoxFit.cover),
+                  child: _avatarFile != null
+                      ? Image.file(_avatarFile!, fit: BoxFit.cover)
+                      : (_avatarNetworkUrl != null
+                          ? Image.network(
+                              _avatarNetworkUrl!,
+                              fit: BoxFit.cover,
+                            )
+                          : const Icon(Icons.person, size: 60)),
                 ),
               ),
             ),
@@ -352,7 +404,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
             height: 25,
             child: OutlinedButton(
               onPressed: _pickAvatar,
-              child: const Text('Thêm ảnh'),
+              child: const Text('Cập nhật ảnh'),
             ),
           ),
         ],
