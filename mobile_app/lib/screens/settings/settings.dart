@@ -230,10 +230,10 @@ class SettingsScreen extends StatelessWidget {
 
   // ===== Text Size =====
   String _textSizeLabel(double scale) {
-    if (scale <= 0.8) return 'Nhỏ';
-    if (scale <= 1.0) return 'Mặc định';
+    if (scale <= 1.0) return 'Nhỏ';
+    if (scale <= 1.1) return 'Mặc định';
     if (scale <= 1.2) return 'Vừa';
-    if (scale <= 1.4) return 'Lớn';
+    if (scale <= 1.3) return 'Lớn';
     return 'Mặc định';
   }
 }

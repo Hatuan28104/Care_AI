@@ -1,0 +1,252 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'auth_storage.dart';
+
+class FamilyApi {
+  static const String _baseUrl = 'http://10.0.2.2:3000';
+  // 10.0.2.2 = localhost cho Android emulator
+
+  static Future<Map<String, String>> _authHeaders() async {
+    final token = await AuthStorage.getToken();
+
+    if (token == null || token.isEmpty) {
+      throw Exception('Token null trước khi gọi API');
+    }
+
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+  }
+
+/* =========================
+   GỬI LỜI MỜI BẰNG SĐT
+========================= */
+  static Future<void> sendInviteByPhone(String phone) async {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/family/invite/by-phone'),
+      headers: await _authHeaders(), // ✅ BẮT BUỘC await
+      body: jsonEncode({'phone': phone}),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode != 200 || data['success'] != true) {
+      throw Exception(data['message'] ?? 'Gửi lời mời thất bại');
+    }
+  }
+
+  /* =========================
+     DANH SÁCH LỜI MỜI ĐẾN
+  ========================= */
+  static Future<List<dynamic>> getIncomingInvites() async {
+    final url = Uri.parse(
+      '$_baseUrl/family/invite/incoming',
+    );
+
+    final response = await http.get(
+      url,
+      headers: await _authHeaders(),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode != 200 || data['success'] != true) {
+      throw Exception('Không lấy được danh sách lời mời');
+    }
+
+    return data['data'];
+  }
+
+  /* =========================
+     CHẤP NHẬN
+  ========================= */
+  static Future<void> acceptInvite(String loiMoiId) async {
+    final url = Uri.parse('$_baseUrl/family/invite/accept');
+
+    final response = await http.post(
+      url,
+      headers: await _authHeaders(),
+      body: jsonEncode({
+        'loiMoiId': loiMoiId,
+      }),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode != 200 || data['success'] != true) {
+      throw Exception(data['message'] ?? 'Accept thất bại');
+    }
+  }
+
+  /* =========================
+     TỪ CHỐI
+  ========================= */
+  static Future<void> rejectInvite(String loiMoiId) async {
+    final url = Uri.parse('$_baseUrl/family/invite/reject');
+
+    final response = await http.post(
+      url,
+      headers: await _authHeaders(),
+      body: jsonEncode({
+        'loiMoiId': loiMoiId,
+      }),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode != 200 || data['success'] != true) {
+      throw Exception(data['message'] ?? 'Reject thất bại');
+    }
+  }
+
+  /* =========================
+   DANH SÁCH NGƯỜI GIÁM HỘ
+========================= */
+  static Future<List<dynamic>> getMyGuardians() async {
+    final url = Uri.parse('$_baseUrl/family/relationship/guardians');
+
+    final response = await http.get(
+      url,
+      headers: await _authHeaders(),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode != 200 || data['success'] != true) {
+      throw Exception('Không lấy được danh sách người giám hộ');
+    }
+
+    return data['data'];
+  }
+
+/* =========================
+   DANH SÁCH NGƯỜI ĐƯỢC GIÁM HỘ
+========================= */
+  static Future<List<dynamic>> getMyDependents() async {
+    final url = Uri.parse('$_baseUrl/family/relationship/dependents');
+
+    final response = await http.get(
+      url,
+      headers: await _authHeaders(),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode != 200 || data['success'] != true) {
+      throw Exception('Không lấy được danh sách người được giám hộ');
+    }
+
+    return data['data'];
+  }
+
+/* =========================
+   KẾT THÚC QUAN HỆ GIÁM HỘ
+========================= */
+  static Future<void> endRelationship(String quanHeId) async {
+    final url = Uri.parse('$_baseUrl/family/relationship/end');
+
+    final response = await http.post(
+      url,
+      headers: await _authHeaders(),
+      body: jsonEncode({
+        'quanHeId': quanHeId,
+      }),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode != 200 || data['success'] != true) {
+      throw Exception(data['message'] ?? 'Không thể kết thúc quan hệ');
+    }
+  }
+
+/* =========================
+   DANH SÁCH QUYỀN
+========================= */
+  static Future<List<dynamic>> getPermissions() async {
+    final url = Uri.parse('$_baseUrl/family/permission');
+
+    final response = await http.get(
+      url,
+      headers: await _authHeaders(),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode != 200 || data['success'] != true) {
+      throw Exception('Không lấy được danh sách quyền');
+    }
+
+    return data['data'];
+  }
+
+/* =========================
+   QUYỀN THEO QUAN HỆ
+========================= */
+  static Future<List<dynamic>> getPermissionConfigs(String quanHeId) async {
+    final url = Uri.parse('$_baseUrl/family/permission/$quanHeId');
+
+    final response = await http.get(
+      url,
+      headers: await _authHeaders(),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode != 200 || data['success'] != true) {
+      throw Exception('Không lấy được cấu hình quyền');
+    }
+
+    return data['data'];
+  }
+
+/* =========================
+   BẬT / TẮT QUYỀN
+========================= */
+  static Future<void> savePermission({
+    required String quanHeId,
+    required String quyenId,
+    required bool active,
+  }) async {
+    final url = Uri.parse('$_baseUrl/family/permission');
+
+    final response = await http.post(
+      url,
+      headers: await _authHeaders(),
+      body: jsonEncode({
+        'quanHeId': quanHeId,
+        'quyenId': quyenId,
+        'active': active,
+      }),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode != 200 || data['success'] != true) {
+      throw Exception(data['message'] ?? 'Không lưu được quyền');
+    }
+  }
+
+  /* =========================
+   TÌM USER THEO SĐT
+========================= */
+  static Future<List<dynamic>> findUserByPhone(String phone) async {
+    final url = Uri.parse(
+      '$_baseUrl/family/invite/find-by-phone?phone=$phone',
+    );
+
+    final response = await http.get(
+      url,
+      headers: await _authHeaders(),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode != 200 || data['success'] != true) {
+      throw Exception('Không tìm được user');
+    }
+
+    return data['data'] ?? [];
+  }
+}

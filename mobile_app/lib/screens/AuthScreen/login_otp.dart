@@ -4,6 +4,7 @@ import 'package:Care_AI/api/auth_api.dart';
 import 'package:Care_AI/api/profile_api.dart' as profile_api;
 import 'package:Care_AI/models/current_user.dart';
 import 'package:Care_AI/screens/home/home.dart';
+import 'package:Care_AI/api/auth_storage.dart';
 
 import 'package:Care_AI/screens/settings/profile/create_profile.dart';
 
@@ -87,11 +88,10 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
     });
 
     try {
-      // 1️⃣ Verify OTP
       final user = await AuthApi.verifyOtp(widget.phoneE164, otp);
       if (!mounted) return;
 
-      // 2️⃣ Lưu user
+// lưu user
       CurrentUser.user = user;
 
       // 3️⃣ Check profile
@@ -224,10 +224,15 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
               maxLength: 1,
               textAlign: TextAlign.center,
               keyboardType: TextInputType.number,
+              style: const TextStyle(
+                fontSize: 18,
+                height: 1.2, // 🔥 QUAN TRỌNG
+              ),
               decoration: InputDecoration(
                 counterText: '',
                 filled: true,
                 fillColor: _otpBg,
+                contentPadding: EdgeInsets.zero, // 🔥 QUAN TRỌNG
                 enabledBorder: _borderStyle(),
                 focusedBorder: _borderStyle(),
               ),

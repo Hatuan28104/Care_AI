@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/user.dart';
+import 'auth_storage.dart';
 
 class AuthApi {
   static const String baseUrl = 'http://10.0.2.2:3000';
@@ -55,6 +56,18 @@ class AuthApi {
     final data = jsonDecode(res.body);
 
     if (res.statusCode == 200 && data['success'] == true) {
+      final token = data['token']; // 🔥 LẤY TOKEN
+      if (token == null || token.isEmpty) {
+        throw Exception('Không nhận được token');
+      }
+
+      // 🔥🔥🔥 LƯU TOKEN
+      await AuthStorage.saveToken(token);
+
+      print('🔥 TOKEN FROM API = $token');
+      await AuthStorage.saveToken(token);
+      print('🔥 TOKEN SAVED = ${AuthStorage.token}');
+
       return User.fromJson(data['user']);
     } else {
       throw Exception(data['message'] ?? 'OTP không hợp lệ');

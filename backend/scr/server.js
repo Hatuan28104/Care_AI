@@ -1,18 +1,29 @@
 import express from "express";
+
 import authRoute from "./routes/auth.route.js";
 import profileRoute from "./routes/profile.route.js";
 
+import inviteRoute from "./routes/invite.route.js";
+import relationshipRoute from "./routes/relationship.route.js";
+import permissionRoute from "./routes/permission.route.js";
+
 const app = express();
 
-// ❌ KHÔNG parse JSON GLOBAL
-// app.use(express.json());
+// middleware chung
+app.use(express.json());
 
-// profile có upload → multer tự xử lý
+// ===== FAMILY CENTER =====
+app.use("/family/invite", inviteRoute);
+app.use("/family/relationship", relationshipRoute);
+app.use("/family/permission", permissionRoute);
+
+// ===== PROFILE =====
 app.use("/profile", profileRoute);
 
-// auth chỉ dùng JSON → parse tại đây
-app.use("/auth", express.json(), authRoute);
+// ===== AUTH =====
+app.use("/auth", authRoute);
 
+// static
 app.use("/uploads", express.static("uploads"));
 
 app.get("/", (req, res) => {

@@ -1,5 +1,6 @@
 import sql from "mssql";
 import { getDB } from "../../db.js";
+import jwt from "jsonwebtoken";
 
 const otpStore = new Map();
 
@@ -120,10 +121,21 @@ export async function verifyOtp(phone, otp) {
         ON TK.NguoiDung_ID = ND.NguoiDung_ID
       WHERE TK.SoDienThoai = @sdt
     `);
+  const payload = {
+  NguoiDung_ID: user.recordset[0].NguoiDung_ID,
+  SoDienThoai: user.recordset[0].SoDienThoai,
+};
 
+const token = jwt.sign(
+  payload,
+  process.env.JWT_SECRET || "my_secret_key",
+  { expiresIn: "7d" }
+);
   return {
     success: true,
     message: "Xác thực thành công",
     user: user.recordset[0],
+    token,
   };
+
 }

@@ -40,7 +40,7 @@ class ProfileApi {
     if (avatarFile != null) {
       req.files.add(
         await http.MultipartFile.fromPath(
-          'avatar', // 🔥 PHẢI ĐÚNG TÊN BE upload.single("avatar")
+          'avatar', 
           avatarFile.path,
         ),
       );

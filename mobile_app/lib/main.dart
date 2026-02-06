@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'screens/intro_screen.dart';
 import 'app_settings.dart';
+import 'api/auth_storage.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await AuthStorage.load();
   runApp(const MyApp());
 }
 
@@ -17,7 +20,7 @@ class MyApp extends StatelessWidget {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
-            fontFamily: 'Poppins', // 👈 CHỈ 1 DÒNG
+            fontFamily: 'Poppins',
           ),
           title: 'Care AI',
           builder: (context, child) {

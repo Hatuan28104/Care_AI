@@ -65,10 +65,8 @@ class WelcomeScreen extends StatelessWidget {
   Widget _subtitle() {
     return const Text(
       'Người bạn số của bạn, sự an tâm cho cả gia đình.',
-      textAlign: TextAlign.center,
       style: TextStyle(
-        fontSize: 14,
-        height: 1,
+        fontSize: 13.5,
       ),
     );
   }

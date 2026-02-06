@@ -111,7 +111,7 @@ class _RegisterOtpState extends State<RegisterOtp> {
       );
     } catch (e) {
       setState(() {
-        _errorText = e.toString();
+        _errorText = e.toString().replaceFirst('Exception: ', '');
       });
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -195,10 +195,15 @@ class _RegisterOtpState extends State<RegisterOtp> {
               maxLength: 1,
               textAlign: TextAlign.center,
               keyboardType: TextInputType.number,
+              style: const TextStyle(
+                fontSize: 18,
+                height: 1.2, // 🔥 QUAN TRỌNG
+              ),
               decoration: InputDecoration(
                 counterText: '',
                 filled: true,
                 fillColor: _otpBg,
+                contentPadding: EdgeInsets.zero, // 🔥 QUAN TRỌNG
                 enabledBorder: _borderStyle(),
                 focusedBorder: _borderStyle(),
               ),

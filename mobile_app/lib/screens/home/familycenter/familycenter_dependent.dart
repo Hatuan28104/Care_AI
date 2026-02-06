@@ -1,26 +1,74 @@
 import 'package:flutter/material.dart';
+import 'package:Care_AI/api/family_api.dart';
 import 'familycenter_dependent_proflie.dart';
+import 'package:Care_AI/api/auth_storage.dart';
 
-class MyDependentsScreen extends StatelessWidget {
+class MyDependentsScreen extends StatefulWidget {
   const MyDependentsScreen({super.key});
 
+  @override
+  State<MyDependentsScreen> createState() => _MyDependentsScreenState();
+}
+
+class _MyDependentsScreenState extends State<MyDependentsScreen> {
   static const Color _blue = Color(0xFF1877F2);
+
+  List<dynamic> invites = [];
+  List<dynamic> dependents = [];
+  bool loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    try {
+      final incoming = await FamilyApi.getIncomingInvites();
+
+      setState(() {
+        invites = incoming;
+      });
+
+      try {
+        final deps = await FamilyApi.getMyDependents();
+        setState(() {
+          dependents = deps;
+        });
+      } catch (_) {}
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    } finally {
+      setState(() {
+        loading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return ListView(
       padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
       children: [
-        _inviteCard(context),
-        const SizedBox(height: 14),
-        _joinedCard(context),
+        ...invites.map(_inviteCard).toList(),
+        if (invites.isNotEmpty && dependents.isNotEmpty)
+          const SizedBox(height: 14),
+        ...dependents.map(_joinedCard).toList(),
       ],
     );
   }
 
   // ================= INVITE CARD =================
-  Widget _inviteCard(BuildContext context) {
+  Widget _inviteCard(dynamic inv) {
     return Container(
+      margin: const EdgeInsets.only(bottom: 14),
       height: 123,
       padding: const EdgeInsets.all(14),
       decoration: _cardDecoration(),
@@ -34,9 +82,9 @@ class MyDependentsScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                    'LiLy Lary',
-                    style: TextStyle(
+                  Text(
+                    inv['TenND'] ?? 'Không tên',
+                    style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                     ),
@@ -44,10 +92,13 @@ class MyDependentsScreen extends StatelessWidget {
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      _actionBtn('Chấp nhận', _blue),
+                      GestureDetector(
+                        onTap: () => _accept(inv['LoiMoi_ID']),
+                        child: _actionBtn('Chấp nhận', _blue),
+                      ),
                       const SizedBox(width: 16),
                       GestureDetector(
-                        onTap: () => _showDeclineDialog(context),
+                        onTap: () => _reject(inv['LoiMoi_ID']),
                         child: _actionBtn('Từ chối', const Color(0xFFFE4343)),
                       ),
                     ],
@@ -61,55 +112,21 @@ class MyDependentsScreen extends StatelessWidget {
     );
   }
 
-  void _showDeclineDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (ctx) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: Container(
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(22),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'Từ chối lời mời',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
-                ),
-                const SizedBox(height: 10),
-                const Text(
-                  'Bạn có chắc chắn muốn từ chối lời mời này không?',
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: const Text('Từ chối'),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   // ================= JOINED CARD =================
-  Widget _joinedCard(BuildContext context) {
+  Widget _joinedCard(dynamic dep) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => const DependentProfileScreen(),
+            builder: (_) => DependentProfileScreen(
+              quanHeId: dep['QuanHeGiamHo_ID'],
+            ),
           ),
         );
       },
       child: Container(
+        margin: const EdgeInsets.only(bottom: 14),
         height: 123,
         padding: const EdgeInsets.all(14),
         decoration: _cardDecoration(),
@@ -117,22 +134,22 @@ class MyDependentsScreen extends StatelessWidget {
           children: [
             _avatar(),
             const SizedBox(width: 14),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Edsel Vanily',
-                    style: TextStyle(
+                    dep['TenND'] ?? 'Không tên',
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  SizedBox(height: 6),
+                  const SizedBox(height: 6),
                   Text(
-                    'Ngày tham gia: 23/09/2025',
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                    'Ngày tham gia: ${_formatDate(dep['NgayBatDau'])}',
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                 ],
               ),
@@ -143,6 +160,18 @@ class MyDependentsScreen extends StatelessWidget {
     );
   }
 
+  // ================= ACTION =================
+  Future<void> _accept(String loiMoiId) async {
+    await FamilyApi.acceptInvite(loiMoiId);
+    _loadData();
+  }
+
+  Future<void> _reject(String loiMoiId) async {
+    await FamilyApi.rejectInvite(loiMoiId);
+    _loadData();
+  }
+
+  // ================= UI HELPERS =================
   BoxDecoration _cardDecoration() {
     return BoxDecoration(
       color: Colors.white,
@@ -188,4 +217,12 @@ class MyDependentsScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+// ================= HELPER =================
+String _formatDate(dynamic raw) {
+  if (raw == null) return '--/--/----';
+  final d = DateTime.tryParse(raw.toString());
+  if (d == null) return '--/--/----';
+  return '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
 }

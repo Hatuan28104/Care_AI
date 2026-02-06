@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class AppSettings {
   // ===== TEXT SIZE =====
-  static final ValueNotifier<double> textScale = ValueNotifier<double>(1.0);
+  static final ValueNotifier<double> textScale = ValueNotifier<double>(1.1);
 
   // ===== NOTIFICATIONS =====
   static final ValueNotifier<bool> notificationOn = ValueNotifier<bool>(false);

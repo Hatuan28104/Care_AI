@@ -3,7 +3,12 @@ import 'package:flutter/material.dart';
 import 'familycenter_configure_permissions.dart';
 
 class GuardianProfile extends StatelessWidget {
-  const GuardianProfile({super.key});
+  final String quanHeId;
+
+  const GuardianProfile({
+    super.key,
+    required this.quanHeId,
+  });
 
   static const Color blue = Color(0xFF1877F2);
   static const Color textDark = Color(0xFF0D459F);

@@ -192,10 +192,6 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
 
       setState(() => _isEditing = false);
       await _fetchProfileFromBE();
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Đã lưu hồ sơ thành công')),
-      );
     } catch (e, s) {
       debugPrint('❌ Save profile error: $e');
       debugPrint('$s');

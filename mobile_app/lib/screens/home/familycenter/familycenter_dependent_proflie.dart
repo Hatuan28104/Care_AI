@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 
 class DependentProfileScreen extends StatelessWidget {
-  const DependentProfileScreen({super.key});
+  final String quanHeId;
 
+  const DependentProfileScreen({
+    super.key,
+    required this.quanHeId,
+  });
   // ===== CONSTANTS =====
   static const Color _blue = Color(0xFF1877F2);
   static const Color _bg = Color(0xFFF6F6F6);
