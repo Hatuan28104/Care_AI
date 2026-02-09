@@ -10,7 +10,7 @@ export async function getMyGuardians(userId) {
   const rs = await db.request()
     .input("uid", sql.Char(12), userId)
     .query(`
-      SELECT QH.QuanHeGiamHo_ID,QH.NgayBatDau AS NgayBatDau, ND.NguoiDung_ID, ND.TenND
+      SELECT QH.QuanHeGiamHo_ID,QH.NgayBatDau AS NgayBatDau, ND.NguoiDung_ID, ND.TenND, ND.AvatarUrl
       FROM QuanHeGiamHo QH
       JOIN NguoiDung ND ON ND.NguoiDung_ID = QH.NguoiGiamHo_ID
       WHERE QH.NguoiDuocGiamHo_ID = @uid
@@ -29,7 +29,7 @@ export async function getMyDependents(userId) {
   const rs = await db.request()
     .input("uid", sql.Char(12), userId)
     .query(`
-      SELECT QH.QuanHeGiamHo_ID,QH.NgayBatDau AS NgayBatDau, ND.NguoiDung_ID, ND.TenND
+      SELECT QH.QuanHeGiamHo_ID,QH.NgayBatDau AS NgayBatDau, ND.NguoiDung_ID, ND.TenND,ND.AvatarUrl
       FROM QuanHeGiamHo QH
       JOIN NguoiDung ND ON ND.NguoiDung_ID = QH.NguoiDuocGiamHo_ID
       WHERE QH.NguoiGiamHo_ID = @uid
@@ -58,4 +58,56 @@ export async function endRelationship(qhId) {
   if (rs.rowsAffected[0] === 0) {
     throw new Error("Quan hệ không hợp lệ");
   }
+}
+/* =========================
+   PROFILE QUAN HỆ (GIÁM HỘ / PHỤ THUỘC)
+========================= */
+export async function getRelationshipProfile(qhId, userId) {
+  const db = await getDB();
+
+  const rs = await db.request()
+    .input("qhId", sql.Char(12), qhId)
+    .input("uid", sql.Char(12), userId)
+    .query(`
+      SELECT
+        QH.QuanHeGiamHo_ID,
+        QH.NgayBatDau,
+
+        -- xác định vai trò
+        CASE 
+          WHEN QH.NguoiDuocGiamHo_ID = @uid THEN 'GUARDIAN'
+          WHEN QH.NguoiGiamHo_ID = @uid THEN 'DEPENDENT'
+        END AS VaiTro,
+
+        ND.NguoiDung_ID,
+        ND.TenND,
+        ND.AvatarUrl,
+        ND.GioiTinh,
+        ND.NgaySinh,
+        TK.SoDienThoai
+      FROM QuanHeGiamHo QH
+
+      -- JOIN ĐÚNG NGƯỜI CẦN HIỂN THỊ
+      JOIN NguoiDung ND
+        ON ND.NguoiDung_ID = 
+          CASE 
+            WHEN QH.NguoiDuocGiamHo_ID = @uid 
+              THEN QH.NguoiGiamHo_ID
+            WHEN QH.NguoiGiamHo_ID = @uid
+              THEN QH.NguoiDuocGiamHo_ID
+          END
+
+      JOIN TaiKhoan TK
+        ON TK.NguoiDung_ID = ND.NguoiDung_ID
+
+      WHERE QH.QuanHeGiamHo_ID = @qhId
+        AND QH.DaXoa = 0
+        AND (@uid IN (QH.NguoiDuocGiamHo_ID, QH.NguoiGiamHo_ID))
+    `);
+
+  if (rs.recordset.length === 0) {
+    throw new Error("Không tìm thấy quan hệ hoặc không có quyền xem");
+  }
+
+  return rs.recordset[0];
 }

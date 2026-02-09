@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-
+import 'package:Care_AI/api/family_api.dart';
 import 'familycenter_configure_permissions.dart';
 
-class GuardianProfile extends StatelessWidget {
+class GuardianProfile extends StatefulWidget {
   final String quanHeId;
 
   const GuardianProfile({
@@ -10,29 +10,80 @@ class GuardianProfile extends StatelessWidget {
     required this.quanHeId,
   });
 
+  @override
+  State<GuardianProfile> createState() => _GuardianProfileState();
+}
+
+class _GuardianProfileState extends State<GuardianProfile> {
   static const Color blue = Color(0xFF1877F2);
-  static const Color textDark = Color(0xFF0D459F);
   static const Color bg = Color(0xFFF6F6F6);
   static const Color itemBg = Color(0xFFF6F7FB);
+
+  Map<String, dynamic>? data;
+  bool loading = true;
+  String? error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    try {
+      final res = await FamilyApi.getRelationshipProfile(widget.quanHeId);
+
+      setState(() {
+        data = res;
+        loading = false;
+      });
+    } catch (e) {
+      setState(() {
+        error = e.toString();
+        loading = false;
+      });
+    }
+  }
+
+  // ================= FORMAT HELPERS =================
+  String _formatDate(String? iso) {
+    if (iso == null || iso.isEmpty) return '';
+    final d = DateTime.parse(iso);
+    return '${d.day.toString().padLeft(2, '0')}/'
+        '${d.month.toString().padLeft(2, '0')}/'
+        '${d.year}';
+  }
+
+  String _genderText(dynamic g) {
+    if (g == true) return 'Nam';
+    if (g == false) return 'Nữ';
+    return '';
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: bg,
       body: SafeArea(
-        child: Column(
-          children: [
-            _profileHeader(context),
-            const SizedBox(height: 18),
-            _infoSection(context),
-          ],
-        ),
+        child: loading
+            ? const Center(child: CircularProgressIndicator())
+            : error != null
+                ? Center(child: Text(error!))
+                : Column(
+                    children: [
+                      _profileHeader(context),
+                      const SizedBox(height: 18),
+                      _infoSection(context),
+                    ],
+                  ),
       ),
     );
   }
 
   // ================= PROFILE HEADER =================
   Widget _profileHeader(BuildContext context) {
+    final avatar = FamilyApi.normalizeAvatar(data?['AvatarUrl']);
+
     return Column(
       children: [
         Align(
@@ -45,14 +96,15 @@ class GuardianProfile extends StatelessWidget {
         const SizedBox(height: 6),
         CircleAvatar(
           radius: 44,
-          backgroundImage: const NetworkImage(
-            'https://images.unsplash.com/photo-1607746882042-944635dfe10e',
-          ),
+          backgroundImage: avatar != null && avatar.toString().isNotEmpty
+              ? NetworkImage(avatar)
+              : null,
+          child: avatar == null ? const Icon(Icons.person, size: 40) : null,
         ),
         const SizedBox(height: 14),
-        const Text(
-          'Edsel Smith',
-          style: TextStyle(
+        Text(
+          data?['TenND'] ?? '',
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w700,
           ),
@@ -67,10 +119,10 @@ class GuardianProfile extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 18),
       child: Column(
         children: [
-          _infoItem('Họ và tên', 'Edsel Smith'),
-          _infoItem('Ngày sinh', '20/09/2000'),
-          _infoItem('Giới tính', 'Nữ'),
-          _infoItem('Ngày tham gia', '23/09/2025'),
+          _infoItem('Họ và tên', data?['TenND']),
+          _infoItem('Ngày sinh', _formatDate(data?['NgaySinh'])),
+          _infoItem('Giới tính', _genderText(data?['GioiTinh'])),
+          _infoItem('Ngày tham gia', _formatDate(data?['NgayBatDau'])),
           _permissionItem(context),
         ],
       ),
@@ -111,6 +163,11 @@ class GuardianProfile extends StatelessWidget {
 
   // ================= PERMISSION ITEM =================
   Widget _permissionItem(BuildContext context) {
+    // chỉ cho cấu hình quyền khi user là NGƯỜI GIÁM HỘ
+    if (data?['VaiTro'] != 'GUARDIAN') {
+      return const SizedBox.shrink();
+    }
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -129,7 +186,7 @@ class GuardianProfile extends StatelessWidget {
         child: Row(
           children: const [
             Text(
-              'Chia sẽ dữ liệu',
+              'Chia sẻ dữ liệu',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,

@@ -4,7 +4,8 @@ import {
   acceptInvite,
   rejectInvite,
   getInvites,
-  findUserByPhone 
+  findUserByPhone,
+  cancelInvite 
 } from "../repos/invite.repo.js";
 import { auth } from "../middlewares/auth.middleware.js";
 
@@ -31,17 +32,16 @@ router.post("/by-phone", auth, async (req, res) => {
   }
 });
 
-router.get("/find-by-phone", async (req, res) => {
+router.get("/find-by-phone", auth, async (req, res) => {
   try {
     const { phone } = req.query;
     if (!phone) throw new Error("Thiếu số điện thoại");
 
-    const user = await findUserByPhone(phone);
-    if (!user) {
-      return res.json({ success: true, data: null });
-    }
+    const currentUserId = req.user.NguoiDung_ID; 
 
-    res.json({ success: true, data: user });
+    const users = await findUserByPhone(phone, currentUserId);
+
+    res.json({ success: true, data: users });
   } catch (e) {
     res.status(400).json({
       success: false,
@@ -49,6 +49,7 @@ router.get("/find-by-phone", async (req, res) => {
     });
   }
 });
+
 
 
 /* =========================
@@ -98,6 +99,23 @@ router.get("/incoming", auth, async (req, res) => {
     const data = await getInvites(userId);
 
     res.json({ success: true, data });
+  } catch (e) {
+    res.status(400).json({
+      success: false,
+      message: e.message,
+    });
+  }
+});
+router.post("/cancel", auth, async (req, res) => {
+  try {
+    const { loiMoiId } = req.body;
+    const fromId = req.user.NguoiDung_ID; // 🔥 BẮT BUỘC
+
+    if (!loiMoiId) throw new Error("Thiếu ID lời mời");
+
+    await cancelInvite(loiMoiId, fromId);
+
+    res.json({ success: true });
   } catch (e) {
     res.status(400).json({
       success: false,

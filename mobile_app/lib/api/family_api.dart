@@ -249,4 +249,57 @@ class FamilyApi {
 
     return data['data'] ?? [];
   }
+
+/* =========================
+   PROFILE QUAN HỆ (GIÁM HỘ / PHỤ THUỘC)
+========================= */
+  static Future<Map<String, dynamic>> getRelationshipProfile(
+      String quanHeId) async {
+    final url = Uri.parse(
+      '$_baseUrl/family/relationship/profile/$quanHeId',
+    );
+
+    final response = await http.get(
+      url,
+      headers: await _authHeaders(),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode != 200 || data['success'] != true) {
+      throw Exception(data['message'] ?? 'Không lấy được profile quan hệ');
+    }
+
+    return data['data'];
+  }
+
+/* =========================
+   HỦY LỜI MỜI
+========================= */
+  static Future<void> cancelInvite(String loiMoiId) async {
+    final url = Uri.parse('$_baseUrl/family/invite/cancel');
+
+    final response = await http.post(
+      url,
+      headers: await _authHeaders(),
+      body: jsonEncode({
+        'loiMoiId': loiMoiId,
+      }),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode != 200 || data['success'] != true) {
+      throw Exception(data['message'] ?? 'Không thể hủy lời mời');
+    }
+  }
+
+  /* =========================
+   NORMALIZE AVATAR URL
+========================= */
+  static String? normalizeAvatar(String? avatar) {
+    if (avatar == null || avatar.isEmpty) return null;
+    if (avatar.startsWith('http')) return avatar;
+    return '$_baseUrl$avatar';
+  }
 }

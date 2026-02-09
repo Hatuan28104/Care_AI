@@ -12,6 +12,7 @@ class AddGuardians extends StatefulWidget {
 class _AddGuardiansState extends State<AddGuardians> {
   static const Color blue = Color(0xFF1877F2);
   static const Color bg = Color(0xFFF6F6F6);
+
   final TextEditingController _phoneCtrl = TextEditingController();
   bool _loading = false;
   List<dynamic> _foundUsers = [];
@@ -30,24 +31,42 @@ class _AddGuardiansState extends State<AddGuardians> {
             _description(),
             _phoneInput(),
             const SizedBox(height: 18),
-            if (_loading)
-              const Padding(
-                padding: EdgeInsets.all(20),
-                child: Center(child: CircularProgressIndicator()),
-              )
-            else if (_error != null)
-              Padding(
-                padding: const EdgeInsets.all(18),
-                child: Text(
-                  _error!,
-                  style: const TextStyle(color: Colors.red),
-                ),
-              )
-            else if (_foundUsers.isNotEmpty)
-              ..._foundUsers.map((u) => _guardianStyleCard(u)).toList(),
+            Expanded(
+              child: _buildResultArea(),
+            ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildResultArea() {
+    if (_loading) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    if (_error != null) {
+      return Padding(
+        padding: const EdgeInsets.all(18),
+        child: Text(
+          _error!,
+          style: const TextStyle(color: Colors.red),
+        ),
+      );
+    }
+
+    if (_foundUsers.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.only(bottom: 20),
+      itemCount: _foundUsers.length,
+      itemBuilder: (context, index) {
+        return _guardianStyleCard(_foundUsers[index]);
+      },
     );
   }
 
@@ -64,17 +83,13 @@ class _AddGuardiansState extends State<AddGuardians> {
           const SizedBox(width: 2),
           const Text(
             'Thêm mới',
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w700,
-            ),
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
           ),
         ],
       ),
     );
   }
 
-  // ================= DESCRIPTION =================
   Widget _description() {
     return const Padding(
       padding: EdgeInsets.fromLTRB(18, 0, 18, 10),
@@ -89,7 +104,6 @@ class _AddGuardiansState extends State<AddGuardians> {
     );
   }
 
-  // ================= PHONE INPUT =================
   Widget _phoneInput() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -116,68 +130,81 @@ class _AddGuardiansState extends State<AddGuardians> {
     );
   }
 
-  // ================= CARD (GIỐNG MY GUARDIANS) =================
+  // ================= CARD =================
   Widget _guardianStyleCard(Map<String, dynamic> user) {
+    print('DEBUG USER = $user');
+    final avatar = FamilyApi.normalizeAvatar(user['AvatarUrl']);
+    final status = user['inviteStatus'];
+
     return Container(
       margin: const EdgeInsets.fromLTRB(18, 0, 18, 14),
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: const [
-            BoxShadow(
-              blurRadius: 14,
-              color: Colors.black12,
-              offset: Offset(0, 6),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: const [
+          BoxShadow(
+            blurRadius: 14,
+            color: Colors.black12,
+            offset: Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              color: avatar == null ? Colors.grey.shade300 : null,
+              image: avatar != null && avatar.toString().isNotEmpty
+                  ? DecorationImage(
+                      image: NetworkImage(avatar),
+                      fit: BoxFit.cover,
+                    )
+                  : null,
             ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(14),
-                image: const DecorationImage(
-                  image: NetworkImage(
-                    'https://images.unsplash.com/photo-1607746882042-944635dfe10e',
+            child: avatar == null
+                ? const Icon(Icons.person, size: 40, color: Colors.white)
+                : null,
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  user['TenND'] ?? 'Không tên',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
                   ),
-                  fit: BoxFit.cover,
                 ),
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    user['TenND'] ?? 'Không tên',
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    if (status == 'none') ...[
                       _actionBtn('Gửi lời mời', blue, () {
                         _sendInvite(user['SoDienThoai']);
                       }),
-                      const SizedBox(width: 14),
-                      _actionBtn('Hủy', Colors.redAccent, () {
+                      const SizedBox(width: 12),
+                      _actionBtn('Hủy', Colors.red, () {
                         Navigator.pop(context);
                       }),
                     ],
-                  ),
-                ],
-              ),
+                    if (status == 'pending')
+                      _actionBtn('Hủy yêu cầu',
+                          const Color.fromARGB(174, 158, 158, 158), () {
+                        _cancelInvite(user['LoiMoi_ID']);
+                      }),
+                  ],
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -203,33 +230,79 @@ class _AddGuardiansState extends State<AddGuardians> {
     );
   }
 
+  // ================= SEND INVITE =================
   Future<void> _sendInvite(String phone) async {
-    if (phone.isEmpty) {
-      _showMsg('Số điện thoại không hợp lệ');
-      return;
-    }
-
     try {
       await FamilyApi.sendInviteByPhone(phone);
-      _showMsg('Đã gửi lời mời');
+      _showSuccessDialog();
+      _searchUser();
+    } catch (_) {}
+  }
+
+  Future<void> _cancelInvite(String loiMoiId) async {
+    try {
+      await FamilyApi.cancelInvite(loiMoiId);
+      _searchUser(); // reload danh sách
     } catch (e) {
-      _showMsg(e.toString());
+      debugPrint(e.toString());
     }
   }
 
-  void _showMsg(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg)),
+// ================= SUCCESS POPUP =================
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        Future.delayed(const Duration(seconds: 2), () {
+          if (Navigator.of(ctx).canPop()) {
+            Navigator.of(ctx).pop();
+          }
+        });
+
+        return Dialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 30, 20, 26),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 70,
+                  height: 70,
+                  decoration: const BoxDecoration(
+                    color: blue,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.check,
+                    color: Colors.white,
+                    size: 40,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'Đã gửi lời mời thành công',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 24),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
+  // ================= SEARCH =================
   Future<void> _searchUser() async {
     final phone = _phoneCtrl.text.trim();
-
-    if (phone.isEmpty) {
-      _showMsg('Vui lòng nhập số điện thoại');
-      return;
-    }
+    if (phone.isEmpty) return;
 
     setState(() {
       _loading = true;
@@ -239,36 +312,20 @@ class _AddGuardiansState extends State<AddGuardians> {
 
     try {
       final users = await FamilyApi.findUserByPhone(phone);
-
       setState(() {
         _foundUsers = users;
         _error = users.isEmpty ? 'Không tìm thấy người dùng' : null;
       });
     } catch (e) {
-      setState(() {
-        _error = e.toString();
-      });
+      setState(() => _error = e.toString());
     } finally {
-      setState(() {
-        _loading = false;
-      });
+      setState(() => _loading = false);
     }
   }
 
   void _onPhoneChanged(String value) {
-    if (_debounce?.isActive ?? false) _debounce!.cancel();
-
-    _debounce = Timer(const Duration(milliseconds: 400), () {
-      if (value.trim().length < 2) {
-        setState(() {
-          _foundUsers = [];
-          _error = null;
-        });
-        return;
-      }
-
-      _searchUser();
-    });
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 400), _searchUser);
   }
 
   @override

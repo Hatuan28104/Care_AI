@@ -1,35 +1,89 @@
 import 'package:flutter/material.dart';
+import 'package:Care_AI/api/family_api.dart';
 
-class DependentProfileScreen extends StatelessWidget {
+class DependentProfileScreen extends StatefulWidget {
   final String quanHeId;
 
   const DependentProfileScreen({
     super.key,
     required this.quanHeId,
   });
+
   // ===== CONSTANTS =====
   static const Color _blue = Color(0xFF1877F2);
   static const Color _bg = Color(0xFFF6F6F6);
   static const Color _itemBg = Color(0xFFF6F7FB);
 
   @override
+  State<DependentProfileScreen> createState() => _DependentProfileScreenState();
+}
+
+class _DependentProfileScreenState extends State<DependentProfileScreen> {
+  Map<String, dynamic>? data;
+  bool loading = true;
+  String? error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    try {
+      final res = await FamilyApi.getRelationshipProfile(widget.quanHeId);
+
+      setState(() {
+        data = res;
+        loading = false;
+      });
+    } catch (e) {
+      setState(() {
+        error = e.toString();
+        loading = false;
+      });
+    }
+  }
+
+  // ================= FORMAT HELPERS =================
+  String _formatDate(String? iso) {
+    if (iso == null || iso.isEmpty) return '';
+    final d = DateTime.parse(iso);
+    return '${d.day.toString().padLeft(2, '0')}/'
+        '${d.month.toString().padLeft(2, '0')}/'
+        '${d.year}';
+  }
+
+  String _genderText(dynamic g) {
+    if (g == true) return 'Nam';
+    if (g == false) return 'Nữ';
+    return '';
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: DependentProfileScreen._bg,
       body: SafeArea(
-        child: Column(
-          children: [
-            _profileHeader(context),
-            const SizedBox(height: 16),
-            Expanded(child: _content()),
-          ],
-        ),
+        child: loading
+            ? const Center(child: CircularProgressIndicator())
+            : error != null
+                ? Center(child: Text(error!))
+                : Column(
+                    children: [
+                      _profileHeader(context),
+                      const SizedBox(height: 16),
+                      Expanded(child: _content()),
+                    ],
+                  ),
       ),
     );
   }
 
   // ================= PROFILE HEADER =================
   Widget _profileHeader(BuildContext context) {
+    final avatar = FamilyApi.normalizeAvatar(data?['AvatarUrl']);
+
     return Column(
       children: [
         Align(
@@ -42,14 +96,15 @@ class DependentProfileScreen extends StatelessWidget {
         const SizedBox(height: 4),
         CircleAvatar(
           radius: 52,
-          backgroundImage: const NetworkImage(
-            'https://images.unsplash.com/photo-1527980965255-d3b416303d12',
-          ),
+          backgroundImage: avatar != null && avatar.toString().isNotEmpty
+              ? NetworkImage(avatar)
+              : null,
+          child: avatar == null ? const Icon(Icons.person, size: 42) : null,
         ),
         const SizedBox(height: 12),
-        const Text(
-          'Rober Joshon',
-          style: TextStyle(
+        Text(
+          data?['TenND'] ?? '',
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w700,
           ),
@@ -63,10 +118,19 @@ class DependentProfileScreen extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(18, 8, 18, 18),
       children: [
-        _infoItem('Họ và tên', 'Rober Joshon'),
-        _infoItem('Ngày sinh', '20/01/1978'),
-        _infoItem('Giới tính', 'Male'),
-        _infoItem('Ngày tham gia', '23/09/2025'),
+        _infoItem('Họ và tên', data?['TenND']),
+        _infoItem(
+          'Ngày sinh',
+          _formatDate(data?['NgaySinh']),
+        ),
+        _infoItem(
+          'Giới tính',
+          _genderText(data?['GioiTinh']),
+        ),
+        _infoItem(
+          'Ngày tham gia',
+          _formatDate(data?['NgayBatDau']),
+        ),
         const SizedBox(height: 8),
         const Text(
           'Báo cáo',
@@ -77,12 +141,12 @@ class DependentProfileScreen extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Row(
-          children: [
-            Expanded(child: _reportItem('Ngày')),
-            const SizedBox(width: 12),
-            Expanded(child: _reportItem('Tuần')),
-            const SizedBox(width: 12),
-            Expanded(child: _reportItem('Tháng')),
+          children: const [
+            Expanded(child: _ReportItem(label: 'Ngày')),
+            SizedBox(width: 12),
+            Expanded(child: _ReportItem(label: 'Tuần')),
+            SizedBox(width: 12),
+            Expanded(child: _ReportItem(label: 'Tháng')),
           ],
         ),
       ],
@@ -95,7 +159,7 @@ class DependentProfileScreen extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       decoration: BoxDecoration(
-        color: _itemBg,
+        color: DependentProfileScreen._itemBg,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
@@ -120,9 +184,15 @@ class DependentProfileScreen extends StatelessWidget {
       ),
     );
   }
+}
 
-  // ================= REPORT ITEM =================
-  static Widget _reportItem(String label) {
+// ================= REPORT ITEM =================
+class _ReportItem extends StatelessWidget {
+  final String label;
+  const _ReportItem({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       height: 64,
       decoration: BoxDecoration(
@@ -144,7 +214,8 @@ class DependentProfileScreen extends StatelessWidget {
             children: const [
               Icon(Icons.bar_chart, size: 18, color: Colors.grey),
               SizedBox(width: 4),
-              Icon(Icons.bar_chart, size: 18, color: _blue),
+              Icon(Icons.bar_chart,
+                  size: 18, color: DependentProfileScreen._blue),
               SizedBox(width: 4),
               Icon(Icons.bar_chart, size: 18, color: Colors.grey),
             ],

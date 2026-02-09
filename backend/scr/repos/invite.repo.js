@@ -23,7 +23,10 @@ export async function sendInvite(fromId, toId) {
     throw new Error("Lời mời đã tồn tại");
   }
 
-  await db.request().query(`
+await db.request()
+  .input("from", sql.Char(12), fromId)
+  .input("to", sql.Char(12), toId)
+  .query(`
     INSERT INTO LoiMoi (
       LoiMoi_ID, NgayGui, TrangThaiLoiMoi,
       NguoiMoi_ID, NguoiDuocMoi_ID
@@ -31,9 +34,10 @@ export async function sendInvite(fromId, toId) {
     VALUES (
       'LM' + RIGHT(NEWID(), 10),
       GETDATE(), 0,
-      '${fromId}', '${toId}'
+      @from, @to
     )
   `);
+
 }
 
 /* =========================
@@ -112,6 +116,7 @@ export async function getInvites(userId) {
         LM.LoiMoi_ID,
         LM.NgayGui,
         ND.NguoiDung_ID AS NguoiMoi_ID,
+        ND.AvatarUrl,
         ND.TenND,
         TK.SoDienThoai
       FROM LoiMoi LM
@@ -154,21 +159,51 @@ export async function sendInviteByPhone(fromId, phone) {
   // 2. gọi lại logic cũ
   return sendInvite(fromId, toUserId);
 }
-export async function findUserByPhone(phone) {
+export async function findUserByPhone(phone, currentUserId) {
   const db = await getDB();
 
   const rs = await db.request()
     .input("phone", sql.NVarChar(15), phone)
+    .input("me", sql.Char(12), currentUserId)
     .query(`
       SELECT 
         ND.NguoiDung_ID,
         ND.TenND,
-        TK.SoDienThoai
+        ND.AvatarUrl,
+        TK.SoDienThoai,
+        LM.LoiMoi_ID,
+        LM.TrangThaiLoiMoi
       FROM TaiKhoan TK
       JOIN NguoiDung ND 
         ON TK.NguoiDung_ID = ND.NguoiDung_ID
+      LEFT JOIN LoiMoi LM
+        ON LM.NguoiMoi_ID = @me
+       AND LM.NguoiDuocMoi_ID = ND.NguoiDung_ID
+       AND LM.TrangThaiLoiMoi = 0
       WHERE TK.SoDienThoai LIKE @phone + '%'
     `);
 
-  return rs.recordset; 
+  return rs.recordset.map(u => ({
+    ...u,
+    inviteStatus: u.TrangThaiLoiMoi === 0 ? "pending" : "none"
+  }));
 }
+export async function cancelInvite(loiMoiId, fromId) {
+  const db = await getDB();
+
+  const rs = await db.request()
+    .input("id", sql.Char(12), loiMoiId)
+    .input("from", sql.Char(12), fromId)
+    .query(`
+      UPDATE LoiMoi
+      SET TrangThaiLoiMoi = 3
+      WHERE LoiMoi_ID = @id
+        AND NguoiMoi_ID = @from
+        AND TrangThaiLoiMoi = 0
+    `);
+
+  if (rs.rowsAffected[0] === 0) {
+    throw new Error("Không thể hủy lời mời");
+  }
+}
+

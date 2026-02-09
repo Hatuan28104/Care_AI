@@ -2,13 +2,32 @@ import express from "express";
 import {
   getMyGuardians,
   getMyDependents,
-  endRelationship
+  endRelationship,
+  getRelationshipProfile
 } from "../repos/relationship.repo.js";
 import { auth } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
-router.get("/guardians",auth, async (req, res) => {
+/* =========================
+   PROFILE QUAN HỆ (GIÁM HỘ / PHỤ THUỘC)
+========================= */
+router.get("/profile/:id", auth, async (req, res) => {
+  try {
+    const qhId = req.params.id;
+    const userId = req.user.NguoiDung_ID;
+
+    const data = await getRelationshipProfile(qhId, userId);
+    res.json({ success: true, data });
+  } catch (e) {
+    res.status(400).json({ success: false, message: e.message });
+  }
+});
+
+/* =========================
+   DANH SÁCH NGƯỜI GIÁM HỘ
+========================= */
+router.get("/guardians", auth, async (req, res) => {
   try {
     const userId = req.user.NguoiDung_ID;
     const data = await getMyGuardians(userId);
@@ -18,6 +37,9 @@ router.get("/guardians",auth, async (req, res) => {
   }
 });
 
+/* =========================
+   DANH SÁCH NGƯỜI ĐƯỢC GIÁM HỘ
+========================= */
 router.get("/dependents", auth, async (req, res) => {
   try {
     const userId = req.user.NguoiDung_ID;
@@ -28,7 +50,10 @@ router.get("/dependents", auth, async (req, res) => {
   }
 });
 
-router.post("/end", async (req, res) => {
+/* =========================
+   KẾT THÚC QUAN HỆ
+========================= */
+router.post("/end", auth, async (req, res) => {
   try {
     const { quanHeId } = req.body;
     await endRelationship(quanHeId);
