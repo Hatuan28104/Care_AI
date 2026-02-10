@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Care_AI/api/family_api.dart';
+import 'report_detail_screen.dart';
 
 class DependentProfileScreen extends StatefulWidget {
   final String quanHeId;
@@ -12,7 +13,6 @@ class DependentProfileScreen extends StatefulWidget {
   // ===== CONSTANTS =====
   static const Color _blue = Color(0xFF1877F2);
   static const Color _bg = Color(0xFFF6F6F6);
-  static const Color _itemBg = Color(0xFFF6F7FB);
 
   @override
   State<DependentProfileScreen> createState() => _DependentProfileScreenState();
@@ -142,11 +142,11 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
         const SizedBox(height: 12),
         Row(
           children: const [
-            Expanded(child: _ReportItem(label: 'Ngày')),
+            Expanded(child: _ReportItem(label: 'Ngày', type: 'day')),
             SizedBox(width: 12),
-            Expanded(child: _ReportItem(label: 'Tuần')),
+            Expanded(child: _ReportItem(label: 'Tuần', type: 'week')),
             SizedBox(width: 12),
-            Expanded(child: _ReportItem(label: 'Tháng')),
+            Expanded(child: _ReportItem(label: 'Tháng', type: 'month')),
           ],
         ),
       ],
@@ -159,8 +159,12 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       decoration: BoxDecoration(
-        color: DependentProfileScreen._itemBg,
-        borderRadius: BorderRadius.circular(14),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: const Color(0xFF1F41BB).withOpacity(0.5),
+          width: 1,
+        ),
       ),
       child: Row(
         children: [
@@ -189,46 +193,46 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
 // ================= REPORT ITEM =================
 class _ReportItem extends StatelessWidget {
   final String label;
-  const _ReportItem({required this.label});
+  final String type;
+
+  const _ReportItem({required this.label, required this.type});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 64,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: const [
-          BoxShadow(
-            blurRadius: 10,
-            color: Colors.black12,
-            offset: Offset(0, 4),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ReportDetailScreen(type: type),
           ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Icon(Icons.bar_chart, size: 18, color: Colors.grey),
-              SizedBox(width: 4),
-              Icon(Icons.bar_chart,
-                  size: 18, color: DependentProfileScreen._blue),
-              SizedBox(width: 4),
-              Icon(Icons.bar_chart, size: 18, color: Colors.grey),
-            ],
+        );
+      },
+      child: Container(
+        height: 64,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: const Color(0xFF1F41BB).withOpacity(0.5),
+            width: 1,
           ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF1F41BB).withOpacity(0.25),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
             ),
-          ),
-        ],
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.bar_chart, size: 18),
+            const SizedBox(height: 6),
+            Text(label),
+          ],
+        ),
       ),
     );
   }

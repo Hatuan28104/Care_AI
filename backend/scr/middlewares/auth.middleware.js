@@ -1,19 +1,34 @@
 import jwt from "jsonwebtoken";
 
+const JWT_SECRET = process.env.JWT_SECRET || "my_secret_key";
+
 export function auth(req, res, next) {
-    console.log('🔥 AUTH HEADER =', req.headers.authorization);
- 
   const authHeader = req.headers.authorization;
+
   if (!authHeader) {
-    return res.status(401).json({ success: false, message: "Chưa đăng nhập" });
+    return res.status(401).json({
+      success: false,
+      message: "Chưa đăng nhập",
+    });
+  }
+
+  if (!authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({
+      success: false,
+      message: "Authorization không hợp lệ",
+    });
   }
 
   const token = authHeader.split(" ")[1];
+
   try {
-const decoded = jwt.verify(token, "my_secret_key");
-    req.user = decoded; 
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
     next();
   } catch (e) {
-    return res.status(401).json({ success: false, message: "Token không hợp lệ" });
+    return res.status(401).json({
+      success: false,
+      message: "Token không hợp lệ",
+    });
   }
 }

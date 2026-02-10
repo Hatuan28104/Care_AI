@@ -135,8 +135,12 @@ class _GuardianProfileState extends State<GuardianProfile> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       decoration: BoxDecoration(
-        color: itemBg,
-        borderRadius: BorderRadius.circular(14),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: const Color(0xFF1F41BB).withOpacity(0.5),
+          width: 1,
+        ),
       ),
       child: Row(
         children: [
@@ -180,16 +184,21 @@ class _GuardianProfileState extends State<GuardianProfile> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         decoration: BoxDecoration(
-          color: itemBg,
-          borderRadius: BorderRadius.circular(14),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: const Color(0xFF1F41BB).withOpacity(0.5),
+            width: 1,
+          ),
         ),
         child: Row(
           children: const [
             Text(
               'Chia sẻ dữ liệu',
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 13,
                 fontWeight: FontWeight.w600,
+                color: Colors.grey,
               ),
             ),
             Spacer(),

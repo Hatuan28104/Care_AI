@@ -138,25 +138,25 @@ class _AddGuardiansState extends State<AddGuardians> {
 
     return Container(
       margin: const EdgeInsets.fromLTRB(18, 0, 18, 14),
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: const [
           BoxShadow(
-            blurRadius: 14,
+            blurRadius: 10,
             color: Colors.black12,
-            offset: Offset(0, 6),
+            offset: Offset(0, 5),
           ),
         ],
       ),
       child: Row(
         children: [
           Container(
-            width: 80,
-            height: 80,
+            width: 64,
+            height: 64,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(12),
               color: avatar == null ? Colors.grey.shade300 : null,
               image: avatar != null && avatar.toString().isNotEmpty
                   ? DecorationImage(
@@ -166,7 +166,7 @@ class _AddGuardiansState extends State<AddGuardians> {
                   : null,
             ),
             child: avatar == null
-                ? const Icon(Icons.person, size: 40, color: Colors.white)
+                ? const Icon(Icons.person, size: 28, color: Colors.white)
                 : null,
           ),
           const SizedBox(width: 14),
@@ -182,7 +182,7 @@ class _AddGuardiansState extends State<AddGuardians> {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 6),
                 Row(
                   children: [
                     if (status == 'none') ...[
@@ -213,10 +213,10 @@ class _AddGuardiansState extends State<AddGuardians> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
         decoration: BoxDecoration(
           color: color,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
           text,

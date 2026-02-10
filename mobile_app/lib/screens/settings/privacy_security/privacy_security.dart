@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../app_settings.dart';
 import 'privacy_policy.dart';
 import 'terms_of_service.dart';
+import '../../../api/auth_api.dart';
+import '../../../models/login_history_item.dart';
 
 class PrivacySecurityScreen extends StatefulWidget {
   const PrivacySecurityScreen({super.key});
@@ -15,6 +17,13 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
   static const blue = Color(0xFF1877F2);
   bool _twoFA = false;
   bool _biometrics = false;
+  bool _showAllHistory = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLoginHistory();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +103,7 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
             icon: const Icon(Icons.refresh, color: blue, size: 20),
-            onPressed: () => setState(() {}),
+            onPressed: _loadLoginHistory,
           ),
         ],
       ),
@@ -190,7 +199,22 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
       return;
     }
 
-    AppSettings.phoneNumber.value = cleaned;
+    try {
+      await AuthApi.changePhone(cleaned);
+
+      // cập nhật local sau khi BE OK
+      AppSettings.phoneNumber.value = cleaned;
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Đã cập nhật số điện thoại')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    }
   }
 
   bool _looksLikePhone(String s) {
@@ -202,28 +226,20 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
     final s = input.trim();
     if (s.isEmpty) return '(Chưa thiết lập)';
 
-    final digits = s.replaceAll(RegExp(r'\D'), '');
+    String digits = s.replaceAll(RegExp(r'\D'), '');
 
-    if (digits.startsWith('84') && digits.length >= 11) {
-      final national = digits.substring(2);
-      return '(+84) ${_groupVN(national)}';
+    // +84xxxxxxx → 0xxxxxxxx
+    if (digits.startsWith('84')) {
+      digits = '0' + digits.substring(2);
     }
 
-    if (digits.length == 10 && digits.startsWith('0')) {
-      return '(+84) ${_groupVN(digits.substring(1))}';
-    }
+    // Không đủ 10 số thì trả thô
+    if (digits.length != 10) return s;
 
-    if (digits.length == 9) {
-      return '(+84) ${_groupVN(digits)}';
-    }
-
-    return s;
-  }
-
-  String _groupVN(String nineDigits) {
-    final d = nineDigits.replaceAll(RegExp(r'\D'), '');
-    if (d.length < 9) return d;
-    return '${d.substring(0, 3)} ${d.substring(3, 6)} ${d.substring(6, 9)}';
+    // 0912345678 → 091 234 5678
+    return '${digits.substring(0, 3)} '
+        '${digits.substring(3, 6)} '
+        '${digits.substring(6, 10)}';
   }
 
   Widget _verifyCard() {
@@ -308,33 +324,39 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
     return _card(
       child: ValueListenableBuilder<List<LoginHistoryItem>>(
         valueListenable: AppSettings.loginHistory,
-        builder: (_, list, __) {
-          final items = list.isEmpty
-              ? <LoginHistoryItem>[
-                  const LoginHistoryItem(
-                    device: 'iPhone 13',
-                    location: 'TP. Hồ Chí Minh',
-                    time: 'Hôm nay, 10:30',
-                  ),
-                  const LoginHistoryItem(
-                    device: 'iPad Pro',
-                    location: 'TP. Hồ Chí Minh',
-                    time: '2 ngày trước, 9:00',
-                  ),
-                ]
-              : list;
+        builder: (_, rawList, __) {
+          if (rawList.isEmpty) {
+            return const Text(
+              'Chưa có lịch sử đăng nhập',
+              style: TextStyle(color: Colors.black45),
+            );
+          }
+
+          final list = _buildDisplayHistory(rawList);
 
           return Column(
             children: [
-              for (int i = 0; i < items.length; i++) ...[
-                _loginRow(items[i]),
-                if (i != items.length - 1)
+              for (int i = 0; i < list.length; i++) ...[
+                _loginRow(list[i]),
+                if (i != list.length - 1)
                   const Divider(
                     height: 18,
                     thickness: 1,
                     color: Color(0x11000000),
                   ),
               ],
+
+              // 👇 XEM THÊM
+              if (!_showAllHistory && rawList.length > list.length)
+                TextButton(
+                  onPressed: () {
+                    setState(() => _showAllHistory = true);
+                  },
+                  child: const Text(
+                    'Xem thêm',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
             ],
           );
         },
@@ -452,5 +474,37 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
       ),
       child: child,
     );
+  }
+
+  Future<void> _loadLoginHistory() async {
+    try {
+      final list = await AuthApi.getLoginHistory();
+      AppSettings.loginHistory.value = list;
+    } catch (e) {
+      debugPrint('Load login history error: $e');
+    }
+  }
+
+  List<LoginHistoryItem> _buildDisplayHistory(List<LoginHistoryItem> raw) {
+    // 1. Gom theo device, chỉ lấy bản ghi mới nhất
+    final Map<String, LoginHistoryItem> latestByDevice = {};
+
+    for (final item in raw) {
+      if (!latestByDevice.containsKey(item.device)) {
+        latestByDevice[item.device] = item;
+      }
+    }
+
+    final list = latestByDevice.values.toList();
+
+    // 2. Sắp xếp theo thời gian giảm dần (mới nhất trước)
+    list.sort((a, b) => b.time.compareTo(a.time));
+
+    // 3. Nếu chưa xem all → chỉ lấy 2 cái
+    if (!_showAllHistory && list.length > 2) {
+      return list.take(2).toList();
+    }
+
+    return list;
   }
 }

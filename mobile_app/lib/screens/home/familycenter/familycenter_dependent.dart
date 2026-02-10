@@ -68,8 +68,8 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
   // ================= INVITE CARD =================
   Widget _inviteCard(dynamic inv) {
     return Container(
-      height: 123,
-      padding: const EdgeInsets.all(14),
+      height: 96,
+      padding: const EdgeInsets.all(12),
       decoration: _cardDecoration(),
       child: Row(
         children: [
@@ -147,8 +147,8 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
           );
         },
         child: Container(
-          height: 123,
-          padding: const EdgeInsets.all(14),
+          height: 96,
+          padding: const EdgeInsets.all(12),
           decoration: _cardDecoration(),
           child: Row(
             children: [
@@ -485,10 +485,10 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
     final avatar = FamilyApi.normalizeAvatar(avatarUrl);
 
     return Container(
-      width: 100,
-      height: 100,
+      width: 72,
+      height: 72,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         color: avatar == null ? _blue.withOpacity(.1) : null,
         image: avatar != null
             ? DecorationImage(
@@ -498,25 +498,25 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
             : null,
       ),
       child: avatar == null
-          ? const Icon(Icons.person, color: _blue, size: 36)
+          ? const Icon(Icons.person, color: _blue, size: 30)
           : null,
     );
   }
 
   Widget _actionBtn(String text, Color color) {
     return Container(
-      width: 90,
-      height: 26,
+      width: 78,
+      height: 24,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: color,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         text,
         style: const TextStyle(
           color: Colors.white,
-          fontSize: 13,
+          fontSize: 12,
           fontWeight: FontWeight.w600,
         ),
       ),

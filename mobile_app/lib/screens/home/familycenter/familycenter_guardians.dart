@@ -126,7 +126,16 @@ class _MyGuardiansScreenState extends State<MyGuardiansScreen> {
             name: g['TenND'] ?? 'Không tên',
             date: _formatDate(g['NgayBatDau']),
             avatar: FamilyApi.normalizeAvatar(g['AvatarUrl']),
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => GuardianProfile(
+                    quanHeId: g['QuanHeGiamHo_ID'],
+                  ),
+                ),
+              );
+            },
           ),
         );
       },
@@ -242,65 +251,67 @@ class GuardianCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 123,
-        padding: const EdgeInsets.all(14),
+        height: 96, // 👈 nhỏ hơn
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: const [
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
             BoxShadow(
-              blurRadius: 14,
-              color: Colors.black12,
-              offset: Offset(0, 6),
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
             ),
           ],
         ),
         child: Row(
           children: [
             Container(
-              width: 100,
-              height: 100,
+              width: 72, // 👈 avatar nhỏ
+              height: 72,
               decoration: BoxDecoration(
                 color: const Color(0xFF1877F2).withOpacity(.1),
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: avatar != null
                   ? ClipRRect(
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(12),
                       child: Image.network(
                         avatar!,
-                        width: 100,
-                        height: 100,
                         fit: BoxFit.cover,
                       ),
                     )
                   : const Icon(
                       Icons.person,
                       color: Color(0xFF1877F2),
-                      size: 36,
+                      size: 30,
                     ),
             ),
-            const SizedBox(width: 14),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  name,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Ngày tham gia: $date',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
+                  const SizedBox(height: 4),
+                  Text(
+                    'Ngày tham gia: $date',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),

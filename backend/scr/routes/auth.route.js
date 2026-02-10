@@ -3,7 +3,10 @@ import {
   requestRegisterOtp,
   requestLoginOtp,
   verifyOtp,
+  changePhone,
+  getLoginHistory,   // 🔥 THÊM
 } from "../repos/auth.repo.js";
+import { auth } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
@@ -61,10 +64,50 @@ router.post("/verify-otp", async (req, res) => {
       throw new Error("Thiếu số điện thoại hoặc OTP");
     }
 
-    const result = await verifyOtp(phone, otp);
+    const result = await verifyOtp(phone, otp, req);
     res.json(result);
   } catch (e) {
     res.status(401).json({
+      success: false,
+      message: e.message,
+    });
+  }
+});
+
+/* =========================
+   CHANGE PHONE
+========================= */
+router.post("/change-phone", auth, async (req, res) => {
+  try {
+    const { phone } = req.body;
+    const userId = req.user.NguoiDung_ID;
+
+    await changePhone(userId, phone);
+
+    res.json({ success: true });
+  } catch (e) {
+    res.status(400).json({
+      success: false,
+      message: e.message,
+    });
+  }
+});
+
+/* =========================
+   LOGIN HISTORY (🔥 THÊM)
+========================= */
+router.get("/login-history", auth, async (req, res) => {
+  try {
+    const userId = req.user.NguoiDung_ID;
+
+    const data = await getLoginHistory(userId);
+
+    res.json({
+      success: true,
+      data,
+    });
+  } catch (e) {
+    res.status(400).json({
       success: false,
       message: e.message,
     });

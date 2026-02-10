@@ -8,10 +8,10 @@ const otpStore = new Map();
    HELPER
 ========================= */
 function normalizeVnPhone(phone) {
-  let digits = phone.replace(/\D/g, '');
+  let digits = phone.replace(/\D/g, "");
 
-  if (digits.startsWith('84')) {
-    digits = '0' + digits.slice(2);
+  if (digits.startsWith("84")) {
+    digits = "0" + digits.slice(2);
   }
 
   if (digits.length !== 10) {
@@ -22,7 +22,8 @@ function normalizeVnPhone(phone) {
 }
 
 async function phoneExists(db, localPhone) {
-  const rs = await db.request()
+  const rs = await db
+    .request()
     .input("sdt", sql.NVarChar(10), localPhone)
     .query("SELECT 1 FROM TaiKhoan WHERE SoDienThoai = @sdt");
 
@@ -34,53 +35,49 @@ function generateOtp() {
 }
 
 /* =========================
-   REGISTER – GỬI OTP
+   REGISTER – REQUEST OTP
 ========================= */
 export async function requestRegisterOtp(phone) {
   const db = await getDB();
   const localPhone = normalizeVnPhone(phone);
 
-  const exists = await phoneExists(db, localPhone);
-  if (exists) {
+  if (await phoneExists(db, localPhone)) {
     throw new Error("Số điện thoại đã được đăng ký");
   }
 
   const otp = generateOtp();
-
   otpStore.set(phone, {
     otp,
     expires: Date.now() + 2 * 60 * 1000,
   });
 
-  console.log(`📩 REGISTER OTP cho ${phone}:`, otp);
+  console.log(`📩 REGISTER OTP ${phone}: ${otp}`);
 }
 
 /* =========================
-   LOGIN – GỬI OTP
+   LOGIN – REQUEST OTP
 ========================= */
 export async function requestLoginOtp(phone) {
   const db = await getDB();
   const localPhone = normalizeVnPhone(phone);
 
-  const exists = await phoneExists(db, localPhone);
-  if (!exists) {
+  if (!(await phoneExists(db, localPhone))) {
     throw new Error("Số điện thoại chưa đăng ký tài khoản");
   }
 
   const otp = generateOtp();
-
   otpStore.set(phone, {
     otp,
     expires: Date.now() + 2 * 60 * 1000,
   });
 
-  console.log(`📩 LOGIN OTP cho ${phone}:`, otp);
+  console.log(`📩 LOGIN OTP ${phone}: ${otp}`);
 }
 
 /* =========================
-   VERIFY OTP (DÙNG CHUNG)
+   VERIFY OTP (CHUNG)
 ========================= */
-export async function verifyOtp(phone, otp) {
+export async function verifyOtp(phone, otp, req) {
   const data = otpStore.get(phone);
   if (!data) throw new Error("OTP không tồn tại");
   if (Date.now() > data.expires) throw new Error("OTP hết hạn");
@@ -91,51 +88,119 @@ export async function verifyOtp(phone, otp) {
   const db = await getDB();
   const localPhone = normalizeVnPhone(phone);
 
-  // kiểm tra tồn tại
-  const exists = await phoneExists(db, localPhone);
-
-  // nếu chưa có → tạo tài khoản (REGISTER FLOW)
-  if (!exists) {
-    const result = await db.request()
+  if (!(await phoneExists(db, localPhone))) {
+    const rs = await db
+      .request()
       .input("sodienthoai", sql.NVarChar(10), localPhone)
       .output("ret", sql.Bit)
       .execute("dbo.sp_TaoTaiKhoan");
 
-    if (!result.output.ret) {
-      throw new Error("Tạo tài khoản thất bại");
-    }
+    if (!rs.output.ret) throw new Error("Tạo tài khoản thất bại");
   }
 
-  // lấy user
-  const user = await db.request()
+  const userRs = await db
+    .request()
     .input("sdt", sql.NVarChar(10), localPhone)
     .query(`
       SELECT 
-        TK.TaiKhoan_ID,
         TK.SoDienThoai,
-        TK.LaAdmin,
         ND.NguoiDung_ID,
         ND.TenND
       FROM TaiKhoan TK
-      JOIN NguoiDung ND 
-        ON TK.NguoiDung_ID = ND.NguoiDung_ID
+      JOIN NguoiDung ND ON TK.NguoiDung_ID = ND.NguoiDung_ID
       WHERE TK.SoDienThoai = @sdt
     `);
-  const payload = {
-  NguoiDung_ID: user.recordset[0].NguoiDung_ID,
-  SoDienThoai: user.recordset[0].SoDienThoai,
-};
 
-const token = jwt.sign(
-  payload,
-  process.env.JWT_SECRET || "my_secret_key",
-  { expiresIn: "7d" }
-);
+  const user = userRs.recordset[0];
+
+  const token = jwt.sign(
+    {
+      NguoiDung_ID: user.NguoiDung_ID,
+      SoDienThoai: user.SoDienThoai,
+    },
+    process.env.JWT_SECRET || "my_secret_key",
+    { expiresIn: "7d" }
+  );
+
+  /* ========= LOGIN HISTORY ========= */
+  const userAgent = req.headers["user-agent"] || "Unknown";
+  const ip =
+    req.headers["x-forwarded-for"]?.split(",")[0] ||
+    req.socket.remoteAddress ||
+    "";
+
+  await db
+    .request()
+    .input("uid", sql.Char(12), user.NguoiDung_ID)
+    .input("device", sql.NVarChar(255), userAgent)
+    .input("ip", sql.NVarChar(50), ip)
+    .query(`
+      INSERT INTO LichSuDangNhap (
+        LichSu_ID,
+        NguoiDung_ID,
+        ThietBi,
+        IP,
+        ThoiGian
+      )
+      VALUES (
+        'LS' + RIGHT(REPLACE(NEWID(), '-', ''), 10),
+        @uid,
+        @device,
+        @ip,
+        GETDATE()
+      )
+    `);
+
   return {
     success: true,
     message: "Xác thực thành công",
-    user: user.recordset[0],
+    user,
     token,
   };
+}
 
+/* =========================
+   CHANGE PHONE
+========================= */
+export async function changePhone(userId, newPhone) {
+  const db = await getDB();
+  const localPhone = normalizeVnPhone(newPhone);
+
+  if (await phoneExists(db, localPhone)) {
+    throw new Error("Số điện thoại đã tồn tại");
+  }
+
+  await db
+    .request()
+    .input("uid", sql.Char(12), userId)
+    .input("phone", sql.NVarChar(10), localPhone)
+    .query(`
+      UPDATE TaiKhoan
+      SET SoDienThoai = @phone
+      WHERE NguoiDung_ID = @uid
+    `);
+
+  return true;
+}
+
+/* =========================
+   LOGIN HISTORY
+========================= */
+export async function getLoginHistory(userId) {
+  const db = await getDB();
+
+  const rs = await db
+    .request()
+    .input("uid", sql.Char(12), userId)
+    .query(`
+      SELECT TOP 10
+        ThoiGian,
+        ThietBi,
+        IP
+      FROM LichSuDangNhap
+      WHERE NguoiDung_ID = @uid
+      ORDER BY ThoiGian DESC
+    `);
+
+  return rs.recordset;
 }
