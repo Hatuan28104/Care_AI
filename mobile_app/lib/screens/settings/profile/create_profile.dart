@@ -59,6 +59,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
   final _phoneCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _addressCtrl = TextEditingController();
+  Map<String, String> _formErrors = {};
 
   String? _gender;
   final _genderCtrl = TextEditingController();
@@ -151,12 +152,45 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
         MaterialPageRoute(builder: (_) => const HomeScreen()),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Dữ liệu không hợp lệ'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      final raw = e.toString().replaceFirst("Exception: ", "");
+
+      try {
+        final errorData = jsonDecode(raw);
+        final errors = Map<String, dynamic>.from(errorData["errors"] ?? {});
+
+        setState(() {
+          _formErrors = {};
+          errors.forEach((key, value) {
+            _formErrors[key] = value.toString();
+          });
+        });
+      } catch (_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Có lỗi xảy ra"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  String _mapLabelToKey(String label) {
+    switch (label) {
+      case 'Họ và tên':
+        return 'tenND';
+      case 'Ngày sinh':
+        return 'ngaySinh';
+      case 'Chiều cao':
+        return 'chieuCao';
+      case 'Cân nặng':
+        return 'canNang';
+      case 'Email':
+        return 'email';
+      case 'Địa chỉ':
+        return 'diaChi';
+      default:
+        return '';
     }
   }
 
@@ -493,6 +527,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
           keyboardType: keyboardType,
           style: _fieldTextStyle,
           decoration: InputDecoration(
+            errorText: _formErrors[_mapLabelToKey(label)],
             isDense: true,
             contentPadding: _fieldPadding,
             hintText: hint,
@@ -519,6 +554,14 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
             focusedErrorBorder: _outline(Colors.red, 1.6),
           ),
           validator: validator,
+          onChanged: (_) {
+            final key = _mapLabelToKey(label);
+            if (_formErrors.containsKey(key)) {
+              setState(() {
+                _formErrors.remove(key);
+              });
+            }
+          },
         ),
       ],
     );

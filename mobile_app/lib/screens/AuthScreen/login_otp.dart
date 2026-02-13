@@ -181,7 +181,6 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
         const SizedBox(height: 32),
         Text(
           'Mã OTP đã được gửi đến số điện thoại\n${widget.displayPhone}:',
-          textAlign: TextAlign.center,
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w500,

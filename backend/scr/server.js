@@ -8,7 +8,8 @@ import relationshipRoute from "./routes/relationship.route.js";
 import permissionRoute from "./routes/permission.route.js";
 
 const app = express();
-
+// ===== PROFILE =====
+app.use("/profile", profileRoute);
 // middleware chung
 app.use(express.json());
 
@@ -17,8 +18,7 @@ app.use("/family/invite", inviteRoute);
 app.use("/family/relationship", relationshipRoute);
 app.use("/family/permission", permissionRoute);
 
-// ===== PROFILE =====
-app.use("/profile", profileRoute);
+
 
 // ===== AUTH =====
 app.use("/auth", authRoute);

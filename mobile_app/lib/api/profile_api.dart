@@ -17,7 +17,7 @@ class ProfileApi {
     required double canNang,
     String? email,
     String? diaChi,
-    File? avatarFile, // 🔥 THÊM
+    File? avatarFile,
   }) async {
     final req = http.MultipartRequest(
       'PUT',
@@ -40,7 +40,7 @@ class ProfileApi {
     if (avatarFile != null) {
       req.files.add(
         await http.MultipartFile.fromPath(
-          'avatar', 
+          'avatar',
           avatarFile.path,
         ),
       );
@@ -48,11 +48,24 @@ class ProfileApi {
 
     final res = await req.send();
     final body = await res.stream.bytesToString();
+
+    if (body.isEmpty) {
+      throw Exception(jsonEncode({
+        "message": "Server không phản hồi",
+      }));
+    }
+
     final data = jsonDecode(body);
 
+    // 🔥 QUAN TRỌNG: throw full message + errors
     if (res.statusCode != 200 || data['success'] != true) {
-      throw Exception(data['message'] ?? 'Cập nhật thất bại');
+      throw Exception(jsonEncode({
+        "message": data['message'] ?? "Cập nhật thất bại",
+        "errors": data['errors']
+      }));
     }
+    print("STATUS: ${res.statusCode}");
+    print("BODY: $body");
   }
 
   /* =========================
@@ -65,13 +78,12 @@ class ProfileApi {
       );
 
       if (res.statusCode == 404) return null;
-
       if (res.body.isEmpty) return null;
 
       final body = jsonDecode(res.body);
 
       if (res.statusCode != 200 || body['success'] != true) {
-        return null; // 🔥 KHÔNG THROW
+        return null;
       }
 
       final raw = body['data'];
@@ -88,7 +100,6 @@ class ProfileApi {
         'avatarUrl': raw['AvatarUrl'],
       };
     } catch (e) {
-      // 🔥 LOGIN FLOW → NUỐT LỖI
       return null;
     }
   }

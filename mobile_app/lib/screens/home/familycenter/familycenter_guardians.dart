@@ -160,7 +160,7 @@ class _MyGuardiansScreenState extends State<MyGuardiansScreen> {
                   height: 56,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.red, width: 2),
+                    border: Border.all(color: Colors.red, width: 4),
                   ),
                   child: const Icon(Icons.priority_high, color: Colors.red),
                 ),
@@ -194,7 +194,7 @@ class _MyGuardiansScreenState extends State<MyGuardiansScreen> {
                     child: const Text(
                       'Xóa',
                       style: TextStyle(
-                        color: Color.fromARGB(221, 140, 24, 35),
+                        color: Color.fromARGB(255, 135, 13, 25),
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -206,7 +206,7 @@ class _MyGuardiansScreenState extends State<MyGuardiansScreen> {
                   child: ElevatedButton(
                     onPressed: () => Navigator.pop(ctx, false),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(209, 211, 217, 237),
+                      backgroundColor: const Color(0xD1D1D3D9),
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
@@ -216,7 +216,7 @@ class _MyGuardiansScreenState extends State<MyGuardiansScreen> {
                     child: const Text(
                       'Hủy',
                       style: TextStyle(
-                        color: Colors.black87,
+                        color: Color.fromARGB(255, 71, 71, 71),
                         fontWeight: FontWeight.w700,
                       ),
                     ),

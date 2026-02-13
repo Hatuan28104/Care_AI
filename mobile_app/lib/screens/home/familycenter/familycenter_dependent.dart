@@ -202,7 +202,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                   height: 56,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.red, width: 2),
+                    border: Border.all(color: Colors.red, width: 4),
                   ),
                   child: const Icon(Icons.priority_high, color: Colors.red),
                 ),
@@ -236,7 +236,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                     child: const Text(
                       'Xóa',
                       style: TextStyle(
-                        color: Color.fromARGB(221, 140, 24, 35),
+                        color: Color.fromARGB(255, 135, 13, 25),
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -248,7 +248,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                   child: ElevatedButton(
                     onPressed: () => Navigator.pop(ctx, false),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(209, 211, 217, 237),
+                      backgroundColor: const Color(0xD1D1D3D9),
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
@@ -258,7 +258,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                     child: const Text(
                       'Hủy',
                       style: TextStyle(
-                        color: Colors.black87,
+                        color: Color.fromARGB(255, 71, 71, 71),
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -291,7 +291,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
       builder: (ctx) {
         return Dialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(20),
           ),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 26, 20, 20),
@@ -308,7 +308,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                   child: const Icon(
                     Icons.check,
                     color: Colors.white,
-                    size: 36,
+                    size: 46,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -323,7 +323,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                 const Text(
                   'Bạn có muốn nhận lời mời không?',
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey),
+                  style: TextStyle(color: Color.fromARGB(255, 65, 65, 65)),
                 ),
                 const SizedBox(height: 24),
                 SizedBox(
@@ -333,7 +333,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _blue,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(6),
                       ),
                       elevation: 0,
                     ),
@@ -346,6 +346,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
+                        color: Colors.white,
                       ),
                     ),
                   ),
@@ -354,14 +355,21 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                 SizedBox(
                   width: double.infinity,
                   height: 44,
-                  child: TextButton(
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: const Color(0xFFD1D3D9),
+                      side: BorderSide.none,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
                     onPressed: () => Navigator.pop(ctx),
                     child: const Text(
                       'Hủy',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Colors.grey,
+                        color: Color(0xFF626262),
                       ),
                     ),
                   ),
@@ -382,7 +390,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
       builder: (ctx) {
         return Dialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(20),
           ),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 26, 20, 20),
@@ -414,7 +422,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                 const Text(
                   'Bạn có chắc chắn muốn từ chối lời mời này không?',
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey),
+                  style: TextStyle(color: Color.fromARGB(255, 65, 65, 65)),
                 ),
                 const SizedBox(height: 24),
                 SizedBox(
@@ -425,7 +433,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                       backgroundColor: _red.withOpacity(.3),
                       foregroundColor: _red,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(6),
                       ),
                       elevation: 0,
                     ),
@@ -436,7 +444,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                     child: const Text(
                       'Xóa',
                       style: TextStyle(
-                        fontSize: 15,
+                        color: Color.fromARGB(255, 135, 13, 25),
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -445,15 +453,21 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                 const SizedBox(height: 10),
                 SizedBox(
                   width: double.infinity,
-                  height: 44,
-                  child: TextButton(
-                    onPressed: () => Navigator.pop(ctx),
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(ctx, false),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xD1D1D3D9),
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
                     child: const Text(
                       'Hủy',
                       style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey,
+                        color: Color.fromARGB(255, 71, 71, 71),
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),

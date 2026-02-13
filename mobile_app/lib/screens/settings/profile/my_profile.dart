@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
@@ -53,6 +55,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   final _addressCtrl = TextEditingController();
   final _genderCtrl = TextEditingController();
   String? _avatarNetworkUrl;
+  Map<String, String> _formErrors = {};
 
   String? _gender;
 
@@ -122,6 +125,24 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
         borderRadius: BorderRadius.circular(8),
         borderSide: BorderSide(color: c, width: w),
       );
+  String _mapLabelToKey(String label) {
+    switch (label) {
+      case 'Họ và tên':
+        return 'tenND';
+      case 'Ngày sinh':
+        return 'ngaySinh';
+      case 'Chiều cao':
+        return 'chieuCao';
+      case 'Cân nặng':
+        return 'canNang';
+      case 'Email':
+        return 'email';
+      case 'Địa chỉ':
+        return 'diaChi';
+      default:
+        return '';
+    }
+  }
 
   // ===== ACTIONS =====
   Future<void> _pickAvatar() async {
@@ -192,9 +213,24 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
 
       setState(() => _isEditing = false);
       await _fetchProfileFromBE();
-    } catch (e, s) {
-      debugPrint('❌ Save profile error: $e');
-      debugPrint('$s');
+    } catch (e) {
+      final raw = e.toString().replaceFirst("Exception: ", "");
+
+      try {
+        final errorData = jsonDecode(raw);
+        final errors = Map<String, dynamic>.from(errorData["errors"] ?? {});
+
+        setState(() {
+          _formErrors = {};
+          errors.forEach((key, value) {
+            _formErrors[key] = value.toString();
+          });
+        });
+      } catch (_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Có lỗi xảy ra")),
+        );
+      }
     }
   }
 
@@ -462,6 +498,8 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
           keyboardType: keyboardType,
           style: _fieldTextStyle,
           decoration: InputDecoration(
+            errorText: _formErrors[_mapLabelToKey(label)],
+
             isDense: true,
 
             // 🔒 KHÓA CHIỀU CAO — CỰC KỲ QUAN TRỌNG
@@ -494,6 +532,14 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
             enabledBorder: _outline(_borderBlue, 1.2),
             focusedBorder: _outline(_borderBlue, 1.6),
           ),
+          onChanged: (_) {
+            final key = _mapLabelToKey(label);
+            if (_formErrors.containsKey(key)) {
+              setState(() {
+                _formErrors.remove(key);
+              });
+            }
+          },
         ),
       ],
     );
