@@ -59,7 +59,7 @@ export async function updateProfile(data) {
   const height = Number(chieuCao);
   if (!chieuCao || isNaN(height)) {
     errors.chieuCao = "Chiều cao phải là số";
-  } else if (height <= 0 || height > 300) {
+  } else if (height <= 50 || height > 300) {
     errors.chieuCao = "Chiều cao không hợp lệ";
   }
 
@@ -67,7 +67,7 @@ export async function updateProfile(data) {
   const weight = Number(canNang);
   if (!canNang || isNaN(weight)) {
     errors.canNang = "Cân nặng phải là số";
-  } else if (weight <= 0 || weight > 200) {
+  } else if (weight <= 20 || weight > 200) {
     errors.canNang = "Cân nặng không hợp lệ";
   }
 
