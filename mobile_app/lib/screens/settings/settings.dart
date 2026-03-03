@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:Care_AI/screens/settings/profile/my_profile.dart';
 import 'package:Care_AI/screens/welcome_screen.dart';
 import '../../app_settings.dart';
@@ -8,11 +9,41 @@ import 'text_size.dart';
 import 'language.dart';
 import 'sound_vibration.dart';
 import 'help_support.dart';
+import '../../api/settings_api.dart';
+import '../../api/auth_storage.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
   static const _blue = Color(0xFF1877F2);
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    try {
+      final data = await SettingsApi.getSettings();
+
+      AppSettings.notificationOn.value = data['notificationOn'];
+      AppSettings.healthAlertOn.value = data['healthAlertOn'];
+      AppSettings.syncDataOn.value = data['syncDataOn'];
+    } catch (e) {
+      print("Load settings lỗi: $e");
+    }
+
+    if (mounted) {
+      setState(() => _loading = false);
+    }
+  }
 
   static void _go(BuildContext context, Widget page) {
     Navigator.push(
@@ -23,8 +54,14 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (_loading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
-      backgroundColor: Color(0xFFF6F6F6),
+      backgroundColor: const Color(0xFFF6F6F6),
       appBar: _appBar(context),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -32,10 +69,7 @@ class SettingsScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _section(
-                'Tài khoản',
-                fontSize: 18,
-              ),
+              _section('Tài khoản', fontSize: 18),
               _card([
                 _item(
                   icon: Icons.person_outline,
@@ -69,6 +103,7 @@ class SettingsScreen extends StatelessWidget {
                   icon: Icons.notifications_none,
                   text: 'Thông báo',
                   notifier: AppSettings.notificationOn,
+                  settingKey: "notificationOn",
                 ),
                 _item(
                   icon: Icons.volume_up_outlined,
@@ -82,11 +117,13 @@ class SettingsScreen extends StatelessWidget {
                   icon: Icons.health_and_safety_outlined,
                   text: 'Cảnh báo sức khỏe',
                   notifier: AppSettings.healthAlertOn,
+                  settingKey: "healthAlertOn",
                 ),
                 _switchItem(
                   icon: Icons.sync,
                   text: 'Đồng bộ dữ liệu',
                   notifier: AppSettings.syncDataOn,
+                  settingKey: "syncDataOn",
                 ),
               ]),
               _section('Hỗ trợ'),
@@ -124,10 +161,7 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _section(
-    String text, {
-    double fontSize = 16,
-  }) {
+  Widget _section(String text, {double fontSize = 16}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8, top: 16),
       child: Text(
@@ -174,6 +208,7 @@ class SettingsScreen extends StatelessWidget {
     required IconData icon,
     required String text,
     required ValueNotifier<bool> notifier,
+    required String settingKey,
   }) {
     return ValueListenableBuilder<bool>(
       valueListenable: notifier,
@@ -189,7 +224,15 @@ class SettingsScreen extends StatelessWidget {
             scale: 0.8,
             child: Switch(
               value: value,
-              onChanged: (v) => notifier.value = v,
+              onChanged: (v) async {
+                notifier.value = v;
+
+                try {
+                  await SettingsApi.updateSetting(settingKey, v);
+                } catch (e) {
+                  notifier.value = !v;
+                }
+              },
               activeTrackColor: const Color.fromARGB(255, 19, 114, 255),
               inactiveTrackColor: const Color.fromARGB(255, 218, 217, 217),
               inactiveThumbColor: Colors.white,
@@ -200,13 +243,15 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  // ===== LOG OUT =====
   Widget _logoutButton(BuildContext context) {
     return SizedBox(
       width: double.infinity,
       height: 48,
       child: ElevatedButton(
-        onPressed: () {
+        onPressed: () async {
+          await AuthStorage.clear();
+          await FirebaseMessaging.instance.deleteToken();
+
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (_) => const WelcomeScreen()),
@@ -228,7 +273,6 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  // ===== Text Size =====
   String _textSizeLabel(double scale) {
     if (scale <= 1.0) return 'Nhỏ';
     if (scale <= 1.1) return 'Mặc định';

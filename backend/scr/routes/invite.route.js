@@ -60,9 +60,12 @@ router.post("/accept", auth, async (req, res) => {
     const { loiMoiId } = req.body;
     if (!loiMoiId) throw new Error("Thiếu ID lời mời");
 
-    await acceptInvite(loiMoiId);
+const newDep = await acceptInvite(loiMoiId);
 
-    res.json({ success: true, message: "Đã chấp nhận lời mời" });
+res.json({
+  success: true,
+  data: newDep
+});
   } catch (e) {
     res.status(400).json({
       success: false,

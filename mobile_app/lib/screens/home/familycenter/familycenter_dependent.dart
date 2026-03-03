@@ -274,13 +274,20 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
 
   // ================= ACTION =================
   Future<void> _acceptConfirmed(String loiMoiId) async {
-    await FamilyApi.acceptInvite(loiMoiId);
-    _loadData();
+    final newDep = await FamilyApi.acceptInvite(loiMoiId);
+
+    setState(() {
+      invites.removeWhere((e) => e['LoiMoi_ID'] == loiMoiId);
+      dependents.add(newDep);
+    });
   }
 
   Future<void> _rejectConfirmed(String loiMoiId) async {
     await FamilyApi.rejectInvite(loiMoiId);
-    _loadData();
+
+    setState(() {
+      invites.removeWhere((e) => e['LoiMoi_ID'] == loiMoiId);
+    });
   }
 
   // ================= ACCEPT POPUP =================

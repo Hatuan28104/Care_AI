@@ -62,22 +62,39 @@ export async function acceptInvite(loiMoiId) {
     }
 
     await tx.request().query(`
-      INSERT INTO QuanHeGiamHo (
-        QuanHeGiamHo_ID, LoiMoi_ID,
-        NguoiDuocGiamHo_ID, NguoiGiamHo_ID,
-        NgayBatDau, DaXoa
-      )
-      SELECT
-        'QH' + RIGHT(NEWID(), 10),
-        LoiMoi_ID,
-        NguoiDuocMoi_ID,
-        NguoiMoi_ID,
-        GETDATE(), 0
-      FROM LoiMoi
-      WHERE LoiMoi_ID = '${loiMoiId}'
-    `);
+  INSERT INTO QuanHeGiamHo (
+    QuanHeGiamHo_ID, LoiMoi_ID,
+    NguoiDuocGiamHo_ID, 
+    NguoiGiamHo_ID,
+    NgayBatDau, DaXoa
+  )
+  SELECT
+    'QH' + RIGHT(NEWID(), 10),
+    LoiMoi_ID,
+    NguoiMoi_ID,       
+    NguoiDuocMoi_ID,   
+    GETDATE(), 0
+  FROM LoiMoi
+  WHERE LoiMoi_ID = '${loiMoiId}'
+`);
+
+    // 🔥 LẤY RELATIONSHIP VỪA TẠO
+   const newDep = await tx.request().query(`
+  SELECT TOP 1
+    QH.QuanHeGiamHo_ID,
+    QH.NgayBatDau,
+    ND.TenND,
+    ND.AvatarUrl
+  FROM QuanHeGiamHo QH
+  JOIN LoiMoi LM ON LM.LoiMoi_ID = QH.LoiMoi_ID
+  JOIN NguoiDung ND ON ND.NguoiDung_ID = QH.NguoiGiamHo_ID
+  WHERE LM.LoiMoi_ID = '${loiMoiId}'
+  ORDER BY QH.NgayBatDau DESC
+`);
 
     await tx.commit();
+
+    return newDep.recordset[0]; // 🔥 QUAN TRỌNG
   } catch (e) {
     await tx.rollback();
     throw e;

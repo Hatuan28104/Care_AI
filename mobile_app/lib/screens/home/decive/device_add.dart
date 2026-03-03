@@ -1,11 +1,82 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'device_connect.dart';
 
-class AddDeviceScreen extends StatelessWidget {
+class AddDeviceScreen extends StatefulWidget {
   const AddDeviceScreen({super.key});
 
+  @override
+  State<AddDeviceScreen> createState() => _AddDeviceScreenState();
+}
+
+class _AddDeviceScreenState extends State<AddDeviceScreen> {
   static const Color blue = Color(0xFF1877F2);
   static const Color background = Color(0xFFF6F6F6);
+
+  List<ScanResult> scanResults = [];
+  bool isScanning = false;
+  StreamSubscription? scanSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    requestPermission();
+  }
+
+  Future<void> requestPermission() async {
+    await [
+      Permission.bluetooth,
+      Permission.bluetoothScan,
+      Permission.bluetoothConnect,
+      Permission.location,
+    ].request();
+
+    startScan();
+  }
+
+  void startScan() async {
+    setState(() => isScanning = true);
+
+    FlutterBluePlus.startScan(timeout: const Duration(seconds: 5));
+
+    scanSubscription = FlutterBluePlus.scanResults.listen((results) {
+      if (!mounted) return;
+      setState(() {
+        scanResults = results;
+      });
+    });
+
+    await Future.delayed(const Duration(seconds: 5));
+
+    await FlutterBluePlus.stopScan();
+
+    if (!mounted) return;
+    setState(() => isScanning = false);
+  }
+
+  Future<void> connectDevice(BluetoothDevice device) async {
+    try {
+      await device.connect();
+    } catch (_) {}
+
+    if (!mounted) return;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const ConnectDeviceScreen(),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    scanSubscription?.cancel();
+    FlutterBluePlus.stopScan();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,11 +150,12 @@ class AddDeviceScreen extends StatelessWidget {
 
                   const SizedBox(height: 28),
 
-                  // ===== LOADING =====
-                  const CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.grey,
-                  ),
+                  // ===== LOADING (chỉ hiện khi quét) =====
+                  if (isScanning)
+                    const CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.grey,
+                    ),
 
                   const SizedBox(height: 32),
 
@@ -91,21 +163,27 @@ class AddDeviceScreen extends StatelessWidget {
                   Expanded(
                     child: ListView.separated(
                       padding: const EdgeInsets.symmetric(horizontal: 18),
-                      itemCount: 1,
+                      itemCount: scanResults.isEmpty ? 1 : scanResults.length,
                       separatorBuilder: (_, __) => const SizedBox(height: 12),
                       itemBuilder: (context, index) {
+                        if (scanResults.isEmpty) {
+                          return _deviceCard(
+                            name: 'Không tìm thấy thiết bị',
+                            mac: '',
+                            battery: 0,
+                          );
+                        }
+
+                        final result = scanResults[index];
+                        final device = result.device;
+
                         return _deviceCard(
-                          name: 'Apple Watch (Demo)',
-                          mac: '23:12:D1:E3:12:18',
+                          name: device.name.isNotEmpty
+                              ? device.name
+                              : "Thiết bị không tên",
+                          mac: device.id.id,
                           battery: 100,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const ConnectDeviceScreen(),
-                              ),
-                            );
-                          },
+                          onTap: () => connectDevice(device),
                         );
                       },
                     ),
@@ -119,7 +197,7 @@ class AddDeviceScreen extends StatelessWidget {
     );
   }
 
-  // ===== DEVICE CARD =====
+  // ===== DEVICE CARD (GIỮ NGUYÊN UI) =====
   static Widget _deviceCard({
     required String name,
     required String mac,

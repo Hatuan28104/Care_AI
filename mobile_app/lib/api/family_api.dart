@@ -61,7 +61,7 @@ class FamilyApi {
   /* =========================
      CHẤP NHẬN
   ========================= */
-  static Future<void> acceptInvite(String loiMoiId) async {
+  static Future<Map<String, dynamic>> acceptInvite(String loiMoiId) async {
     final url = Uri.parse('$_baseUrl/family/invite/accept');
 
     final response = await http.post(
@@ -77,6 +77,8 @@ class FamilyApi {
     if (response.statusCode != 200 || data['success'] != true) {
       throw Exception(data['message'] ?? 'Accept thất bại');
     }
+
+    return data['data']; // 🔥 QUAN TRỌNG
   }
 
   /* =========================

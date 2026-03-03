@@ -4,6 +4,7 @@ import '../models/user.dart';
 import 'auth_storage.dart';
 import '../models/login_history_item.dart';
 import '../app_settings.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class AuthApi {
   static const String baseUrl = 'http://10.0.2.2:3000';
@@ -58,25 +59,45 @@ class AuthApi {
     final data = jsonDecode(res.body);
 
     if (res.statusCode == 200 && data['success'] == true) {
-      final token = data['token']; // 🔥 LẤY TOKEN
+      final token = data['token'];
       if (token == null || token.isEmpty) {
         throw Exception('Không nhận được token');
       }
 
-      // 🔥🔥🔥 LƯU TOKEN
+      // ✅ Lưu JWT
       await AuthStorage.saveToken(token);
-
-      print('🔥 TOKEN FROM API = $token');
-      await AuthStorage.saveToken(token);
-      print('🔥 TOKEN SAVED = ${AuthStorage.token}');
 
       final user = User.fromJson(data['user']);
 
       AppSettings.phoneNumber.value = user.soDienThoai ?? '';
 
+      // 🔥 LẤY FCM TOKEN SAU LOGIN
+      FirebaseMessaging messaging = FirebaseMessaging.instance;
+      String? fcmToken = await messaging.getToken();
+
+      if (fcmToken != null) {
+        await _sendFcmTokenToServer(fcmToken);
+      }
+
       return user;
     } else {
       throw Exception(data['message'] ?? 'OTP không hợp lệ');
+    }
+  }
+
+  static Future<void> _sendFcmTokenToServer(String fcmToken) async {
+    final headers = await _authHeaders();
+
+    final res = await http.post(
+      Uri.parse('$baseUrl/auth/save-fcm-token'),
+      headers: headers,
+      body: jsonEncode({
+        'fcmToken': fcmToken,
+      }),
+    );
+
+    if (res.statusCode != 200) {
+      print("⚠ Không lưu được FCM token");
     }
   }
 

@@ -1,6 +1,7 @@
 import sql from "mssql";
 import { getDB } from "../../db.js";
 import jwt from "jsonwebtoken";
+import admin from "../config/firebase.js";
 
 const otpStore = new Map();
 
@@ -203,4 +204,44 @@ export async function getLoginHistory(userId) {
     `);
 
   return rs.recordset;
+}
+/* =========================
+   SAVE FCM TOKEN
+========================= */
+export async function saveFcmToken(userId, fcmToken) {
+  const db = await getDB();
+
+  await db
+    .request()
+    .input("uid", sql.Char(12), userId)
+    .input("fcm", sql.NVarChar(255), fcmToken)
+    .query(`
+      UPDATE NguoiDung
+      SET FcmToken = @fcm
+      WHERE NguoiDung_ID = @uid
+    `);
+
+  return true;
+}
+export async function sendTestPush(userId) {
+  const db = await getDB();
+
+  const rs = await db
+    .request()
+    .input("uid", sql.Char(12), userId)
+    .query("SELECT FcmToken FROM NguoiDung WHERE NguoiDung_ID = @uid");
+
+  const token = rs.recordset[0]?.FcmToken;
+
+  if (!token) throw new Error("User chưa có FCM token");
+
+  await admin.messaging().send({
+    token,
+    notification: {
+      title: "🔥 CareAI",
+      body: "Thông báo test thành công!",
+    },
+  });
+
+  return true;
 }

@@ -6,19 +6,22 @@ import profileRoute from "./routes/profile.route.js";
 import inviteRoute from "./routes/invite.route.js";
 import relationshipRoute from "./routes/relationship.route.js";
 import permissionRoute from "./routes/permission.route.js";
+import settingsRoute from "./routes/settings.route.js";
+import notificationRoute from "./routes/notification.route.js";
 
 const app = express();
 // ===== PROFILE =====
 app.use("/profile", profileRoute);
 // middleware chung
 app.use(express.json());
-
+app.use("/notification", notificationRoute);
 // ===== FAMILY CENTER =====
 app.use("/family/invite", inviteRoute);
 app.use("/family/relationship", relationshipRoute);
 app.use("/family/permission", permissionRoute);
 
-
+// ===== SETTINGS =====
+app.use("/api/settings", settingsRoute);
 
 // ===== AUTH =====
 app.use("/auth", authRoute);

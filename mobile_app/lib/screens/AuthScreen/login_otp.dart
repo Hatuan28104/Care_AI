@@ -5,7 +5,10 @@ import 'package:Care_AI/api/profile_api.dart' as profile_api;
 import 'package:Care_AI/models/current_user.dart';
 import 'package:Care_AI/screens/home/home.dart';
 import 'package:Care_AI/api/auth_storage.dart';
-
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:Care_AI/api/settings_api.dart';
 import 'package:Care_AI/screens/settings/profile/create_profile.dart';
 
 class LoginOtpScreen extends StatefulWidget {
@@ -93,6 +96,30 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
 
 // lưu user
       CurrentUser.user = user;
+      await _syncUserData(user.nguoiDungId);
+      // 🔥 LẤY FCM TOKEN VÀ GỬI LÊN BE
+      try {
+        final fcmToken = await FirebaseMessaging.instance.getToken();
+
+        if (fcmToken != null) {
+          final jwt = await AuthStorage.getToken();
+
+          await http.post(
+            Uri.parse("http://10.0.2.2:3000/auth/save-fcm-token"),
+            headers: {
+              "Authorization": "Bearer $jwt",
+              "Content-Type": "application/json",
+            },
+            body: jsonEncode({
+              "fcmToken": fcmToken,
+            }),
+          );
+
+          print("✅ FCM token đã gửi lên BE");
+        }
+      } catch (e) {
+        print("❌ Lỗi gửi FCM token: $e");
+      }
 
       // 3️⃣ Check profile
       Map<String, dynamic>? profile;
@@ -140,6 +167,15 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
       if (mounted) {
         setState(() => _loading = false);
       }
+    }
+  }
+
+  Future<void> _syncUserData(String userId) async {
+    try {
+      await SettingsApi.getSettings();
+      print("🔥 Sync dữ liệu xong");
+    } catch (e) {
+      print("❌ Sync lỗi: $e");
     }
   }
 

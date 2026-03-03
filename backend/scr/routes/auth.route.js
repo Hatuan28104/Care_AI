@@ -4,9 +4,11 @@ import {
   requestLoginOtp,
   verifyOtp,
   changePhone,
-  getLoginHistory,   // 🔥 THÊM
+  getLoginHistory,  
+   saveFcmToken, 
 } from "../repos/auth.repo.js";
 import { auth } from "../middlewares/auth.middleware.js";
+import { sendTestPush } from "../repos/auth.repo.js";
 
 const router = express.Router();
 
@@ -113,5 +115,35 @@ router.get("/login-history", auth, async (req, res) => {
     });
   }
 });
+router.post("/save-fcm-token", auth, async (req, res) => {
+  try {
+    const userId = req.user.NguoiDung_ID;
+    const { fcmToken } = req.body;
 
+    if (!fcmToken) {
+      return res.status(400).json({ success: false });
+    }
+
+    await saveFcmToken(userId, fcmToken);
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false });
+  }
+});
+router.post("/test-push", auth, async (req, res) => {
+  try {
+    const userId = req.user.NguoiDung_ID;
+
+    await sendTestPush(userId);
+
+    res.json({ success: true });
+  } catch (e) {
+    res.status(400).json({
+      success: false,
+      message: e.message,
+    });
+  }
+});
 export default router;
