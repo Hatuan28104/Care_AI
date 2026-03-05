@@ -1,0 +1,187 @@
+{
+  "settings": "Settings",
+  "account": "Account",
+  "myProfile": "My Profile",
+  "privacySecurity": "Privacy & Security",
+  "display": "Display",
+  "textSize": "Text Size",
+  "language": "Language",
+  "notifications": "Notifications",
+  "soundVibration": "Sound & Vibration",
+  "device": "Device",
+  "healthAlert": "Health Alert",
+  "syncData": "Sync Data",
+  "support": "Support",
+  "helpSupport": "Help & Support",
+  "logout": "Logout",
+
+  "small": "Small",
+  "defaultSize": "Default",
+  "medium": "Medium",
+  "large": "Large",
+
+  "searchData": "Search data...",
+  "activityData": "Activity Data",
+  "healthData": "Health Data",
+
+  "value": "Value",
+  "latest": "Latest",
+
+  "alert": "Alert",
+  "today": "Today",
+  "markAllRead": "Mark all as read",
+  "deleteAlert": "Delete alert",
+  "deleteWarning": "This action may have consequences.",
+  "accept": "Accept",
+  "cancel": "Cancel",
+  "deletedSuccess": "Deleted successfully",
+
+  "digitalHuman": "Digital Human",
+  "nutritionExpert": "Nutrition Expert",
+  "zodiacExpert": "Zodiac Expert",
+  "fitnessCoach": "Fitness Coach",
+  "meditationGuide": "Meditation Guide",
+
+  "digitalHumanSection": "Digital Human",
+  "viewAll": "View all",
+
+  "healthCategory": "Health Categories",
+  "start": "Start",
+
+  "welcome": "Hello 👋",
+  "welcomeQuestion": "How can I help you today?",
+
+  "chatHint": "Ask anything...",
+  "chooseImage": "Image",
+
+  "home": "Home",
+  "family": "Family",
+  "deviceTab": "Device",
+  "history": "History",
+
+  "configurePermissions": "Configure permissions",
+  "conversationHistory": "Conversation history",
+  "chooseConversation": "Choose conversation",
+  "shareConversationHistory": "Share conversation history",
+
+  "basicHealthData": "Basic health data",
+  "chooseHealthData": "Choose health data",
+
+  "save": "Save",
+
+  "guardians": "Guardians",
+  "dependents": "Dependents",
+
+  "add": "Add",
+  "addNew": "Add new",
+
+  "enterGuardianPhone": "Enter guardian phone number",
+  "enterPhone": "Enter phone number",
+
+  "sendInvite": "Send invite",
+  "cancelRequest": "Cancel request",
+
+  "inviteSentSuccess": "Invitation sent successfully",
+  "userNotFound": "User not found",
+
+  "reject": "Reject",
+  "delete": "Delete",
+
+  "confirmDelete": "Confirm delete",
+  "confirmDeleteGuardian": "Are you sure you want to remove this guardian?",
+
+  "confirmInvite": "Confirm invitation",
+  "acceptInviteQuestion": "Do you want to accept the invitation?",
+
+  "confirmRejectInvite": "Confirm reject invitation",
+  "rejectInviteQuestion": "Are you sure you want to reject this invitation?",
+
+  "fullName": "Full name",
+  "birthDate": "Birth date",
+  "gender": "Gender",
+  "joinDate": "Join date",
+
+  "male": "Male",
+  "female": "Female",
+
+  "report": "Report",
+  "day": "Day",
+  "week": "Week",
+  "month": "Month",
+
+  "shareData": "Share data",
+
+  "heartRate": "Heart rate",
+  "bodyTemperature": "Body temperature",
+  "bloodPressure": "Blood pressure",
+  "steps": "Steps",
+  "sleep": "Sleep",
+
+  "sevenDaysAgo": "7 days ago",
+
+  "view": "View",
+
+  "noData": "No data",
+  "distance": "Distance",
+  "calories": "Calories",
+
+  "scanningBluetooth": "Scanning Bluetooth",
+  "deviceNearby": "Make sure your device is nearby",
+  "deviceVisible": "and discoverable",
+
+  "noDeviceFound": "No device found",
+  "unnamedDevice": "Unnamed device",
+
+  "connectDevice": "Connect device",
+  "connecting": "Connecting...",
+
+  "bluetoothPairRequest": "Bluetooth pair request",
+  "pair": "Pair",
+
+  "pairSuccess": "Device paired successfully!",
+  "deviceConnectedSuccess": "Device connected successfully.",
+  "setup": "Setup",
+
+  "allowHealthNotificationTitle": "Receive health\nnotifications",
+  "allowHealthNotificationDesc": "Get notified when something important happens.",
+
+  "healthAlertDesc": "Smartwatch can detect abnormal health signals.",
+
+  "allow": "Allow",
+  "later": "Later",
+
+  "syncingDevice": "Syncing device",
+  "syncingDesc": "Preparing health data for the best experience.",
+
+"continueButton": "Continue",
+  "setupComplete": "Setup complete!",
+  "deviceReady": "Your device is ready",
+  "done": "Done",
+
+  "connected": "Connected",
+  "goodHealth": "Good health",
+  "goodHealthDesc": "Your health indicators are within normal range.",
+
+  "todayHealthData": "Today's health data",
+
+  "spo2": "Blood oxygen – SpO₂",
+  "caloriesBurned": "Calories burned",
+  "bodyTemp": "Body temperature",
+  "stressLevel": "Stress level",
+
+  "disconnectDevice": "Disconnect device",
+  "deleteDevice": "Delete device",
+  "confirmDeleteDevice": "Are you sure you want to delete this device?",
+
+  "scan": "Scan",
+
+  "scanWatchInstruction1": "Hold the smartwatch",
+  "scanWatchInstruction2": "in front of the camera",
+  "scanWatchInstruction3": "Align the watch with the scan frame",
+
+  "qrNotFound": "QR not found? Try connecting via Bluetooth",
+
+  "search": "Search",
+  "chooseLanguage": "Choose language",
+  "languageChanged": "Language changed"
+}

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../app_settings.dart';
+import '../../l10n/app_localizations.dart';
 
 class LanguageScreen extends StatefulWidget {
   const LanguageScreen({super.key});
@@ -13,40 +14,38 @@ class _LanguageScreenState extends State<LanguageScreen> {
   static const _border = Color(0xFFD6DAE3);
 
   final _searchCtrl = TextEditingController();
-  String _selected = 'Tiếng Việt';
+  String _selected = '';
   String _query = '';
   bool _dirty = false;
 
-  // 🔥 MAP NAME → LOCALE CODE
-  static const Map<String, String> _langMap = {
-    'Tiếng Việt': 'vi',
-    'Tiếng Anh': 'en',
-    'Tiếng Nhật': 'ja',
-    'Tiếng Hàn': 'ko',
-    'Tiếng Trung (Giản thể)': 'zh',
-    'Tiếng Trung (Phồn thể)': 'zh',
-    'Tiếng Pháp': 'fr',
-    'Tiếng Đức': 'de',
-    'Tiếng Tây Ban Nha': 'es',
-    'Tiếng Ý': 'it',
-    'Tiếng Bồ Đào Nha': 'pt',
-    'Tiếng Nga': 'ru',
-  };
-
   static const List<Map<String, String>> _languages = [
-    {'name': 'Tiếng Anh', 'code': 'en', 'flag': '🇺🇸'},
-    {'name': 'Tiếng Việt', 'code': 'vi', 'flag': '🇻🇳'},
-    {'name': 'Tiếng Đức', 'code': 'de', 'flag': '🇩🇪'},
-    {'name': 'Tiếng Pháp', 'code': 'fr', 'flag': '🇫🇷'},
-    {'name': 'Tiếng Tây Ban Nha', 'code': 'es', 'flag': '🇪🇸'},
-    {'name': 'Tiếng Ý', 'code': 'it', 'flag': '🇮🇹'},
-    {'name': 'Tiếng Bồ Đào Nha', 'code': 'pt', 'flag': '🇵🇹'},
-    {'name': 'Tiếng Nga', 'code': 'ru', 'flag': '🇷🇺'},
-    {'name': 'Tiếng Trung (Giản thể)', 'code': 'zh', 'flag': '🇨🇳'},
-    {'name': 'Tiếng Trung (Phồn thể)', 'code': 'zh-Hant', 'flag': '🇹🇼'},
-    {'name': 'Tiếng Nhật', 'code': 'ja', 'flag': '🇯🇵'},
-    {'name': 'Tiếng Hàn', 'code': 'ko', 'flag': '🇰🇷'},
+    {'name': 'United States', 'code': 'en', 'flag': '🇺🇸'},
+    {'name': 'Việt Nam', 'code': 'vi', 'flag': '🇻🇳'},
+    {'name': 'Deutschland', 'code': 'de', 'flag': '🇩🇪'},
+    {'name': 'France', 'code': 'fr', 'flag': '🇫🇷'},
+    {'name': 'España', 'code': 'es', 'flag': '🇪🇸'},
+    {'name': 'Italia', 'code': 'it', 'flag': '🇮🇹'},
+    {'name': 'Portugal', 'code': 'pt', 'flag': '🇵🇹'},
+    {'name': 'Россия', 'code': 'ru', 'flag': '🇷🇺'},
+    {'name': '中国', 'code': 'zh', 'flag': '🇨🇳'},
+    {'name': '台灣', 'code': 'zh', 'flag': '🇹🇼'},
+    {'name': '日本', 'code': 'ja', 'flag': '🇯🇵'},
+    {'name': '대한민국', 'code': 'ko', 'flag': '🇰🇷'},
   ];
+
+  @override
+  void initState() {
+    super.initState();
+
+    final current = AppSettings.locale.value.languageCode;
+
+    final lang = _languages.firstWhere(
+      (l) => l['code'] == current,
+      orElse: () => _languages[1],
+    );
+
+    _selected = lang['name']!;
+  }
 
   @override
   void dispose() {
@@ -57,18 +56,19 @@ class _LanguageScreenState extends State<LanguageScreen> {
   @override
   Widget build(BuildContext context) {
     final list = _filteredLanguages();
+    final l = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF6F6F6),
-      appBar: _appBar(context),
+      appBar: _appBar(context, l),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(28, 14, 28, 24),
         children: [
-          _searchBar(),
+          _searchBar(l),
           const SizedBox(height: 12),
-          const Text(
-            'Chọn ngôn ngữ',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          Text(
+            l.chooseLanguage,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 12),
           ...list.map(_languageCard),
@@ -77,7 +77,7 @@ class _LanguageScreenState extends State<LanguageScreen> {
     );
   }
 
-  PreferredSizeWidget _appBar(BuildContext context) {
+  PreferredSizeWidget _appBar(BuildContext context, AppLocalizations l) {
     return AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
@@ -86,9 +86,9 @@ class _LanguageScreenState extends State<LanguageScreen> {
         icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
         onPressed: () => Navigator.pop(context),
       ),
-      title: const Text(
-        'Ngôn ngữ',
-        style: TextStyle(fontWeight: FontWeight.w700, fontSize: 24),
+      title: Text(
+        l.language,
+        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 24),
       ),
       actions: [
         IconButton(
@@ -102,7 +102,7 @@ class _LanguageScreenState extends State<LanguageScreen> {
     );
   }
 
-  Widget _searchBar() {
+  Widget _searchBar(AppLocalizations l) {
     return Container(
       height: 45,
       padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -114,10 +114,10 @@ class _LanguageScreenState extends State<LanguageScreen> {
       child: TextField(
         controller: _searchCtrl,
         onChanged: (s) => setState(() => _query = s.trim()),
-        decoration: const InputDecoration(
-          hintText: 'Tìm kiếm',
+        decoration: InputDecoration(
+          hintText: l.search,
           border: InputBorder.none,
-          icon: Icon(Icons.search),
+          icon: const Icon(Icons.search),
         ),
       ),
     );
@@ -125,6 +125,7 @@ class _LanguageScreenState extends State<LanguageScreen> {
 
   List<Map<String, String>> _filteredLanguages() {
     if (_query.isEmpty) return _languages;
+
     return _languages.where((l) {
       return (l['name'] ?? '').toLowerCase().contains(_query.toLowerCase());
     }).toList();
@@ -150,9 +151,11 @@ class _LanguageScreenState extends State<LanguageScreen> {
             Text(flag, style: const TextStyle(fontSize: 20)),
             const SizedBox(width: 14),
             Expanded(
-              child: Text(name,
-                  style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.w500)),
+              child: Text(
+                name,
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              ),
             ),
             Icon(
               selected ? Icons.radio_button_checked : Icons.radio_button_off,
@@ -166,25 +169,25 @@ class _LanguageScreenState extends State<LanguageScreen> {
 
   void _pick(String name) {
     if (_selected == name) return;
+
     setState(() {
       _selected = name;
       _dirty = true;
     });
   }
 
-  // 🔥 CHỖ QUAN TRỌNG NHẤT
   void _onSave() {
-    final lang = _languages.firstWhere(
-      (l) => l['name'] == _selected,
-    );
+    final lang = _languages.firstWhere((l) => l['name'] == _selected);
 
     final code = lang['code']!;
 
-    AppSettings.locale.value = Locale(code); // 🔥 APPLY NGAY
+    AppSettings.locale.value = Locale(code);
+
+    final l = AppLocalizations.of(context)!;
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Đã đổi ngôn ngữ: $_selected'),
+        content: Text(l.languageChanged),
         duration: const Duration(seconds: 1),
       ),
     );

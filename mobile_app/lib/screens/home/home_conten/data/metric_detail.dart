@@ -1,7 +1,7 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:Care_AI/api/health_api.dart';
+import 'package:Care_AI/models/metric_config.dart';
 
-// ===== CONSTANTS =====
 const TextStyle _axisTextStyle = TextStyle(
   fontSize: 11,
   color: Colors.black45,
@@ -10,65 +10,78 @@ const TextStyle _axisTextStyle = TextStyle(
 
 enum MetricRange { h, d, w, m, m6, y }
 
-// ===== SCREEN =====
-class BasicHealthDetailScreen extends StatefulWidget {
-  const BasicHealthDetailScreen({
+class MetricDetailScreen extends StatefulWidget {
+  const MetricDetailScreen({
     super.key,
     required this.title,
-    required this.unit,
-    required this.minDisplay,
-    required this.maxDisplay,
+    required this.deviceId,
+    required this.metricId,
     this.accent = const Color(0xFF00BCD4),
   });
 
   final String title;
-  final String unit;
-  final String minDisplay;
-  final String maxDisplay;
+  final String deviceId;
+  final String metricId;
   final Color accent;
 
   @override
-  State<BasicHealthDetailScreen> createState() =>
-      _BasicHealthDetailScreenState();
+  State<MetricDetailScreen> createState() => _MetricDetailScreenState();
 }
 
-class _BasicHealthDetailScreenState extends State<BasicHealthDetailScreen> {
+class _MetricDetailScreenState extends State<MetricDetailScreen> {
   static const _bg = Color(0xFFF6F6F6);
 
   MetricRange _range = MetricRange.h;
-  late List<double> _values;
+
+  List<double> _values = [];
+  List<String> _labels = [];
+
+  MetricConfig get _config =>
+      metricConfigs[widget.metricId.trim()] ??
+      const MetricConfig(
+        min: 0,
+        max: 100,
+        unit: "",
+        divisions: 4,
+      );
+
+  double get _minY => _config.min;
+  double get _maxY => _config.max;
+  double get _rangeY => _maxY - _minY;
 
   @override
   void initState() {
     super.initState();
-    _values = _mockValues();
+    _loadData();
   }
 
-  List<String> _xLabels() {
-    switch (_range) {
-      case MetricRange.h:
-        return ['16:00', '16:15', '16:30', '16:45'];
+  /* =========================
+     LOAD DATA
+  ========================= */
 
-      case MetricRange.d:
-        return ['00:00', '06:00', '12:00', '18:00'];
+  Future<void> _loadData() async {
+    try {
+      final data = await HealthApi.getHealthHistory(
+        widget.deviceId,
+        widget.metricId,
+        _range.name,
+      );
 
-      case MetricRange.w:
-        return ['Mon', 'Tue', 'Wed', 'Thu'];
+      final values =
+          data.map<double>((e) => (e['GiaTri'] as num).toDouble()).toList();
 
-      case MetricRange.m:
-        return ['1', '8', '15', '22'];
+      final labels = data.map<String>((e) {
+        final t = DateTime.parse(e['ThoiGian']);
+        return "${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}";
+      }).toList();
 
-      case MetricRange.m6:
-        return ['Jan', 'Mar', 'May', 'Jul'];
-
-      case MetricRange.y:
-        return ['2021', '2022', '2023', '2024'];
+      setState(() {
+        _values = values;
+        _labels = labels;
+      });
+    } catch (e) {
+      debugPrint(e.toString());
     }
-  }
-
-  List<double> _mockValues() {
-    final r = Random();
-    return List.generate(12, (_) => 60 + r.nextInt(25) + r.nextDouble());
   }
 
   @override
@@ -80,11 +93,11 @@ class _BasicHealthDetailScreenState extends State<BasicHealthDetailScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            _header(),
+            _header(context),
             const SizedBox(height: 10),
             _rangeTabs(),
             const SizedBox(height: 10),
-            _rangeInfo(),
+            _valueSection(latest),
             const SizedBox(height: 12),
             _chartCard(),
             const SizedBox(height: 10),
@@ -96,8 +109,11 @@ class _BasicHealthDetailScreenState extends State<BasicHealthDetailScreen> {
     );
   }
 
-  // ===== HEADER =====
-  Widget _header() {
+  /* =========================
+        HEADER
+  ========================= */
+
+  Widget _header(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(18, 14, 18, 10),
       child: Row(
@@ -127,33 +143,28 @@ class _BasicHealthDetailScreenState extends State<BasicHealthDetailScreen> {
     );
   }
 
-  // ===== RANGE TABS =====
+  /* =========================
+        RANGE TABS
+  ========================= */
+
   Widget _rangeTabs() {
-    Widget tab(String label, MetricRange r) {
+    Widget tab(String t, MetricRange r) {
       final active = _range == r;
+
       return GestureDetector(
-        onTap: () => setState(() {
-          _range = r;
-          _values = _mockValues();
-        }),
+        onTap: () {
+          setState(() => _range = r);
+          _loadData();
+        },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           padding: const EdgeInsets.symmetric(horizontal: 21, vertical: 6),
           decoration: BoxDecoration(
             color: active ? Colors.white : Colors.transparent,
             borderRadius: BorderRadius.circular(4),
-            boxShadow: active
-                ? const [
-                    BoxShadow(
-                      blurRadius: 6,
-                      color: Color(0x22000000),
-                      offset: Offset(0, 2),
-                    )
-                  ]
-                : null,
           ),
           child: Text(
-            label,
+            t,
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w500,
@@ -172,32 +183,28 @@ class _BasicHealthDetailScreenState extends State<BasicHealthDetailScreen> {
           color: const Color(0xFFEDEDED),
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            tab('H', MetricRange.h),
-            tab('D', MetricRange.d),
-            tab('W', MetricRange.w),
-            tab('M', MetricRange.m),
-            tab('6M', MetricRange.m6),
-            tab('Y', MetricRange.y),
-          ],
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              tab('H', MetricRange.h),
+              tab('D', MetricRange.d),
+              tab('W', MetricRange.w),
+              tab('M', MetricRange.m),
+              tab('6M', MetricRange.m6),
+              tab('Y', MetricRange.y),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  // ===== RANGE INFO =====
-  Widget _rangeInfo() {
-    const subtitles = {
-      MetricRange.h: 'Today, 16 - 17',
-      MetricRange.d: 'Today',
-      MetricRange.w: 'This week',
-      MetricRange.m: 'This month',
-      MetricRange.m6: 'Last 6 months',
-      MetricRange.y: 'This year',
-    };
+  /* =========================
+        VALUE
+  ========================= */
 
+  Widget _valueSection(double latest) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Align(
@@ -206,7 +213,7 @@ class _BasicHealthDetailScreenState extends State<BasicHealthDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'RANGE',
+              'Giá trị',
               style: TextStyle(
                 color: Colors.black45,
                 fontWeight: FontWeight.w600,
@@ -218,7 +225,7 @@ class _BasicHealthDetailScreenState extends State<BasicHealthDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  '${widget.minDisplay} – ${widget.maxDisplay}',
+                  latest.toStringAsFixed(_config.decimals),
                   style: const TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.w700,
@@ -228,7 +235,7 @@ class _BasicHealthDetailScreenState extends State<BasicHealthDetailScreen> {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 3),
                   child: Text(
-                    widget.unit,
+                    _config.unit,
                     style: const TextStyle(
                       color: Colors.black54,
                       fontSize: 24,
@@ -238,28 +245,22 @@ class _BasicHealthDetailScreenState extends State<BasicHealthDetailScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 2),
-            Text(
-              subtitles[_range]!,
-              style: const TextStyle(
-                color: Colors.black45,
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
           ],
         ),
       ),
     );
   }
 
-  // ===== CHART CARD =====
+  /* =========================
+        CHART
+  ========================= */
+
   Widget _chartCard() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Container(
-        height: 240,
-        padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
+        height: 260,
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(10),
@@ -272,21 +273,29 @@ class _BasicHealthDetailScreenState extends State<BasicHealthDetailScreen> {
                 children: [
                   Expanded(
                     child: CustomPaint(
-                      painter: _MiniBarChartPainter(
+                      painter: _MetricBarPainter(
                         values: _values,
                         accent: widget.accent,
+                        minY: _minY,
+                        maxY: _maxY,
                       ),
-                      child: const SizedBox.expand(),
                     ),
                   ),
                   const SizedBox(width: 6),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
-                      Text('100', style: _axisTextStyle),
-                      Text('50', style: _axisTextStyle),
-                      Text('0', style: _axisTextStyle),
-                    ],
+                    children: List.generate(
+                      _config.divisions + 1,
+                      (i) {
+                        final value =
+                            _maxY - (i * (_rangeY / _config.divisions));
+
+                        return Text(
+                          value.toStringAsFixed(_config.decimals),
+                          style: _axisTextStyle,
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),
@@ -294,9 +303,8 @@ class _BasicHealthDetailScreenState extends State<BasicHealthDetailScreen> {
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: _xLabels()
-                  .map((e) => Text(e, style: _axisTextStyle))
-                  .toList(),
+              children:
+                  _labels.map((e) => Text(e, style: _axisTextStyle)).toList(),
             ),
           ],
         ),
@@ -304,7 +312,10 @@ class _BasicHealthDetailScreenState extends State<BasicHealthDetailScreen> {
     );
   }
 
-  // ===== LATEST =====
+  /* =========================
+        LATEST
+  ========================= */
+
   Widget _latestRow(double latest) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -316,13 +327,10 @@ class _BasicHealthDetailScreenState extends State<BasicHealthDetailScreen> {
         ),
         child: Row(
           children: [
-            const Text(
-              'Latest: 16:30',
-              style: TextStyle(fontWeight: FontWeight.w500),
-            ),
+            const Text('Mới nhất'),
             const Spacer(),
             Text(
-              '${latest.toStringAsFixed(0)} ${widget.unit}',
+              '${latest.toStringAsFixed(_config.decimals)} ${_config.unit}',
               style: const TextStyle(fontWeight: FontWeight.w700),
             ),
           ],
@@ -332,47 +340,45 @@ class _BasicHealthDetailScreenState extends State<BasicHealthDetailScreen> {
   }
 }
 
-// ===== CHART PAINTER (GIỮ NGUYÊN LOGIC CŨ) =====
-class _MiniBarChartPainter extends CustomPainter {
-  _MiniBarChartPainter({required this.values, required this.accent});
+/* =========================
+      CHART PAINTER
+========================= */
+
+class _MetricBarPainter extends CustomPainter {
+  _MetricBarPainter({
+    required this.values,
+    required this.accent,
+    required this.minY,
+    required this.maxY,
+  });
 
   final List<double> values;
   final Color accent;
+  final double minY;
+  final double maxY;
 
+  double get rangeY => (maxY - minY) == 0 ? 1 : (maxY - minY);
   @override
   void paint(Canvas canvas, Size size) {
-    final grid = Paint()
-      ..color = const Color(0x11000000)
-      ..strokeWidth = 1;
-
-    for (int i = 1; i < 4; i++) {
-      final x = size.width * i / 4;
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
-    }
-    for (int i = 1; i < 3; i++) {
-      final y = size.height * i / 3;
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
-    }
-
     if (values.isEmpty) return;
 
-    final minV = values.reduce(min);
-    final maxV = values.reduce(max);
-    final range = (maxV - minV).abs() < 0.001 ? 1.0 : (maxV - minV);
-
     final paint = Paint()..color = accent;
-    final n = values.length;
-    const gap = 6.0;
-    final barW = (size.width - gap * (n - 1)) / n;
 
+    final n = values.length;
+    const gap = 8.0;
+    final barW = (size.width - gap * (n - 1)) / n;
     for (int i = 0; i < n; i++) {
-      final norm = (values[i] - minV) / range;
-      final barH = 10 + norm * (size.height - 18);
+      final v = values[i].clamp(minY, maxY);
+
+      final norm = (v - minY) / rangeY;
+      final barH = norm * size.height;
+
       final left = i * (barW + gap);
+
       canvas.drawRRect(
         RRect.fromRectAndRadius(
           Rect.fromLTWH(left, size.height - barH, barW, barH),
-          const Radius.circular(3),
+          const Radius.circular(4),
         ),
         paint,
       );
@@ -380,6 +386,9 @@ class _MiniBarChartPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _MiniBarChartPainter old) =>
-      old.values != values || old.accent != accent;
+  bool shouldRepaint(covariant _MetricBarPainter old) =>
+      old.values != values ||
+      old.accent != accent ||
+      old.minY != minY ||
+      old.maxY != maxY;
 }

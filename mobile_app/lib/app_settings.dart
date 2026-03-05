@@ -5,8 +5,8 @@ import 'models/login_history_item.dart';
 class AppSettings {
   static final ValueNotifier<double> textScale = ValueNotifier<double>(1.1);
 
-  static final ValueNotifier<Locale> locale = ValueNotifier(const Locale('vi'));
-
+  static final ValueNotifier<Locale> locale =
+      ValueNotifier(WidgetsBinding.instance.platformDispatcher.locale);
   static final ValueNotifier<bool> notificationOn = ValueNotifier<bool>(true);
 
   static final ValueNotifier<bool> healthAlertOn = ValueNotifier<bool>(true);
@@ -32,6 +32,17 @@ class AppSettings {
     healthAlertOn.value = _prefs?.getBool('healthAlertOn') ?? true;
 
     syncDataOn.value = _prefs?.getBool('syncDataOn') ?? true;
+
+    // 🔥 LOAD LANGUAGE
+    final savedLang = _prefs?.getString('locale');
+    if (savedLang != null) {
+      locale.value = Locale(savedLang);
+    }
+
+    // 🔥 SAVE LANGUAGE
+    locale.addListener(() {
+      _prefs?.setString('locale', locale.value.languageCode);
+    });
 
     textScale.addListener(() {
       _prefs?.setDouble('textScale', textScale.value);

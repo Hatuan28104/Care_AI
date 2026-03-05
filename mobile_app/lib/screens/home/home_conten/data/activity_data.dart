@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'activity_item.dart';
-import 'activity_detail.dart';
+import 'package:Care_AI/api/health_api.dart';
+import 'metric_item.dart';
+import 'metric_detail.dart';
+import 'package:Care_AI/models/health_icon_mapper.dart';
 
 class ActivityDataScreen extends StatefulWidget {
   const ActivityDataScreen({super.key});
@@ -17,49 +19,91 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
   final TextEditingController _searchCtrl = TextEditingController();
   String _keyword = '';
 
-  // ===== DEMO DATA =====
-  final List<ActivityItem> _items = [
-    ActivityItem(
-      icon: Icons.directions_walk,
-      iconColor: Colors.red,
-      title: 'Số bước',
-      value: 600,
-      unit: 'bước',
-      time: '18:30',
-    ),
-    ActivityItem(
-      icon: Icons.route,
-      iconColor: Colors.orange,
-      title: 'Quãng đường đi bộ + chạy',
-      value: 3,
-      unit: 'km',
-      time: '18:30',
-    ),
-    ActivityItem(
-      icon: Icons.bedtime,
-      iconColor: Colors.indigo,
-      title: 'Thời gian ngủ',
-      value: 7,
-      unit: 'giờ',
-      time: '18:30',
-    ),
-    ActivityItem(
-      icon: Icons.auto_graph,
-      iconColor: Colors.blue,
-      title: 'Chất lượng giấc ngủ',
-      value: 85,
-      unit: '%',
-      time: '18:30',
-    ),
-    ActivityItem(
-      icon: Icons.local_fire_department,
-      iconColor: Colors.purple,
-      title: 'Thời gian vận động',
-      value: 50,
-      unit: 'phút',
-      time: '18:30',
-    ),
-  ];
+  String? _deviceId;
+
+  List<MetricItem> _items = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _initData();
+  }
+
+  /// =========================
+  /// INIT
+  /// =========================
+  Future<void> _initData() async {
+    await _loadMetrics();
+    await _loadDevice();
+  }
+
+  /// =========================
+  /// LOAD DEVICE
+  /// =========================
+  Future<void> _loadDevice() async {
+    try {
+      _deviceId = "DEVICE001"; // test
+
+      if (_deviceId != null && _items.isNotEmpty) {
+        await _loadLatestActivityData();
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  /// =========================
+  /// LOAD METRICS
+  /// =========================
+  Future<void> _loadMetrics() async {
+    try {
+      final data = await HealthApi.getMetrics();
+
+      final items =
+          data.where((e) => e['Category'] == 'activity').map<MetricItem>((e) {
+        final iconData = getHealthIcon(e['TenChiSo']);
+
+        return MetricItem(
+          icon: iconData.icon,
+          iconColor: iconData.color,
+          title: e['TenChiSo'],
+          value: '--',
+          unit: e['DonViDo'],
+          time: '--:--',
+        );
+      }).toList();
+
+      setState(() {
+        _items = items;
+      });
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  /// =========================
+  /// LOAD LATEST DATA
+  /// =========================
+  Future<void> _loadLatestActivityData() async {
+    try {
+      final data = await HealthApi.getLatestHealthData(_deviceId!);
+
+      setState(() {
+        for (var item in _items) {
+          final match = data.where((e) => e['TenChiSo'] == item.title);
+
+          if (match.isNotEmpty) {
+            final m = match.first;
+
+            item.value = m['GiaTri'].toString();
+            item.time = m['ThoiGian'] ?? '--:--';
+          }
+        }
+      });
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +120,7 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
             _searchBox(),
             Expanded(
               child: filteredItems.isEmpty
-                  ? const Center(child: Text('Không có dữ liệu'))
+                  ? const SizedBox()
                   : ListView.separated(
                       padding: _listPadding,
                       itemCount: filteredItems.length,
@@ -90,7 +134,7 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
     );
   }
 
-  // ===== HEADER =====
+  /// HEADER
   Widget _header(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(18, 14, 18, 6),
@@ -107,7 +151,7 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
           const SizedBox(width: 10),
           const Expanded(
             child: Text(
-              'Dữ liệu sức khỏe',
+              'Dữ liệu hoạt động',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 24,
@@ -122,7 +166,7 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
     );
   }
 
-  // ===== SEARCH =====
+  /// SEARCH
   Widget _searchBox() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(18, 0, 18, 12),
@@ -146,18 +190,18 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
     );
   }
 
-  // ===== TILE =====
-  Widget _tile(BuildContext context, ActivityItem m) {
+  /// TILE
+  Widget _tile(BuildContext context, MetricItem m) {
     return InkWell(
       borderRadius: _cardRadius,
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => ActivityDetailScreen(
+            builder: (_) => MetricDetailScreen(
               title: m.title,
-              unit: m.unit,
-              value: m.value,
+              deviceId: _deviceId!,
+              metricId: m.title,
               accent: m.iconColor,
             ),
           ),
@@ -185,7 +229,7 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
     );
   }
 
-  Widget _iconBox(ActivityItem m) {
+  Widget _iconBox(MetricItem m) {
     return Container(
       width: 46,
       height: 46,
@@ -197,7 +241,7 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
     );
   }
 
-  Widget _content(ActivityItem m) {
+  Widget _content(MetricItem m) {
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -213,7 +257,7 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
           Row(
             children: [
               Text(
-                m.value.toString(),
+                m.value,
                 style: const TextStyle(
                   fontWeight: FontWeight.w900,
                   fontSize: 18,

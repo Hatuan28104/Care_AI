@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'basic_health_item.dart';
-import 'basic_health_detail.dart';
+import 'package:Care_AI/api/health_api.dart';
+import 'package:Care_AI/models/health_icon_mapper.dart';
+import 'metric_item.dart';
+import 'metric_detail.dart';
 
 class BasicHealthDataScreen extends StatefulWidget {
   const BasicHealthDataScreen({super.key});
@@ -11,60 +13,97 @@ class BasicHealthDataScreen extends StatefulWidget {
 
 class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
   static const Color _bg = Color(0xFFF6F6F6);
-  static const EdgeInsets _pagePadding = EdgeInsets.fromLTRB(18, 2, 18, 18);
+  static const EdgeInsets _listPadding = EdgeInsets.fromLTRB(18, 2, 18, 18);
   static const BorderRadius _cardRadius = BorderRadius.all(Radius.circular(10));
 
   final TextEditingController _searchCtrl = TextEditingController();
   String _keyword = '';
 
-  // ===== DEMO DATA =====
-  final List<BasicHealthItem> _items = [
-    BasicHealthItem(
-      icon: Icons.favorite,
-      iconColor: Colors.red,
-      title: 'Nhịp tim',
-      value: '72',
-      unit: 'BPM',
-      time: '18:30',
-    ),
-    BasicHealthItem(
-      icon: Icons.bloodtype,
-      iconColor: Colors.blue,
-      title: 'Huyết áp',
-      value: '120 / 80',
-      unit: 'mmHg',
-      time: '18:30',
-    ),
-    BasicHealthItem(
-      icon: Icons.monitor_heart,
-      iconColor: Colors.indigo,
-      title: 'Nồng độ oxy máu (SpO₂)',
-      value: '98',
-      unit: '%',
-      time: '18:30',
-    ),
-    BasicHealthItem(
-      icon: Icons.thermostat,
-      iconColor: Colors.orange,
-      title: 'Nhiệt độ cơ thể',
-      value: '36.8',
-      unit: '°C',
-      time: '18:30',
-    ),
-    BasicHealthItem(
-      icon: Icons.fitness_center,
-      iconColor: Colors.purple,
-      title: 'Chỉ số BMI',
-      value: '21.5',
-      unit: 'kg/m²',
-      time: '18:30',
-    ),
-  ];
+  String? _deviceId;
+
+  List<MetricItem> _items = [];
 
   @override
-  void dispose() {
-    _searchCtrl.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    _initData();
+  }
+
+  /// =========================
+  /// INIT
+  /// =========================
+  Future<void> _initData() async {
+    await _loadMetrics();
+    await _loadDevice();
+  }
+
+  /// =========================
+  /// LOAD DEVICE
+  /// =========================
+  Future<void> _loadDevice() async {
+    try {
+      _deviceId = "DEVICE001"; // test device
+
+      if (_deviceId != null && _items.isNotEmpty) {
+        await _loadLatestHealthData();
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  /// =========================
+  /// LOAD METRICS
+  /// =========================
+  Future<void> _loadMetrics() async {
+    try {
+      final data = await HealthApi.getMetrics();
+
+      final items = data
+          .where((e) => e['Category'] == 'health')
+          .map<MetricItem>((e) {
+        final iconData = getHealthIcon(e['TenChiSo']);
+
+        return MetricItem(
+          icon: iconData.icon,
+          iconColor: iconData.color,
+          title: e['TenChiSo'],
+          value: '--',
+          unit: e['DonViDo'],
+          time: '--:--',
+        );
+      }).toList();
+
+      setState(() {
+        _items = items;
+      });
+    } catch (e) {
+      debugPrint('Load metrics error: $e');
+    }
+  }
+
+  /// =========================
+  /// LOAD LATEST DATA
+  /// =========================
+  Future<void> _loadLatestHealthData() async {
+    try {
+      final data = await HealthApi.getLatestHealthData(_deviceId!);
+
+      setState(() {
+        for (var item in _items) {
+          final match = data.where((e) => e['TenChiSo'] == item.title);
+
+          if (match.isNotEmpty) {
+            final m = match.first;
+
+            item.value = m['GiaTri'].toString();
+            item.time = m['ThoiGian'] ?? '--:--';
+          }
+        }
+      });
+    } catch (e) {
+      debugPrint(e.toString());
+    }
   }
 
   @override
@@ -82,9 +121,9 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
             _searchBox(),
             Expanded(
               child: filteredItems.isEmpty
-                  ? const Center(child: Text('Không có dữ liệu'))
+                  ? const SizedBox()
                   : ListView.separated(
-                      padding: _pagePadding,
+                      padding: _listPadding,
                       itemCount: filteredItems.length,
                       separatorBuilder: (_, __) => const SizedBox(height: 10),
                       itemBuilder: (_, i) => _tile(context, filteredItems[i]),
@@ -96,7 +135,9 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
     );
   }
 
-  // ===== HEADER =====
+  /// =========================
+  /// HEADER
+  /// =========================
   Widget _header(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(18, 14, 18, 6),
@@ -113,7 +154,7 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
           const SizedBox(width: 10),
           const Expanded(
             child: Text(
-              'Dữ liệu hoạt động',
+              'Dữ liệu sức khỏe',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 24,
@@ -128,7 +169,9 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
     );
   }
 
-  // ===== SEARCH =====
+  /// =========================
+  /// SEARCH
+  /// =========================
   Widget _searchBox() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(18, 0, 18, 12),
@@ -152,29 +195,29 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
     );
   }
 
-  // ===== TILE =====
-  Widget _tile(BuildContext context, BasicHealthItem m) {
-    final minD = _firstNumber(m.value);
-    final maxD = _calcMax(minD);
-
+  /// =========================
+  /// TILE
+  /// =========================
+  Widget _tile(BuildContext context, MetricItem m) {
     return InkWell(
       borderRadius: _cardRadius,
       onTap: () {
+        if (_deviceId == null) return;
+
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => BasicHealthDetailScreen(
+            builder: (_) => MetricDetailScreen(
               title: m.title,
-              unit: m.unit,
-              minDisplay: minD,
-              maxDisplay: maxD,
+              deviceId: _deviceId!,
+              metricId: m.title,
               accent: m.iconColor,
             ),
           ),
         );
       },
       child: Container(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: _cardRadius,
@@ -195,10 +238,10 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
     );
   }
 
-  Widget _iconBox(BasicHealthItem m) {
+  Widget _iconBox(MetricItem m) {
     return Container(
-      width: 38,
-      height: 38,
+      width: 46,
+      height: 46,
       decoration: BoxDecoration(
         color: m.iconColor.withOpacity(.12),
         borderRadius: BorderRadius.circular(10),
@@ -207,7 +250,7 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
     );
   }
 
-  Widget _content(BasicHealthItem m) {
+  Widget _content(MetricItem m) {
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -252,17 +295,5 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
         fontWeight: FontWeight.w700,
       ),
     );
-  }
-
-  // ===== HELPERS =====
-  static String _firstNumber(String s) {
-    final m = RegExp(r'(\d+(\.\d+)?)').firstMatch(s);
-    return m?.group(1) ?? '--';
-  }
-
-  static String _calcMax(String minD) {
-    final v = double.tryParse(minD);
-    if (v == null) return '--';
-    return (v + 2).toStringAsFixed(v % 1 == 0 ? 0 : 1);
   }
 }

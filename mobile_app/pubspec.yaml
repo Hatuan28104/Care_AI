@@ -25,6 +25,7 @@ dependencies:
   firebase_core: ^2.25.4
   firebase_messaging: ^14.7.10
   flutter_local_notifications: ^20.1.0
+
 flutter:
   uses-material-design: true
   generate: true

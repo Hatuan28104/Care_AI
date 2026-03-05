@@ -11,6 +11,7 @@ import 'sound_vibration.dart';
 import 'help_support.dart';
 import '../../api/settings_api.dart';
 import '../../api/auth_storage.dart';
+import '../../models/tr.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -69,68 +70,70 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _section('Tài khoản', fontSize: 18),
+              _section(context.tr.account, fontSize: 18),
               _card([
                 _item(
                   icon: Icons.person_outline,
-                  text: 'Hồ sơ của tôi',
+                  text: context.tr.myProfile,
                   onTap: () => _go(context, const MyProfileScreen()),
                 ),
                 _item(
                   icon: Icons.lock_outline,
-                  text: 'Quyền riêng tư & bảo mật',
+                  text: context.tr.privacySecurity,
                   onTap: () => _go(context, const PrivacySecurityScreen()),
                 ),
               ]),
-              _section('Trưng bày'),
+              _section(context.tr.display),
               _card([
                 _item(
                   icon: Icons.text_fields,
-                  text: 'Cỡ chữ',
+                  text: context.tr.textSize,
                   subtitle: _textSizeLabel(AppSettings.textScale.value),
                   onTap: () => _go(context, const TextSizeScreen()),
                 ),
                 _item(
                   icon: Icons.language,
-                  text: 'Ngôn ngữ',
-                  subtitle: 'Tiếng Việt',
+                  text: context.tr.language,
+                  subtitle: AppSettings.locale.value.languageCode == 'vi'
+                      ? 'Tiếng Việt'
+                      : 'English',
                   onTap: () => _go(context, const LanguageScreen()),
                 ),
               ]),
-              _section('Thông báo'),
+              _section(context.tr.notifications),
               _card([
                 _switchItem(
                   icon: Icons.notifications_none,
-                  text: 'Thông báo',
+                  text: context.tr.notifications,
                   notifier: AppSettings.notificationOn,
                   settingKey: "notificationOn",
                 ),
                 _item(
                   icon: Icons.volume_up_outlined,
-                  text: 'Âm thanh & rung',
+                  text: context.tr.soundVibration,
                   onTap: () => _go(context, const SoundVibrationScreen()),
                 ),
               ]),
-              _section('Thiết bị'),
+              _section(context.tr.device),
               _card([
                 _switchItem(
                   icon: Icons.health_and_safety_outlined,
-                  text: 'Cảnh báo sức khỏe',
+                  text: context.tr.healthAlert,
                   notifier: AppSettings.healthAlertOn,
                   settingKey: "healthAlertOn",
                 ),
                 _switchItem(
                   icon: Icons.sync,
-                  text: 'Đồng bộ dữ liệu',
+                  text: context.tr.syncData,
                   notifier: AppSettings.syncDataOn,
                   settingKey: "syncDataOn",
                 ),
               ]),
-              _section('Hỗ trợ'),
+              _section(context.tr.support),
               _card([
                 _item(
                   icon: Icons.help_outline,
-                  text: 'Trợ giúp & hỗ trợ',
+                  text: context.tr.helpSupport,
                   onTap: () => _go(context, const HelpSupportScreen()),
                 ),
               ]),
@@ -153,10 +156,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             color: Colors.black, size: 20),
         onPressed: () => Navigator.pop(context),
       ),
-      title: const Text(
-        'Cài đặt',
-        style: TextStyle(
-            fontWeight: FontWeight.w700, fontSize: 24, color: Colors.black),
+      title: Text(
+        context.tr.settings,
+        style: const TextStyle(
+          fontWeight: FontWeight.w700,
+          fontSize: 24,
+          color: Colors.black,
+        ),
       ),
     );
   }
@@ -265,19 +271,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
-        child: const Text(
-          'Đăng xuất',
-          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+        child: Text(
+          context.tr.logout,
+          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
         ),
       ),
     );
   }
 
   String _textSizeLabel(double scale) {
-    if (scale <= 1.0) return 'Nhỏ';
-    if (scale <= 1.1) return 'Mặc định';
-    if (scale <= 1.2) return 'Vừa';
-    if (scale <= 1.3) return 'Lớn';
-    return 'Mặc định';
+    if (scale <= 1.0) return context.tr.small;
+    if (scale <= 1.1) return context.tr.defaultSize;
+    if (scale <= 1.2) return context.tr.medium;
+    if (scale <= 1.3) return context.tr.large;
+    return context.tr.defaultSize;
   }
 }

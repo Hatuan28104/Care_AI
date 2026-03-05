@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'screens/intro_screen.dart';
@@ -7,6 +6,8 @@ import 'app_settings.dart';
 import 'api/auth_storage.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'l10n/app_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
@@ -67,19 +68,21 @@ class MyApp extends StatelessWidget {
             return MaterialApp(
               debugShowCheckedModeBanner: false,
               locale: locale,
-              supportedLocales: const [
-                Locale('vi'),
-                Locale('en'),
-                Locale('de'),
-                Locale('fr'),
-                Locale('es'),
-                Locale('it'),
-              ],
+              supportedLocales: AppLocalizations.supportedLocales,
               localizationsDelegates: const [
+                AppLocalizations.delegate,
                 GlobalMaterialLocalizations.delegate,
                 GlobalWidgetsLocalizations.delegate,
                 GlobalCupertinoLocalizations.delegate,
               ],
+              localeResolutionCallback: (deviceLocale, supportedLocales) {
+                for (var locale in supportedLocales) {
+                  if (locale.languageCode == deviceLocale?.languageCode) {
+                    return locale;
+                  }
+                }
+                return supportedLocales.first;
+              },
               builder: (context, child) {
                 final mq = MediaQuery.of(context);
                 return MediaQuery(

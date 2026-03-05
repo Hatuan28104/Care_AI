@@ -83,7 +83,7 @@ class HomeTab extends StatelessWidget {
             text: 'Dữ liệu hoạt động',
             onTap: () => _go(
               context,
-              const BasicHealthDataScreen(),
+              const ActivityDataScreen(),
             ),
           ),
           const SizedBox(height: 6),
@@ -93,7 +93,7 @@ class HomeTab extends StatelessWidget {
             text: 'Dữ liệu sức khỏe',
             onTap: () => _go(
               context,
-              const ActivityDataScreen(),
+              const BasicHealthDataScreen(),
             ),
           ),
 

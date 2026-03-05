@@ -1,0 +1,187 @@
+{
+  "settings": "Cài đặt",
+  "account": "Tài khoản",
+  "myProfile": "Hồ sơ của tôi",
+  "privacySecurity": "Quyền riêng tư & bảo mật",
+  "display": "Hiển thị",
+  "textSize": "Cỡ chữ",
+  "language": "Ngôn ngữ",
+  "notifications": "Thông báo",
+  "soundVibration": "Âm thanh & rung",
+  "device": "Thiết bị",
+  "healthAlert": "Cảnh báo sức khỏe",
+  "syncData": "Đồng bộ dữ liệu",
+  "support": "Hỗ trợ",
+  "helpSupport": "Trợ giúp & hỗ trợ",
+  "logout": "Đăng xuất",
+
+  "small": "Nhỏ",
+  "defaultSize": "Mặc định",
+  "medium": "Vừa",
+  "large": "Lớn",
+
+  "searchData": "Tìm kiếm dữ liệu...",
+  "activityData": "Dữ liệu hoạt động",
+  "healthData": "Dữ liệu sức khỏe",
+
+  "value": "Giá trị",
+  "latest": "Mới nhất",
+
+  "alert": "Cảnh báo",
+  "today": "Hôm nay",
+  "markAllRead": "Đánh dấu đã đọc",
+  "deleteAlert": "Xóa cảnh báo",
+  "deleteWarning": "Hành động này có thể gây hậu quả.",
+  "accept": "Chấp nhận",
+  "cancel": "Hủy",
+  "deletedSuccess": "Đã xóa thành công",
+
+  "digitalHuman": "Nhân vật số",
+  "nutritionExpert": "Chuyên gia dinh dưỡng",
+  "zodiacExpert": "Chuyên gia cung hoàng đạo",
+  "fitnessCoach": "Huấn luyện viên thể chất",
+  "meditationGuide": "Hướng dẫn thiền",
+
+  "digitalHumanSection": "Digital Human",
+  "viewAll": "Tất cả",
+
+  "healthCategory": "Danh mục sức khỏe",
+  "start": "Bắt đầu",
+
+  "welcome": "Xin chào 👋",
+  "welcomeQuestion": "Hôm nay bạn muốn được hỗ trợ điều gì?",
+
+  "chatHint": "Hỏi bất cứ điều gì...",
+  "chooseImage": "Ảnh",
+
+  "home": "Trang chủ",
+  "family": "Gia đình",
+  "deviceTab": "Thiết bị",
+  "history": "Lịch sử",
+
+  "configurePermissions": "Thiết lập quyền",
+  "conversationHistory": "Lịch sử trò chuyện",
+  "chooseConversation": "Chọn cuộc trò chuyện",
+  "shareConversationHistory": "Chia sẻ lịch sử trò chuyện",
+
+  "basicHealthData": "Dữ liệu sức khỏe cơ bản",
+  "chooseHealthData": "Chọn dữ liệu sức khỏe",
+
+  "save": "Lưu",
+
+  "guardians": "Người giám hộ",
+  "dependents": "Người phụ thuộc",
+
+  "add": "Thêm",
+  "addNew": "Thêm mới",
+
+  "enterGuardianPhone": "Nhập số điện thoại của người giám hộ",
+  "enterPhone": "Nhập số điện thoại",
+
+  "sendInvite": "Gửi lời mời",
+  "cancelRequest": "Hủy yêu cầu",
+
+  "inviteSentSuccess": "Đã gửi lời mời thành công",
+  "userNotFound": "Không tìm thấy người dùng",
+
+  "reject": "Từ chối",
+  "delete": "Xóa",
+
+  "confirmDelete": "Xác nhận xóa",
+  "confirmDeleteGuardian": "Bạn có chắc chắn muốn xóa người giám hộ này khỏi gia đình không?",
+
+  "confirmInvite": "Xác nhận lời mời",
+  "acceptInviteQuestion": "Bạn có muốn nhận lời mời không?",
+
+  "confirmRejectInvite": "Xác nhận từ chối lời mời",
+  "rejectInviteQuestion": "Bạn có chắc chắn muốn từ chối lời mời này không?",
+
+  "fullName": "Họ và tên",
+  "birthDate": "Ngày sinh",
+  "gender": "Giới tính",
+  "joinDate": "Ngày tham gia",
+
+  "male": "Nam",
+  "female": "Nữ",
+
+  "report": "Báo cáo",
+  "day": "Ngày",
+  "week": "Tuần",
+  "month": "Tháng",
+
+  "shareData": "Chia sẻ dữ liệu",
+
+  "heartRate": "Nhịp tim",
+  "bodyTemperature": "Nhiệt độ cơ thể",
+  "bloodPressure": "Huyết áp",
+  "steps": "Số bước",
+  "sleep": "Giấc ngủ",
+
+  "sevenDaysAgo": "7 ngày trước",
+
+  "view": "Xem",
+
+  "noData": "Chưa có dữ liệu",
+  "distance": "Quãng đường",
+  "calories": "Calo",
+
+  "scanningBluetooth": "Đang quét Bluetooth",
+  "deviceNearby": "Hãy đảm bảo thiết bị của bạn ở gần",
+  "deviceVisible": "và đang bật chế độ hiển thị",
+
+  "noDeviceFound": "Không tìm thấy thiết bị",
+  "unnamedDevice": "Thiết bị không tên",
+
+  "connectDevice": "Kết nối thiết bị",
+  "connecting": "Đang kết nối...",
+
+  "bluetoothPairRequest": "Yêu cầu ghép đôi Bluetooth",
+  "pair": "Ghép đôi",
+
+  "pairSuccess": "Đã ghép đôi thiết bị!",
+  "deviceConnectedSuccess": "Thiết bị đã được kết nối thành công.",
+  "setup": "Thiết lập",
+
+  "allowHealthNotificationTitle": "Nhận thông báo\nvề sức khỏe của bạn",
+  "allowHealthNotificationDesc": "Nhận thông báo khi có điều quan trọng cần biết.",
+
+  "healthAlertDesc": "Đồng hồ thông minh có thể cảnh báo khi phát hiện các dấu hiệu bất thường.",
+
+  "allow": "Cho phép",
+  "later": "Để sau",
+
+  "syncingDevice": "Đang đồng bộ thiết bị",
+  "syncingDesc": "Chúng tôi đang chuẩn bị dữ liệu sức khỏe.",
+
+"continueButton": "Tiếp tục",
+  "setupComplete": "Thiết lập hoàn tất!",
+  "deviceReady": "Thiết bị của bạn đã sẵn sàng sử dụng",
+  "done": "Hoàn tất",
+
+  "connected": "Đã kết nối",
+  "goodHealth": "Sức khỏe tốt",
+  "goodHealthDesc": "Các chỉ số của bạn đều nằm trong ngưỡng bình thường.",
+
+  "todayHealthData": "Dữ liệu sức khỏe hôm nay",
+
+  "spo2": "Nồng độ oxy trong máu – SpO₂",
+  "caloriesBurned": "Lượng calo tiêu thụ",
+  "bodyTemp": "Nhiệt độ cơ thể",
+  "stressLevel": "Mức độ căng thẳng",
+
+  "disconnectDevice": "Ngắt kết nối thiết bị",
+  "deleteDevice": "Xóa thiết bị",
+  "confirmDeleteDevice": "Bạn có chắc chắn muốn xóa thiết bị này không?",
+
+  "scan": "Quét",
+
+  "scanWatchInstruction1": "Giữ đồng hồ thông minh",
+  "scanWatchInstruction2": "trước camera",
+  "scanWatchInstruction3": "Căn chỉnh đồng hồ vào khung quét",
+
+  "qrNotFound": "Không tìm thấy mã QR? Hãy thử kết nối bằng Bluetooth",
+
+  "search": "Tìm kiếm",
+  "chooseLanguage": "Chọn ngôn ngữ",
+  "languageChanged": "Đã đổi ngôn ngữ"
+}

@@ -8,7 +8,7 @@ import relationshipRoute from "./routes/relationship.route.js";
 import permissionRoute from "./routes/permission.route.js";
 import settingsRoute from "./routes/settings.route.js";
 import notificationRoute from "./routes/notification.route.js";
-
+import healthMetricRoute from "./routes/healthMetric.route.js";
 const app = express();
 // ===== PROFILE =====
 app.use("/profile", profileRoute);
@@ -22,7 +22,7 @@ app.use("/family/permission", permissionRoute);
 
 // ===== SETTINGS =====
 app.use("/api/settings", settingsRoute);
-
+app.use("/health", healthMetricRoute);
 // ===== AUTH =====
 app.use("/auth", authRoute);
 
