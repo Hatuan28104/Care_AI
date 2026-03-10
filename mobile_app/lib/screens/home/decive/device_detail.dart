@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../models/tr.dart';
 
 class DeviceDetailScreen extends StatelessWidget {
   const DeviceDetailScreen({super.key});
@@ -45,8 +46,8 @@ class DeviceDetailScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 14),
-                const Text(
-                  'Xác nhận xóa',
+                Text(
+                  context.tr.confirmDelete,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
@@ -54,8 +55,8 @@ class DeviceDetailScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 6),
-                const Text(
-                  'Bạn có chắc chắn muốn xóa\nthiết bị này không?',
+                Text(
+                  context.tr.deleteDeviceConfirm,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 13,
@@ -82,8 +83,8 @@ class DeviceDetailScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child: const Text(
-                      'Xóa thiết bị',
+                    child: Text(
+                      context.tr.deleteDevice,
                       style: TextStyle(fontWeight: FontWeight.w800),
                     ),
                   ),
@@ -104,8 +105,8 @@ class DeviceDetailScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child: const Text(
-                      'Hủy',
+                    child: Text(
+                      context.tr.cancel,
                       style: TextStyle(fontWeight: FontWeight.w800),
                     ),
                   ),
@@ -125,30 +126,28 @@ class DeviceDetailScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // ❌ HEADER ĐÃ BỎ
-
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _deviceCard(),
+                    _deviceCard(context),
                     const SizedBox(height: 14),
-                    _goodHealthCard(),
+                    _goodHealthCard(context),
                     const SizedBox(height: 16),
-                    const Text(
-                      'Dữ liệu sức khỏe hôm nay',
+                    Text(
+                      context.tr.todayHealthData,
                       style:
                           TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
                     ),
                     const SizedBox(height: 10),
-                    _gridTopStats(),
+                    _gridTopStats(context),
                     const SizedBox(height: 12),
                     _barTile(
                       icon: Icons.opacity,
                       iconColor: _blue,
-                      title: 'Nồng độ oxy trong máu – SpO₂',
+                      title: context.tr.spo2,
                       valueRight: '98%',
                       progress: 0.82,
                     ),
@@ -156,7 +155,7 @@ class DeviceDetailScreen extends StatelessWidget {
                     _barTile(
                       icon: Icons.local_fire_department,
                       iconColor: Colors.red,
-                      title: 'Lượng calo tiêu thụ',
+                      title: context.tr.calories,
                       valueRight: '210 kcal',
                       progress: 0.35,
                     ),
@@ -164,7 +163,7 @@ class DeviceDetailScreen extends StatelessWidget {
                     _barTile(
                       icon: Icons.accessibility_new,
                       iconColor: Colors.red,
-                      title: 'Nhiệt độ cơ thể',
+                      title: context.tr.bodyTemperature,
                       valueRight: '36.8°C',
                       progress: 0.62,
                     ),
@@ -172,7 +171,7 @@ class DeviceDetailScreen extends StatelessWidget {
                     _barTile(
                       icon: Icons.sentiment_satisfied_alt,
                       iconColor: Colors.orange,
-                      title: 'Mức độ căng thẳng',
+                      title: context.tr.stressLevel,
                       valueRight: '45',
                       progress: 0.45,
                     ),
@@ -189,7 +188,7 @@ class DeviceDetailScreen extends StatelessWidget {
   }
 
   // ===== DEVICE CARD =====
-  Widget _deviceCard() {
+  Widget _deviceCard(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -215,22 +214,29 @@ class DeviceDetailScreen extends StatelessWidget {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 Text(
-                  'Apple Watch Series Demo',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                  context.tr.demoWatch,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
-                SizedBox(height: 6),
+                const SizedBox(height: 6),
                 Row(
                   children: [
-                    Icon(Icons.bluetooth, size: 16, color: Colors.black54),
-                    SizedBox(width: 6),
+                    const Icon(Icons.bluetooth,
+                        size: 16, color: Colors.black54),
+                    const SizedBox(width: 6),
                     Text(
-                      'Đã kết nối',
-                      style: TextStyle(color: Colors.black54, fontSize: 13),
+                      context.tr.connected,
+                      style: const TextStyle(
+                        color: Colors.black54,
+                        fontSize: 13,
+                      ),
                     ),
                   ],
-                ),
+                )
               ],
             ),
           ),
@@ -240,8 +246,10 @@ class DeviceDetailScreen extends StatelessWidget {
           const SizedBox(width: 6),
           const Text(
             '85%',
-            style:
-                TextStyle(fontWeight: FontWeight.w800, color: Colors.black87),
+            style: TextStyle(
+              fontWeight: FontWeight.w800,
+              color: Colors.black87,
+            ),
           ),
         ],
       ),
@@ -249,7 +257,7 @@ class DeviceDetailScreen extends StatelessWidget {
   }
 
   // ===== GOOD HEALTH =====
-  Widget _goodHealthCard() {
+  Widget _goodHealthCard(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -258,27 +266,25 @@ class DeviceDetailScreen extends StatelessWidget {
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          Icon(Icons.check_circle, color: Colors.green, size: 26),
-          SizedBox(width: 10),
+        children: [
+          const Icon(Icons.check_circle, color: Colors.green, size: 26),
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Sức khỏe tốt',
-                  style: TextStyle(
+                  context.tr.goodHealth,
+                  style: const TextStyle(
                     fontWeight: FontWeight.w800,
                     color: Colors.green,
                     fontSize: 16,
                   ),
                 ),
-                SizedBox(height: 6),
+                const SizedBox(height: 6),
                 Text(
-                  'Các chỉ số của bạn đều nằm trong\n'
-                  'ngưỡng bình thường. Hãy tiếp tục\n'
-                  'duy trì lối sống lành mạnh!',
-                  style: TextStyle(
+                  context.tr.goodHealthDesc,
+                  style: const TextStyle(
                     color: Colors.black54,
                     height: 1.3,
                     fontSize: 13,
@@ -293,23 +299,23 @@ class DeviceDetailScreen extends StatelessWidget {
   }
 
   // ===== GRID TOP STATS =====
-  Widget _gridTopStats() {
+  Widget _gridTopStats(BuildContext context) {
     return Row(
       children: [
         Expanded(
           child: Column(
-            children: const [
+            children: [
               _MiniStatCard(
                 icon: Icons.favorite_border,
                 iconColor: Colors.red,
-                title: 'Nhịp tim',
+                title: context.tr.heartRate,
                 value: '72 BPM',
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               _MiniStatCard(
                 icon: Icons.directions_walk,
                 iconColor: _blue,
-                title: 'Số bước',
+                title: context.tr.steps,
                 value: '3,247',
               ),
             ],
@@ -318,18 +324,18 @@ class DeviceDetailScreen extends StatelessWidget {
         const SizedBox(width: 10),
         Expanded(
           child: Column(
-            children: const [
+            children: [
               _MiniStatCard(
                 icon: Icons.monitor_heart_outlined,
                 iconColor: Colors.red,
-                title: 'Huyết áp',
+                title: context.tr.bloodPressure,
                 value: '120/80',
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               _MiniStatCard(
                 icon: Icons.bedtime_outlined,
                 iconColor: _blue,
-                title: 'Giấc ngủ',
+                title: context.tr.sleep,
                 value: '7h 23m',
               ),
             ],
@@ -418,8 +424,8 @@ class DeviceDetailScreen extends StatelessWidget {
       child: TextButton.icon(
         onPressed: () => _showDisconnectDialog(context),
         icon: const Icon(Icons.logout, color: Colors.white),
-        label: const Text(
-          'Ngắt kết nối thiết bị',
+        label: Text(
+          context.tr.disconnectDevice,
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w800,

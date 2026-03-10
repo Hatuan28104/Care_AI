@@ -33,13 +33,11 @@ class AppSettings {
 
     syncDataOn.value = _prefs?.getBool('syncDataOn') ?? true;
 
-    // 🔥 LOAD LANGUAGE
     final savedLang = _prefs?.getString('locale');
     if (savedLang != null) {
       locale.value = Locale(savedLang);
     }
 
-    // 🔥 SAVE LANGUAGE
     locale.addListener(() {
       _prefs?.setString('locale', locale.value.languageCode);
     });

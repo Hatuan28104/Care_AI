@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:Care_AI/api/chat_api.dart';
+import '../../../models/tr.dart';
 
 class ChatScreen extends StatefulWidget {
   final String name;
-  final String role;
   final String image;
   final String intro;
+  final String digitalId;
+  final String userId;
 
   const ChatScreen({
     super.key,
     required this.name,
-    required this.role,
     required this.image,
     required this.intro,
+    required this.digitalId,
+    required this.userId,
   });
-
-  static const _blue = Color(0xFF1877F2);
-  static const _bg = Color(0xFFF6F6F6);
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -24,271 +24,267 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
-  final List<_Msg> _messages = [];
+  final ScrollController _scrollController = ScrollController();
+  final FocusNode _focusNode = FocusNode();
 
-  final ValueNotifier<bool> _hasText = ValueNotifier(false);
+  bool _isFocused = false;
 
-  final ImagePicker _picker = ImagePicker();
-
-  bool _isRecording = false;
-
-  String get displayName => widget.name.split(' - ').first;
+  final List<Map<String, dynamic>> messages = [];
 
   @override
   void initState() {
     super.initState();
-    _controller.addListener(() {
-      _hasText.value = _controller.text.trim().isNotEmpty;
+
+    messages.add({
+      "text": widget.intro,
+      "isUser": false,
+    });
+
+    _focusNode.addListener(() {
+      setState(() {
+        _isFocused = _focusNode.hasFocus;
+      });
     });
   }
 
   @override
   void dispose() {
     _controller.dispose();
-    _hasText.dispose();
+    _scrollController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
-  // ===== SEND TEXT =====
-  void _send() {
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  /* ================= SEND MESSAGE ================= */
+
+  Future<void> sendMessage() async {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
 
     setState(() {
-      _messages.add(_Msg(text, true));
+      messages.add({"text": text, "isUser": true});
+      messages.add({"isUser": false, "isTyping": true});
     });
 
     _controller.clear();
-  }
+    _scrollToBottom();
 
-  // ===== + MENU =====
-  void _openAttachmentMenu() {
-    showModalBottomSheet(
-      context: context,
-      builder: (_) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo),
-              title: const Text("Ảnh"),
-              onTap: () {
-                Navigator.pop(context);
-                _pickImage();
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+    try {
+      final response = await ChatApi.sendMessage(
+        message: text,
+        userId: widget.userId,
+        digitalId: widget.digitalId,
+      );
 
-  // ===== CAMERA / GALLERY =====
-  Future<void> _pickImage() async {
-    final XFile? img = await _picker.pickImage(source: ImageSource.gallery);
-    if (img != null) {
+      if (!mounted) return;
+
       setState(() {
-        _messages.add(_Msg("📷 Đã chọn ảnh", true));
+        messages.removeWhere((m) => m["isTyping"] == true);
+
+        messages.add({
+          "text": response["success"] == true
+              ? response["reply"]
+              : "${context.tr.error}: ${response["message"]}",
+          "isUser": false,
+        });
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        messages.removeWhere((m) => m["isTyping"] == true);
+
+        messages.add({
+          "text": context.tr.serverError,
+          "isUser": false,
+        });
       });
     }
+
+    _scrollToBottom();
   }
 
-  // ===== MIC =====
-  void _toggleMic() {
-    setState(() => _isRecording = !_isRecording);
+  /* ================= MESSAGE UI ================= */
 
-    if (!_isRecording) {
-      _messages.add(_Msg("🎤 Tin nhắn thoại", true));
-    }
-  }
+  Widget buildMessage(Map<String, dynamic> msg) {
+    final isUser = msg["isUser"] == true;
 
-  // ===== UI =====
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: ChatScreen._bg,
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.only(bottom: 20),
-                children: [
-                  _heroSection(context),
-                  _introBubble(),
-                  ..._messages.map(_chatBubble),
-                ],
-              ),
-            ),
-            _inputBar(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ===== CHAT BUBBLE =====
-  Widget _chatBubble(_Msg m) {
-    return Align(
-      alignment: m.isUser ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        padding: const EdgeInsets.all(14),
-        constraints: const BoxConstraints(maxWidth: 280),
-        decoration: BoxDecoration(
-          color: m.isUser ? ChatScreen._blue : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          m.text,
-          style: TextStyle(
-            color: m.isUser ? Colors.white : Colors.black,
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ===== HERO =====
-  Widget _heroSection(BuildContext context) {
-    return Stack(
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisAlignment:
+          isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: [
-        Image.asset(
-          widget.image,
-          width: 428,
-          height: 320,
-          fit: BoxFit.cover,
-          alignment: const FractionalOffset(0.5, 0.18),
-        ),
-        Positioned(
-          top: 6,
-          left: -10,
-          child: Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-                onPressed: () => Navigator.pop(context),
-              ),
-              const CircleAvatar(
-                radius: 20,
-                backgroundImage: AssetImage('assets/images/Luna_avatar.png'),
-              ),
-              const SizedBox(width: 10),
-              Text(
-                displayName,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w600,
-                  color: Color.fromARGB(255, 4, 4, 4),
-                ),
-              ),
-            ],
+        if (!isUser)
+          Padding(
+            padding: const EdgeInsets.only(left: 8),
+            child: CircleAvatar(
+              radius: 18,
+              backgroundImage: AssetImage(widget.image),
+            ),
+          ),
+        Flexible(
+          child: Container(
+            margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+            padding: const EdgeInsets.all(12),
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width * 0.70,
+            ),
+            decoration: BoxDecoration(
+              color: isUser ? Colors.blue : Colors.grey[300],
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: msg["isTyping"] == true
+                ? Text(
+                    context.tr.typing,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 18),
+                  )
+                : Text(
+                    msg["text"] ?? "",
+                    style: TextStyle(
+                      color: isUser ? Colors.white : Colors.black,
+                    ),
+                  ),
           ),
         ),
       ],
     );
   }
 
-  // ===== INTRO =====
-  Widget _introBubble() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          constraints: const BoxConstraints(maxWidth: 340),
-          decoration: BoxDecoration(
-            color: const Color.fromARGB(173, 232, 232, 232),
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: const Text(
-            "Chào bạn, mình là Care AI 💙\nRất vui được gặp bạn hôm nay. Bạn có muốn chia sẻ gần đây bạn cảm thấy thế nào không?",
-            style: TextStyle(fontSize: 15),
-          ),
-        ),
-      ),
-    );
-  }
+  /* ================= INPUT BAR ================= */
 
-  // ===== MINI ICON =====
-  Widget _miniActionIcon(IconData icon, VoidCallback onTap) {
-    return SizedBox(
-      width: 36,
-      child: IconButton(
-        icon: Icon(icon),
-        iconSize: 26,
-        padding: EdgeInsets.zero,
-        constraints: const BoxConstraints(),
-        color: ChatScreen._blue,
-        onPressed: onTap,
-      ),
-    );
-  }
-
-  // ===== INPUT BAR =====
-  Widget _inputBar() {
+  Widget _buildInputBar() {
     return Container(
-      padding: const EdgeInsets.all(6),
+      padding: const EdgeInsets.fromLTRB(8, 6, 8, 6),
       decoration: const BoxDecoration(
         color: Colors.white,
         border: Border(top: BorderSide(color: Colors.black12)),
       ),
       child: Row(
         children: [
-          _miniActionIcon(Icons.add, _openAttachmentMenu),
-          _miniActionIcon(Icons.camera_alt, _pickImage),
-          _miniActionIcon(_isRecording ? Icons.stop : Icons.mic, _toggleMic),
-          const SizedBox(width: 6),
+          if (_isFocused)
+            IconButton(
+              icon: const Icon(Icons.keyboard_arrow_right,
+                  color: Colors.blue, size: 28),
+              onPressed: () {
+                FocusScope.of(context).unfocus();
+              },
+            ),
+
+          if (!_isFocused) ...[
+            IconButton(
+              icon: const Icon(Icons.add_circle_outline, color: Colors.blue),
+              onPressed: () {
+                FocusScope.of(context).requestFocus(_focusNode);
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.camera_alt_outlined, color: Colors.blue),
+              onPressed: () {
+                FocusScope.of(context).requestFocus(_focusNode);
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.mic_none, color: Colors.blue),
+              onPressed: () {
+                FocusScope.of(context).requestFocus(_focusNode);
+              },
+            ),
+          ],
+
           Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6),
-              decoration: BoxDecoration(
-                color: ChatScreen._bg,
-                borderRadius: BorderRadius.circular(15),
+            flex: _isFocused ? 10 : 6,
+            child: TextField(
+              controller: _controller,
+              focusNode: _focusNode,
+              decoration: InputDecoration(
+                hintText: _isFocused ? null : context.tr.enterMessage,
+                filled: true,
+                fillColor: const Color(0xFFF6F6F6),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25),
+                  borderSide: BorderSide.none,
+                ),
               ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _controller,
-                      onSubmitted: (_) => _send(),
-                      decoration: const InputDecoration(
-                        hintText: "Hỏi bất cứ điều gì...",
-                        border: InputBorder.none,
-                        isDense: true,
-                        contentPadding:
-                            EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                      ),
-                    ),
-                  ),
-                  ValueListenableBuilder<bool>(
-                    valueListenable: _hasText,
-                    builder: (_, hasText, __) {
-                      return IconButton(
-                        icon: Icon(
-                          hasText ? Icons.send : Icons.emoji_emotions_outlined,
-                          color: ChatScreen._blue,
-                        ),
-                        padding: EdgeInsets.zero,
-                        constraints:
-                            const BoxConstraints(minWidth: 32, minHeight: 32),
-                        onPressed: _hasText.value ? _send : () {},
-                      );
-                    },
-                  ),
-                ],
-              ),
+              onSubmitted: (_) => sendMessage(),
+            ),
+          ),
+
+          const SizedBox(width: 6),
+
+          CircleAvatar(
+            backgroundColor: Colors.blue,
+            child: IconButton(
+              icon: const Icon(Icons.send, color: Colors.white),
+              onPressed: sendMessage,
             ),
           ),
         ],
       ),
     );
   }
-}
 
-class _Msg {
-  final String text;
-  final bool isUser;
-  _Msg(this.text, this.isUser);
+  /* ================= BUILD ================= */
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF6F6F6),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 1,
+        titleSpacing: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded,
+              size: 20, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Row(
+          children: [
+            CircleAvatar(
+              radius: 18,
+              backgroundImage: AssetImage(widget.image),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              widget.name,
+              style: const TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              controller: _scrollController,
+              padding: const EdgeInsets.all(8),
+              itemCount: messages.length,
+              itemBuilder: (context, index) {
+                return buildMessage(messages[index]);
+              },
+            ),
+          ),
+          _buildInputBar(),
+        ],
+      ),
+    );
+  }
 }

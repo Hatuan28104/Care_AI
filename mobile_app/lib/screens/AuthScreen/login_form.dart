@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:intl_phone_field/phone_number.dart' as ipn;
 import 'package:Care_AI/api/auth_api.dart';
+import '../../models/tr.dart';
 
 class LoginForm extends StatefulWidget {
   final void Function(String phoneE164, String displayPhone) onOtp;
@@ -20,7 +21,7 @@ class _LoginFormState extends State<LoginForm> {
   static const _primaryColor = Color(0xFF1F41BB);
   static const _buttonColor = Color(0xFF1877F2);
   static const _fieldBg = Color(0xFFF6F6F6);
-  static const _errorMsg = 'Vui lòng kiểm tra và nhập đúng số điện thoại!';
+  String get _errorMsg => context.tr.invalidPhone;
   String? _serverError;
 
   static const _borderSide = BorderSide(
@@ -77,8 +78,8 @@ class _LoginFormState extends State<LoginForm> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const Text(
-          'Đăng nhập',
+        Text(
+          context.tr.login,
           style: TextStyle(
             fontSize: 30,
             fontWeight: FontWeight.w700,
@@ -86,8 +87,8 @@ class _LoginFormState extends State<LoginForm> {
           ),
         ),
         const SizedBox(height: 17),
-        const Text(
-          'Chào mừng bạn quay trở lại!',
+        Text(
+          context.tr.welcomeBack,
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w600,
@@ -123,9 +124,9 @@ class _LoginFormState extends State<LoginForm> {
                 IntlPhoneField(
                   initialCountryCode: 'VN',
                   disableLengthCheck: true,
-                  searchText: 'Tìm kiếm quốc gia',
+                  searchText: context.tr.searchCountry,
                   decoration: InputDecoration(
-                    hintText: 'Số điện thoại',
+                    hintText: context.tr.phoneNumber,
                     hintStyle: const TextStyle(
                       fontSize: 16,
                       color: Color(0xFFD1D1D1),
@@ -176,8 +177,8 @@ class _LoginFormState extends State<LoginForm> {
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            child: const Text(
-              'Tiếp tục',
+            child: Text(
+              context.tr.continueButton,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,

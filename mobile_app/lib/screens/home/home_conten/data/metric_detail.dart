@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:Care_AI/api/health_api.dart';
 import 'package:Care_AI/models/metric_config.dart';
+import '../../../../models/tr.dart';
 
 const TextStyle _axisTextStyle = TextStyle(
   fontSize: 11,
@@ -212,8 +213,8 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Giá trị',
+            Text(
+              context.tr.value,
               style: TextStyle(
                 color: Colors.black45,
                 fontWeight: FontWeight.w600,
@@ -327,7 +328,7 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
         ),
         child: Row(
           children: [
-            const Text('Mới nhất'),
+            Text(context.tr.latest),
             const Spacer(),
             Text(
               '${latest.toStringAsFixed(_config.decimals)} ${_config.unit}',

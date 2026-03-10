@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:Care_AI/api/family_api.dart';
 import 'report_detail_screen.dart';
+import '../../../models/tr.dart';
 
 class DependentProfileScreen extends StatefulWidget {
   final String quanHeId;
@@ -55,8 +56,8 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
   }
 
   String _genderText(dynamic g) {
-    if (g == true) return 'Nam';
-    if (g == false) return 'Nữ';
+    if (g == true) return context.tr.male;
+    if (g == false) return context.tr.female;
     return '';
   }
 
@@ -118,22 +119,22 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(18, 8, 18, 18),
       children: [
-        _infoItem('Họ và tên', data?['TenND']),
+        _infoItem(context.tr.fullName, data?['TenND']),
         _infoItem(
-          'Ngày sinh',
+          context.tr.birthDate,
           _formatDate(data?['NgaySinh']),
         ),
         _infoItem(
-          'Giới tính',
+          context.tr.gender,
           _genderText(data?['GioiTinh']),
         ),
         _infoItem(
-          'Ngày tham gia',
+          context.tr.joinDate,
           _formatDate(data?['NgayBatDau']),
         ),
         const SizedBox(height: 8),
-        const Text(
-          'Báo cáo',
+        Text(
+          context.tr.report,
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w700,
@@ -141,12 +142,13 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
         ),
         const SizedBox(height: 12),
         Row(
-          children: const [
-            Expanded(child: _ReportItem(label: 'Ngày', type: 'day')),
+          children: [
+            Expanded(child: _ReportItem(label: context.tr.day, type: 'day')),
             SizedBox(width: 12),
-            Expanded(child: _ReportItem(label: 'Tuần', type: 'week')),
+            Expanded(child: _ReportItem(label: context.tr.week, type: 'week')),
             SizedBox(width: 12),
-            Expanded(child: _ReportItem(label: 'Tháng', type: 'month')),
+            Expanded(
+                child: _ReportItem(label: context.tr.month, type: 'month')),
           ],
         ),
       ],

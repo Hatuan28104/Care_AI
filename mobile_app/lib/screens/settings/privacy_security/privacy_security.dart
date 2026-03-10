@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../models/tr.dart';
 
 import '../../../app_settings.dart';
 import 'privacy_policy.dart';
@@ -30,40 +31,39 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
     return Scaffold(
       backgroundColor: Color(0xFFF6F6F6),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: false,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: Colors.black,
-            size: 20,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          centerTitle: false,
+          leading: IconButton(
+            icon: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: Colors.black,
+              size: 20,
+            ),
+            onPressed: () => Navigator.pop(context),
           ),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Quyền riêng tư & Bảo mật',
-          style: TextStyle(
-            fontWeight: FontWeight.w700,
-            color: Colors.black,
-          ),
-        ),
-      ),
+          title: Text(
+            context.tr.privacySecurity,
+            style: const TextStyle(
+              fontWeight: FontWeight.w700,
+              color: Colors.black,
+            ),
+          )),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(18, 12, 18, 24),
           children: [
-            _sectionTitle('Số điện thoại'),
+            _sectionTitle(context.tr.phoneNumber),
             _phoneCard(),
             const SizedBox(height: 14),
-            _sectionTitle('Xác minh'),
+            _sectionTitle(context.tr.verification),
             _verifyCard(),
             const SizedBox(height: 14),
             _loginHeader(),
             const SizedBox(height: 2),
             _loginHistoryCard(),
             const SizedBox(height: 14),
-            _sectionTitle('Quyền riêng tư'),
+            _sectionTitle(context.tr.privacy),
             _privacyCard(context),
           ],
         ),
@@ -90,8 +90,8 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         children: [
-          const Text(
-            'Lịch sử đăng nhập',
+          Text(
+            context.tr.loginHistory,
             style: TextStyle(
               fontWeight: FontWeight.w600,
               fontSize: 17,
@@ -143,8 +143,8 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 14),
               ),
-              child: const Text(
-                'Thay đổi',
+              child: Text(
+                context.tr.change,
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w400,
@@ -166,22 +166,22 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
       barrierDismissible: true,
       builder: (ctx) {
         return AlertDialog(
-          title: const Text('Thay đổi số điện thoại'),
+          title: Text(context.tr.changePhone),
           content: TextField(
             controller: ctrl,
             keyboardType: TextInputType.phone,
-            decoration: const InputDecoration(
-              hintText: 'Ví dụ: 0912345678 hoặc +84 912345678',
+            decoration: InputDecoration(
+              hintText: context.tr.phoneExample,
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Hủy'),
+              child: Text(context.tr.cancel),
             ),
             ElevatedButton(
               onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
-              child: const Text('Lưu'),
+              child: Text(context.tr.save),
             ),
           ],
         );
@@ -194,7 +194,7 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
     if (cleaned.isNotEmpty && !_looksLikePhone(cleaned)) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Số điện thoại không hợp lệ.')),
+        SnackBar(content: Text(context.tr.invalidPhone)),
       );
       return;
     }
@@ -207,7 +207,7 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Đã cập nhật số điện thoại')),
+        SnackBar(content: Text(context.tr.phoneUpdated)),
       );
     } catch (e) {
       if (!mounted) return;
@@ -248,15 +248,15 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
         children: [
           _switchTile(
             icon: Icons.lock_outline,
-            title: 'Xác thực hai lớp (2FA)',
+            title: context.tr.twoFactorAuth,
             value: _twoFA,
             onChanged: (v) => setState(() => _twoFA = v),
           ),
           const Divider(height: 18, thickness: 1, color: Color(0x11000000)),
           _switchTile(
             icon: Icons.fingerprint,
-            title: 'Sinh trắc học',
-            subtitle: 'Vân tay hoặc nhận diện khuôn mặt',
+            title: context.tr.biometrics,
+            subtitle: context.tr.fingerprintOrFace,
             value: _biometrics,
             onChanged: (v) => setState(() => _biometrics = v),
           ),
@@ -326,8 +326,8 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
         valueListenable: AppSettings.loginHistory,
         builder: (_, rawList, __) {
           if (rawList.isEmpty) {
-            return const Text(
-              'Chưa có lịch sử đăng nhập',
+            return Text(
+              context.tr.noLoginHistory,
               style: TextStyle(color: Colors.black45),
             );
           }
@@ -352,8 +352,8 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
                   onPressed: () {
                     setState(() => _showAllHistory = true);
                   },
-                  child: const Text(
-                    'Xem thêm',
+                  child: Text(
+                    context.tr.viewMore,
                     style: TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ),
@@ -415,7 +415,7 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
         children: [
           _arrowRow(
             icon: Icons.privacy_tip_outlined,
-            text: 'Chính sách quyền riêng tư',
+            text: context.tr.privacyPolicy,
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen()),
@@ -424,7 +424,7 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
           const Divider(height: 18, thickness: 1, color: Color(0x11000000)),
           _arrowRow(
             icon: Icons.description_outlined,
-            text: 'Điều khoản sử dụng',
+            text: context.tr.termsOfService,
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const TermsOfServiceScreen()),

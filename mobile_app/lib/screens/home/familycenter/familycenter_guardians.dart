@@ -3,6 +3,7 @@ import 'package:Care_AI/api/family_api.dart';
 import 'familycenter_guardian_add.dart';
 import 'familycenter_guardian_profile.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import '../../../models/tr.dart';
 
 class MyGuardiansScreen extends StatefulWidget {
   const MyGuardiansScreen({super.key});
@@ -71,8 +72,8 @@ class _MyGuardiansScreenState extends State<MyGuardiansScreen> {
               borderRadius: BorderRadius.circular(20),
             ),
           ),
-          child: const Text(
-            'Thêm',
+          child: Text(
+            context.tr.add,
             style: TextStyle(fontWeight: FontWeight.w700),
           ),
         ),
@@ -87,8 +88,8 @@ class _MyGuardiansScreenState extends State<MyGuardiansScreen> {
     }
 
     if (guardians.isEmpty) {
-      return const Center(
-        child: Text('Chưa có người giám hộ'),
+      return Center(
+        child: Text(context.tr.noGuardians),
       );
     }
 
@@ -123,7 +124,7 @@ class _MyGuardiansScreenState extends State<MyGuardiansScreen> {
             ],
           ),
           child: GuardianCard(
-            name: g['TenND'] ?? 'Không tên',
+            name: g['TenND'] ?? context.tr.unknownName,
             date: _formatDate(g['NgayBatDau']),
             avatar: FamilyApi.normalizeAvatar(g['AvatarUrl']),
             onTap: () {
@@ -165,16 +166,16 @@ class _MyGuardiansScreenState extends State<MyGuardiansScreen> {
                   child: const Icon(Icons.priority_high, color: Colors.red),
                 ),
                 const SizedBox(height: 14),
-                const Text(
-                  'Xác nhận xóa',
+                Text(
+                  context.tr.confirmDelete,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 16,
                   ),
                 ),
                 const SizedBox(height: 6),
-                const Text(
-                  'Bạn có chắc chắn muốn xóa người giám hộ này khỏi gia đình không?',
+                Text(
+                  context.tr.deleteGuardianConfirm,
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.black54),
                 ),
@@ -191,8 +192,8 @@ class _MyGuardiansScreenState extends State<MyGuardiansScreen> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child: const Text(
-                      'Xóa',
+                    child: Text(
+                      context.tr.delete,
                       style: TextStyle(
                         color: Color.fromARGB(255, 135, 13, 25),
                         fontWeight: FontWeight.w700,
@@ -213,8 +214,8 @@ class _MyGuardiansScreenState extends State<MyGuardiansScreen> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child: const Text(
-                      'Hủy',
+                    child: Text(
+                      context.tr.cancel,
                       style: TextStyle(
                         color: Color.fromARGB(255, 71, 71, 71),
                         fontWeight: FontWeight.w700,
@@ -304,7 +305,7 @@ class GuardianCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Ngày tham gia: $date',
+                    '${context.tr.joinDate}: $date',
                     style: const TextStyle(
                       fontSize: 12,
                       color: Colors.grey,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:Care_AI/api/family_api.dart';
 import 'familycenter_configure_permissions.dart';
+import '../../../models/tr.dart';
 
 class GuardianProfile extends StatefulWidget {
   final String quanHeId;
@@ -55,8 +56,8 @@ class _GuardianProfileState extends State<GuardianProfile> {
   }
 
   String _genderText(dynamic g) {
-    if (g == true) return 'Nam';
-    if (g == false) return 'Nữ';
+    if (g == true) return context.tr.male;
+    if (g == false) return context.tr.female;
     return '';
   }
 
@@ -119,10 +120,10 @@ class _GuardianProfileState extends State<GuardianProfile> {
       padding: const EdgeInsets.symmetric(horizontal: 18),
       child: Column(
         children: [
-          _infoItem('Họ và tên', data?['TenND']),
-          _infoItem('Ngày sinh', _formatDate(data?['NgaySinh'])),
-          _infoItem('Giới tính', _genderText(data?['GioiTinh'])),
-          _infoItem('Ngày tham gia', _formatDate(data?['NgayBatDau'])),
+          _infoItem(context.tr.fullName, data?['TenND']),
+          _infoItem(context.tr.birthDate, _formatDate(data?['NgaySinh'])),
+          _infoItem(context.tr.gender, _genderText(data?['GioiTinh'])),
+          _infoItem(context.tr.joinDate, _formatDate(data?['NgayBatDau'])),
           _permissionItem(context),
         ],
       ),
@@ -192,9 +193,9 @@ class _GuardianProfileState extends State<GuardianProfile> {
           ),
         ),
         child: Row(
-          children: const [
+          children:  [
             Text(
-              'Chia sẻ dữ liệu',
+              context.tr.shareData,
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,

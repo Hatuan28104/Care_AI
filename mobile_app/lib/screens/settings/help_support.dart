@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../models/tr.dart';
 
 class HelpSupportScreen extends StatefulWidget {
   const HelpSupportScreen({super.key});
@@ -38,11 +39,11 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _sectionTitle('Liên hệ nhanh'),
+            _sectionTitle(context.tr.quickContact),
             const SizedBox(height: 12),
             _quickContact(),
             const SizedBox(height: 22),
-            _sectionTitle('Gửi yêu cầu hỗ trợ'),
+            _sectionTitle(context.tr.sendSupportRequest),
             const SizedBox(height: 12),
             _formCard(context),
             const SizedBox(height: 12),
@@ -65,8 +66,8 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
             color: Colors.black, size: 20),
         onPressed: () => Navigator.pop(context),
       ),
-      title: const Text(
-        'Trợ giúp & Hỗ trợ',
+      title: Text(
+        context.tr.helpSupport,
         style: TextStyle(
           fontSize: 24,
           fontWeight: FontWeight.w700,
@@ -90,11 +91,11 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
   Widget _quickContact() {
     return Column(
       children: [
-        _pill('Gọi hotline: 1900 xxxx'),
+        _pill(context.tr.callHotline),
         const SizedBox(height: 6),
-        _pill('Email: support@careai.vn'),
+        _pill(context.tr.supportEmail),
         const SizedBox(height: 6),
-        _pill('Trò chuyện'),
+        _pill(context.tr.chat),
       ],
     );
   }
@@ -142,25 +143,26 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _label('Họ và tên'),
+          _label(context.tr.fullName),
           const SizedBox(height: 6),
-          _input(_nameCtrl, 'Nhập họ và tên'),
+          _input(_nameCtrl, context.tr.enterFullName),
           const SizedBox(height: 6),
-          _label('Số điện thoại'),
+          _label(context.tr.phoneNumber),
           const SizedBox(height: 6),
-          _input(_phoneCtrl, 'Nhập số điện thoại', type: TextInputType.phone),
+          _input(_phoneCtrl, context.tr.enterPhone, type: TextInputType.phone),
           const SizedBox(height: 6),
-          _label('Email'),
+          _label(context.tr.email),
           const SizedBox(height: 6),
-          _input(_emailCtrl, 'Nhập email', type: TextInputType.emailAddress),
+          _input(_emailCtrl, context.tr.enterEmail,
+              type: TextInputType.emailAddress),
           const SizedBox(height: 6),
-          _label('Chủ đề'),
+          _label(context.tr.subject),
           const SizedBox(height: 6),
           _subjectDropdown(),
           const SizedBox(height: 6),
-          _label('Nội dung'),
+          _label(context.tr.content),
           const SizedBox(height: 6),
-          _input(_msgCtrl, 'Mô tả vấn đề của bạn...', lines: 2),
+          _input(_msgCtrl, context.tr.describeProblem, lines: 2),
           const SizedBox(height: 6),
           _submitButton(context),
         ],
@@ -212,11 +214,11 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
 
   Widget _subjectDropdown() {
     final items = [
-      {'label': 'Hỗ trợ kỹ thuật', 'icon': Icons.build_outlined},
-      {'label': 'Tài khoản & bảo mật', 'icon': Icons.lock_outline},
-      {'label': 'Tính năng AI', 'icon': Icons.smart_toy_outlined},
-      {'label': 'Thanh toán', 'icon': Icons.credit_card_outlined},
-      {'label': 'Khác', 'icon': Icons.more_horiz},
+      {'label': context.tr.techSupport, 'icon': Icons.build_outlined},
+      {'label': context.tr.accountSecurity, 'icon': Icons.lock_outline},
+      {'label': context.tr.aiFeatures, 'icon': Icons.smart_toy_outlined},
+      {'label': context.tr.payment, 'icon': Icons.credit_card_outlined},
+      {'label': context.tr.other, 'icon': Icons.more_horiz},
     ];
 
     return DropdownButtonFormField<String>(
@@ -246,7 +248,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
         );
       }).toList(),
       decoration: InputDecoration(
-        hintText: 'Chọn chủ đề',
+        hintText: context.tr.chooseSubject,
         filled: true,
         fillColor: _fieldBg,
         contentPadding:
@@ -275,8 +277,8 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
       child: ElevatedButton(
         onPressed: () {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Gửi yêu cầu thành công'),
+            SnackBar(
+              content: Text(context.tr.requestSentSuccess),
               duration: Duration(seconds: 2),
             ),
           );
@@ -293,8 +295,8 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
             borderRadius: BorderRadius.circular(10),
           ),
         ),
-        child: const Text(
-          'Gửi yêu cầu',
+        child: Text(
+          context.tr.sendRequest,
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w700,
@@ -309,8 +311,8 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Thông tin liên hệ',
+        Text(
+          context.tr.contactInfo,
           style: TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.w600,
@@ -327,21 +329,21 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
             children: [
               _contactRow(
                 icon: Icons.call_outlined,
-                title: 'Hotline',
+                title: context.tr.hotline,
                 value: '1900 xxxx',
-                note: 'Hỗ trợ 24/7',
+                note: context.tr.support247,
               ),
               const Divider(height: 1, thickness: 1, color: Color(0x11000000)),
               _contactRow(
                 icon: Icons.email_outlined,
-                title: 'Email',
+                title: context.tr.email,
                 value: 'support@careai.vn',
-                note: 'Phản hồi trong vòng 24 giờ',
+                note: context.tr.replyWithin24h,
               ),
               const Divider(height: 1, thickness: 1, color: Color(0x11000000)),
               _contactRow(
                 icon: Icons.location_on_outlined,
-                title: 'Địa chỉ',
+                title: context.tr.address,
                 value: '123 ABC, Quận 1, TP. Hồ Chí Minh',
               ),
             ],
@@ -406,17 +408,17 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
 
   Widget _faqCard() {
     final faqs = [
-      'Làm thế nào để thay đổi cỡ chữ?',
-      'AI có thể hỗ trợ tôi những gì?',
-      'Làm thế nào để gọi video với Nhân sự số?',
-      'Thông tin của tôi có an toàn không?',
+      context.tr.faqTextSize,
+      context.tr.faqAiSupport,
+      context.tr.faqVideoCall,
+      context.tr.faqDataSafety,
     ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Câu hỏi thường gặp',
+        Text(
+          context.tr.faq,
           style: TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.w600,

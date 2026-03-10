@@ -3,6 +3,7 @@ import 'package:Care_AI/api/health_api.dart';
 import 'metric_item.dart';
 import 'metric_detail.dart';
 import 'package:Care_AI/models/health_icon_mapper.dart';
+import '../../../../models/tr.dart';
 
 class ActivityDataScreen extends StatefulWidget {
   const ActivityDataScreen({super.key});
@@ -149,9 +150,9 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
             ),
           ),
           const SizedBox(width: 10),
-          const Expanded(
+          Expanded(
             child: Text(
-              'Dữ liệu hoạt động',
+              context.tr.activityData,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 24,
@@ -176,7 +177,7 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
           setState(() => _keyword = v);
         },
         decoration: InputDecoration(
-          hintText: 'Tìm kiếm dữ liệu...',
+          hintText: context.tr.searchData,
           prefixIcon: const Icon(Icons.search),
           filled: true,
           fillColor: Colors.white,

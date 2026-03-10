@@ -10,6 +10,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:Care_AI/api/settings_api.dart';
 import 'package:Care_AI/screens/settings/profile/create_profile.dart';
+import '../../models/tr.dart';
 
 class LoginOtpScreen extends StatefulWidget {
   final String phoneE164;
@@ -81,7 +82,7 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
     final otp = _controllers.map((e) => e.text).join();
 
     if (!RegExp(r'^\d{6}$').hasMatch(otp)) {
-      setState(() => _errorText = 'Mã OTP không hợp lệ');
+      setState(() => _errorText = context.tr.invalidOtp);
       return;
     }
 
@@ -134,7 +135,7 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
         print('🔴 GET PROFILE ERROR = $e');
         print('📌 STACKTRACE = $s');
 
-        profile = null; // 🔥 coi như chưa có profile
+        profile = null;
       }
 
       if (!mounted) return;
@@ -152,9 +153,11 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
         return;
       }
 
-      Navigator.pushReplacement(
+      Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        MaterialPageRoute(
+          builder: (_) => HomeScreen(userId: user.nguoiDungId),
+        ),
       );
 
       return; // 🔥 BẮT BUỘC
@@ -206,8 +209,8 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const Text(
-          'Đăng nhập',
+        Text(
+          context.tr.login,
           style: TextStyle(
             fontSize: 30,
             fontWeight: FontWeight.w700,
@@ -216,7 +219,7 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
         ),
         const SizedBox(height: 32),
         Text(
-          'Mã OTP đã được gửi đến số điện thoại\n${widget.displayPhone}:',
+          context.tr.otpSentTo(widget.displayPhone),
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w500,
@@ -319,8 +322,8 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
                     color: Colors.white,
                   ),
                 )
-              : const Text(
-                  'Tiếp tục',
+              : Text(
+                  context.tr.continueButton,
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
@@ -336,8 +339,8 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
       onTap: disabled ? null : _onResend,
       child: Text(
         disabled
-            ? 'Gửi lại mã OTP trong ${_mmss(_secondsLeft)}'
-            : 'Gửi lại mã OTP',
+            ? '${context.tr.resendOtp} ${_mmss(_secondsLeft)}'
+            : context.tr.resendOtp,
         style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w500,

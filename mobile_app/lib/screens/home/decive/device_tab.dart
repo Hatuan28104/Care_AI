@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'device_scan.dart';
 import 'device_add.dart';
+import '../../../models/tr.dart';
 
 class DeviceTab extends StatelessWidget {
   const DeviceTab({super.key});
@@ -72,8 +73,8 @@ class DeviceTab extends StatelessWidget {
                   borderRadius: BorderRadius.circular(14),
                 ),
               ),
-              child: const Text(
-                'Quét',
+              child: Text(
+                context.tr.scan,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
@@ -100,8 +101,8 @@ class DeviceTab extends StatelessWidget {
                   borderRadius: BorderRadius.circular(14),
                 ),
               ),
-              child: const Text(
-                'Thêm mới',
+              child: Text(
+                context.tr.addNew,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:Care_AI/api/family_api.dart';
 import 'familycenter_dependent_proflie.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import '../../../models/tr.dart';
 
 class MyDependentsScreen extends StatefulWidget {
   const MyDependentsScreen({super.key});
@@ -53,8 +54,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
       itemCount: items.length,
-      separatorBuilder: (_, __) =>
-          const SizedBox(height: 14), // 👈 spacing chuẩn
+      separatorBuilder: (_, __) => const SizedBox(height: 14),
       itemBuilder: (context, index) {
         final item = items[index];
         if (item['type'] == 'invite') {
@@ -82,7 +82,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    inv['TenND'] ?? 'Không tên',
+                    inv['TenND'] ?? context.tr.unknownName,
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
@@ -93,12 +93,12 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                     children: [
                       GestureDetector(
                         onTap: () => _showAcceptDialog(inv['LoiMoi_ID']),
-                        child: _actionBtn('Chấp nhận', _blue),
+                        child: _actionBtn(context.tr.accept, _blue),
                       ),
                       const SizedBox(width: 16),
                       GestureDetector(
                         onTap: () => _showRejectDialog(inv['LoiMoi_ID']),
-                        child: _actionBtn('Từ chối', _red),
+                        child: _actionBtn(context.tr.reject, _red),
                       ),
                     ],
                   ),
@@ -160,7 +160,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      dep['TenND'] ?? 'Không tên',
+                      dep['TenND'] ?? context.tr.unknownName,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -168,7 +168,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Ngày tham gia: ${_formatDate(dep['NgayBatDau'])}',
+                      '${context.tr.joinDate}: ${_formatDate(dep['NgayBatDau'])}',
                       style: const TextStyle(
                         fontSize: 12,
                         color: Colors.grey,
@@ -207,16 +207,16 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                   child: const Icon(Icons.priority_high, color: Colors.red),
                 ),
                 const SizedBox(height: 14),
-                const Text(
-                  'Xác nhận xóa',
+                Text(
+                  context.tr.confirmDelete,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 16,
                   ),
                 ),
                 const SizedBox(height: 6),
-                const Text(
-                  'Bạn có chắc chắn muốn xóa người giám hộ này khỏi gia đình không?',
+                Text(
+                  context.tr.deleteGuardianConfirm,
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.black54),
                 ),
@@ -233,8 +233,8 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child: const Text(
-                      'Xóa',
+                    child:  Text(
+                      context.tr.delete,
                       style: TextStyle(
                         color: Color.fromARGB(255, 135, 13, 25),
                         fontWeight: FontWeight.w700,
@@ -255,8 +255,8 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child: const Text(
-                      'Hủy',
+                    child:  Text(
+                      context.tr.cancel,
                       style: TextStyle(
                         color: Color.fromARGB(255, 71, 71, 71),
                         fontWeight: FontWeight.w700,
@@ -319,16 +319,16 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  'Xác nhận lời mời',
+                 Text(
+                  context.tr.confirmInvite,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Bạn có muốn nhận lời mời không?',
+                 Text(
+              context.tr.acceptInviteQuestion,
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Color.fromARGB(255, 65, 65, 65)),
                 ),
@@ -348,8 +348,8 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                       Navigator.pop(ctx);
                       await _acceptConfirmed(loiMoiId);
                     },
-                    child: const Text(
-                      'Xác nhận',
+                    child:  Text(
+                    context.tr.confirm,
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
@@ -371,8 +371,8 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                       ),
                     ),
                     onPressed: () => Navigator.pop(ctx),
-                    child: const Text(
-                      'Hủy',
+                    child:  Text(
+                      context.tr.cancel,
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -418,16 +418,16 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  'Xác nhận xóa lời mời',
+                 Text(
+                  context.tr.confirmDeleteInvite,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Bạn có chắc chắn muốn từ chối lời mời này không?',
+                 Text(
+                 context.tr.rejectInviteConfirm,
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Color.fromARGB(255, 65, 65, 65)),
                 ),
@@ -448,8 +448,8 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                       Navigator.pop(ctx);
                       await _rejectConfirmed(loiMoiId);
                     },
-                    child: const Text(
-                      'Xóa',
+                    child:  Text(
+                     context.tr.delete,
                       style: TextStyle(
                         color: Color.fromARGB(255, 135, 13, 25),
                         fontWeight: FontWeight.w700,
@@ -470,8 +470,8 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child: const Text(
-                      'Hủy',
+                    child:  Text(
+                     context.tr.cancel,
                       style: TextStyle(
                         color: Color.fromARGB(255, 71, 71, 71),
                         fontWeight: FontWeight.w700,

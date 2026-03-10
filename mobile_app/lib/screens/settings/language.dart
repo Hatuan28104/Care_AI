@@ -14,37 +14,37 @@ class _LanguageScreenState extends State<LanguageScreen> {
   static const _border = Color(0xFFD6DAE3);
 
   final _searchCtrl = TextEditingController();
-  String _selected = '';
+  String _selectedCode = '';
   String _query = '';
   bool _dirty = false;
 
   static const List<Map<String, String>> _languages = [
-    {'name': 'United States', 'code': 'en', 'flag': '🇺🇸'},
-    {'name': 'Việt Nam', 'code': 'vi', 'flag': '🇻🇳'},
-    {'name': 'Deutschland', 'code': 'de', 'flag': '🇩🇪'},
-    {'name': 'France', 'code': 'fr', 'flag': '🇫🇷'},
-    {'name': 'España', 'code': 'es', 'flag': '🇪🇸'},
-    {'name': 'Italia', 'code': 'it', 'flag': '🇮🇹'},
-    {'name': 'Portugal', 'code': 'pt', 'flag': '🇵🇹'},
-    {'name': 'Россия', 'code': 'ru', 'flag': '🇷🇺'},
-    {'name': '中国', 'code': 'zh', 'flag': '🇨🇳'},
-    {'name': '台灣', 'code': 'zh', 'flag': '🇹🇼'},
-    {'name': '日本', 'code': 'ja', 'flag': '🇯🇵'},
-    {'name': '대한민국', 'code': 'ko', 'flag': '🇰🇷'},
+    {'name': 'English (US)', 'code': 'en', 'flag': '🇺🇸'},
+    {'name': 'Tiếng Việt', 'code': 'vi', 'flag': '🇻🇳'},
+    {'name': '简体中文', 'code': 'zh_CN', 'flag': '🇨🇳'},
+    {'name': '日本語', 'code': 'ja', 'flag': '🇯🇵'},
+    {'name': 'Deutsch', 'code': 'de', 'flag': '🇩🇪'},
+    {'name': 'Français', 'code': 'fr', 'flag': '🇫🇷'},
+    {'name': 'Español', 'code': 'es', 'flag': '🇪🇸'},
+    {'name': 'Italiano', 'code': 'it', 'flag': '🇮🇹'},
+    {'name': 'Português', 'code': 'pt', 'flag': '🇵🇹'},
+    {'name': 'Русский', 'code': 'ru', 'flag': '🇷🇺'},
+    {'name': '繁體中文', 'code': 'zh_TW', 'flag': '🇹🇼'},
+    {'name': '한국어', 'code': 'ko', 'flag': '🇰🇷'},
   ];
 
   @override
   void initState() {
     super.initState();
 
-    final current = AppSettings.locale.value.languageCode;
+    final current = AppSettings.locale.value.toString();
 
     final lang = _languages.firstWhere(
       (l) => l['code'] == current,
-      orElse: () => _languages[1],
+      orElse: () => _languages.first,
     );
 
-    _selected = lang['name']!;
+    _selectedCode = lang['code']!;
   }
 
   @override
@@ -127,17 +127,22 @@ class _LanguageScreenState extends State<LanguageScreen> {
     if (_query.isEmpty) return _languages;
 
     return _languages.where((l) {
-      return (l['name'] ?? '').toLowerCase().contains(_query.toLowerCase());
+      final name = l['name']!.toLowerCase();
+      final code = l['code']!.toLowerCase();
+      final q = _query.toLowerCase();
+
+      return name.contains(q) || code.contains(q);
     }).toList();
   }
 
   Widget _languageCard(Map<String, String> lang) {
     final name = lang['name']!;
+    final code = lang['code']!;
     final flag = lang['flag']!;
-    final selected = _selected == name;
+    final selected = _selectedCode == code;
 
     return InkWell(
-      onTap: () => _pick(name),
+      onTap: () => _pick(code),
       child: Container(
         margin: const EdgeInsets.only(bottom: 14),
         padding: const EdgeInsets.all(18),
@@ -167,21 +172,22 @@ class _LanguageScreenState extends State<LanguageScreen> {
     );
   }
 
-  void _pick(String name) {
-    if (_selected == name) return;
+  void _pick(String code) {
+    if (_selectedCode == code) return;
 
     setState(() {
-      _selected = name;
+      _selectedCode = code;
       _dirty = true;
     });
   }
 
   void _onSave() {
-    final lang = _languages.firstWhere((l) => l['name'] == _selected);
+    final parts = _selectedCode.split('_');
 
-    final code = lang['code']!;
+    final locale =
+        parts.length == 2 ? Locale(parts[0], parts[1]) : Locale(parts[0]);
 
-    AppSettings.locale.value = Locale(code);
+    AppSettings.locale.value = locale;
 
     final l = AppLocalizations.of(context)!;
 

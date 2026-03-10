@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Care_AI/screens/home/decive/device_allow.dart';
+import '../../../models/tr.dart';
 
 class DevicePairScreen extends StatelessWidget {
   const DevicePairScreen({super.key});
@@ -14,8 +15,6 @@ class DevicePairScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // ❌ HEADER ĐÃ BỎ
-
             Padding(
               padding: const EdgeInsets.fromLTRB(12, 100, 12, 6),
               child: Column(
@@ -31,8 +30,8 @@ class DevicePairScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'Đã ghép đôi thiết bị!',
+                  Text(
+                    context.tr.devicePaired,
                     style: TextStyle(
                       fontSize: 26,
                       fontWeight: FontWeight.w800,
@@ -40,11 +39,11 @@ class DevicePairScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  const Padding(
+                  Padding(
                     padding: EdgeInsets.symmetric(horizontal: 34),
                     child: Text(
-                      'Thiết bị đã được kết nối thành công.\n'
-                      'Bạn có thể tiếp tục quá trình thiết lập ban đầu.',
+                      '${context.tr.deviceConnectedSuccess}\n'
+                      '${context.tr.setupContinue}',
                       style: TextStyle(
                         fontSize: 13,
                         color: Colors.black54,
@@ -84,8 +83,8 @@ class DevicePairScreen extends StatelessWidget {
                       ),
                       elevation: 4,
                     ),
-                    child: const Text(
-                      'Thiết lập',
+                    child: Text(
+                      context.tr.setup,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,

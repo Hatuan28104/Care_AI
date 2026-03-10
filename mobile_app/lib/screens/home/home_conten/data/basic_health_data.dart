@@ -3,6 +3,7 @@ import 'package:Care_AI/api/health_api.dart';
 import 'package:Care_AI/models/health_icon_mapper.dart';
 import 'metric_item.dart';
 import 'metric_detail.dart';
+import '../../../../models/tr.dart';
 
 class BasicHealthDataScreen extends StatefulWidget {
   const BasicHealthDataScreen({super.key});
@@ -59,9 +60,8 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
     try {
       final data = await HealthApi.getMetrics();
 
-      final items = data
-          .where((e) => e['Category'] == 'health')
-          .map<MetricItem>((e) {
+      final items =
+          data.where((e) => e['Category'] == 'health').map<MetricItem>((e) {
         final iconData = getHealthIcon(e['TenChiSo']);
 
         return MetricItem(
@@ -152,9 +152,9 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
             ),
           ),
           const SizedBox(width: 10),
-          const Expanded(
+          Expanded(
             child: Text(
-              'Dữ liệu sức khỏe',
+              context.tr.healthData,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 24,
@@ -181,7 +181,7 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
           setState(() => _keyword = v);
         },
         decoration: InputDecoration(
-          hintText: 'Tìm kiếm dữ liệu...',
+          hintText: context.tr.searchData,
           prefixIcon: const Icon(Icons.search),
           filled: true,
           fillColor: Colors.white,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'device_connect.dart';
+import '../../../models/tr.dart';
 
 class AddDeviceScreen extends StatefulWidget {
   const AddDeviceScreen({super.key});
@@ -102,8 +103,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
                       onPressed: () => Navigator.pop(context),
                     ),
                   ),
-                  const Text(
-                    'Thiết bị',
+                 Text(context.tr.device,
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w700,
@@ -120,8 +120,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
                   const SizedBox(height: 20),
 
                   // ===== TITLE =====
-                  const Text(
-                    'Đang quét Bluetooth',
+                Text(context.tr.scanningBluetooth,
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.w800,
@@ -130,16 +129,14 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'Hãy đảm bảo thiết bị của bạn ở gần',
+                Text(context.tr.keepDeviceNear,
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.black54,
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const Text(
-                    'và đang bật chế độ hiển thị',
+        Text(context.tr.enableVisibility,
                     style: TextStyle(
                       fontSize: 14,
                       color: blue,
@@ -168,7 +165,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
                       itemBuilder: (context, index) {
                         if (scanResults.isEmpty) {
                           return _deviceCard(
-                            name: 'Không tìm thấy thiết bị',
+                           name: context.tr.noDeviceFound,
                             mac: '',
                             battery: 0,
                           );
@@ -180,7 +177,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
                         return _deviceCard(
                           name: device.name.isNotEmpty
                               ? device.name
-                              : "Thiết bị không tên",
+                              :context.tr.unnamedDevice,
                           mac: device.id.id,
                           battery: 100,
                           onTap: () => connectDevice(device),

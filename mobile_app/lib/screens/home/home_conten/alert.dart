@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../app_settings.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import '../../../models/tr.dart';
 
 class AlertScreen extends StatefulWidget {
   const AlertScreen({super.key});
@@ -95,10 +96,10 @@ class _AlertScreenState extends State<AlertScreen> {
             onTap: () => Navigator.pop(context),
             child: const Icon(Icons.arrow_back_ios_new, size: 20),
           ),
-          const Expanded(
+          Expanded(
             child: Center(
               child: Text(
-                'Alert',
+                context.tr.notifications,
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
               ),
             ),
@@ -119,8 +120,8 @@ class _AlertScreenState extends State<AlertScreen> {
         if (i == 0) {
           return Row(
             children: [
-              const Text(
-                'TODAY',
+              Text(
+                context.tr.today.toUpperCase(),
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
@@ -137,8 +138,8 @@ class _AlertScreenState extends State<AlertScreen> {
                   });
                   _syncBadge();
                 },
-                child: const Text(
-                  'Mark all read',
+                child: Text(
+                  context.tr.markAllRead,
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -284,16 +285,16 @@ class _AlertScreenState extends State<AlertScreen> {
                   child: const Icon(Icons.priority_high, color: Colors.red),
                 ),
                 const SizedBox(height: 14),
-                const Text(
-                  'Delete Your Alert',
+                Text(
+                  context.tr.deleteAlertTitle,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 16,
                   ),
                 ),
                 const SizedBox(height: 6),
-                const Text(
-                  'Your actions may have serious consequences.',
+                Text(
+                  context.tr.deleteAlertWarning,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Color.fromARGB(1, 98, 98, 98),
@@ -314,8 +315,8 @@ class _AlertScreenState extends State<AlertScreen> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child: const Text(
-                      'Accept',
+                    child: Text(
+                      context.tr.accept,
                       style: TextStyle(
                         color: Color.fromARGB(221, 140, 24, 35),
                         fontWeight: FontWeight.w700,
@@ -336,8 +337,8 @@ class _AlertScreenState extends State<AlertScreen> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child: const Text(
-                      'Cancel',
+                    child: Text(
+                      context.tr.cancel,
                       style: TextStyle(
                         color: Colors.black87,
                         fontWeight: FontWeight.w700,
@@ -377,8 +378,8 @@ class _AlertScreenState extends State<AlertScreen> {
                   child: const Icon(Icons.check, color: Colors.green),
                 ),
                 const SizedBox(height: 14),
-                const Text(
-                  'Deleted Successfully',
+                Text(
+                  context.tr.deletedSuccessfully,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 16,
@@ -416,10 +417,10 @@ class _AlertDetail extends StatelessWidget {
                     onTap: () => Navigator.pop(context),
                     child: const Icon(Icons.arrow_back_ios_new),
                   ),
-                  const Expanded(
+                  Expanded(
                     child: Center(
                       child: Text(
-                        'Alert',
+                        context.tr.alert,
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.w800,
@@ -483,8 +484,8 @@ class _HeartRateCard extends StatelessWidget {
                 child: Icon(item.icon, color: Colors.red, size: 100),
               ),
               const SizedBox(width: 60),
-              const Text(
-                'Heart\nRate',
+              Text(
+                context.tr.heartRateTitle,
                 style: TextStyle(
                   fontSize: 40,
                   fontWeight: FontWeight.w600,
@@ -527,8 +528,8 @@ class _HeartRateCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: const Color.fromARGB(208, 244, 67, 54)),
             ),
-            child: const Text(
-              'High',
+            child: Text(
+              context.tr.high,
               style: TextStyle(
                 color: const Color.fromARGB(208, 244, 67, 54),
                 fontWeight: FontWeight.w600,
@@ -572,7 +573,7 @@ class _HeartRateCard extends StatelessWidget {
           const SizedBox(height: 10),
 
           RichText(
-            text: const TextSpan(
+            text: TextSpan(
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.black,
@@ -580,11 +581,11 @@ class _HeartRateCard extends StatelessWidget {
               ),
               children: [
                 TextSpan(
-                  text: 'Detailed Description: ',
+                  text: context.tr.detailedDescription,
                   style: TextStyle(fontWeight: FontWeight.w700),
                 ),
                 TextSpan(
-                  text: 'Unstable heart rate, higher than normal',
+                  text: context.tr.unstableHeartRate,
                   style: TextStyle(fontWeight: FontWeight.w400),
                 ),
               ],

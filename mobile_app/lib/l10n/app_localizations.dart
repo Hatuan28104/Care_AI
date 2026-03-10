@@ -6,7 +6,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
 import 'app_localizations_en.dart';
+import 'app_localizations_ja.dart';
 import 'app_localizations_vi.dart';
+import 'app_localizations_zh.dart';
 
 // ignore_for_file: type=lint
 
@@ -92,7 +94,9 @@ abstract class AppLocalizations {
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
-    Locale('vi')
+    Locale('ja'),
+    Locale('vi'),
+    Locale('zh')
   ];
 
   /// No description provided for @settings.
@@ -184,6 +188,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Logout'**
   String get logout;
+
+  /// No description provided for @login.
+  ///
+  /// In en, this message translates to:
+  /// **'Login'**
+  String get login;
 
   /// No description provided for @small.
   ///
@@ -326,13 +336,13 @@ abstract class AppLocalizations {
   /// No description provided for @viewAll.
   ///
   /// In en, this message translates to:
-  /// **'View all'**
+  /// **'View All'**
   String get viewAll;
 
   /// No description provided for @healthCategory.
   ///
   /// In en, this message translates to:
-  /// **'Health Categories'**
+  /// **'Health Category'**
   String get healthCategory;
 
   /// No description provided for @start.
@@ -344,7 +354,7 @@ abstract class AppLocalizations {
   /// No description provided for @welcome.
   ///
   /// In en, this message translates to:
-  /// **'Hello 👋'**
+  /// **'Welcome 👋'**
   String get welcome;
 
   /// No description provided for @welcomeQuestion.
@@ -392,37 +402,37 @@ abstract class AppLocalizations {
   /// No description provided for @configurePermissions.
   ///
   /// In en, this message translates to:
-  /// **'Configure permissions'**
+  /// **'Configure Permissions'**
   String get configurePermissions;
 
   /// No description provided for @conversationHistory.
   ///
   /// In en, this message translates to:
-  /// **'Conversation history'**
+  /// **'Conversation History'**
   String get conversationHistory;
 
   /// No description provided for @chooseConversation.
   ///
   /// In en, this message translates to:
-  /// **'Choose conversation'**
+  /// **'Choose Conversation'**
   String get chooseConversation;
 
   /// No description provided for @shareConversationHistory.
   ///
   /// In en, this message translates to:
-  /// **'Share conversation history'**
+  /// **'Share Conversation History'**
   String get shareConversationHistory;
 
   /// No description provided for @basicHealthData.
   ///
   /// In en, this message translates to:
-  /// **'Basic health data'**
+  /// **'Basic Health Data'**
   String get basicHealthData;
 
   /// No description provided for @chooseHealthData.
   ///
   /// In en, this message translates to:
-  /// **'Choose health data'**
+  /// **'Choose Health Data'**
   String get chooseHealthData;
 
   /// No description provided for @save.
@@ -452,14 +462,8 @@ abstract class AppLocalizations {
   /// No description provided for @addNew.
   ///
   /// In en, this message translates to:
-  /// **'Add new'**
+  /// **'Add New'**
   String get addNew;
-
-  /// No description provided for @enterGuardianPhone.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter guardian phone number'**
-  String get enterGuardianPhone;
 
   /// No description provided for @enterPhone.
   ///
@@ -470,19 +474,19 @@ abstract class AppLocalizations {
   /// No description provided for @sendInvite.
   ///
   /// In en, this message translates to:
-  /// **'Send invite'**
+  /// **'Send Invite'**
   String get sendInvite;
 
   /// No description provided for @cancelRequest.
   ///
   /// In en, this message translates to:
-  /// **'Cancel request'**
+  /// **'Cancel Request'**
   String get cancelRequest;
 
   /// No description provided for @inviteSentSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Invitation sent successfully'**
+  /// **'Invite sent successfully'**
   String get inviteSentSuccess;
 
   /// No description provided for @userNotFound.
@@ -506,19 +510,19 @@ abstract class AppLocalizations {
   /// No description provided for @confirmDelete.
   ///
   /// In en, this message translates to:
-  /// **'Confirm delete'**
+  /// **'Confirm Delete'**
   String get confirmDelete;
 
   /// No description provided for @confirmDeleteGuardian.
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to remove this guardian?'**
+  /// **'Are you sure you want to remove this guardian from the family?'**
   String get confirmDeleteGuardian;
 
   /// No description provided for @confirmInvite.
   ///
   /// In en, this message translates to:
-  /// **'Confirm invitation'**
+  /// **'Confirm Invite'**
   String get confirmInvite;
 
   /// No description provided for @acceptInviteQuestion.
@@ -530,7 +534,7 @@ abstract class AppLocalizations {
   /// No description provided for @confirmRejectInvite.
   ///
   /// In en, this message translates to:
-  /// **'Confirm reject invitation'**
+  /// **'Confirm Reject Invite'**
   String get confirmRejectInvite;
 
   /// No description provided for @rejectInviteQuestion.
@@ -542,13 +546,13 @@ abstract class AppLocalizations {
   /// No description provided for @fullName.
   ///
   /// In en, this message translates to:
-  /// **'Full name'**
+  /// **'Full Name'**
   String get fullName;
 
   /// No description provided for @birthDate.
   ///
   /// In en, this message translates to:
-  /// **'Birth date'**
+  /// **'Date of Birth'**
   String get birthDate;
 
   /// No description provided for @gender.
@@ -560,7 +564,7 @@ abstract class AppLocalizations {
   /// No description provided for @joinDate.
   ///
   /// In en, this message translates to:
-  /// **'Join date'**
+  /// **'Join Date'**
   String get joinDate;
 
   /// No description provided for @male.
@@ -602,25 +606,25 @@ abstract class AppLocalizations {
   /// No description provided for @shareData.
   ///
   /// In en, this message translates to:
-  /// **'Share data'**
+  /// **'Share Data'**
   String get shareData;
 
   /// No description provided for @heartRate.
   ///
   /// In en, this message translates to:
-  /// **'Heart rate'**
+  /// **'Heart Rate'**
   String get heartRate;
 
   /// No description provided for @bodyTemperature.
   ///
   /// In en, this message translates to:
-  /// **'Body temperature'**
+  /// **'Body Temperature'**
   String get bodyTemperature;
 
   /// No description provided for @bloodPressure.
   ///
   /// In en, this message translates to:
-  /// **'Blood pressure'**
+  /// **'Blood Pressure'**
   String get bloodPressure;
 
   /// No description provided for @steps.
@@ -635,12 +639,6 @@ abstract class AppLocalizations {
   /// **'Sleep'**
   String get sleep;
 
-  /// No description provided for @sevenDaysAgo.
-  ///
-  /// In en, this message translates to:
-  /// **'7 days ago'**
-  String get sevenDaysAgo;
-
   /// No description provided for @view.
   ///
   /// In en, this message translates to:
@@ -650,7 +648,7 @@ abstract class AppLocalizations {
   /// No description provided for @noData.
   ///
   /// In en, this message translates to:
-  /// **'No data'**
+  /// **'No data available'**
   String get noData;
 
   /// No description provided for @distance.
@@ -658,12 +656,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Distance'**
   String get distance;
-
-  /// No description provided for @calories.
-  ///
-  /// In en, this message translates to:
-  /// **'Calories'**
-  String get calories;
 
   /// No description provided for @scanningBluetooth.
   ///
@@ -674,13 +666,13 @@ abstract class AppLocalizations {
   /// No description provided for @deviceNearby.
   ///
   /// In en, this message translates to:
-  /// **'Make sure your device is nearby'**
+  /// **'Please ensure your device is nearby'**
   String get deviceNearby;
 
   /// No description provided for @deviceVisible.
   ///
   /// In en, this message translates to:
-  /// **'and discoverable'**
+  /// **'and visibility mode is on'**
   String get deviceVisible;
 
   /// No description provided for @noDeviceFound.
@@ -692,13 +684,13 @@ abstract class AppLocalizations {
   /// No description provided for @unnamedDevice.
   ///
   /// In en, this message translates to:
-  /// **'Unnamed device'**
+  /// **'Unnamed Device'**
   String get unnamedDevice;
 
   /// No description provided for @connectDevice.
   ///
   /// In en, this message translates to:
-  /// **'Connect device'**
+  /// **'Connect Device'**
   String get connectDevice;
 
   /// No description provided for @connecting.
@@ -710,7 +702,7 @@ abstract class AppLocalizations {
   /// No description provided for @bluetoothPairRequest.
   ///
   /// In en, this message translates to:
-  /// **'Bluetooth pair request'**
+  /// **'Bluetooth Pairing Request'**
   String get bluetoothPairRequest;
 
   /// No description provided for @pair.
@@ -722,7 +714,7 @@ abstract class AppLocalizations {
   /// No description provided for @pairSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Device paired successfully!'**
+  /// **'Device paired!'**
   String get pairSuccess;
 
   /// No description provided for @deviceConnectedSuccess.
@@ -740,20 +732,26 @@ abstract class AppLocalizations {
   /// No description provided for @allowHealthNotificationTitle.
   ///
   /// In en, this message translates to:
-  /// **'Receive health\nnotifications'**
+  /// **'Receive Health Notifications'**
   String get allowHealthNotificationTitle;
 
   /// No description provided for @allowHealthNotificationDesc.
   ///
   /// In en, this message translates to:
-  /// **'Get notified when something important happens.'**
+  /// **'Get notified when there is important information you need to know.'**
   String get allowHealthNotificationDesc;
 
   /// No description provided for @healthAlertDesc.
   ///
   /// In en, this message translates to:
-  /// **'Smartwatch can detect abnormal health signals.'**
+  /// **'Smartwatches can alert you when abnormal signs are detected in heart rate, blood pressure, or other vital metrics.\n\nThese notifications help you take timely action or notify relatives when necessary.'**
   String get healthAlertDesc;
+
+  /// No description provided for @back.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get back;
 
   /// No description provided for @allow.
   ///
@@ -767,6 +765,96 @@ abstract class AppLocalizations {
   /// **'Later'**
   String get later;
 
+  /// No description provided for @bluetoothPairDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'“Apple Watch Series Demo” wants to pair with your iPhone. Please confirm this code also displays on “Apple Watch Series Demo”. Do not enter this code on any other accessory.'**
+  String get bluetoothPairDesc;
+
+  /// No description provided for @todayHealthData.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s Health Data'**
+  String get todayHealthData;
+
+  /// No description provided for @demoWatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Apple Watch Series Demo'**
+  String get demoWatch;
+
+  /// No description provided for @connected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected'**
+  String get connected;
+
+  /// No description provided for @preparingHealthData.
+  ///
+  /// In en, this message translates to:
+  /// **'We are preparing health data to provide the best experience for you. This process may take a moment.\n\nPlease keep the watch near the phone to ensure smooth synchronization. You will receive a notification when the process is complete.'**
+  String get preparingHealthData;
+
+  /// No description provided for @chooseConversationsToShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the conversations you want to share'**
+  String get chooseConversationsToShare;
+
+  /// No description provided for @shareImportantHealthData.
+  ///
+  /// In en, this message translates to:
+  /// **'Share important health information with caregivers'**
+  String get shareImportantHealthData;
+
+  /// No description provided for @holdSmartwatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold the smartwatch'**
+  String get holdSmartwatch;
+
+  /// No description provided for @inFrontOfCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'in front of the camera'**
+  String get inFrontOfCamera;
+
+  /// No description provided for @alignWatchInFrame.
+  ///
+  /// In en, this message translates to:
+  /// **'Align the watch within the scan frame'**
+  String get alignWatchInFrame;
+
+  /// No description provided for @scanFrameAbove.
+  ///
+  /// In en, this message translates to:
+  /// **'above.'**
+  String get scanFrameAbove;
+
+  /// No description provided for @qrNotFoundBluetooth.
+  ///
+  /// In en, this message translates to:
+  /// **'QR code not found? Try connecting via Bluetooth'**
+  String get qrNotFoundBluetooth;
+
+  /// No description provided for @devicePaired.
+  ///
+  /// In en, this message translates to:
+  /// **'Device Paired'**
+  String get devicePaired;
+
+  /// No description provided for @setupContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'You can continue the initial setup process.'**
+  String get setupContinue;
+
+  /// No description provided for @disconnectDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect Device'**
+  String get disconnectDevice;
+
   /// No description provided for @syncingDevice.
   ///
   /// In en, this message translates to:
@@ -776,7 +864,7 @@ abstract class AppLocalizations {
   /// No description provided for @syncingDesc.
   ///
   /// In en, this message translates to:
-  /// **'Preparing health data for the best experience.'**
+  /// **'We are preparing health data.'**
   String get syncingDesc;
 
   /// No description provided for @continueButton.
@@ -788,13 +876,13 @@ abstract class AppLocalizations {
   /// No description provided for @setupComplete.
   ///
   /// In en, this message translates to:
-  /// **'Setup complete!'**
+  /// **'Setup Complete!'**
   String get setupComplete;
 
   /// No description provided for @deviceReady.
   ///
   /// In en, this message translates to:
-  /// **'Your device is ready'**
+  /// **'Your device is ready to use'**
   String get deviceReady;
 
   /// No description provided for @done.
@@ -803,64 +891,184 @@ abstract class AppLocalizations {
   /// **'Done'**
   String get done;
 
-  /// No description provided for @connected.
+  /// No description provided for @configureSharingPermissions.
   ///
   /// In en, this message translates to:
-  /// **'Connected'**
-  String get connected;
+  /// **'Configure Sharing Permissions'**
+  String get configureSharingPermissions;
 
-  /// No description provided for @goodHealth.
+  /// No description provided for @lastMessage.
   ///
   /// In en, this message translates to:
-  /// **'Good health'**
-  String get goodHealth;
+  /// **'Last message'**
+  String get lastMessage;
 
-  /// No description provided for @goodHealthDesc.
+  /// No description provided for @welcomeTitle.
   ///
   /// In en, this message translates to:
-  /// **'Your health indicators are within normal range.'**
-  String get goodHealthDesc;
+  /// **'Care AI, hello'**
+  String get welcomeTitle;
 
-  /// No description provided for @todayHealthData.
+  /// No description provided for @welcomeSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Today\'s health data'**
-  String get todayHealthData;
+  /// **'Your digital companion, peace of mind for the whole family.'**
+  String get welcomeSubtitle;
 
-  /// No description provided for @spo2.
+  /// No description provided for @welcomeBack.
   ///
   /// In en, this message translates to:
-  /// **'Blood oxygen – SpO₂'**
-  String get spo2;
+  /// **'Welcome back!'**
+  String get welcomeBack;
 
-  /// No description provided for @caloriesBurned.
+  /// No description provided for @searchCountry.
   ///
   /// In en, this message translates to:
-  /// **'Calories burned'**
-  String get caloriesBurned;
+  /// **'Search country'**
+  String get searchCountry;
 
-  /// No description provided for @bodyTemp.
+  /// No description provided for @phoneNumber.
   ///
   /// In en, this message translates to:
-  /// **'Body temperature'**
-  String get bodyTemp;
+  /// **'Phone Number'**
+  String get phoneNumber;
 
-  /// No description provided for @stressLevel.
+  /// No description provided for @invalidOtp.
   ///
   /// In en, this message translates to:
-  /// **'Stress level'**
-  String get stressLevel;
+  /// **'Invalid OTP code'**
+  String get invalidOtp;
 
-  /// No description provided for @disconnectDevice.
+  /// No description provided for @otpSentTo.
   ///
   /// In en, this message translates to:
-  /// **'Disconnect device'**
-  String get disconnectDevice;
+  /// **'An OTP code has been sent to phone number {phone}:'**
+  String otpSentTo(Object phone);
+
+  /// No description provided for @resendOtp.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend OTP'**
+  String get resendOtp;
+
+  /// No description provided for @createAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Care AI Account'**
+  String get createAccount;
+
+  /// No description provided for @startHealthJourney.
+  ///
+  /// In en, this message translates to:
+  /// **'Start your health journey with an AI assistant'**
+  String get startHealthJourney;
+
+  /// No description provided for @registerSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration Successful'**
+  String get registerSuccess;
+
+  /// No description provided for @startUsingApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Start experiencing Care AI now.'**
+  String get startUsingApp;
+
+  /// No description provided for @invalidPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Please check and enter the correct phone number!'**
+  String get invalidPhone;
+
+  /// No description provided for @registerAgree.
+  ///
+  /// In en, this message translates to:
+  /// **'By registering, you confirm that you agree to the'**
+  String get registerAgree;
+
+  /// No description provided for @register.
+  ///
+  /// In en, this message translates to:
+  /// **'Register'**
+  String get register;
+
+  /// No description provided for @terms.
+  ///
+  /// In en, this message translates to:
+  /// **'terms'**
+  String get terms;
+
+  /// No description provided for @termsOfService.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Service'**
+  String get termsOfService;
+
+  /// No description provided for @privacy_Policy.
+  ///
+  /// In en, this message translates to:
+  /// **'privacy policy'**
+  String get privacy_Policy;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy policy '**
+  String get privacyPolicy;
+
+  /// No description provided for @and.
+  ///
+  /// In en, this message translates to:
+  /// **'and'**
+  String get and;
+
+  /// No description provided for @enterFullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter full name'**
+  String get enterFullName;
+
+  /// No description provided for @email.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get email;
+
+  /// No description provided for @enterEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter email'**
+  String get enterEmail;
+
+  /// No description provided for @subject.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject'**
+  String get subject;
+
+  /// No description provided for @content.
+  ///
+  /// In en, this message translates to:
+  /// **'Content'**
+  String get content;
+
+  /// No description provided for @describeProblem.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe your problem...'**
+  String get describeProblem;
+
+  /// No description provided for @ofCareAI.
+  ///
+  /// In en, this message translates to:
+  /// **'of Care AI.'**
+  String get ofCareAI;
 
   /// No description provided for @deleteDevice.
   ///
   /// In en, this message translates to:
-  /// **'Delete device'**
+  /// **'Delete Device'**
   String get deleteDevice;
 
   /// No description provided for @confirmDeleteDevice.
@@ -875,30 +1083,6 @@ abstract class AppLocalizations {
   /// **'Scan'**
   String get scan;
 
-  /// No description provided for @scanWatchInstruction1.
-  ///
-  /// In en, this message translates to:
-  /// **'Hold the smartwatch'**
-  String get scanWatchInstruction1;
-
-  /// No description provided for @scanWatchInstruction2.
-  ///
-  /// In en, this message translates to:
-  /// **'in front of the camera'**
-  String get scanWatchInstruction2;
-
-  /// No description provided for @scanWatchInstruction3.
-  ///
-  /// In en, this message translates to:
-  /// **'Align the watch with the scan frame'**
-  String get scanWatchInstruction3;
-
-  /// No description provided for @qrNotFound.
-  ///
-  /// In en, this message translates to:
-  /// **'QR not found? Try connecting via Bluetooth'**
-  String get qrNotFound;
-
   /// No description provided for @search.
   ///
   /// In en, this message translates to:
@@ -908,7 +1092,7 @@ abstract class AppLocalizations {
   /// No description provided for @chooseLanguage.
   ///
   /// In en, this message translates to:
-  /// **'Choose language'**
+  /// **'Choose Language'**
   String get chooseLanguage;
 
   /// No description provided for @languageChanged.
@@ -916,6 +1100,786 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Language changed'**
   String get languageChanged;
+
+  /// No description provided for @callHotline.
+  ///
+  /// In en, this message translates to:
+  /// **'Call hotline: 1900 xxxx'**
+  String get callHotline;
+
+  /// No description provided for @supportEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email: support@careai.vn'**
+  String get supportEmail;
+
+  /// No description provided for @chat.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get chat;
+
+  /// No description provided for @chooseSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose subject'**
+  String get chooseSubject;
+
+  /// No description provided for @requestSentSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent successfully'**
+  String get requestSentSuccess;
+
+  /// No description provided for @sendRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Request'**
+  String get sendRequest;
+
+  /// No description provided for @contactInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Information'**
+  String get contactInfo;
+
+  /// No description provided for @hotline.
+  ///
+  /// In en, this message translates to:
+  /// **'Hotline'**
+  String get hotline;
+
+  /// No description provided for @support247.
+  ///
+  /// In en, this message translates to:
+  /// **'24/7 Support'**
+  String get support247;
+
+  /// No description provided for @replyWithin24h.
+  ///
+  /// In en, this message translates to:
+  /// **'Reply within 24 hours'**
+  String get replyWithin24h;
+
+  /// No description provided for @address.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get address;
+
+  /// No description provided for @faq.
+  ///
+  /// In en, this message translates to:
+  /// **'FAQ'**
+  String get faq;
+
+  /// No description provided for @faqTextSize.
+  ///
+  /// In en, this message translates to:
+  /// **'How do I change the text size?'**
+  String get faqTextSize;
+
+  /// No description provided for @faqAiSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'How can AI assist me?'**
+  String get faqAiSupport;
+
+  /// No description provided for @faqVideoCall.
+  ///
+  /// In en, this message translates to:
+  /// **'How do I make a video call with a Digital Human?'**
+  String get faqVideoCall;
+
+  /// No description provided for @faqDataSafety.
+  ///
+  /// In en, this message translates to:
+  /// **'Is my information safe?'**
+  String get faqDataSafety;
+
+  /// No description provided for @quickContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Contact'**
+  String get quickContact;
+
+  /// No description provided for @sendSupportRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Support Request'**
+  String get sendSupportRequest;
+
+  /// No description provided for @techSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Technical Support'**
+  String get techSupport;
+
+  /// No description provided for @accountSecurity.
+  ///
+  /// In en, this message translates to:
+  /// **'Account & Security'**
+  String get accountSecurity;
+
+  /// No description provided for @aiFeatures.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Features'**
+  String get aiFeatures;
+
+  /// No description provided for @payment.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment'**
+  String get payment;
+
+  /// No description provided for @other.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get other;
+
+  /// No description provided for @textSizePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Apps that support Dynamic Type will adjust to your preferred reading size below.'**
+  String get textSizePreview;
+
+  /// No description provided for @infoCollected.
+  ///
+  /// In en, this message translates to:
+  /// **'Information We Collect'**
+  String get infoCollected;
+
+  /// No description provided for @infoUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'How We Use Information'**
+  String get infoUsage;
+
+  /// No description provided for @infoSharing.
+  ///
+  /// In en, this message translates to:
+  /// **'Information Sharing'**
+  String get infoSharing;
+
+  /// No description provided for @dataSecurity.
+  ///
+  /// In en, this message translates to:
+  /// **'Data Security'**
+  String get dataSecurity;
+
+  /// No description provided for @userRights.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Rights'**
+  String get userRights;
+
+  /// No description provided for @infoUsedFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Your information is used to:'**
+  String get infoUsedFor;
+
+  /// No description provided for @infoSharedCases.
+  ///
+  /// In en, this message translates to:
+  /// **'We only share your information in the following cases:'**
+  String get infoSharedCases;
+
+  /// No description provided for @serviceTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Provide health tracking, reminder services, and care support.'**
+  String get serviceTracking;
+
+  /// No description provided for @alertGuardian.
+  ///
+  /// In en, this message translates to:
+  /// **'Send alerts to guardians or medical staff when necessary.'**
+  String get alertGuardian;
+
+  /// No description provided for @improveSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'Improve system stability and personalize the user experience.'**
+  String get improveSystem;
+
+  /// No description provided for @ensureSafety.
+  ///
+  /// In en, this message translates to:
+  /// **'Ensure safety, comply with legal regulations, and use for correct purposes.'**
+  String get ensureSafety;
+
+  /// No description provided for @shareWithGuardian.
+  ///
+  /// In en, this message translates to:
+  /// **'With guardians or family members with your permission.'**
+  String get shareWithGuardian;
+
+  /// No description provided for @shareWithMedical.
+  ///
+  /// In en, this message translates to:
+  /// **'With medical facilities when authorized or in emergencies.'**
+  String get shareWithMedical;
+
+  /// No description provided for @privacyIntro1.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to the Health Monitoring Support System. This Privacy Policy applies to all system services, including apps, websites, software, and related platforms.'**
+  String get privacyIntro1;
+
+  /// No description provided for @privacyIntro2.
+  ///
+  /// In en, this message translates to:
+  /// **'We are committed to protecting your privacy. This policy explains how we collect, use, share, and protect your personal information. By using the platform, you agree to the contents described below.'**
+  String get privacyIntro2;
+
+  /// No description provided for @verification.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification'**
+  String get verification;
+
+  /// No description provided for @privacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy'**
+  String get privacy;
+
+  /// No description provided for @loginHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Login History'**
+  String get loginHistory;
+
+  /// No description provided for @change.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get change;
+
+  /// No description provided for @changePhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Change phone number'**
+  String get changePhone;
+
+  /// No description provided for @phoneExample.
+  ///
+  /// In en, this message translates to:
+  /// **'Example: 0912345678 or +84 912345678'**
+  String get phoneExample;
+
+  /// No description provided for @phoneUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number updated'**
+  String get phoneUpdated;
+
+  /// No description provided for @twoFactorAuth.
+  ///
+  /// In en, this message translates to:
+  /// **'Two-Factor Authentication (2FA)'**
+  String get twoFactorAuth;
+
+  /// No description provided for @biometrics.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometrics'**
+  String get biometrics;
+
+  /// No description provided for @fingerprintOrFace.
+  ///
+  /// In en, this message translates to:
+  /// **'Fingerprint or Face Recognition'**
+  String get fingerprintOrFace;
+
+  /// No description provided for @noLoginHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'No login history'**
+  String get noLoginHistory;
+
+  /// No description provided for @viewMore.
+  ///
+  /// In en, this message translates to:
+  /// **'View more'**
+  String get viewMore;
+
+  /// No description provided for @acceptTerms.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept Terms'**
+  String get acceptTerms;
+
+  /// No description provided for @userResponsibility.
+  ///
+  /// In en, this message translates to:
+  /// **'User Responsibility'**
+  String get userResponsibility;
+
+  /// No description provided for @serviceLimitations.
+  ///
+  /// In en, this message translates to:
+  /// **'Service Limitations'**
+  String get serviceLimitations;
+
+  /// No description provided for @accountManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Management'**
+  String get accountManagement;
+
+  /// No description provided for @termsUpdates.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms & Policy Updates'**
+  String get termsUpdates;
+
+  /// No description provided for @unknownName.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Name'**
+  String get unknownName;
+
+  /// No description provided for @confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirm;
+
+  /// No description provided for @confirmDeleteInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm delete invitation'**
+  String get confirmDeleteInvite;
+
+  /// No description provided for @userResponsibilityDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'You must provide accurate and updated information. You are responsible for the security of your account and all activities that occur under it. Use of the platform for illegal, harmful, or fraudulent purposes is strictly prohibited.'**
+  String get userResponsibilityDesc;
+
+  /// No description provided for @serviceLimitationsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'The Elderly Care Digital Human System is a support tool and does not replace professional medical advice, diagnosis, or treatment.'**
+  String get serviceLimitationsDesc;
+
+  /// No description provided for @accountManagementDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'You can suspend or permanently delete your account at any time through app settings or by contacting support.'**
+  String get accountManagementDesc;
+
+  /// No description provided for @termsUpdatesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'These Terms of Use may be updated over time to comply with new legal regulations or to improve service quality.'**
+  String get termsUpdatesDesc;
+
+  /// No description provided for @profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Profile'**
+  String get profile;
+
+  /// No description provided for @personalInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Information'**
+  String get personalInfo;
+
+  /// No description provided for @noGuardians.
+  ///
+  /// In en, this message translates to:
+  /// **'No guardians yet'**
+  String get noGuardians;
+
+  /// No description provided for @last7Days.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 7 days'**
+  String get last7Days;
+
+  /// No description provided for @height.
+  ///
+  /// In en, this message translates to:
+  /// **'Height'**
+  String get height;
+
+  /// No description provided for @weight.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight'**
+  String get weight;
+
+  /// No description provided for @healthCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Health Categories'**
+  String get healthCategories;
+
+  /// No description provided for @hello.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello 👋'**
+  String get hello;
+
+  /// No description provided for @whatSupportToday.
+  ///
+  /// In en, this message translates to:
+  /// **'What support do you\nneed today?'**
+  String get whatSupportToday;
+
+  /// No description provided for @aiIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello 👋 How can I assist you today?'**
+  String get aiIntro;
+
+  /// No description provided for @addPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Photo'**
+  String get addPhoto;
+
+  /// No description provided for @deleteAlertTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Alert'**
+  String get deleteAlertTitle;
+
+  /// No description provided for @deleteAlertWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This action can lead to serious consequences.'**
+  String get deleteAlertWarning;
+
+  /// No description provided for @deletedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted successfully'**
+  String get deletedSuccessfully;
+
+  /// No description provided for @heartRateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Heart\nRate'**
+  String get heartRateTitle;
+
+  /// No description provided for @high.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get high;
+
+  /// No description provided for @detailedDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Detailed description: '**
+  String get detailedDescription;
+
+  /// No description provided for @unstableHeartRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Unstable heart rate, higher than normal'**
+  String get unstableHeartRate;
+
+  /// No description provided for @photo.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo'**
+  String get photo;
+
+  /// No description provided for @imageSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'📷 Image selected'**
+  String get imageSelected;
+
+  /// No description provided for @voiceMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'🎤 Voice message'**
+  String get voiceMessage;
+
+  /// No description provided for @careAIIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi, I\'m Care AI 💙\nIt\'s great to see you today. Would you like to share how you\'ve been feeling lately?'**
+  String get careAIIntro;
+
+  /// No description provided for @chooseGender.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Gender'**
+  String get chooseGender;
+
+  /// No description provided for @fullNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name is required.'**
+  String get fullNameRequired;
+
+  /// No description provided for @birthDateRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Birth Date is required.'**
+  String get birthDateRequired;
+
+  /// No description provided for @invalidBirthDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid date format.'**
+  String get invalidBirthDate;
+
+  /// No description provided for @mustBe16.
+  ///
+  /// In en, this message translates to:
+  /// **'You must be at least 16 years old.'**
+  String get mustBe16;
+
+  /// No description provided for @invalidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email address.'**
+  String get invalidEmail;
+
+  /// No description provided for @genderRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Gender is required.'**
+  String get genderRequired;
+
+  /// No description provided for @weightRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight is required.'**
+  String get weightRequired;
+
+  /// No description provided for @heightRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Height is required.'**
+  String get heightRequired;
+
+  /// No description provided for @errorOccurred.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred'**
+  String get errorOccurred;
+
+  /// No description provided for @fullNameExample.
+  ///
+  /// In en, this message translates to:
+  /// **'John Doe'**
+  String get fullNameExample;
+
+  /// No description provided for @updatePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Update photo'**
+  String get updatePhoto;
+
+  /// No description provided for @invalidHeightWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid height / weight'**
+  String get invalidHeightWeight;
+
+  /// No description provided for @invalidGender.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a valid gender'**
+  String get invalidGender;
+
+  /// No description provided for @calories.
+  ///
+  /// In en, this message translates to:
+  /// **'Calories Burned'**
+  String get calories;
+
+  /// No description provided for @spo2.
+  ///
+  /// In en, this message translates to:
+  /// **'Blood Oxygen Level – SpO₂'**
+  String get spo2;
+
+  /// No description provided for @goodHealthDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Your metrics are all within the normal range. Keep maintaining a healthy lifestyle!'**
+  String get goodHealthDesc;
+
+  /// No description provided for @enterGuardianPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your guardian\'s phone number'**
+  String get enterGuardianPhone;
+
+  /// No description provided for @termsIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'By creating an account or accessing the Health Monitoring Support System, you agree to comply with these Terms of Use...'**
+  String get termsIntro;
+
+  /// No description provided for @askAnything.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask anything...'**
+  String get askAnything;
+
+  /// No description provided for @keepDeviceNear.
+  ///
+  /// In en, this message translates to:
+  /// **'Please ensure your device is nearby'**
+  String get keepDeviceNear;
+
+  /// No description provided for @enableVisibility.
+  ///
+  /// In en, this message translates to:
+  /// **'and visibility mode is on'**
+  String get enableVisibility;
+
+  /// No description provided for @healthNotificationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive Health\nNotifications'**
+  String get healthNotificationTitle;
+
+  /// No description provided for @healthNotificationDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Get notified when there is important information you need to know.'**
+  String get healthNotificationDesc;
+
+  /// No description provided for @goodHealth.
+  ///
+  /// In en, this message translates to:
+  /// **'Good health'**
+  String get goodHealth;
+
+  /// No description provided for @stressLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Stress level'**
+  String get stressLevel;
+
+  /// No description provided for @deleteDeviceConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this device?'**
+  String get deleteDeviceConfirm;
+
+  /// No description provided for @deleteGuardianConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to remove this guardian from the family?'**
+  String get deleteGuardianConfirm;
+
+  /// No description provided for @enterPhoneNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter phone number'**
+  String get enterPhoneNumber;
+
+  /// No description provided for @all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get all;
+
+  /// No description provided for @rejectInviteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm rejection of invitation'**
+  String get rejectInviteConfirm;
+
+  /// No description provided for @enterMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter message...'**
+  String get enterMessage;
+
+  /// No description provided for @serverError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to connect to server.'**
+  String get serverError;
+
+  /// No description provided for @error.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get error;
+
+  /// No description provided for @typing.
+  ///
+  /// In en, this message translates to:
+  /// **'...'**
+  String get typing;
+
+  /// No description provided for @loadDataError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load data'**
+  String get loadDataError;
+
+  /// No description provided for @aiNotUnderstand.
+  ///
+  /// In en, this message translates to:
+  /// **'Sorry, I don\'t understand.'**
+  String get aiNotUnderstand;
+
+  /// No description provided for @noHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'No history yet'**
+  String get noHistory;
+
+  /// No description provided for @chooseAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose action'**
+  String get chooseAction;
+
+  /// No description provided for @enterNewName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter new name'**
+  String get enterNewName;
+
+  /// No description provided for @rename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get rename;
+
+  /// No description provided for @soundNotification.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification Sound'**
+  String get soundNotification;
+
+  /// No description provided for @sound.
+  ///
+  /// In en, this message translates to:
+  /// **'Sound'**
+  String get sound;
+
+  /// No description provided for @volume.
+  ///
+  /// In en, this message translates to:
+  /// **'Volume'**
+  String get volume;
+
+  /// No description provided for @vibration.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibration'**
+  String get vibration;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
@@ -927,7 +1891,7 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['en', 'vi'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['en', 'ja', 'vi', 'zh'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -939,7 +1903,9 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
     case 'en': return AppLocalizationsEn();
+    case 'ja': return AppLocalizationsJa();
     case 'vi': return AppLocalizationsVi();
+    case 'zh': return AppLocalizationsZh();
   }
 
   throw FlutterError(

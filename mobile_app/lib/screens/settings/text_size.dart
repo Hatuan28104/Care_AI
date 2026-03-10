@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../app_settings.dart';
+import '../../models/tr.dart';
 
 class TextSizeScreen extends StatefulWidget {
   const TextSizeScreen({super.key});
@@ -23,7 +24,6 @@ class _TextSizeScreenState extends State<TextSizeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF6F6F6),
       appBar: _appBar(context),
       body: SafeArea(
         child: Padding(
@@ -53,8 +53,8 @@ class _TextSizeScreenState extends State<TextSizeScreen> {
         ),
         onPressed: () => Navigator.pop(context),
       ),
-      title: const Text(
-        'Cỡ chữ',
+      title: Text(
+        context.tr.textSize,
         style: TextStyle(
             fontSize: 24, fontWeight: FontWeight.w700, color: Colors.black),
       ),
@@ -63,7 +63,7 @@ class _TextSizeScreenState extends State<TextSizeScreen> {
 
   Widget _previewText() {
     return Text(
-      'Các ứng dụng hỗ trợ cỡ chữ động sẽ tự điều chỉnh theo kích thước chữ bạn chọn bên dưới',
+      context.tr.textSizePreview,
       textAlign: TextAlign.justify,
       style: TextStyle(
         fontSize: 14 * _scale,

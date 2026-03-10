@@ -30,6 +30,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadSettings();
   }
 
+  static const Map<String, String> _languageNames = {
+    'vi': 'Tiếng Việt',
+    'en': 'English',
+    'ja': '日本語',
+    'zh': '中文',
+    'ko': '한국어',
+    'fr': 'Français',
+    'de': 'Deutsch',
+    'es': 'Español',
+    'it': 'Italiano',
+    'pt': 'Português',
+    'ru': 'Русский',
+  };
   Future<void> _loadSettings() async {
     try {
       final data = await SettingsApi.getSettings();
@@ -94,9 +107,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _item(
                   icon: Icons.language,
                   text: context.tr.language,
-                  subtitle: AppSettings.locale.value.languageCode == 'vi'
-                      ? 'Tiếng Việt'
-                      : 'English',
+                  subtitle:
+                      _languageNames[AppSettings.locale.value.languageCode] ??
+                          'English',
                   onTap: () => _go(context, const LanguageScreen()),
                 ),
               ]),

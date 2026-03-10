@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'familycenter_guardians.dart';
 import 'familycenter_dependent.dart';
+import '../../../models/tr.dart';
 
 class FamilyTab extends StatefulWidget {
   const FamilyTab({super.key});
@@ -41,7 +42,7 @@ class _FamilyTabState extends State<FamilyTab> {
               onTap: () => setState(() => _index = 0),
               child: _tabItem(
                 icon: Icons.group_outlined,
-                text: 'Người giám hộ',
+                text: context.tr.guardians,
                 active: _index == 0,
               ),
             ),
@@ -52,7 +53,7 @@ class _FamilyTabState extends State<FamilyTab> {
               onTap: () => setState(() => _index = 1),
               child: _tabItem(
                 icon: Icons.favorite_border,
-                text: 'Người phụ thuộc',
+                text: context.tr.dependents,
                 active: _index == 1,
               ),
             ),

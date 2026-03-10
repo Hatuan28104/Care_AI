@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../models/tr.dart';
 
 class HealthDataScreen extends StatefulWidget {
   const HealthDataScreen({super.key});
@@ -44,10 +45,10 @@ class _HealthDataScreenState extends State<HealthDataScreen> {
             icon: const Icon(Icons.arrow_back_ios_new, size: 18),
             onPressed: () => Navigator.pop(context),
           ),
-          const Expanded(
+          Expanded(
             child: Center(
               child: Text(
-                'Dữ liệu sức khỏe',
+                context.tr.healthData,
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
@@ -164,8 +165,8 @@ class _HealthDataScreenState extends State<HealthDataScreen> {
               borderRadius: BorderRadius.circular(22),
             ),
           ),
-          child: const Text(
-            'Lưu',
+          child: Text(
+            context.tr.save,
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w700,

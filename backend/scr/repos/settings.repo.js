@@ -10,7 +10,13 @@ export async function getSettings(userId) {
   const result = await db.request()
     .input("userId", sql.Char(12), userId)
     .query(`
-      SELECT NotificationOn, HealthAlertOn, SyncDataOn
+      SELECT 
+        NotificationOn,
+        HealthAlertOn,
+        SyncDataOn,
+        SoundOn,
+        VibrationOn,
+        Volume
       FROM AppSettings
       WHERE NguoiDung_ID = @userId
     `);
@@ -19,7 +25,10 @@ export async function getSettings(userId) {
     return {
       notificationOn: true,
       healthAlertOn: true,
-      syncDataOn: true
+      syncDataOn: true,
+      soundOn: true,
+      vibrationOn: true,
+      volume: 0.6
     };
   }
 
@@ -28,7 +37,10 @@ export async function getSettings(userId) {
   return {
     notificationOn: row.NotificationOn,
     healthAlertOn: row.HealthAlertOn,
-    syncDataOn: row.SyncDataOn
+    syncDataOn: row.SyncDataOn,
+    soundOn: row.SoundOn,
+    vibrationOn: row.VibrationOn,
+    volume: row.Volume
   };
 }
 
@@ -38,11 +50,13 @@ export async function getSettings(userId) {
 export async function updateSetting(userId, key, value) {
   const db = await getDB();
 
-  // 🔥 Chỉ cho update 3 field hợp lệ (tránh SQL Injection)
   const allowedFields = [
-    "notificationOn",
-    "healthAlertOn",
-    "syncDataOn"
+    "NotificationOn",
+    "HealthAlertOn",
+    "SyncDataOn",
+    "SoundOn",
+    "VibrationOn",
+    "Volume"
   ];
 
   if (!allowedFields.includes(key)) {
@@ -51,7 +65,7 @@ export async function updateSetting(userId, key, value) {
 
   await db.request()
     .input("userId", sql.Char(12), userId)
-    .input("value", sql.Bit, value)
+    .input("value", key === "Volume" ? sql.Float : sql.Bit, value)
     .query(`
       IF EXISTS (SELECT 1 FROM AppSettings WHERE NguoiDung_ID = @userId)
         UPDATE AppSettings

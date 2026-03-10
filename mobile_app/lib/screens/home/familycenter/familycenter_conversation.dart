@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../models/tr.dart';
 
 class ConversationScreen extends StatefulWidget {
   const ConversationScreen({super.key});
@@ -16,17 +17,17 @@ class _ConversationSharingScreenState extends State<ConversationScreen> {
   final List<Map<String, dynamic>> _users = [
     {
       'name': 'Alex - Bác sĩ',
-      'last': 'Tin nhắn gần nhất: September 27, 2025',
+      'date': 'September 27, 2025',
       'enabled': false,
     },
     {
       'name': 'Anna - Luật sư',
-      'last': 'Tin nhắn gần nhất: September 26, 2025',
+      'date': 'September 26, 2025',
       'enabled': false,
     },
     {
       'name': 'Luna - Y tá',
-      'last': 'Tin nhắn gần nhất: September 23, 2025',
+      'date': 'September 23, 2025',
       'enabled': false,
     },
   ];
@@ -56,10 +57,10 @@ class _ConversationSharingScreenState extends State<ConversationScreen> {
             icon: const Icon(Icons.arrow_back_ios_new, size: 18),
             onPressed: () => Navigator.pop(context),
           ),
-          const Expanded(
+          Expanded(
             child: Center(
               child: Text(
-                'Thiết lập quyền chia sẻ',
+                context.tr.configureSharingPermissions,
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
@@ -78,9 +79,9 @@ class _ConversationSharingScreenState extends State<ConversationScreen> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(18, 8, 18, 18),
       children: [
-        const Center(
+        Center(
           child: Text(
-            'Chia sẻ lịch sử trò chuyện',
+            context.tr.shareConversationHistory,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 27,
@@ -146,7 +147,7 @@ class _ConversationSharingScreenState extends State<ConversationScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  user['last'],
+                  '${context.tr.lastMessage}: ${user['date']}',
                   style: const TextStyle(
                     fontSize: 16,
                     color: Colors.grey,
@@ -189,8 +190,8 @@ class _ConversationSharingScreenState extends State<ConversationScreen> {
               borderRadius: BorderRadius.circular(22),
             ),
           ),
-          child: const Text(
-            'Lưu',
+          child: Text(
+            context.tr.save,
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w700,

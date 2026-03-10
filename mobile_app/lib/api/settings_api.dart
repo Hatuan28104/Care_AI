@@ -18,35 +18,45 @@ class SettingsApi {
       Uri.parse(_baseUrl),
       headers: {
         "Authorization": "Bearer $token",
+        "Accept": "application/json",
       },
-    );
+    ).timeout(const Duration(seconds: 8));
 
     if (res.statusCode == 200) {
-      return jsonDecode(res.body);
+      final data = jsonDecode(res.body);
+
+      if (data["volume"] != null) {
+        data["volume"] = (data["volume"] as num).toDouble();
+      }
+
+      return data;
     }
 
     throw Exception("Không load được settings (${res.statusCode})");
   }
 
   // 🔹 UPDATE setting
-  static Future<void> updateSetting(String key, bool value) async {
+  static Future<void> updateSetting(String key, dynamic value) async {
     final token = await AuthStorage.getToken();
 
     if (token == null) {
       throw Exception("Chưa đăng nhập");
     }
 
-    final res = await http.put(
-      Uri.parse(_baseUrl),
-      headers: {
-        "Authorization": "Bearer $token",
-        "Content-Type": "application/json",
-      },
-      body: jsonEncode({
-        "key": key,
-        "value": value,
-      }),
-    );
+    final res = await http
+        .put(
+          Uri.parse(_baseUrl),
+          headers: {
+            "Authorization": "Bearer $token",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+          },
+          body: jsonEncode({
+            "key": key,
+            "value": value,
+          }),
+        )
+        .timeout(const Duration(seconds: 8));
 
     if (res.statusCode != 200) {
       throw Exception("Update setting thất bại (${res.statusCode})");

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
+import '../../../models/tr.dart';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -76,29 +77,35 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
 
       final data = await profile_api.ProfileApi.getProfile(user.nguoiDungId);
 
-      if (data == null) return; // 🔥 CHƯA CÓ PROFILE
+      if (data == null) return;
 
       _nameCtrl.text = data['tenND'] ?? '';
-      _dobCtrl.text = data['ngaySinh']?.substring(0, 10) ?? '';
+
+      final dob = data['ngaySinh'];
+      _dobCtrl.text =
+          dob != null && dob.length >= 10 ? dob.substring(0, 10) : '';
 
       _gender = data['gioiTinh'] == 1
-          ? 'Nam'
+          ? context.tr.male
           : data['gioiTinh'] == 0
-              ? 'Nữ'
+              ? context.tr.female
               : null;
+
       _genderCtrl.text = _gender ?? '';
 
       _heightCtrl.text = data['chieuCao']?.toString() ?? '';
       _weightCtrl.text = data['canNang']?.toString() ?? '';
+
       _emailCtrl.text = data['email'] ?? '';
       _addressCtrl.text = data['diaChi'] ?? '';
 
-      // 📌 Số điện thoại (readonly)
       _phoneCtrl.text = user.soDienThoai ?? '';
 
-      if (data['avatarUrl'] != null) {
+      final avatar = data['avatarUrl'];
+
+      if (avatar != null && avatar.isNotEmpty) {
         _avatarFile = null;
-        _avatarNetworkUrl = 'http://10.0.2.2:3000${data['avatarUrl']}';
+        _avatarNetworkUrl = 'http://10.0.2.2:3000$avatar';
       }
 
       setState(() {});
@@ -126,22 +133,13 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
         borderSide: BorderSide(color: c, width: w),
       );
   String _mapLabelToKey(String label) {
-    switch (label) {
-      case 'Họ và tên':
-        return 'tenND';
-      case 'Ngày sinh':
-        return 'ngaySinh';
-      case 'Chiều cao':
-        return 'chieuCao';
-      case 'Cân nặng':
-        return 'canNang';
-      case 'Email':
-        return 'email';
-      case 'Địa chỉ':
-        return 'diaChi';
-      default:
-        return '';
-    }
+    if (label == context.tr.fullName) return 'tenND';
+    if (label == context.tr.birthDate) return 'ngaySinh';
+    if (label == context.tr.height) return 'chieuCao';
+    if (label == context.tr.weight) return 'canNang';
+    if (label == context.tr.email) return 'email';
+    if (label == context.tr.address) return 'diaChi';
+    return '';
   }
 
   // ===== ACTIONS =====
@@ -181,20 +179,20 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
 
       if (height == null || weight == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Chiều cao / cân nặng không hợp lệ')),
+          SnackBar(content: Text(context.tr.invalidHeightWeight)),
         );
         return;
       }
 
-      final gioiTinh = _gender == 'Nam'
+      final gioiTinh = _gender == context.tr.male
           ? 1
-          : _gender == 'Nữ'
+          : _gender == context.tr.female
               ? 0
               : null;
 
       if (gioiTinh == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Vui lòng chọn giới tính hợp lệ')),
+          SnackBar(content: Text(context.tr.invalidGender)),
         );
         return;
       }
@@ -227,9 +225,8 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
           });
         });
       } catch (_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Có lỗi xảy ra")),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(context.tr.errorOccurred)));
       }
     }
   }
@@ -254,18 +251,18 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
               _profileCard(),
               const SizedBox(height: 14),
               _cardSection(
-                title: 'Thông tin cá nhân',
+                title: context.tr.personalInfo,
                 child: Column(
                   children: [
                     _input(
-                      label: 'Họ và tên',
+                      label: context.tr.fullName,
                       controller: _nameCtrl,
                       required: true,
                       readOnly: !_isEditing,
                     ),
                     const SizedBox(height: 10),
                     _input(
-                      label: 'Ngày sinh',
+                      label: context.tr.birthDate,
                       controller: _dobCtrl,
                       required: true,
                       readOnly: true,
@@ -282,7 +279,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                     _genderDropdown(),
                     const SizedBox(height: 10),
                     _input(
-                      label: 'Chiều cao',
+                      label: context.tr.height,
                       controller: _heightCtrl,
                       required: true,
                       readOnly: !_isEditing,
@@ -291,7 +288,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                     ),
                     const SizedBox(height: 10),
                     _input(
-                      label: 'Cân nặng',
+                      label: context.tr.weight,
                       controller: _weightCtrl,
                       required: true,
                       readOnly: !_isEditing,
@@ -303,23 +300,23 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
               ),
               const SizedBox(height: 14),
               _cardSection(
-                title: 'Thông tin liên hệ',
+                title: context.tr.contactInfo,
                 child: Column(
                   children: [
                     _input(
-                      label: 'Số điện thoại',
+                      label: context.tr.phoneNumber,
                       controller: _phoneCtrl,
                       readOnly: true,
                     ),
                     const SizedBox(height: 10),
                     _input(
-                      label: 'Email',
+                      label: context.tr.email,
                       controller: _emailCtrl,
                       readOnly: !_isEditing,
                     ),
                     const SizedBox(height: 10),
                     _input(
-                      label: 'Địa chỉ',
+                      label: context.tr.address,
                       controller: _addressCtrl,
                       readOnly: !_isEditing,
                     ),
@@ -339,8 +336,8 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
       backgroundColor: Colors.transparent,
       elevation: 0,
       centerTitle: true,
-      title: const Text(
-        'Hồ sơ cá nhân',
+      title: Text(
+        context.tr.profile,
         style: TextStyle(
           fontWeight: FontWeight.w700,
           fontSize: 24,
@@ -428,7 +425,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
           ),
           const SizedBox(height: 10),
           Text(
-            _nameCtrl.text.isEmpty ? 'Họ và tên' : _nameCtrl.text,
+            _nameCtrl.text.isEmpty ? context.tr.fullName : _nameCtrl.text,
             style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 17),
           ),
           const SizedBox(height: 8),
@@ -436,7 +433,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
             height: 25,
             child: OutlinedButton(
               onPressed: _pickAvatar,
-              child: const Text('Cập nhật ảnh'),
+              child: Text(context.tr.updatePhoto),
             ),
           ),
         ],
@@ -551,7 +548,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
       children: [
         RichText(
           text: TextSpan(
-            text: 'Giới tính',
+            text: context.tr.gender,
             style: _labelStyle,
             children: [
               if (required)
@@ -574,7 +571,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
               readOnly: true,
               style: _fieldTextStyle,
               decoration: InputDecoration(
-                hintText: 'Chọn giới tính',
+                hintText: context.tr.chooseGender,
                 hintStyle: _hintStyle,
                 isDense: true,
                 contentPadding: _fieldPadding,
@@ -594,7 +591,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
               ),
               validator: required
                   ? (v) => (v == null || v.isEmpty)
-                      ? 'Trường giới tính là bắt buộc.'
+                      ? context.tr.genderRequired
                       : null
                   : null,
             ),
@@ -606,31 +603,25 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
 
   void _showGenderMenu(TapDownDetails d) async {
     final selected = await showMenu<String>(
-      context: context,
-      position: RelativeRect.fromLTRB(
-        d.globalPosition.dx,
-        d.globalPosition.dy + 20,
-        0,
-        0,
-      ),
-      items: const [
-        PopupMenuItem(
-          value: 'Nam',
-          height: 32,
-          child: Text('Nam'),
+        context: context,
+        position: RelativeRect.fromLTRB(
+          d.globalPosition.dx,
+          d.globalPosition.dy + 20,
+          0,
+          0,
         ),
-        PopupMenuItem(
-          value: 'Nữ',
-          height: 32,
-          child: Text('Nữ'),
-        ),
-        PopupMenuItem(
-          value: 'Khác',
-          height: 32,
-          child: Text('Khác'),
-        ),
-      ],
-    );
+        items: [
+          PopupMenuItem(
+              value: context.tr.male, height: 32, child: Text(context.tr.male)),
+          PopupMenuItem(
+              value: context.tr.female,
+              height: 32,
+              child: Text(context.tr.female)),
+          PopupMenuItem(
+              value: context.tr.other,
+              height: 32,
+              child: Text(context.tr.other)),
+        ]);
 
     if (selected != null) {
       setState(() {

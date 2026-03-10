@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Care_AI/screens/home/decive/device_complete.dart';
+import '../../../models/tr.dart';
 
 class DeviceSyncingScreen extends StatelessWidget {
   const DeviceSyncingScreen({super.key});
@@ -14,16 +15,13 @@ class DeviceSyncingScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // ❌ HEADER ĐÃ BỎ
-
             const SizedBox(height: 8),
-
             Transform.translate(
               offset: const Offset(0, 6),
-              child: const Column(
+              child: Column(
                 children: [
                   Text(
-                    'Đang đồng bộ thiết bị',
+                    context.tr.syncingDevice,
                     style: TextStyle(
                       fontSize: 36,
                       fontWeight: FontWeight.w800,
@@ -35,12 +33,7 @@ class DeviceSyncingScreen extends StatelessWidget {
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 40),
                     child: Text(
-                      'Chúng tôi đang chuẩn bị dữ liệu sức khỏe để mang lại '
-                      'trải nghiệm tốt nhất cho bạn. Quá trình này có thể '
-                      'mất một chút thời gian.\n\n'
-                      'Hãy giữ đồng hồ ở gần điện thoại để đảm bảo việc '
-                      'đồng bộ diễn ra suôn sẻ. Bạn sẽ nhận được thông báo '
-                      'khi quá trình hoàn tất.',
+                      context.tr.preparingHealthData,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 13,
@@ -52,9 +45,7 @@ class DeviceSyncingScreen extends StatelessWidget {
                 ],
               ),
             ),
-
             const SizedBox(height: 22),
-
             Expanded(
               child: Transform.translate(
                 offset: const Offset(0, -80),
@@ -95,7 +86,6 @@ class DeviceSyncingScreen extends StatelessWidget {
                 ),
               ),
             ),
-
             Transform.translate(
               offset: const Offset(0, -50),
               child: Padding(
@@ -120,8 +110,8 @@ class DeviceSyncingScreen extends StatelessWidget {
                       ),
                       elevation: 4,
                     ),
-                    child: const Text(
-                      'Tiếp tục',
+                    child: Text(
+                      context.tr.continueButton,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,

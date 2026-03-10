@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
+import '../../../models/tr.dart';
 
 class ReportDetailScreen extends StatelessWidget {
   final String type; // day | week | month
 
   const ReportDetailScreen({super.key, required this.type});
 
-  String get title {
+  String title(BuildContext context) {
     switch (type) {
       case 'week':
-        return 'Tuần';
+        return context.tr.week;
       case 'month':
-        return 'Tháng';
+        return context.tr.month;
       default:
-        return 'Ngày';
+        return context.tr.day;
     }
   }
 
@@ -25,7 +26,7 @@ class ReportDetailScreen extends StatelessWidget {
         elevation: 0,
         leading: BackButton(color: Colors.blue),
         title: Text(
-          title,
+          title(context),
           style: const TextStyle(color: Colors.black),
         ),
       ),
@@ -33,7 +34,7 @@ class ReportDetailScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            _heartCard(),
+            _heartCard(context),
             const SizedBox(height: 16),
             _grid(),
             const SizedBox(height: 16),
@@ -48,7 +49,7 @@ class ReportDetailScreen extends StatelessWidget {
 
   // ================= UI =================
 
-  Widget _heartCard() {
+  Widget _heartCard(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -61,14 +62,14 @@ class ReportDetailScreen extends StatelessWidget {
           const SizedBox(width: 20),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
+            children: [
               Text(
                 '-- BPM',
                 style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 6),
               Text(
-                'Chưa có dữ liệu',
+                context.tr.noData,
                 style: TextStyle(color: Colors.red),
               ),
             ],

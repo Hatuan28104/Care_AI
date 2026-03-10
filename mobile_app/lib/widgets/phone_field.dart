@@ -17,7 +17,6 @@ class PhoneField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        // Flag + code
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
           decoration: BoxDecoration(

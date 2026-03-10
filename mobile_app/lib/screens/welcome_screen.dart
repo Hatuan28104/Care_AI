@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'AuthScreen/auth.dart';
+import '../models/tr.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -10,7 +11,6 @@ class WelcomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F6F6),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -19,9 +19,9 @@ class WelcomeScreen extends StatelessWidget {
               const SizedBox(height: 100),
               _logo(),
               const SizedBox(height: 30),
-              _title(),
+              _title(context),
               const SizedBox(height: 4),
-              _subtitle(),
+              _subtitle(context),
               const Spacer(),
               _actions(context),
             ],
@@ -30,8 +30,6 @@ class WelcomeScreen extends StatelessWidget {
       ),
     );
   }
-
-  /// ===== Widgets =====
 
   Widget _logo() {
     return Hero(
@@ -43,15 +41,15 @@ class WelcomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _title() {
-    return const Hero(
+  Widget _title(BuildContext context) {
+    return Hero(
       tag: 'care-text',
       child: Material(
         color: Colors.transparent,
         child: Text(
-          'Care AI, xin chào',
+          context.tr.welcomeTitle,
           textAlign: TextAlign.center,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 35,
             fontWeight: FontWeight.w600,
             height: 2,
@@ -62,10 +60,11 @@ class WelcomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _subtitle() {
-    return const Text(
-      'Người bạn số của bạn, sự an tâm cho cả gia đình.',
-      style: TextStyle(
+  Widget _subtitle(BuildContext context) {
+    return Text(
+      context.tr.welcomeSubtitle,
+      textAlign: TextAlign.center,
+      style: const TextStyle(
         fontSize: 13.5,
       ),
     );
@@ -77,13 +76,13 @@ class WelcomeScreen extends StatelessWidget {
       child: Column(
         children: [
           _button(
-            text: 'Đăng nhập',
+            text: context.tr.login,
             filled: true,
             onTap: () => _go(context, AuthTab.login),
           ),
           const SizedBox(height: 16),
           _button(
-            text: 'Đăng ký',
+            text: context.tr.register,
             filled: false,
             onTap: () => _go(context, AuthTab.register),
           ),

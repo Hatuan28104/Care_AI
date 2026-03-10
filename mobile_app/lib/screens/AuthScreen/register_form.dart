@@ -5,6 +5,7 @@ import 'package:intl_phone_field/phone_number.dart' as ipn;
 import 'package:Care_AI/screens/settings/privacy_security/terms_of_service.dart';
 import 'package:Care_AI/screens/settings/privacy_security/privacy_policy.dart';
 import 'package:Care_AI/api/auth_api.dart';
+import '../../models/tr.dart';
 
 class RegisterForm extends StatefulWidget {
   final void Function(String phoneE164, String displayPhone) onOtp;
@@ -23,7 +24,7 @@ class _RegisterFormState extends State<RegisterForm> {
   static const _primaryColor = Color(0xFF1F41BB);
   static const _buttonColor = Color(0xFF1877F2);
   static const _fieldBg = Color(0xFFF6F6F6);
-  static const _errorMsg = 'Vui lòng kiểm tra và nhập đúng số điện thoại!';
+  String get _errorMsg => context.tr.invalidPhone;
   String? _serverError;
 
   static const _borderSide = BorderSide(
@@ -77,7 +78,7 @@ class _RegisterFormState extends State<RegisterForm> {
         _serverError = e.toString().replaceFirst('Exception: ', '');
       });
 
-      _formKey.currentState?.validate(); 
+      _formKey.currentState?.validate();
     }
   }
 
@@ -86,8 +87,8 @@ class _RegisterFormState extends State<RegisterForm> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const Text(
-          'Đăng ký',
+        Text(
+          context.tr.register,
           style: TextStyle(
             fontSize: 30,
             fontWeight: FontWeight.w700,
@@ -95,16 +96,16 @@ class _RegisterFormState extends State<RegisterForm> {
           ),
         ),
         const SizedBox(height: 12),
-        const Text(
-          'Tạo tài khoản Care AI',
+        Text(
+          context.tr.createAccount,
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 8),
-        const Text(
-          'Bắt đầu chăm sóc sức khoẻ cùng trợ lý AI',
+        Text(
+          context.tr.startHealthJourney,
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 15,
@@ -142,9 +143,9 @@ class _RegisterFormState extends State<RegisterForm> {
                 IntlPhoneField(
                   initialCountryCode: 'VN',
                   disableLengthCheck: true,
-                  searchText: 'Tìm kiếm quốc gia',
+                  searchText: context.tr.searchCountry,
                   decoration: InputDecoration(
-                    hintText: 'Số điện thoại',
+                    hintText: context.tr.phoneNumber,
                     hintStyle: _hintStyle,
                     filled: true,
                     fillColor: _fieldBg,
@@ -191,8 +192,8 @@ class _RegisterFormState extends State<RegisterForm> {
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            child: const Text(
-              'Tiếp tục',
+            child: Text(
+              context.tr.continueButton,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
@@ -221,11 +222,11 @@ class _RegisterFormState extends State<RegisterForm> {
             height: 1.4,
           ),
           children: [
-            const TextSpan(
-              text: 'Khi đăng ký, bạn xác nhận đã đồng ý với các\n',
+            TextSpan(
+              text: '${context.tr.registerAgree}\n',
             ),
             TextSpan(
-              text: 'điều khoản',
+              text: context.tr.terms,
               style: const TextStyle(color: Color(0xFF1877F2)),
               recognizer: TapGestureRecognizer()
                 ..onTap = () {
@@ -237,9 +238,11 @@ class _RegisterFormState extends State<RegisterForm> {
                   );
                 },
             ),
-            const TextSpan(text: ' và '),
             TextSpan(
-              text: 'chính sách bảo mật',
+              text: ' ${context.tr.and} ',
+            ),
+            TextSpan(
+              text: context.tr.privacy_Policy,
               style: const TextStyle(color: Color(0xFF1877F2)),
               recognizer: TapGestureRecognizer()
                 ..onTap = () {
@@ -251,7 +254,9 @@ class _RegisterFormState extends State<RegisterForm> {
                   );
                 },
             ),
-            const TextSpan(text: ' của Care AI.'),
+            TextSpan(
+              text: ' ${context.tr.ofCareAI}',
+            ),
           ],
         ),
       ),

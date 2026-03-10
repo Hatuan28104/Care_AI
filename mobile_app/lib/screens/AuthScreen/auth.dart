@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import '../../models/tr.dart';
 import 'login_form.dart';
 import 'register_form.dart';
 import 'login_otp.dart';
@@ -65,7 +65,7 @@ class _AuthScreenState extends State<AuthScreen> {
         Row(
           children: [
             _tabText(
-              text: 'Đăng nhập',
+              text: context.tr.login,
               active: _tab == AuthTab.login,
               onTap: () {
                 setState(() {
@@ -75,7 +75,7 @@ class _AuthScreenState extends State<AuthScreen> {
               },
             ),
             _tabText(
-              text: 'Đăng ký',
+              text: context.tr.register,
               active: _tab == AuthTab.register,
               onTap: () {
                 setState(() {

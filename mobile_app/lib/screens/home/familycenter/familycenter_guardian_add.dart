@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:Care_AI/api/family_api.dart';
 import 'dart:async';
+import '../../../models/tr.dart';
 
 class AddGuardians extends StatefulWidget {
   const AddGuardians({super.key});
@@ -81,8 +82,8 @@ class _AddGuardiansState extends State<AddGuardians> {
             onPressed: () => Navigator.pop(context),
           ),
           const SizedBox(width: 2),
-          const Text(
-            'Thêm mới',
+          Text(
+            context.tr.addNew,
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
           ),
         ],
@@ -91,10 +92,10 @@ class _AddGuardiansState extends State<AddGuardians> {
   }
 
   Widget _description() {
-    return const Padding(
+    return Padding(
       padding: EdgeInsets.fromLTRB(18, 0, 18, 10),
       child: Text(
-        'Nhập số điện thoại của người giám hộ của bạn',
+        context.tr.enterGuardianPhone,
         style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w600,
@@ -112,7 +113,7 @@ class _AddGuardiansState extends State<AddGuardians> {
         keyboardType: TextInputType.phone,
         onChanged: _onPhoneChanged,
         decoration: InputDecoration(
-          hintText: 'Nhập số điện thoại',
+          hintText: context.tr.enterPhoneNumber,
           filled: true,
           fillColor: Colors.white,
           contentPadding:
@@ -176,7 +177,7 @@ class _AddGuardiansState extends State<AddGuardians> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  user['TenND'] ?? 'Không tên',
+                  user['TenND'] ?? context.tr.unknownName,
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
@@ -186,16 +187,16 @@ class _AddGuardiansState extends State<AddGuardians> {
                 Row(
                   children: [
                     if (status == 'none') ...[
-                      _actionBtn('Gửi lời mời', blue, () {
+                      _actionBtn(context.tr.sendInvite, blue, () {
                         _sendInvite(user['SoDienThoai']);
                       }),
                       const SizedBox(width: 12),
-                      _actionBtn('Hủy', Colors.red, () {
+                      _actionBtn(context.tr.cancel, Colors.red, () {
                         Navigator.pop(context);
                       }),
                     ],
                     if (status == 'pending')
-                      _actionBtn('Hủy yêu cầu',
+                      _actionBtn(context.tr.cancelRequest,
                           const Color.fromARGB(174, 158, 158, 158), () {
                         _cancelInvite(user['LoiMoi_ID']);
                       }),
@@ -282,8 +283,8 @@ class _AddGuardiansState extends State<AddGuardians> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                const Text(
-                  'Đã gửi lời mời thành công',
+                Text(
+                  context.tr.inviteSentSuccess,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 18,
@@ -314,7 +315,7 @@ class _AddGuardiansState extends State<AddGuardians> {
       final users = await FamilyApi.findUserByPhone(phone);
       setState(() {
         _foundUsers = users;
-        _error = users.isEmpty ? 'Không tìm thấy người dùng' : null;
+        _error = users.isEmpty ? context.tr.userNotFound : null;
       });
     } catch (e) {
       setState(() => _error = e.toString());

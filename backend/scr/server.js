@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import express from "express";
 
 import authRoute from "./routes/auth.route.js";
@@ -9,24 +12,39 @@ import permissionRoute from "./routes/permission.route.js";
 import settingsRoute from "./routes/settings.route.js";
 import notificationRoute from "./routes/notification.route.js";
 import healthMetricRoute from "./routes/healthMetric.route.js";
+import chatRoute from "./routes/chat.route.js";
+import digitalHumanRoute from "./routes/digitalHuman.route.js";
+
 const app = express();
-// ===== PROFILE =====
-app.use("/profile", profileRoute);
+
 // middleware chung
 app.use(express.json());
+
+/* ===== PROFILE ===== */
+app.use("/profile", profileRoute);
+
+/* ===== NOTIFICATION ===== */
 app.use("/notification", notificationRoute);
-// ===== FAMILY CENTER =====
+
+/* ===== FAMILY CENTER ===== */
 app.use("/family/invite", inviteRoute);
 app.use("/family/relationship", relationshipRoute);
 app.use("/family/permission", permissionRoute);
 
-// ===== SETTINGS =====
+/* ===== CHAT ===== */
+app.use("/api/chat", chatRoute);
+app.use("/api/digital-human", digitalHumanRoute);
+
+/* ===== SETTINGS ===== */
 app.use("/api/settings", settingsRoute);
+
+/* ===== HEALTH ===== */
 app.use("/health", healthMetricRoute);
-// ===== AUTH =====
+
+/* ===== AUTH ===== */
 app.use("/auth", authRoute);
 
-// static
+/* ===== STATIC FILE ===== */
 app.use("/uploads", express.static("uploads"));
 
 app.get("/", (req, res) => {

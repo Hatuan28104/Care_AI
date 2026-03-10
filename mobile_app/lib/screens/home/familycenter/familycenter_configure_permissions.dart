@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'familycenter_health_data.dart';
 import 'familycenter_conversation.dart';
+import '../../../models/tr.dart';
 
 class ConfigurePermissionsScreen extends StatelessWidget {
   const ConfigurePermissionsScreen({super.key});
@@ -33,10 +34,10 @@ class ConfigurePermissionsScreen extends StatelessWidget {
             icon: const Icon(Icons.arrow_back_ios_new, size: 18),
             onPressed: () => Navigator.pop(context),
           ),
-          const Expanded(
+          Expanded(
             child: Center(
               child: Text(
-                'Thiết lập quyền',
+                context.tr.configurePermissions,
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
@@ -57,9 +58,9 @@ class ConfigurePermissionsScreen extends StatelessWidget {
       children: [
         _permissionCard(
           icon: Icons.chat_bubble_outline,
-          title: 'Lịch sử trò chuyện',
-          desc: 'Chọn những cuộc trò chuyện bạn muốn chia sẻ',
-          buttonText: 'Chọn cuộc trò chuyện',
+          title: context.tr.conversationHistory,
+          desc: context.tr.chooseConversationsToShare,
+          buttonText: context.tr.chooseConversation,
           onPressed: () {
             Navigator.push(
               context,
@@ -73,9 +74,9 @@ class ConfigurePermissionsScreen extends StatelessWidget {
         _permissionCard(
           icon: Icons.favorite,
           iconColor: Colors.redAccent,
-          title: 'Dữ liệu sức khỏe cơ bản',
-          desc: 'Chia sẻ các thông tin sức khỏe quan trọng với người chăm sóc',
-          buttonText: 'Chọn dữ liệu sức khỏe',
+          title: context.tr.basicHealthData,
+          desc: context.tr.shareImportantHealthData,
+          buttonText: context.tr.chooseHealthData,
           onPressed: () {
             Navigator.push(
               context,

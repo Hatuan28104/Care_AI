@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Care_AI/screens/home/decive/device_syncing.dart';
+import '../../../models/tr.dart';
 
 class AllowDeviceScreen extends StatelessWidget {
   const AllowDeviceScreen({super.key});
@@ -31,8 +32,8 @@ class AllowDeviceScreen extends StatelessWidget {
                     ),
                     onPressed: () => Navigator.pop(context),
                   ),
-                  const Text(
-                    'Back',
+                  Text(
+                    context.tr.back,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w400,
@@ -47,9 +48,9 @@ class AllowDeviceScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 22),
               child: Column(
-                children: const [
+                children: [
                   Text(
-                    'Nhận thông báo\nvề sức khỏe của bạn',
+                    context.tr.healthNotificationTitle,
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.w800,
@@ -60,7 +61,7 @@ class AllowDeviceScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 10),
                   Text(
-                    'Nhận thông báo khi có điều quan trọng\nmà bạn cần biết.',
+                    context.tr.healthNotificationDesc,
                     style: TextStyle(
                       fontSize: 13,
                       color: Colors.black54,
@@ -96,12 +97,12 @@ class AllowDeviceScreen extends StatelessWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Expanded(
+                      Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Cảnh báo sức khỏe',
+                              context.tr.healthAlert,
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w800,
@@ -109,11 +110,7 @@ class AllowDeviceScreen extends StatelessWidget {
                             ),
                             SizedBox(height: 8),
                             Text(
-                              'Đồng hồ thông minh có thể cảnh báo khi phát '
-                              'hiện các dấu hiệu bất thường về nhịp tim, '
-                              'huyết áp hoặc các chỉ số quan trọng khác.\n\n'
-                              'Những thông báo này giúp bạn kịp thời xử lý '
-                              'hoặc thông báo cho người thân khi cần thiết.',
+                              context.tr.healthAlertDesc,
                               style: TextStyle(
                                 fontSize: 12.5,
                                 color: Colors.black54,
@@ -172,8 +169,8 @@ class AllowDeviceScreen extends StatelessWidget {
                               borderRadius: BorderRadius.circular(14),
                             ),
                           ),
-                          child: const Text(
-                            'Để sau',
+                          child: Text(
+                            context.tr.later,
                             style: TextStyle(
                               fontWeight: FontWeight.w700,
                             ),
@@ -202,8 +199,8 @@ class AllowDeviceScreen extends StatelessWidget {
                               borderRadius: BorderRadius.circular(14),
                             ),
                           ),
-                          child: const Text(
-                            'Cho phép',
+                          child: Text(
+                            context.tr.allow,
                             style: TextStyle(
                               fontWeight: FontWeight.w800,
                             ),

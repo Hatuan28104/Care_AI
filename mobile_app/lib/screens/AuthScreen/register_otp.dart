@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:Care_AI/widgets/success_dialog.dart';
 import 'package:Care_AI/screens/welcome_screen.dart';
 import 'package:Care_AI/api/auth_api.dart';
+import '../../models/tr.dart';
 
 class RegisterOtp extends StatefulWidget {
   final String phoneE164; // 🔥 thêm
@@ -74,7 +75,7 @@ class _RegisterOtpState extends State<RegisterOtp> {
 
     if (!RegExp(r'^\d{6}$').hasMatch(otp)) {
       setState(() {
-        _errorText = 'Mã OTP không hợp lệ';
+        _errorText = context.tr.invalidOtp;
       });
       return;
     }
@@ -97,8 +98,8 @@ class _RegisterOtpState extends State<RegisterOtp> {
 
       await SuccessDialog.show(
         context,
-        title: 'Đăng ký thành công',
-        message: 'Hãy bắt đầu trải nghiệm Care AI.',
+        title: context.tr.registerSuccess,
+        message: context.tr.startUsingApp,
       );
 
       if (!mounted) return;
@@ -142,8 +143,8 @@ class _RegisterOtpState extends State<RegisterOtp> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const Text(
-          'Đăng ký',
+        Text(
+          context.tr.register,
           style: TextStyle(
             fontSize: 30,
             fontWeight: FontWeight.w700,
@@ -152,7 +153,7 @@ class _RegisterOtpState extends State<RegisterOtp> {
         ),
         const SizedBox(height: 32),
         Text(
-          'Mã OTP đã được gửi đến số điện thoại\n${widget.displayPhone}:',
+          context.tr.otpSentTo(widget.displayPhone),
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w500,
@@ -250,8 +251,8 @@ class _RegisterOtpState extends State<RegisterOtp> {
                     color: Colors.white,
                   ),
                 )
-              : const Text(
-                  'Tiếp tục',
+              : Text(
+                  context.tr.continueButton,
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
@@ -267,8 +268,8 @@ class _RegisterOtpState extends State<RegisterOtp> {
       onTap: disabled ? null : _onResend,
       child: Text(
         disabled
-            ? 'Gửi lại mã OTP trong ${_mmss(_secondsLeft)}'
-            : 'Gửi lại mã OTP',
+            ? '${context.tr.resendOtp} ${_mmss(_secondsLeft)}'
+            : context.tr.resendOtp,
         style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w500,

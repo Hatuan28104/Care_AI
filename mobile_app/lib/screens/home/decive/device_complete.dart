@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Care_AI/screens/home/decive/device_detail.dart';
+import '../../../models/tr.dart';
 
 class DeviceCompleteScreen extends StatelessWidget {
   const DeviceCompleteScreen({super.key});
@@ -15,11 +16,8 @@ class DeviceCompleteScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // ❌ HEADER ĐÃ BỎ
-
             const Spacer(),
 
-            // ===== ICON + TEXT (GIỮ NGUYÊN LAYOUT) =====
             Transform.translate(
               offset: const Offset(0, -70),
               child: Column(
@@ -38,8 +36,8 @@ class DeviceCompleteScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  const Text(
-                    'Thiết lập hoàn tất!',
+                  Text(
+                    context.tr.setupComplete,
                     style: TextStyle(
                       fontSize: 30,
                       fontWeight: FontWeight.w800,
@@ -48,10 +46,10 @@ class DeviceCompleteScreen extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 6),
-                  const Padding(
+                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 36),
                     child: Text(
-                      'Thiết bị Apple Watch Series Demo của bạn đã sẵn sàng sử dụng',
+                      context.tr.deviceReady,
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.black54,
@@ -91,8 +89,8 @@ class DeviceCompleteScreen extends StatelessWidget {
                       ),
                       elevation: 4,
                     ),
-                    child: const Text(
-                      'Hoàn tất',
+                    child:  Text(
+                      context.tr.done,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,

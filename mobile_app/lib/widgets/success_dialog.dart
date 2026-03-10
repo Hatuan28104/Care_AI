@@ -12,7 +12,6 @@ class SuccessDialog extends StatelessWidget {
     this.onConfirm,
   });
 
-  /// ===== SHOW =====
   static Future<void> show(
     BuildContext context, {
     required String title,
@@ -22,7 +21,6 @@ class SuccessDialog extends StatelessWidget {
   }) async {
     bool closed = false;
 
-    // show dialog
     showGeneralDialog(
       context: context,
       barrierDismissible: true,
@@ -52,7 +50,6 @@ class SuccessDialog extends StatelessWidget {
       },
     );
 
-    // ===== AUTO CLOSE =====
     await Future.delayed(autoClose);
     if (context.mounted && !closed) {
       closed = true;
@@ -68,7 +65,7 @@ class SuccessDialog extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: GestureDetector(
-        onTap: onConfirm, // ✅ bấm popup là tắt
+        onTap: onConfirm,
         child: Container(
           width: 360,
           height: 260,
@@ -80,7 +77,6 @@ class SuccessDialog extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // ===== ICON =====
               Container(
                 width: 72,
                 height: 72,
@@ -94,10 +90,7 @@ class SuccessDialog extends StatelessWidget {
                   color: Colors.white,
                 ),
               ),
-
               const SizedBox(height: 30),
-
-              // ===== TITLE =====
               Text(
                 title,
                 textAlign: TextAlign.center,
@@ -107,17 +100,14 @@ class SuccessDialog extends StatelessWidget {
                   color: black,
                 ),
               ),
-
               const SizedBox(height: 20),
-
-              // ===== MESSAGE =====
               Text(
                 message,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: FontWeight.w400,
-                  height: 1.4,
+                  height: 1.2,
                   color: Colors.black87,
                 ),
               ),

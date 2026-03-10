@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:Care_AI/screens/home/decive/device_pair.dart';
+import '../../../models/tr.dart';
 
 class ConnectDeviceScreen extends StatefulWidget {
   const ConnectDeviceScreen({super.key});
@@ -46,18 +47,16 @@ class _ConnectDeviceScreenState extends State<ConnectDeviceScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const SizedBox(height: 14),
-                const Text(
-                  'Yêu cầu ghép đôi Bluetooth',
+                Text(
+                  context.tr.bluetoothPairRequest,
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 10),
-                const Padding(
+                Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16),
                   child: Text(
-                    '“Apple Watch Series Demo” muốn ghép đôi với iPhone của bạn. '
-                    'Vui lòng xác nhận mã này cũng hiển thị trên “Apple Watch Series Demo”. '
-                    'Không nhập mã này trên bất kỳ phụ kiện nào khác.',
+                    context.tr.bluetoothPairDesc,
                     style: TextStyle(fontSize: 12.5, height: 1.3),
                     textAlign: TextAlign.center,
                   ),
@@ -86,9 +85,9 @@ class _ConnectDeviceScreenState extends State<ConnectDeviceScreen> {
                             Navigator.of(ctx).pop();
                             Navigator.of(context).pop();
                           },
-                          child: const Center(
+                          child: Center(
                             child: Text(
-                              'Hủy',
+                              context.tr.cancel,
                               style: TextStyle(
                                 fontSize: 20,
                                 color: Color(0xFF007AFF),
@@ -113,9 +112,9 @@ class _ConnectDeviceScreenState extends State<ConnectDeviceScreen> {
                               ),
                             );
                           },
-                          child: const Center(
+                          child: Center(
                             child: Text(
-                              'Ghép đôi',
+                              context.tr.pair,
                               style: TextStyle(
                                 fontSize: 20,
                                 color: Color(0xFF007AFF),
@@ -163,8 +162,8 @@ class _ConnectDeviceScreenState extends State<ConnectDeviceScreen> {
                         onPressed: () => Navigator.pop(context),
                       ),
                     ),
-                    const Text(
-                      'Thiết bị',
+                    Text(
+                      context.tr.device,
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
@@ -176,8 +175,8 @@ class _ConnectDeviceScreenState extends State<ConnectDeviceScreen> {
             ),
 
             const SizedBox(height: 30),
-            const Text(
-              'Kết nối thiết bị',
+            Text(
+              context.tr.connectDevice,
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.w800,
@@ -197,13 +196,13 @@ class _ConnectDeviceScreenState extends State<ConnectDeviceScreen> {
             ),
 
             const SizedBox(height: 50),
-            const Text(
-              'Apple Watch Series Demo',
+             Text(
+               context.tr.demoWatch,
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
-            const Text(
-              'Đang kết nối...',
+            Text(
+              context.tr.connecting,
               style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
 

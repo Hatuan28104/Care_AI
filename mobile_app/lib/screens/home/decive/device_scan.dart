@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../models/tr.dart';
 
 class ScanScreen extends StatelessWidget {
   const ScanScreen({super.key});
@@ -8,8 +9,8 @@ class ScanScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF6F6F6),
       appBar: AppBar(
-        title: const Text(
-          'Thiết bị',
+        title: Text(
+          context.tr.device,
           style: TextStyle(fontWeight: FontWeight.w700, color: Colors.black),
         ),
         backgroundColor: Colors.transparent,
@@ -32,23 +33,21 @@ class ScanScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.black,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                      color: const Color(0xFFFACC15),
-                      width: 3), // Yellow border
+                  border: Border.all(color: const Color(0xFFFACC15), width: 3),
                 ),
               ),
             ),
             const SizedBox(height: 60),
-            const Text(
-              'Giữ đồng hồ thông minh',
+            Text(
+              context.tr.holdSmartwatch,
               style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: Colors.black),
               textAlign: TextAlign.center,
             ),
-            const Text(
-              'trước camera',
+            Text(
+              context.tr.inFrontOfCamera,
               style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -56,13 +55,13 @@ class ScanScreen extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 10),
-            const Text(
-              'Căn chỉnh đồng hồ vào khung quét',
+            Text(
+              context.tr.alignWatchInFrame,
               style: TextStyle(fontSize: 14, color: Colors.black54),
               textAlign: TextAlign.center,
             ),
-            const Text(
-              'ở phía trên.',
+            Text(
+              context.tr.scanFrameAbove,
               style: TextStyle(fontSize: 14, color: Colors.black54),
               textAlign: TextAlign.center,
             ),
@@ -72,7 +71,7 @@ class ScanScreen extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 24),
                   child: Text(
-                    'Không tìm thấy mã QR? Hãy thử kết nối bằng Bluetooth',
+                    context.tr.qrNotFoundBluetooth,
                     style: TextStyle(
                       fontSize: 14,
                       color: Color(0xFFFACC15),
