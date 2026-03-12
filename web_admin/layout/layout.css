@@ -6,6 +6,8 @@
 body {
   margin: 0;
   background: #F9FAFB;
+  height: 100vh;
+  overflow: hidden;
 }
 html, body {
   height: 100%;
@@ -14,8 +16,8 @@ html, body {
 /* ===== LAYOUT ===== */
 .layout {
   display: flex;
-  min-height: 100vh;
- align-items: stretch; 
+  height: 100vh;
+  align-items: stretch;
 }
 
 /* ===== SIDEBAR ===== */

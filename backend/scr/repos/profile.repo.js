@@ -1,5 +1,5 @@
 import sql from "mssql";
-import { getDB } from "../../db.js";
+import { getDB } from "../config/db.js";
 export async function updateProfile(data) {
   let {
     nguoiDungId,
@@ -141,21 +141,86 @@ export async function getProfileById(nguoiDungId) {
   const db = await getDB();
 
   const result = await db.request()
-.input("id", sql.NVarChar(50), nguoiDungId)
+    .input("id", sql.NVarChar(50), nguoiDungId)
     .query(`
       SELECT 
-        NguoiDung_ID,
-        TenND,
-        NgaySinh,
-        GioiTinh,
-        ChieuCao,
-        CanNang,
-        Email,
-        DiaChi,
-        AvatarUrl
-      FROM NguoiDung
-      WHERE NguoiDung_ID = @id
+        nd.NguoiDung_ID,
+        nd.TenND,
+        nd.NgaySinh,
+        nd.GioiTinh,
+        nd.ChieuCao,
+        nd.CanNang,
+        nd.Email,
+        nd.DiaChi,
+        nd.AvatarUrl,
+        tk.SoDienThoai,
+        tk.NgayTao
+      FROM NguoiDung nd
+      LEFT JOIN TaiKhoan tk
+        ON nd.NguoiDung_ID = tk.NguoiDung_ID
+      WHERE nd.NguoiDung_ID = @id
     `);
 
   return result.recordset[0] || null;
+}
+export async function getAllUsers() {
+  const db = await getDB();
+
+  const result = await db.request().query(`
+    SELECT 
+      nd.NguoiDung_ID,
+      nd.TenND,
+      nd.NgaySinh,
+      tk.SoDienThoai,
+      tk.NgayTao
+    FROM NguoiDung nd
+    LEFT JOIN TaiKhoan tk
+      ON nd.NguoiDung_ID = tk.NguoiDung_ID
+    ORDER BY nd.NguoiDung_ID
+  `);
+
+  return result.recordset;
+}
+export async function deleteUser(userId) {
+  const db = await getDB();
+
+  const transaction = new sql.Transaction(db);
+  await transaction.begin();
+
+  try {
+
+    // request 1
+    const request1 = new sql.Request(transaction);
+
+    await request1
+      .input("id", sql.NVarChar(50), userId)
+      .query(`
+        DELETE FROM TaiKhoan
+        WHERE NguoiDung_ID = @id
+      `);
+
+    // request 2 (request mới)
+    const request2 = new sql.Request(transaction);
+
+    const result = await request2
+      .input("id", sql.NVarChar(50), userId)
+      .query(`
+        DELETE FROM NguoiDung
+        WHERE NguoiDung_ID = @id
+      `);
+
+    if (result.rowsAffected[0] === 0) {
+      throw new Error("Không tìm thấy người dùng để xoá");
+    }
+
+    await transaction.commit();
+
+    return true;
+
+  } catch (err) {
+
+    await transaction.rollback();
+
+    throw err;
+  }
 }

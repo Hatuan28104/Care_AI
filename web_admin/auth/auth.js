@@ -13,30 +13,33 @@ function togglePassword() {
 function login() {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
-
+  const error = document.getElementById("loginError");
   const toast = document.getElementById("loginToast");
 
-  if (email === "admin@example.com" && password === "admin123") {
-    localStorage.setItem("loggedIn", "true");
+  error.style.display = "none";
 
-    // show toast success
-    toast.querySelector("span").innerText = "Đăng nhập thành công";
-    toast.querySelector("i").style.background = "#16A34A";
-    toast.classList.remove("hidden");
-
-    // redirect sau 1.2s
-    setTimeout(() => {
-      window.location.href = "../dashboard/dashboard.html";
-    }, 1200);
-
-  } else {
-    // toast lỗi
-    toast.querySelector("span").innerText = "Email hoặc mật khẩu không đúng";
-    toast.querySelector("i").style.background = "#EF4444";
-    toast.classList.remove("hidden");
-
-    setTimeout(() => {
-      toast.classList.add("hidden");
-    }, 1500);
+  // chưa nhập
+  if (!email || !password) {
+    error.innerText = "Vui lòng nhập email và mật khẩu";
+    error.style.display = "block";
+    return;
   }
+
+  // sai tài khoản
+  if (email !== "admin@example.com" || password !== "admin123") {
+    error.innerText = "Email hoặc mật khẩu không đúng";
+    error.style.display = "block";
+    return;
+  }
+
+  // đăng nhập thành công
+  localStorage.setItem("loggedIn", "true");
+
+  toast.querySelector("span").innerText = "Đăng nhập thành công";
+  toast.querySelector("i").style.background = "#16A34A";
+  toast.classList.remove("hidden");
+
+  setTimeout(() => {
+    window.location.href = "../dashboard/dashboard.html";
+  }, 1200);
 }

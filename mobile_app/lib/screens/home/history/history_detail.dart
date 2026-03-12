@@ -165,7 +165,8 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
           if (!isUser) ...[
             CircleAvatar(
               radius: 14,
-              backgroundImage: AssetImage(widget.image),
+              backgroundImage:
+                  NetworkImage("http://10.0.2.2:3000/${widget.image}"),
             ),
             const SizedBox(width: 8),
           ],
@@ -218,7 +219,8 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
           ),
           CircleAvatar(
             radius: 20,
-            backgroundImage: AssetImage(widget.image),
+            backgroundImage:
+                NetworkImage("http://10.0.2.2:3000/${widget.image}"),
           ),
           const SizedBox(width: 12),
           Text(

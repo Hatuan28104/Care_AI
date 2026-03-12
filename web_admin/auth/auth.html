@@ -28,12 +28,17 @@
       </div>
 
       <div class="form-group password-group">
-        <label>Mật khẩu</label>
-        <input type="password" id="password" />
-        <span class="toggle" onclick="togglePassword()">
-          <i class="fa-solid fa-eye-slash"></i>
-        </span>
-      </div>
+  <label>Mật khẩu</label>
+
+  <div class="password-field">
+    <input type="password" id="password" />
+    <span class="toggle" onclick="togglePassword()">
+      <i class="fa-solid fa-eye-slash"></i>
+    </span>
+  </div>
+
+  <p id="loginError" class="error-text"></p>
+</div>
 
       <button onclick="login()">Đăng nhập</button>
 

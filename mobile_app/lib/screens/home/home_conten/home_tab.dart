@@ -191,8 +191,8 @@ class _HomeTabState extends State<HomeTab> {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(25),
-                    child: Image.asset(
-                      human['ImageUrl'],
+                    child: Image.network(
+                      "http://10.0.2.2:3000/${human['ImageUrl']}",
                       fit: BoxFit.cover,
                     ),
                   ),

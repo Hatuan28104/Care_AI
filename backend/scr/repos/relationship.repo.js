@@ -1,5 +1,5 @@
 import sql from "mssql";
-import { getDB } from "../../db.js";
+import { getDB } from "../config/db.js";
 
 /* =========================
    DANH SÁCH NGƯỜI GIÁM HỘ CỦA TÔI

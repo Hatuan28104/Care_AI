@@ -99,8 +99,8 @@ class _DigitalHumanAllScreenState extends State<DigitalHumanAllScreen> {
                     child: Stack(
                       children: [
                         Positioned.fill(
-                            child: Image.asset(
-                          human['ImageUrl'],
+                            child: Image.network(
+                          "http://10.0.2.2:3000/${human['ImageUrl']}",
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => const Icon(
                             Icons.person,

@@ -156,8 +156,9 @@ class _HistoryTabState extends State<HistoryTab> {
           children: [
             CircleAvatar(
               radius: 22,
-              backgroundImage:
-                  image.isNotEmpty ? AssetImage(image) as ImageProvider : null,
+              backgroundImage: image.isNotEmpty
+                  ? NetworkImage("http://10.0.2.2:3000/$image")
+                  : null,
               child: image.isEmpty ? const Icon(Icons.person, size: 20) : null,
             ),
             const SizedBox(width: 12),

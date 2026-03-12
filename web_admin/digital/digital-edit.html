@@ -15,11 +15,13 @@
 </head>
 
 <body data-page="digital-edit" class="digital-page">
+
 <div class="layout">
 
   <div id="sidebar"></div>
 
   <div class="main">
+
     <div id="header"></div>
 
     <main class="content">
@@ -32,48 +34,68 @@
       <div class="form-card">
 
         <div class="form-grid">
+
+          <!-- ID -->
           <div class="form-item">
-            <label>Mã <span>*</span></label>
-            <input type="text" value="DH01" disabled />
+            <label>Mã</label>
+            <input id="digitalId" type="text" readonly />
           </div>
 
+          <!-- NAME -->
           <div class="form-item">
             <label>Tên <span>*</span></label>
-            <input type="text" value="Luna" />
+            <input id="digitalName" type="text" placeholder="Nhập tên" required />
           </div>
 
+          <!-- GENDER -->
           <div class="form-item">
             <label>Giới tính <span>*</span></label>
-            <select>
-              <option>Nam</option>
-              <option selected>Nữ</option>
+            <select id="gender" required>
+              <option value="1">Nam</option>
+              <option value="0">Nữ</option>
             </select>
           </div>
 
+          <!-- JOB -->
           <div class="form-item">
             <label>Nghề nghiệp <span>*</span></label>
-            <input type="text" value="Y tá" />
+            <input
+              id="jobId"
+              type="text"
+              placeholder="Nhập mã nghề nghiệp (VD: NN001)"
+              required
+            />
           </div>
+
         </div>
 
+        <!-- APPEARANCE -->
         <div class="form-item full">
           <label>Ngoại hình <span>*</span></label>
-          <textarea>
-Cô là một y tá trẻ khoảng 25 tuổi, mặc đồng phục bệnh viện gọn gàng và sạch sẽ. Cô có nụ cười tươi tắn, thân thiện, tạo cảm giác tin cậy và thoải mái. Ngoại hình toát lên vật dịu dàng, tận tâm và nguồn năng lượng tích cực.
-          </textarea>
+          <textarea
+            id="appearance"
+            placeholder="Mô tả ngoại hình..."
+            required
+          ></textarea>
         </div>
 
+        <!-- PROMPT -->
         <div class="form-item full">
           <label>Mô tả chi tiết <span>*</span></label>
-          <textarea>
-Vai trò này cung cấp hướng dẫn chăm sóc cá nhân hoá theo nhu cầu của từng bệnh nhân, bao gồm nhắc nhở uống thuốc nhằm đảm bảo sử dụng đúng thời điểm và an toàn. Đồng thời, hệ thống hỗ trợ theo dõi sức khỏe hằng ngày để duy trì thể trạng và phát hiện sớm các dấu hiệu bất thường. Mục tiêu là giúp người dùng quản lý sức khỏe một cách chủ động và hiệu quả.
-          </textarea>
+          <textarea
+            id="systemPrompt"
+            placeholder="Nhập mô tả..."
+            required
+          ></textarea>
         </div>
 
         <!-- AVATAR -->
         <div class="form-item full">
-          <label>Ảnh đại diện <span>*</span></label>
+
+          <label>Ảnh đại diện</label>
+
           <div class="upload-box" id="avatarBox">
+
             <img
               id="avatarPreview"
               class="preview-avatar hidden"
@@ -82,7 +104,9 @@ Vai trò này cung cấp hướng dẫn chăm sóc cá nhân hoá theo nhu cầu
 
             <i class="fa-solid fa-cloud-arrow-up" id="uploadIcon"></i>
 
-            <p id="uploadText">Nhấn để tải lên hoặc kéo & thả</p>
+            <p id="uploadText">
+              Nhấn để tải lên hoặc kéo & thả
+            </p>
 
             <button
               type="button"
@@ -91,6 +115,7 @@ Vai trò này cung cấp hướng dẫn chăm sóc cá nhân hoá theo nhu cầu
             >
               Xóa ảnh
             </button>
+
           </div>
 
           <input
@@ -99,20 +124,34 @@ Vai trò này cung cấp hướng dẫn chăm sóc cá nhân hoá theo nhu cầu
             accept="image/*"
             hidden
           />
+
         </div>
 
+        <!-- ACTION -->
         <div class="form-actions">
-          <button class="btn-save" id="btnSave">Lưu</button>
-          <button class="btn-cancel" id="btnCancel">Hủy</button>
+
+          <button type="button" class="btn-save" id="btnSave">
+            Lưu
+          </button>
+
+          <button type="button" class="btn-cancel" id="btnCancel">
+            Hủy
+          </button>
+
         </div>
+
       </div>
+
     </main>
+
   </div>
+
 </div>
 
 <div id="popup"></div>
 
 <script src="../layout/layout.js"></script>
 <script src="./digital.js"></script>
+
 </body>
 </html>

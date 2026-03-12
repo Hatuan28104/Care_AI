@@ -5,54 +5,76 @@
   <title>Thông tin nhân vật số</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
   <link rel="stylesheet" href="../layout/layout.css" />
   <link rel="stylesheet" href="./digital.css" />
 </head>
 
 <body data-page="digital-view" class="digital-page">
+
 <div class="layout">
+
   <div id="sidebar"></div>
 
   <div class="main">
+
     <div id="header"></div>
 
     <main class="content">
+
       <div class="page-back" id="btnBack">
         <i class="fa-solid fa-chevron-left"></i>
         <h1>Thông tin nhân vật số</h1>
       </div>
 
       <div class="info-card">
-        <h2>Luna – Y tá</h2>
+
+        <h2 id="digitalTitle"></h2>
 
         <div class="info-grid">
+
           <div class="info-text">
-            <p><strong>ID:</strong> DH01</p>
-            <p><strong>Tên:</strong> Luna</p>
-            <p><strong>Giới tính:</strong> Nữ</p>
-            <p><strong>Nghề nghiệp:</strong> Y tá</p>
+
+            <p><strong>ID:</strong> <span id="digitalId"></span></p>
+
+            <p><strong>Tên:</strong> <span id="digitalName"></span></p>
+
+            <p><strong>Giới tính:</strong> <span id="digitalGender"></span></p>
+
+            <p><strong>Nghề nghiệp:</strong> <span id="digitalJob"></span></p>
 
             <h4>Ngoại hình:</h4>
-            <p>
-              Cô là một y tá trẻ khoảng 25 tuổi, mặc đồng phục bệnh viện gọn gàng và sạch sẽ. Cô có nụ cười tươi tắn, thân thiện, tạo cảm giác tin cậy và thoải mái. Ngoại hình toát lên vật dịu dàng, tận tâm và nguồn năng lượng tích cực.
-            </p>
+
+            <p id="digitalAppearance"></p>
 
             <h4>Mô tả chi tiết:</h4>
-            <p>
-              Vai trò này cung cấp hướng dẫn chăm sóc cá nhân hoá theo nhu cầu của từng bệnh nhân, bao gồm nhắc nhở uống thuốc nhằm đảm bảo sử dụng đúng thời điểm và an toàn. Đồng thời, hệ thống hỗ trợ theo dõi sức khỏe hằng ngày để duy trì thể trạng và phát hiện sớm các dấu hiệu bất thường. Mục tiêu là giúp người dùng quản lý sức khỏe một cách chủ động và hiệu quả.
-            </p>
+
+            <p id="digitalPrompt"></p>
+
           </div>
 
           <div class="info-avatar">
-            <img src="https://i.pravatar.cc/300?img=47" />
+
+            <img id="digitalAvatar" />
+
           </div>
+
         </div>
-      </main>
-    </div>
+
+      </div>
+
+    </main>
+
   </div>
+
+</div>
+
+<div id="popup"></div>
 
 <script src="../layout/layout.js"></script>
 <script src="./digital.js"></script>
+
 </body>
 </html>

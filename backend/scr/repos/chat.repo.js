@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import OpenAI from "openai";
 import sql from "mssql";
-import { getDB } from "../../db.js";
+import { getDB } from "../config/db.js";
 
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,

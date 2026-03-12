@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import express from "express";
-
+import cors from "cors";
 import authRoute from "./routes/auth.route.js";
 import profileRoute from "./routes/profile.route.js";
 
@@ -16,7 +16,7 @@ import chatRoute from "./routes/chat.route.js";
 import digitalHumanRoute from "./routes/digitalHuman.route.js";
 
 const app = express();
-
+app.use(cors()); 
 // middleware chung
 app.use(express.json());
 

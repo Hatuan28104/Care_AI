@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>Users</title>
@@ -13,105 +14,73 @@
   <link rel="stylesheet" href="../layout/layout.css" />
   <link rel="stylesheet" href="./user.css" />
 </head>
+
 <body data-page="user" class="user-page">
+
 <div class="layout">
+
+  <!-- SIDEBAR -->
   <div id="sidebar"></div>
 
   <div class="main">
+
+    <!-- HEADER -->
     <div id="header"></div>
 
     <main class="content users-page">
-      <h1 class="page-title">Người dùng</h1>
 
+      <!-- PAGE TITLE -->
+      <h1 class="page-title">
+        Người dùng
+      </h1>
+
+      <!-- SEARCH -->
       <div class="filter-bar">
         <div class="search">
           <i class="fa-solid fa-magnifying-glass"></i>
-          <input type="text" placeholder="Tìm kiếm người dùng..." />
+          <input
+  id="searchUser"
+  type="text"
+  placeholder="Tìm kiếm người dùng..."
+/>
         </div>
       </div>
 
+      <!-- TABLE -->
       <div class="table-wrapper">
-        <table>
+
+        <table class="user-table">
+
           <thead>
             <tr>
-              <th>STT</th>
+              <th style="width:60px">STT</th>
               <th>Họ và tên</th>
               <th>Số điện thoại</th>
               <th>Ngày sinh</th>
               <th>Ngày tạo</th>
-              <th class="th-action">Thao tác</th>
+              <th style="width:80px" class="th-action">Thao tác</th>
             </tr>
           </thead>
 
-          <tbody>
-            <tr data-id="1">
-              <td>1</td>
-              <td>Nguyen Thi Mai</td>
-              <td>0123456789</td>
-              <td>13/07/1967</td>
-              <td>09/11/2025</td>
-              <td class="actions">
-                <i class="fa-solid fa-ellipsis-vertical action-toggle"></i>
-                <div class="action-menu"></div>
-              </td>
-            </tr>
+          <!-- JS render user -->
+          <tbody id="userTable"></tbody>
 
-            <tr data-id="2">
-              <td>2</td>
-              <td>Tran Hoai Anh</td>
-              <td>0356278479</td>
-              <td>04/06/1974</td>
-              <td>10/11/2025</td>
-              <td class="actions">
-                <i class="fa-solid fa-ellipsis-vertical action-toggle"></i>
-                <div class="action-menu"></div>
-              </td>
-            </tr>
-
-            <tr data-id="3">
-              <td>3</td>
-              <td>Nguyen Duc Thinh</td>
-              <td>0374879876</td>
-              <td>25/10/1966</td>
-              <td>11/11/2025</td>
-              <td class="actions">
-                <i class="fa-solid fa-ellipsis-vertical action-toggle"></i>
-                <div class="action-menu"></div>
-              </td>
-            </tr>
-
-            <tr data-id="4">
-              <td>4</td>
-              <td>Hoang Thi Huong</td>
-              <td>0985758375</td>
-              <td>10/01/1959</td>
-              <td>09/11/2025</td>
-              <td class="actions">
-                <i class="fa-solid fa-ellipsis-vertical action-toggle"></i>
-                <div class="action-menu"></div>
-              </td>
-            </tr>
-
-            <tr data-id="5">
-              <td>5</td>
-              <td>Le Van Tam</td>
-              <td>0748574836</td>
-              <td>19/12/1960</td>
-              <td>07/11/2025</td>
-              <td class="actions">
-                <i class="fa-solid fa-ellipsis-vertical action-toggle"></i>
-                <div class="action-menu"></div>
-              </td>
-            </tr>
-          </tbody>
         </table>
+
       </div>
+
     </main>
+
   </div>
+
 </div>
 
+<!-- POPUP GLOBAL -->
 <div id="popup"></div>
-  <script src="../layout/layout.js"></script>
-  <script src="./user.js"></script>
+
+<script src="../layout/layout.js"></script>
+<script src="./user.js"></script>
+
 </body>
+
 </html>

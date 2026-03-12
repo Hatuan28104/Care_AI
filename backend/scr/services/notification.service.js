@@ -1,5 +1,5 @@
 import admin from "firebase-admin";
-import { getDB } from "../../db.js";
+import { getDB } from "../config/db.js";
 import sql from "mssql";
 
 /* =========================
