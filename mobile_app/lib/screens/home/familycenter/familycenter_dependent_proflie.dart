@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:Care_AI/api/family_api.dart';
 import 'report_detail_screen.dart';
 import '../../../models/tr.dart';
+import 'shared_conversation_viewer.dart';
 
 class DependentProfileScreen extends StatefulWidget {
   final String quanHeId;
@@ -11,8 +12,6 @@ class DependentProfileScreen extends StatefulWidget {
     required this.quanHeId,
   });
 
-  // ===== CONSTANTS =====
-  static const Color _blue = Color(0xFF1877F2);
   static const Color _bg = Color(0xFFF6F6F6);
 
   @override
@@ -24,11 +23,17 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
   bool loading = true;
   String? error;
 
+  List<Map<String, dynamic>> conversations = [];
+  bool loadingConversation = false;
+
   @override
   void initState() {
     super.initState();
     _loadProfile();
+    _loadConversations();
   }
+
+  // ================= LOAD PROFILE =================
 
   Future<void> _loadProfile() async {
     try {
@@ -46,10 +51,28 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
     }
   }
 
-  // ================= FORMAT HELPERS =================
+  // ================= LOAD CONVERSATIONS =================
+  Future<void> _loadConversations() async {
+    try {
+      print("QUANHE ID SEND: ${widget.quanHeId}");
+
+      final res = await FamilyApi.getSharedConversation(widget.quanHeId);
+      print("API RESPONSE: $res");
+
+      setState(() {
+        conversations = List<Map<String, dynamic>>.from(res);
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+  // ================= FORMAT =================
+
   String _formatDate(String? iso) {
     if (iso == null || iso.isEmpty) return '';
+
     final d = DateTime.parse(iso);
+
     return '${d.day.toString().padLeft(2, '0')}/'
         '${d.month.toString().padLeft(2, '0')}/'
         '${d.year}';
@@ -59,6 +82,21 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
     if (g == true) return context.tr.male;
     if (g == false) return context.tr.female;
     return '';
+  }
+
+  String formatTime(dynamic isoTime) {
+    if (isoTime == null) return "";
+
+    final time = DateTime.parse(isoTime.toString()).toLocal();
+
+    String day = time.day.toString().padLeft(2, '0');
+    String month = time.month.toString().padLeft(2, '0');
+    String year = time.year.toString();
+
+    String hour = time.hour.toString().padLeft(2, '0');
+    String minute = time.minute.toString().padLeft(2, '0');
+
+    return "$day.$month.$year • $hour:$minute";
   }
 
   @override
@@ -72,7 +110,7 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
                 ? Center(child: Text(error!))
                 : Column(
                     children: [
-                      _profileHeader(context),
+                      _profileHeader(),
                       const SizedBox(height: 16),
                       Expanded(child: _content()),
                     ],
@@ -82,7 +120,8 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
   }
 
   // ================= PROFILE HEADER =================
-  Widget _profileHeader(BuildContext context) {
+
+  Widget _profileHeader() {
     final avatar = FamilyApi.normalizeAvatar(data?['AvatarUrl']);
 
     return Column(
@@ -97,9 +136,8 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
         const SizedBox(height: 4),
         CircleAvatar(
           radius: 52,
-          backgroundImage: avatar != null && avatar.toString().isNotEmpty
-              ? NetworkImage(avatar)
-              : null,
+          backgroundImage:
+              avatar != null && avatar.isNotEmpty ? NetworkImage(avatar) : null,
           child: avatar == null ? const Icon(Icons.person, size: 42) : null,
         ),
         const SizedBox(height: 12),
@@ -115,27 +153,19 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
   }
 
   // ================= CONTENT =================
+
   Widget _content() {
     return ListView(
       padding: const EdgeInsets.fromLTRB(18, 8, 18, 18),
       children: [
-        _infoItem(context.tr.fullName, data?['TenND']),
-        _infoItem(
-          context.tr.birthDate,
-          _formatDate(data?['NgaySinh']),
-        ),
-        _infoItem(
-          context.tr.gender,
-          _genderText(data?['GioiTinh']),
-        ),
-        _infoItem(
-          context.tr.joinDate,
-          _formatDate(data?['NgayBatDau']),
-        ),
+        _infoItem(context.tr.fullName, data?['TenND'] ?? ""),
+        _infoItem(context.tr.birthDate, _formatDate(data?['NgaySinh'])),
+        _infoItem(context.tr.gender, _genderText(data?['GioiTinh'])),
+        _infoItem(context.tr.joinDate, _formatDate(data?['NgayBatDau'])),
         const SizedBox(height: 8),
         Text(
           context.tr.report,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w700,
           ),
@@ -143,19 +173,146 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
         const SizedBox(height: 12),
         Row(
           children: [
-            Expanded(child: _ReportItem(label: context.tr.day, type: 'day')),
-            SizedBox(width: 12),
-            Expanded(child: _ReportItem(label: context.tr.week, type: 'week')),
-            SizedBox(width: 12),
             Expanded(
-                child: _ReportItem(label: context.tr.month, type: 'month')),
+              child: _ReportItem(
+                label: context.tr.day,
+                type: 'day',
+                quanHeId: widget.quanHeId,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _ReportItem(
+                label: context.tr.week,
+                type: 'week',
+                quanHeId: widget.quanHeId,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _ReportItem(
+                label: context.tr.month,
+                type: 'month',
+                quanHeId: widget.quanHeId,
+              ),
+            ),
           ],
         ),
+        const SizedBox(height: 24),
+        _conversationSection(),
       ],
     );
   }
 
+  // ================= CONVERSATION SECTION =================
+
+  Widget _conversationSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          context.tr.sharedConversations,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 12),
+        if (loadingConversation)
+          const Center(child: CircularProgressIndicator()),
+        if (!loadingConversation && conversations.isEmpty)
+          Text(
+            context.tr.noSharedConversations,
+            style: TextStyle(color: Colors.grey),
+          ),
+        if (conversations.isNotEmpty)
+          ...conversations.map((e) => _conversationCard(e)).toList(),
+      ],
+    );
+  }
+
+  // ================= CONVERSATION CARD =================
+
+  Widget _conversationCard(Map<String, dynamic> item) {
+    final image = item["ImageUrl"] ?? "";
+
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => SharedConversationViewer(
+              chatId: item["HoiThoai_ID"]?.toString() ?? "",
+              title: item["TenDigitalHuman"]?.toString() ?? "Conversation",
+              image: item["ImageUrl"]?.toString() ?? "",
+            ),
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: const [
+            BoxShadow(
+              blurRadius: 10,
+              color: Colors.black12,
+              offset: Offset(0, 4),
+            )
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 50,
+              height: 50,
+              child: image.isNotEmpty
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        "http://10.0.2.2:3000/$image",
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : Container(
+                      color: Colors.blue.withOpacity(.1),
+                      child: const Icon(Icons.smart_toy),
+                    ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item["TenDigitalHuman"] ?? "Conversation",
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    formatTime(item["LanCuoiTuongTac"]),
+                    style: const TextStyle(
+                      color: Colors.grey,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios, size: 14),
+          ],
+        ),
+      ),
+    );
+  }
+
   // ================= INFO ITEM =================
+
   Widget _infoItem(String label, String value) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -165,7 +322,6 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: const Color(0xFF1F41BB).withOpacity(0.5),
-          width: 1,
         ),
       ),
       child: Row(
@@ -193,11 +349,17 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
 }
 
 // ================= REPORT ITEM =================
+
 class _ReportItem extends StatelessWidget {
   final String label;
   final String type;
+  final String quanHeId;
 
-  const _ReportItem({required this.label, required this.type});
+  const _ReportItem({
+    required this.label,
+    required this.type,
+    required this.quanHeId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -206,7 +368,10 @@ class _ReportItem extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => ReportDetailScreen(type: type),
+            builder: (_) => ReportDetailScreen(
+              type: type,
+              quanHeId: quanHeId,
+            ),
           ),
         );
       },
@@ -217,7 +382,6 @@ class _ReportItem extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: const Color(0xFF1F41BB).withOpacity(0.5),
-            width: 1,
           ),
           boxShadow: [
             BoxShadow(

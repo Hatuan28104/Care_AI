@@ -3,7 +3,7 @@ import 'package:Care_AI/api/chat_api.dart';
 import '../../../models/tr.dart';
 
 class ChatDetailScreen extends StatefulWidget {
-  final String hoiThoaiId;
+  final String? hoiThoaiId;
   final String digitalId;
   final String userId;
   final String title;
@@ -11,7 +11,7 @@ class ChatDetailScreen extends StatefulWidget {
 
   const ChatDetailScreen({
     super.key,
-    required this.hoiThoaiId,
+    this.hoiThoaiId,
     required this.digitalId,
     required this.userId,
     required this.title,
@@ -25,14 +25,8 @@ class ChatDetailScreen extends StatefulWidget {
 class _ChatDetailScreenState extends State<ChatDetailScreen> {
   final TextEditingController controller = TextEditingController();
   final ScrollController scrollController = ScrollController();
-  final FocusNode focusNode = FocusNode();
-
-  static const Color blue = Color(0xFF1877F2);
-  static const Color aiBubble = Color(0xFFF1F1F1);
 
   bool loading = true;
-  bool isFocused = false;
-
   String? conversationId;
 
   List<Map<String, dynamic>> messages = [];
@@ -42,51 +36,41 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     super.initState();
 
     conversationId = widget.hoiThoaiId;
-    loadMessages();
 
-    focusNode.addListener(() {
-      setState(() {
-        isFocused = focusNode.hasFocus;
-      });
-    });
+    if (conversationId != null && conversationId!.isNotEmpty) {
+      loadMessages();
+    } else {
+      loading = false;
+    }
   }
 
   @override
   void dispose() {
     controller.dispose();
     scrollController.dispose();
-    focusNode.dispose();
     super.dispose();
   }
 
   /* ================= LOAD MESSAGES ================= */
 
   Future<void> loadMessages() async {
-    try {
-      final data = await ChatApi.getMessages(widget.hoiThoaiId);
+    final data = await ChatApi.getMessages(conversationId!);
 
-      final list = data.map<Map<String, dynamic>>((msg) {
-        int laDigital = msg["LaDigital"] is int
-            ? msg["LaDigital"]
-            : (msg["LaDigital"] == true ? 1 : 0);
+    final list = data.map<Map<String, dynamic>>((msg) {
+      bool laDigital = msg["LaDigital"] == true || msg["LaDigital"] == 1;
 
-        return {
-          "text": msg["NoiDung"] ?? "",
-          "isUser": laDigital == 0,
-        };
-      }).toList();
+      return {
+        "text": msg["NoiDung"] ?? "",
+        "isUser": !laDigital,
+      };
+    }).toList();
 
-      setState(() {
-        messages = list;
-        loading = false;
-      });
+    setState(() {
+      messages = list;
+      loading = false;
+    });
 
-      scrollToBottom();
-    } catch (e) {
-      setState(() {
-        loading = false;
-      });
-    }
+    scrollToBottom();
   }
 
   /* ================= SCROLL ================= */
@@ -111,7 +95,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
 
     setState(() {
       messages.add({"text": text, "isUser": true});
-      messages.add({"isUser": false, "isTyping": true});
+      messages.add({"isTyping": true});
     });
 
     controller.clear();
@@ -133,18 +117,15 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         messages.removeWhere((m) => m["isTyping"] == true);
 
         messages.add({
-          "text": response["reply"] ?? context.tr.aiNotUnderstand,
-          "isUser": false,
+          "text": response["reply"] ?? context.tr.serverError,
+          "isUser": false
         });
       });
     } catch (e) {
       setState(() {
         messages.removeWhere((m) => m["isTyping"] == true);
 
-        messages.add({
-          "text": context.tr.serverError,
-          "isUser": false,
-        });
+        messages.add({"text": context.tr.serverError, "isUser": false});
       });
     }
 
@@ -157,19 +138,23 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     final isUser = msg["isUser"] == true;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisAlignment:
             isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
-          if (!isUser) ...[
-            CircleAvatar(
-              radius: 14,
-              backgroundImage:
-                  NetworkImage("http://10.0.2.2:3000/${widget.image}"),
+          if (!isUser)
+            Padding(
+              padding: const EdgeInsets.only(right: 6),
+              child: CircleAvatar(
+                radius: 16,
+                backgroundImage:
+                    widget.image.isNotEmpty ? NetworkImage(widget.image) : null,
+                child:
+                    widget.image.isEmpty ? const Icon(Icons.smart_toy) : null,
+              ),
             ),
-            const SizedBox(width: 8),
-          ],
           Flexible(
             child: Container(
               padding: const EdgeInsets.symmetric(
@@ -177,16 +162,13 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                 vertical: 10,
               ),
               decoration: BoxDecoration(
-                color: isUser ? blue : aiBubble,
+                color: isUser ? const Color(0xFF1F41BB) : Colors.grey[200],
                 borderRadius: BorderRadius.circular(18),
               ),
               child: msg["isTyping"] == true
                   ? Text(
                       context.tr.typing,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     )
                   : Text(
                       msg["text"] ?? "",
@@ -201,104 +183,42 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     );
   }
 
-  /* ================= HEADER ================= */
-
-  Widget header() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(6, 12, 18, 12),
-      decoration: const BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: Colors.black12),
-        ),
-      ),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new),
-            onPressed: () => Navigator.pop(context),
-          ),
-          CircleAvatar(
-            radius: 20,
-            backgroundImage:
-                NetworkImage("http://10.0.2.2:3000/${widget.image}"),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            widget.title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          )
-        ],
-      ),
-    );
-  }
-
-  /* ================= INPUT BAR ================= */
+  /* ================= INPUT ================= */
 
   Widget inputBar() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(8, 6, 8, 6),
+      padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
       decoration: const BoxDecoration(
         border: Border(top: BorderSide(color: Colors.black12)),
+        color: Colors.white,
       ),
       child: Row(
         children: [
-          if (isFocused)
-            IconButton(
-              icon:
-                  const Icon(Icons.keyboard_arrow_right, color: blue, size: 28),
-              onPressed: () {
-                FocusScope.of(context).unfocus();
-              },
-            ),
-          if (!isFocused) ...[
-            IconButton(
-              icon: const Icon(Icons.add_circle_outline, color: blue),
-              onPressed: () {
-                FocusScope.of(context).requestFocus(focusNode);
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.camera_alt_outlined, color: blue),
-              onPressed: () {
-                FocusScope.of(context).requestFocus(focusNode);
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.mic_none, color: blue),
-              onPressed: () {
-                FocusScope.of(context).requestFocus(focusNode);
-              },
-            ),
-          ],
           Expanded(
-            flex: isFocused ? 10 : 6,
             child: TextField(
               controller: controller,
-              focusNode: focusNode,
               decoration: InputDecoration(
-                hintText: isFocused ? null : context.tr.enterMessage,
+                hintText: context.tr.enterMessage,
                 filled: true,
-                fillColor: const Color(0xFFF3F3F3),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+                fillColor: const Color(0xFFF6F6F6),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
+                  borderRadius: BorderRadius.circular(25),
                   borderSide: BorderSide.none,
                 ),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
               onSubmitted: (_) => sendMessage(),
             ),
           ),
           const SizedBox(width: 6),
           CircleAvatar(
-            backgroundColor: blue,
+            backgroundColor: const Color(0xFF1F41BB),
             child: IconButton(
-              icon: const Icon(Icons.send, color: Colors.white, size: 20),
+              icon: const Icon(Icons.send, color: Colors.white),
               onPressed: sendMessage,
             ),
-          ),
+          )
         ],
       ),
     );
@@ -309,24 +229,40 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Column(
+      backgroundColor: const Color(0xFFF6F6F6),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 1,
+        titleSpacing: 0,
+        title: Row(
           children: [
-            header(),
-            Expanded(
-              child: loading
-                  ? const Center(child: CircularProgressIndicator())
-                  : ListView.builder(
-                      controller: scrollController,
-                      itemCount: messages.length,
-                      itemBuilder: (context, index) {
-                        return messageBubble(messages[index]);
-                      },
-                    ),
+            CircleAvatar(
+              radius: 18,
+              backgroundImage:
+                  widget.image.isNotEmpty ? NetworkImage(widget.image) : null,
+              child: widget.image.isEmpty ? const Icon(Icons.person) : null,
             ),
-            inputBar(),
+            const SizedBox(width: 10),
+            Text(widget.title),
           ],
         ),
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: loading
+                ? const Center(child: CircularProgressIndicator())
+                : ListView.builder(
+                    controller: scrollController,
+                    padding: const EdgeInsets.all(8),
+                    itemCount: messages.length,
+                    itemBuilder: (context, index) {
+                      return messageBubble(messages[index]);
+                    },
+                  ),
+          ),
+          inputBar(),
+        ],
       ),
     );
   }

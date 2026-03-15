@@ -4,6 +4,10 @@ import 'package:http/http.dart' as http;
 class ChatApi {
   static const String baseUrl = "http://10.0.2.2:3000/api/chat";
 
+  static const headers = {
+    "Content-Type": "application/json",
+  };
+
   /* =========================
       SEND MESSAGE
   ========================= */
@@ -15,20 +19,24 @@ class ChatApi {
     String? hoiThoaiId,
   }) async {
     try {
-      final body = {
+      final Map<String, dynamic> body = {
         "message": message.trim(),
         "userId": userId,
         "digitalId": digitalId,
-        if (hoiThoaiId != null) "hoiThoaiId": hoiThoaiId,
       };
+
+      /// chỉ gửi hoiThoaiId khi có giá trị
+      if (hoiThoaiId != null && hoiThoaiId.isNotEmpty) {
+        body["hoiThoaiId"] = hoiThoaiId;
+      }
 
       final res = await http
           .post(
             Uri.parse(baseUrl),
-            headers: {"Content-Type": "application/json"},
+            headers: headers,
             body: jsonEncode(body),
           )
-          .timeout(const Duration(seconds: 10));
+          .timeout(const Duration(seconds: 15));
 
       if (res.statusCode != 200) {
         return {"success": false, "message": "Server error ${res.statusCode}"};
@@ -48,9 +56,9 @@ class ChatApi {
 
   static Future<List<dynamic>> getHistory(String userId) async {
     try {
-      final res = await http.get(
-        Uri.parse("$baseUrl/history/$userId"),
-      );
+      final res = await http
+          .get(Uri.parse("$baseUrl/history/$userId"))
+          .timeout(const Duration(seconds: 10));
 
       if (res.statusCode != 200) {
         return [];
@@ -74,9 +82,9 @@ class ChatApi {
 
   static Future<List<dynamic>> getMessages(String hoiThoaiId) async {
     try {
-      final res = await http.get(
-        Uri.parse("$baseUrl/messages/$hoiThoaiId"),
-      );
+      final res = await http
+          .get(Uri.parse("$baseUrl/messages/$hoiThoaiId"))
+          .timeout(const Duration(seconds: 10));
 
       if (res.statusCode != 200) {
         return [];
@@ -95,44 +103,20 @@ class ChatApi {
   }
 
   /* =========================
-   DELETE CONVERSATION
-========================= */
+      DELETE CONVERSATION
+  ========================= */
 
   static Future<bool> deleteConversation(String hoiThoaiId) async {
     try {
-      final res = await http.delete(
-        Uri.parse("$baseUrl/conversation/$hoiThoaiId"),
-      );
+      final res = await http
+          .delete(
+            Uri.parse("$baseUrl/conversation/$hoiThoaiId"),
+          )
+          .timeout(const Duration(seconds: 10));
 
       if (res.statusCode != 200) {
         return false;
       }
-
-      final data = jsonDecode(res.body);
-
-      return data["success"] == true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  /* =========================
-   RENAME CONVERSATION
-========================= */
-
-  static Future<bool> renameConversation(
-      String hoiThoaiId, String title) async {
-    try {
-      final res = await http.put(
-        Uri.parse("$baseUrl/conversation/rename"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "hoiThoaiId": hoiThoaiId,
-          "title": title,
-        }),
-      );
-
-      if (res.statusCode != 200) return false;
 
       final data = jsonDecode(res.body);
 

@@ -809,7 +809,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get invalidGender => 'Please select a valid gender';
 
   @override
-  String get calories => 'Calories Burned';
+  String get calories => 'Calories';
 
   @override
   String get spo2 => 'Blood Oxygen Level – SpO₂';
@@ -900,4 +900,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vibration => 'Vibration';
+
+  @override
+  String get sharedConversations => 'Shared Conversations';
+
+  @override
+  String get noSharedConversations => 'No shared conversations';
+
+  @override
+  String get temperature => 'Temperature';
+
+  @override
+  String get normal => 'Normal';
+
+  @override
+  String get stepsUnit => 'steps';
+
+  @override
+  String get deleteConversation => 'Delete conversation';
+
+  @override
+  String get confirmDeleteConversation => 'Are you sure you want to delete this conversation?';
 }

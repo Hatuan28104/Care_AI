@@ -233,7 +233,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child:  Text(
+                    child: Text(
                       context.tr.delete,
                       style: TextStyle(
                         color: Color.fromARGB(255, 135, 13, 25),
@@ -255,7 +255,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child:  Text(
+                    child: Text(
                       context.tr.cancel,
                       style: TextStyle(
                         color: Color.fromARGB(255, 71, 71, 71),
@@ -274,12 +274,9 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
 
   // ================= ACTION =================
   Future<void> _acceptConfirmed(String loiMoiId) async {
-    final newDep = await FamilyApi.acceptInvite(loiMoiId);
+    await FamilyApi.acceptInvite(loiMoiId);
 
-    setState(() {
-      invites.removeWhere((e) => e['LoiMoi_ID'] == loiMoiId);
-      dependents.add(newDep);
-    });
+    await _loadData(); // reload lại danh sách
   }
 
   Future<void> _rejectConfirmed(String loiMoiId) async {
@@ -319,7 +316,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                 Text(
+                Text(
                   context.tr.confirmInvite,
                   style: TextStyle(
                     fontSize: 18,
@@ -327,8 +324,8 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                 Text(
-              context.tr.acceptInviteQuestion,
+                Text(
+                  context.tr.acceptInviteQuestion,
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Color.fromARGB(255, 65, 65, 65)),
                 ),
@@ -348,8 +345,8 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                       Navigator.pop(ctx);
                       await _acceptConfirmed(loiMoiId);
                     },
-                    child:  Text(
-                    context.tr.confirm,
+                    child: Text(
+                      context.tr.confirm,
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
@@ -371,7 +368,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                       ),
                     ),
                     onPressed: () => Navigator.pop(ctx),
-                    child:  Text(
+                    child: Text(
                       context.tr.cancel,
                       style: TextStyle(
                         fontSize: 14,
@@ -418,7 +415,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                 Text(
+                Text(
                   context.tr.confirmDeleteInvite,
                   style: TextStyle(
                     fontSize: 18,
@@ -426,8 +423,8 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                 Text(
-                 context.tr.rejectInviteConfirm,
+                Text(
+                  context.tr.rejectInviteConfirm,
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Color.fromARGB(255, 65, 65, 65)),
                 ),
@@ -448,8 +445,8 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                       Navigator.pop(ctx);
                       await _rejectConfirmed(loiMoiId);
                     },
-                    child:  Text(
-                     context.tr.delete,
+                    child: Text(
+                      context.tr.delete,
                       style: TextStyle(
                         color: Color.fromARGB(255, 135, 13, 25),
                         fontWeight: FontWeight.w700,
@@ -470,8 +467,8 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child:  Text(
-                     context.tr.cancel,
+                    child: Text(
+                      context.tr.cancel,
                       style: TextStyle(
                         color: Color.fromARGB(255, 71, 71, 71),
                         fontWeight: FontWeight.w700,

@@ -140,7 +140,13 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
 
       if (!mounted) return;
 
-      if (profile == null) {
+      bool profileIncomplete = profile == null ||
+          profile['tenND'] == null ||
+          profile['ngaySinh'] == null ||
+          profile['chieuCao'] == null ||
+          profile['canNang'] == null;
+
+      if (profileIncomplete) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -153,23 +159,26 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
         return;
       }
 
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (_) => HomeScreen(userId: user.nguoiDungId),
         ),
       );
 
-      return; // 🔥 BẮT BUỘC
+      return;
     } catch (e) {
       if (!mounted) return;
+
       setState(() {
         _errorText = e.toString().replaceFirst('Exception: ', '');
       });
     } finally {
-      if (mounted) {
-        setState(() => _loading = false);
-      }
+      if (!mounted) return;
+
+      setState(() {
+        _loading = false;
+      });
     }
   }
 

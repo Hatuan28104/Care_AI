@@ -70,39 +70,41 @@ export async function getRelationshipProfile(qhId, userId) {
     .input("uid", sql.Char(12), userId)
     .query(`
       SELECT
-        QH.QuanHeGiamHo_ID,
-        QH.NgayBatDau,
+  QH.QuanHeGiamHo_ID,
+  QH.NgayBatDau,
 
-        -- xác định vai trò
-        CASE 
-          WHEN QH.NguoiDuocGiamHo_ID = @uid THEN 'GUARDIAN'
-          WHEN QH.NguoiGiamHo_ID = @uid THEN 'DEPENDENT'
-        END AS VaiTro,
+  QH.NguoiGiamHo_ID,
+  QH.NguoiDuocGiamHo_ID,
 
-        ND.NguoiDung_ID,
-        ND.TenND,
-        ND.AvatarUrl,
-        ND.GioiTinh,
-        ND.NgaySinh,
-        TK.SoDienThoai
-      FROM QuanHeGiamHo QH
+  CASE 
+    WHEN QH.NguoiDuocGiamHo_ID = @uid THEN 'GUARDIAN'
+    WHEN QH.NguoiGiamHo_ID = @uid THEN 'DEPENDENT'
+  END AS VaiTro,
 
-      -- JOIN ĐÚNG NGƯỜI CẦN HIỂN THỊ
-      JOIN NguoiDung ND
-        ON ND.NguoiDung_ID = 
-          CASE 
-            WHEN QH.NguoiDuocGiamHo_ID = @uid 
-              THEN QH.NguoiGiamHo_ID
-            WHEN QH.NguoiGiamHo_ID = @uid
-              THEN QH.NguoiDuocGiamHo_ID
-          END
+  ND.NguoiDung_ID,
+  ND.TenND,
+  ND.AvatarUrl,
+  ND.GioiTinh,
+  ND.NgaySinh,
+  TK.SoDienThoai
 
-      JOIN TaiKhoan TK
-        ON TK.NguoiDung_ID = ND.NguoiDung_ID
+FROM QuanHeGiamHo QH
 
-      WHERE QH.QuanHeGiamHo_ID = @qhId
-        AND QH.DaXoa = 0
-        AND (@uid IN (QH.NguoiDuocGiamHo_ID, QH.NguoiGiamHo_ID))
+JOIN NguoiDung ND
+  ON ND.NguoiDung_ID =
+    CASE
+      WHEN QH.NguoiDuocGiamHo_ID = @uid
+        THEN QH.NguoiGiamHo_ID
+      WHEN QH.NguoiGiamHo_ID = @uid
+        THEN QH.NguoiDuocGiamHo_ID
+    END
+
+JOIN TaiKhoan TK
+  ON TK.NguoiDung_ID = ND.NguoiDung_ID
+
+WHERE QH.QuanHeGiamHo_ID = @qhId
+  AND QH.DaXoa = 0
+  AND (@uid IN (QH.NguoiDuocGiamHo_ID, QH.NguoiGiamHo_ID))
     `);
 
   if (rs.recordset.length === 0) {

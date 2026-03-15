@@ -276,7 +276,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get steps => 'Số bước';
 
   @override
-  String get sleep => 'Giấc ngủ';
+  String get sleep => 'Ngủ';
 
   @override
   String get view => 'Xem';
@@ -809,7 +809,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get invalidGender => 'Vui lòng chọn giới tính hợp lệ';
 
   @override
-  String get calories => 'Lượng calo tiêu thụ';
+  String get calories => 'Calo';
 
   @override
   String get spo2 => 'Nồng độ oxy trong máu – SpO₂';
@@ -900,4 +900,25 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get vibration => 'Rung';
+
+  @override
+  String get sharedConversations => 'Cuộc trò chuyện được chia sẻ';
+
+  @override
+  String get noSharedConversations => 'Không có cuộc trò chuyện nào';
+
+  @override
+  String get temperature => 'Nhiệt độ';
+
+  @override
+  String get normal => 'Bình thường';
+
+  @override
+  String get stepsUnit => 'bước';
+
+  @override
+  String get deleteConversation => 'Xóa cuộc trò chuyện';
+
+  @override
+  String get confirmDeleteConversation => 'Bạn có chắc muốn xóa cuộc trò chuyện này không?';
 }

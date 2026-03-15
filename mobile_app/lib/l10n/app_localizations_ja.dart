@@ -809,7 +809,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get invalidGender => '有効な性別を選択してください';
 
   @override
-  String get calories => '消費カロリー';
+  String get calories => 'カロリー';
 
   @override
   String get spo2 => '血中酸素濃度 – SpO₂';
@@ -900,4 +900,25 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get vibration => 'バイブレーション';
+
+  @override
+  String get sharedConversations => '共有された会話';
+
+  @override
+  String get noSharedConversations => '共有された会話はありません';
+
+  @override
+  String get temperature => '体温';
+
+  @override
+  String get normal => '正常';
+
+  @override
+  String get stepsUnit => '歩';
+
+  @override
+  String get deleteConversation => '会話を削除';
+
+  @override
+  String get confirmDeleteConversation => 'この会話を削除してもよろしいですか？';
 }

@@ -1,9 +1,6 @@
-import dotenv from "dotenv";
-dotenv.config();
 import OpenAI from "openai";
 import sql from "mssql";
 import { getDB } from "../config/db.js";
-
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -16,28 +13,24 @@ export async function handleChat(message, userId, digitalId, hoiThoaiId) {
   const pool = await getDB();
   let conversationId = hoiThoaiId;
 
-  /* =========================
-     1️⃣ SYSTEM PROMPT
-  ========================= */
+  /* ===== SYSTEM PROMPT ===== */
 
-  const digitalResult = await pool
+  const digital = await pool
     .request()
     .input("DigitalHuman_ID", sql.Char(12), digitalId).query(`
       SELECT SystemPrompt
       FROM DigitalHuman
-      WHERE RTRIM(DigitalHuman_ID)=RTRIM(@DigitalHuman_ID)
+      WHERE RTRIM(DigitalHuman_ID) = RTRIM(@DigitalHuman_ID)
       AND DangHoatDong = 1
     `);
 
-  if (digitalResult.recordset.length === 0) {
+  if (digital.recordset.length === 0) {
     throw new Error("Digital Human không tồn tại");
   }
 
-  const systemPrompt = digitalResult.recordset[0].SystemPrompt;
+  const systemPrompt = digital.recordset[0].SystemPrompt;
 
-  /* =========================
-     2️⃣ TẠO / LẤY HỘI THOẠI
-  ========================= */
+  /* ===== TẠO HỘI THOẠI ===== */
 
   if (!conversationId) {
     const createConversation = await pool
@@ -56,7 +49,7 @@ export async function handleChat(message, userId, digitalId, hoiThoaiId) {
   }
 
   /* =========================
-     3️⃣ LƯU TIN NHẮN USER
+     LƯU TIN NHẮN USER
   ========================= */
 
   const saveUser = await pool
@@ -72,7 +65,7 @@ export async function handleChat(message, userId, digitalId, hoiThoaiId) {
   }
 
   /* =========================
-     4️⃣ LẤY CONTEXT CHAT
+     LẤY CONTEXT CHAT
   ========================= */
 
   const history = await pool
@@ -82,7 +75,7 @@ export async function handleChat(message, userId, digitalId, hoiThoaiId) {
         NoiDung,
         LaDigital
       FROM TinNhan
-      WHERE HoiThoai_ID = @HoiThoai_ID
+      WHERE RTRIM(HoiThoai_ID) = RTRIM(@HoiThoai_ID)
       ORDER BY ThoiGianGui DESC
     `);
 
@@ -96,7 +89,7 @@ export async function handleChat(message, userId, digitalId, hoiThoaiId) {
   });
 
   /* =========================
-     5️⃣ OPENAI
+     OPENAI
   ========================= */
 
   const completion = await client.chat.completions.create({
@@ -108,7 +101,7 @@ export async function handleChat(message, userId, digitalId, hoiThoaiId) {
   const aiReply = completion.choices[0].message.content;
 
   /* =========================
-     6️⃣ LƯU TIN AI
+     LƯU TIN AI
   ========================= */
 
   const saveAI = await pool
@@ -122,6 +115,17 @@ export async function handleChat(message, userId, digitalId, hoiThoaiId) {
   if (!saveAI.output.ret) {
     throw new Error("Lưu tin nhắn AI thất bại");
   }
+
+  /* =========================
+     UPDATE LAST CHAT
+  ========================= */
+
+  await pool.request().input("HoiThoai_ID", sql.Char(12), conversationId)
+    .query(`
+      UPDATE HoiThoai
+      SET LanCuoiTuongTac = GETDATE()
+      WHERE RTRIM(HoiThoai_ID) = RTRIM(@HoiThoai_ID)
+    `);
 
   return {
     success: true,
@@ -143,7 +147,7 @@ export async function getChatHistory(userId) {
       SELECT
         h.HoiThoai_ID,
         h.LanCuoiTuongTac,
-        ISNULL(h.Title, d.TenDigitalHuman) AS TenDigitalHuman,
+        d.TenDigitalHuman,
         d.ImageUrl,
         d.DigitalHuman_ID,
         n.TenNgheNghiep AS NgheNghiep
@@ -152,8 +156,7 @@ export async function getChatHistory(userId) {
         ON h.DigitalHuman_ID = d.DigitalHuman_ID
       JOIN NgheNghiep n
         ON d.NgheNghiep_ID = n.NgheNghiep_ID
-      WHERE h.NguoiDung_ID = @NguoiDung_ID
-      AND h.DaXoa = 0
+      WHERE RTRIM(h.NguoiDung_ID) = RTRIM(@NguoiDung_ID) AND h.DaXoa = 0
       ORDER BY h.LanCuoiTuongTac DESC
     `);
 
@@ -169,13 +172,14 @@ export async function getMessages(hoiThoaiId) {
 
   const result = await pool
     .request()
-    .input("HoiThoai_ID", sql.Char(12), hoiThoaiId).query(`
+    .input("HoiThoai_ID", sql.VarChar(12), hoiThoaiId)
+    .query(`
       SELECT
         NoiDung,
         LaDigital,
         ThoiGianGui
       FROM TinNhan
-      WHERE HoiThoai_ID = @HoiThoai_ID
+      WHERE RTRIM(HoiThoai_ID) = RTRIM(@HoiThoai_ID)
       ORDER BY ThoiGianGui ASC
     `);
 
@@ -192,26 +196,7 @@ export async function deleteConversation(hoiThoaiId) {
   await pool.request().input("HoiThoai_ID", sql.Char(12), hoiThoaiId).query(`
       UPDATE HoiThoai
       SET DaXoa = 1
-      WHERE HoiThoai_ID = @HoiThoai_ID
-    `);
-
-  return true;
-}
-
-/* =========================
-   RENAME CONVERSATION
-========================= */
-
-export async function renameConversation(hoiThoaiId, title) {
-  const pool = await getDB();
-
-  await pool
-    .request()
-    .input("HoiThoai_ID", sql.Char(12), hoiThoaiId)
-    .input("Title", sql.NVarChar(255), title).query(`
-      UPDATE HoiThoai
-      SET Title = @Title
-      WHERE HoiThoai_ID = @HoiThoai_ID
+      WHERE RTRIM(HoiThoai_ID) = RTRIM(@HoiThoai_ID)
     `);
 
   return true;

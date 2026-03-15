@@ -4,13 +4,21 @@ import 'familycenter_conversation.dart';
 import '../../../models/tr.dart';
 
 class ConfigurePermissionsScreen extends StatelessWidget {
-  const ConfigurePermissionsScreen({super.key});
+  final String userId;
+  final String quanHeId;
+
+  const ConfigurePermissionsScreen({
+    super.key,
+    required this.userId,
+    required this.quanHeId,
+  });
 
   static const Color _blue = Color(0xFF1877F2);
   static const Color _bg = Color(0xFFF6F6F6);
 
   @override
   Widget build(BuildContext context) {
+    print("ConfigurePermissionsScreen userId = $userId");
     return Scaffold(
       backgroundColor: _bg,
       body: SafeArea(
@@ -38,7 +46,7 @@ class ConfigurePermissionsScreen extends StatelessWidget {
             child: Center(
               child: Text(
                 context.tr.configurePermissions,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
                 ),
@@ -65,7 +73,10 @@ class ConfigurePermissionsScreen extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => const ConversationScreen(),
+                builder: (context) => ConversationScreen(
+                  userId: userId,
+                  quanHeId: quanHeId,
+                ),
               ),
             );
           },
@@ -81,7 +92,9 @@ class ConfigurePermissionsScreen extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => const HealthDataScreen(),
+                builder: (_) => HealthDataScreen(
+                  quanHeId: quanHeId,
+                ),
               ),
             );
           },
@@ -131,7 +144,7 @@ class ConfigurePermissionsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          // ===== DESC + BUTTON (CENTER) =====
+          // ===== DESC + BUTTON =====
           Center(
             child: Column(
               children: [

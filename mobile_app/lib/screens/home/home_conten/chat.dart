@@ -122,18 +122,18 @@ class _ChatScreenState extends State<ChatScreen> {
     final isUser = msg["isUser"] == true;
 
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment:
           isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: [
         if (!isUser)
           Padding(
-            padding: const EdgeInsets.only(left: 8),
-            child: CircleAvatar(
-              radius: 18,
-              backgroundImage: AssetImage(widget.image),
-            ),
-          ),
+              padding: const EdgeInsets.only(left: 8),
+              child: CircleAvatar(
+                radius: 18,
+                backgroundImage: NetworkImage(widget.image),
+                onBackgroundImageError: (_, __) {},
+              )),
         Flexible(
           child: Container(
             margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
@@ -182,7 +182,6 @@ class _ChatScreenState extends State<ChatScreen> {
                 FocusScope.of(context).unfocus();
               },
             ),
-
           if (!_isFocused) ...[
             IconButton(
               icon: const Icon(Icons.add_circle_outline, color: Colors.blue),
@@ -203,7 +202,6 @@ class _ChatScreenState extends State<ChatScreen> {
               },
             ),
           ],
-
           Expanded(
             flex: _isFocused ? 10 : 6,
             child: TextField(
@@ -223,9 +221,7 @@ class _ChatScreenState extends State<ChatScreen> {
               onSubmitted: (_) => sendMessage(),
             ),
           ),
-
           const SizedBox(width: 6),
-
           CircleAvatar(
             backgroundColor: Colors.blue,
             child: IconButton(
@@ -257,7 +253,9 @@ class _ChatScreenState extends State<ChatScreen> {
           children: [
             CircleAvatar(
               radius: 18,
-              backgroundImage: AssetImage(widget.image),
+              backgroundImage: NetworkImage(widget.image),
+              onBackgroundImageError: (_, __) {},
+              child: widget.image.isEmpty ? const Icon(Icons.person) : null,
             ),
             const SizedBox(width: 10),
             Text(

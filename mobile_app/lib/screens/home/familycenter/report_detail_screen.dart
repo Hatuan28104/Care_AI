@@ -1,13 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:Care_AI/api/family_api.dart';
 import '../../../models/tr.dart';
 
-class ReportDetailScreen extends StatelessWidget {
+class ReportDetailScreen extends StatefulWidget {
   final String type; // day | week | month
+  final String quanHeId;
 
-  const ReportDetailScreen({super.key, required this.type});
+  const ReportDetailScreen({
+    super.key,
+    required this.type,
+    required this.quanHeId,
+  });
+
+  @override
+  State<ReportDetailScreen> createState() => _ReportDetailScreenState();
+}
+
+class _ReportDetailScreenState extends State<ReportDetailScreen> {
+  Map<String, dynamic>? report;
+  bool loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadReport();
+  }
+
+  Future<void> _loadReport() async {
+    try {
+      final res = await FamilyApi.getHealthReport(widget.quanHeId, widget.type);
+
+      setState(() {
+        report = res;
+        loading = false;
+      });
+    } catch (e) {
+      print("REPORT ERROR: $e");
+      setState(() {
+        loading = false;
+      });
+    }
+  }
 
   String title(BuildContext context) {
-    switch (type) {
+    switch (widget.type) {
       case 'week':
         return context.tr.week;
       case 'month':
@@ -24,32 +60,51 @@ class ReportDetailScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: BackButton(color: Colors.blue),
+        leading: const BackButton(color: Colors.blue),
         title: Text(
           title(context),
           style: const TextStyle(color: Colors.black),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _heartCard(context),
-            const SizedBox(height: 16),
-            _grid(),
-            const SizedBox(height: 16),
-            _statItem('Số bước', '-- bước'),
-            _statItem('Quãng đường', '-- km'),
-            _statItem('Calo', '-- kcal'),
-          ],
-        ),
-      ),
+      body: loading
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  _heartCard(context),
+                  const SizedBox(height: 16),
+                  _grid(),
+                  const SizedBox(height: 16),
+                  _statItem(
+                    context.tr.steps,
+                    report?["steps"] != null
+                        ? "${report!["steps"]} ${context.tr.stepsUnit}"
+                        : "--",
+                  ),
+                  _statItem(
+                    context.tr.distance,
+                    report?["distance"] != null
+                        ? "${report!["distance"]} km"
+                        : "--",
+                  ),
+                  _statItem(
+                    context.tr.calories,
+                    report?["calories"] != null
+                        ? "${report!["calories"]} kcal"
+                        : "--",
+                  ),
+                ],
+              ),
+            ),
     );
   }
 
-  // ================= UI =================
+  // ================= HEART =================
 
   Widget _heartCard(BuildContext context) {
+    final bpm = report?["heartRate"];
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -64,13 +119,16 @@ class ReportDetailScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '-- BPM',
-                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                bpm != null ? "$bpm BPM" : "-- BPM",
+                style: const TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              SizedBox(height: 6),
+              const SizedBox(height: 6),
               Text(
-                context.tr.noData,
-                style: TextStyle(color: Colors.red),
+                bpm != null ? context.tr.normal : context.tr.noData,
+                style: const TextStyle(color: Colors.red),
               ),
             ],
           )
@@ -79,15 +137,31 @@ class ReportDetailScreen extends StatelessWidget {
     );
   }
 
+  // ================= GRID =================
+
   Widget _grid() {
     return Row(
       children: [
-        Expanded(child: _mini('Nhiệt độ', '-- °C')),
+        Expanded(
+          child: _mini(
+            context.tr.temperature,
+            report?["temperature"] != null
+                ? "${report!["temperature"]} °C"
+                : "--",
+          ),
+        ),
         const SizedBox(width: 12),
-        Expanded(child: _mini('Ngủ', '--')),
+        Expanded(
+          child: _mini(
+            context.tr.sleep,
+            report?["sleep"] != null ? "${report!["sleep"]} h" : "--",
+          ),
+        ),
       ],
     );
   }
+
+  // ================= MINI CARD =================
 
   Widget _mini(String label, String value) {
     return Container(
@@ -100,11 +174,16 @@ class ReportDetailScreen extends StatelessWidget {
         children: [
           Text(label, style: const TextStyle(color: Colors.grey)),
           const SizedBox(height: 6),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text(
+            value,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
         ],
       ),
     );
   }
+
+  // ================= STAT ITEM =================
 
   Widget _statItem(String label, String value) {
     return Container(
@@ -118,7 +197,10 @@ class ReportDetailScreen extends StatelessWidget {
         children: [
           Text(label, style: const TextStyle(color: Colors.red)),
           const Spacer(),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text(
+            value,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
         ],
       ),
     );

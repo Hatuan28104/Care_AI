@@ -78,7 +78,7 @@ class _DigitalHumanAllScreenState extends State<DigitalHumanAllScreen> {
                     MaterialPageRoute(
                       builder: (_) => ChatScreen(
                         name: human['TenDigitalHuman'],
-                        image: human['ImageUrl'],
+                        image: "http://10.0.2.2:3000/${human['ImageUrl']}",
                         intro: context.tr.aiIntro,
                         digitalId: human['DigitalHuman_ID'],
                         userId: widget.userId,

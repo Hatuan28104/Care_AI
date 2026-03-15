@@ -1,25 +1,88 @@
 import 'package:flutter/material.dart';
+import 'package:Care_AI/models/health_icon_mapper.dart';
+import 'package:Care_AI/api/health_api.dart';
+import 'package:Care_AI/api/family_api.dart';
 import '../../../models/tr.dart';
 
 class HealthDataScreen extends StatefulWidget {
-  const HealthDataScreen({super.key});
+  final String quanHeId;
+
+  const HealthDataScreen({
+    super.key,
+    required this.quanHeId,
+  });
 
   @override
   State<HealthDataScreen> createState() => _HealthDataScreenState();
 }
 
 class _HealthDataScreenState extends State<HealthDataScreen> {
-  // ===== CONSTANTS =====
-  static const Color _blue = Color(0xFF1877F2);
   static const Color _bg = Color(0xFFF6F6F6);
 
-  // ===== STATE =====
-  bool heartRate = false;
-  bool temperature = false;
-  bool bloodPressure = false;
-  bool steps = false;
-  bool sleep = false;
+  List<Map<String, dynamic>> _metrics = [];
+  bool _loading = true;
 
+  @override
+  void initState() {
+    super.initState();
+    _loadMetrics();
+  }
+
+  Future<void> _loadMetrics() async {
+    try {
+      final metrics = await HealthApi.getMetrics();
+      final permissions = await FamilyApi.getPermissionConfigs(widget.quanHeId);
+
+      print("PERMISSIONS FROM DB:");
+      print(permissions);
+
+      final permissionMap = {
+        for (var p in permissions)
+          p["Quyen_ID"].toString().trim(): p["DaKichHoat"]
+      };
+
+      print("PERMISSION MAP:");
+      print(permissionMap);
+
+      _metrics.clear();
+
+      for (var e in metrics) {
+        if (e['Category'].toString().toLowerCase() != 'health') continue;
+
+        final iconData = getHealthIcon(e['TenChiSo']);
+
+        final id = e['LoaiChiSo_ID'].toString().trim();
+
+        final raw = permissionMap[id];
+
+        bool enabled = false;
+
+        if (raw is bool) {
+          enabled = raw;
+        } else if (raw is int) {
+          enabled = raw == 1;
+        } else if (raw is String) {
+          enabled = raw == "1" || raw.toLowerCase() == "true";
+        }
+
+        _metrics.add({
+          "id": id,
+          "name": e['TenChiSo'],
+          "enabled": enabled,
+          "icon": iconData.icon,
+          "color": iconData.color,
+        });
+      }
+
+      setState(() {
+        _loading = false;
+      });
+    } catch (e) {
+      debugPrint("Load metrics error: $e");
+    }
+  }
+
+  /// ================= UI =================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,7 +98,7 @@ class _HealthDataScreenState extends State<HealthDataScreen> {
     );
   }
 
-  // ================= TITLE BAR =================
+  /// ================= TITLE =================
   Widget _titleBar(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(6, 6, 18, 12),
@@ -49,7 +112,7 @@ class _HealthDataScreenState extends State<HealthDataScreen> {
             child: Center(
               child: Text(
                 context.tr.healthData,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
                 ),
@@ -62,57 +125,28 @@ class _HealthDataScreenState extends State<HealthDataScreen> {
     );
   }
 
-  // ================= CONTENT =================
+  /// ================= LIST =================
   Widget _content() {
-    return ListView(
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return ListView.builder(
       padding: const EdgeInsets.fromLTRB(18, 8, 18, 18),
-      children: [
-        _healthItem(
-          icon: Icons.favorite,
-          label: 'Nhịp tim',
-          value: heartRate,
-          onChanged: (v) => setState(() => heartRate = v),
-        ),
-        _healthItem(
-          icon: Icons.thermostat,
-          label: 'Nhiệt độ cơ thể',
-          value: temperature,
-          onChanged: (v) => setState(() => temperature = v),
-        ),
-        _healthItem(
-          icon: Icons.monitor_heart,
-          label: 'Huyết áp',
-          value: bloodPressure,
-          onChanged: (v) => setState(() => bloodPressure = v),
-        ),
-        _healthItem(
-          icon: Icons.directions_walk,
-          label: 'Số bước',
-          value: steps,
-          onChanged: (v) => setState(() => steps = v),
-        ),
-        _healthItem(
-          icon: Icons.bedtime,
-          label: 'Giấc ngủ',
-          value: sleep,
-          onChanged: (v) => setState(() => sleep = v),
-        ),
-        const SizedBox(height: 28),
-        _saveButton(),
-      ],
+      itemCount: _metrics.length,
+      itemBuilder: (_, i) {
+        return _healthItem(index: i);
+      },
     );
   }
 
-  // ================= HEALTH ITEM =================
-  Widget _healthItem({
-    required IconData icon,
-    required String label,
-    required bool value,
-    required ValueChanged<bool> onChanged,
-  }) {
+  /// ================= ITEM =================
+  Widget _healthItem({required int index}) {
+    final m = _metrics[index];
+
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
@@ -126,54 +160,48 @@ class _HealthDataScreenState extends State<HealthDataScreen> {
       ),
       child: Row(
         children: [
-          Icon(icon, color: _blue),
+          Icon(m["icon"], color: m["color"]),
           const SizedBox(width: 12),
+
           Expanded(
             child: Text(
-              label,
+              m["name"],
               style: const TextStyle(
-                fontSize: 24,
+                fontSize: 20,
                 fontWeight: FontWeight.w400,
               ),
             ),
           ),
+
+          /// SWITCH
           Switch(
-            value: value,
-            onChanged: onChanged, // ✅ ĐÚNG
+            value: m["enabled"],
+            onChanged: (v) async {
+              final oldValue = m["enabled"];
+
+              setState(() {
+                m["enabled"] = v;
+              });
+
+              try {
+                await FamilyApi.savePermission(
+                  quanHeId: widget.quanHeId,
+                  quyenId: m["id"],
+                  active: v,
+                );
+              } catch (e) {
+                setState(() {
+                  m["enabled"] = oldValue;
+                });
+
+                print("SAVE PERMISSION ERROR: $e");
+              }
+            },
             activeTrackColor: const Color.fromARGB(255, 19, 114, 255),
             inactiveTrackColor: const Color.fromARGB(255, 218, 217, 217),
             inactiveThumbColor: Colors.white,
-          ),
+          )
         ],
-      ),
-    );
-  }
-
-  // ================= SAVE BUTTON =================
-  Widget _saveButton() {
-    return Center(
-      child: SizedBox(
-        width: 160,
-        height: 44,
-        child: ElevatedButton(
-          onPressed: () {
-            // TODO: handle save
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: _blue,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(22),
-            ),
-          ),
-          child: Text(
-            context.tr.save,
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-            ),
-          ),
-        ),
       ),
     );
   }

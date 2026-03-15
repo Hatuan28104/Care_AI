@@ -296,5 +296,43 @@
   "volume": "音量",
   "vibration": "振动",
   "soundVibration": "声音与振动",
-"rename": "重命名"
+"rename": "重命名",
+  "sharedConversations": "已共享的对话",
+  "noSharedConversations": "没有共享的对话",
+  "steps": "步数",
+  "@steps": {
+    "description": "Number of steps"
+  },
+
+  "distance": "距离",
+  "@distance": {
+    "description": "Distance travelled"
+  },
+
+  "calories": "卡路里",
+  "@calories": {
+    "description": "Calories burned"
+  },
+
+  "temperature": "体温",
+  "@temperature": {
+    "description": "Body temperature"
+  },
+
+  "sleep": "睡眠",
+  "@sleep": {
+    "description": "Sleep duration"
+  },
+
+  "normal": "正常",
+  "@normal": {
+    "description": "Normal health status"
+  },
+
+  "stepsUnit": "步",
+  "@stepsUnit": {
+    "description": "Steps unit"
+  },
+    "deleteConversation": "删除对话",
+  "confirmDeleteConversation": "确定要删除此对话吗？"
 }

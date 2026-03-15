@@ -809,7 +809,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get invalidGender => '请选择有效的性别';
 
   @override
-  String get calories => '卡路里消耗';
+  String get calories => '卡路里';
 
   @override
   String get spo2 => '血氧饱和度 – SpO₂';
@@ -900,4 +900,25 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get vibration => '振动';
+
+  @override
+  String get sharedConversations => '已共享的对话';
+
+  @override
+  String get noSharedConversations => '没有共享的对话';
+
+  @override
+  String get temperature => '体温';
+
+  @override
+  String get normal => '正常';
+
+  @override
+  String get stepsUnit => '步';
+
+  @override
+  String get deleteConversation => '删除对话';
+
+  @override
+  String get confirmDeleteConversation => '确定要删除此对话吗？';
 }

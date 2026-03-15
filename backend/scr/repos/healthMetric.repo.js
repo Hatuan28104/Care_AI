@@ -120,3 +120,41 @@ export async function getHealthHistory(thietBiId, loaiChiSoId) {
 
   return result.recordset;
 }
+/* =========================
+   REPORT HEALTH DATA
+========================= */
+export async function getHealthReport(thietBiId, type) {
+
+  const pool = await getDB();
+
+  let condition = "";
+
+  if (type === "day") {
+    condition = "DATEDIFF(day, d.ThoiGianCapNhat, GETDATE()) = 0";
+  }
+
+  if (type === "week") {
+    condition = "DATEDIFF(day, d.ThoiGianCapNhat, GETDATE()) <= 7";
+  }
+
+  if (type === "month") {
+    condition = "DATEDIFF(day, d.ThoiGianCapNhat, GETDATE()) <= 30";
+  }
+
+  const result = await pool.request()
+    .input("ThietBi_ID", thietBiId)
+    .query(`
+      SELECT 
+        l.TenChiSo,
+        l.DonViDo,
+        AVG(d.GiaTri) AS GiaTri
+      FROM DuLieuSucKhoe d
+      JOIN LoaiChiSoSucKhoe l
+        ON l.LoaiChiSo_ID = d.LoaiChiSo_ID
+      WHERE d.ThietBi_ID = @ThietBi_ID
+      AND ${condition}
+      GROUP BY l.TenChiSo, l.DonViDo
+    `);
+
+  return result.recordset;
+}

@@ -5,7 +5,8 @@ import {
   createHealthMetric,
   saveHealthData,
   getLatestHealthData,
-  getHealthHistory
+  getHealthHistory,
+    getHealthReport
 } from "../repos/healthMetric.repo.js";
 
 const router = express.Router();
@@ -160,5 +161,29 @@ router.get("/history/:deviceId/:metricId", async (req, res) => {
     });
   }
 });
+/* =========================
+   HEALTH REPORT
+========================= */
+router.get("/report/:deviceId", async (req, res) => {
+  try {
 
+    const { deviceId } = req.params;
+    const { type } = req.query; // day | week | month
+
+    const data = await getHealthReport(deviceId, type);
+
+    res.json({
+      success: true,
+      data
+    });
+
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).json({
+      success: false,
+      message: "Không lấy được báo cáo sức khỏe"
+    });
+  }
+});
 export default router;

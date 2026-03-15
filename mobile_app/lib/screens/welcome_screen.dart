@@ -12,19 +12,21 @@ class WelcomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            children: [
-              const SizedBox(height: 100),
-              _logo(),
-              const SizedBox(height: 30),
-              _title(context),
-              const SizedBox(height: 4),
-              _subtitle(context),
-              const Spacer(),
-              _actions(context),
-            ],
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              children: [
+                const SizedBox(height: 100),
+                _logo(),
+                const SizedBox(height: 30),
+                _title(context),
+                const SizedBox(height: 4),
+                _subtitle(context),
+                const SizedBox(height: 60),
+                _actions(context),
+              ],
+            ),
           ),
         ),
       ),
@@ -72,7 +74,7 @@ class WelcomeScreen extends StatelessWidget {
 
   Widget _actions(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 120),
+      padding: const EdgeInsets.only(bottom: 40),
       child: Column(
         children: [
           _button(

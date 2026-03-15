@@ -4,180 +4,96 @@ import {
   getChatHistory,
   getMessages,
   deleteConversation,
-  renameConversation,
 } from "../repos/chat.repo.js";
 
 const router = express.Router();
 
-/* =========================
-   CHAT BOT
-========================= */
+/* ================= CHAT ================= */
 
 router.post("/", async (req, res) => {
   try {
     const { message, userId, digitalId, hoiThoaiId } = req.body;
 
-    /* VALIDATE INPUT */
-
-    if (!message?.trim()) {
+    if (!message || !userId || !digitalId) {
       return res.status(400).json({
         success: false,
-        message: "Thiếu nội dung tin nhắn",
+        message: "Thiếu dữ liệu",
       });
     }
 
-    if (!userId) {
-      return res.status(400).json({
-        success: false,
-        message: "Thiếu userId",
-      });
-    }
+    let conversationId = null;
 
-    if (!digitalId) {
-      return res.status(400).json({
-        success: false,
-        message: "Thiếu digitalId",
-      });
+    if (hoiThoaiId && hoiThoaiId !== "" && hoiThoaiId !== "null") {
+      conversationId = hoiThoaiId;
     }
-
-    /* CALL CHAT SERVICE */
 
     const result = await handleChat(
       message.trim(),
       userId,
       digitalId,
-      hoiThoaiId || null,
+      conversationId,
     );
 
-    return res.json(result);
+    res.json(result);
   } catch (error) {
     console.error("CHAT ERROR:", error);
 
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
-      message: error.message || "Server error",
+      message: error.message,
     });
   }
 });
 
-/* =========================
-   HISTORY CHAT
-========================= */
+/* ================= HISTORY ================= */
 
 router.get("/history/:userId", async (req, res) => {
   try {
-    const { userId } = req.params;
+    const histories = await getChatHistory(req.params.userId);
 
-    if (!userId) {
-      return res.status(400).json({
-        success: false,
-        message: "Thiếu userId",
-      });
-    }
-
-    const histories = await getChatHistory(userId);
-
-    return res.json({
+    res.json({
       success: true,
       data: histories,
     });
   } catch (error) {
-    console.error("HISTORY ERROR:", error);
-
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
-      message: error.message || "Server error",
+      message: error.message,
     });
   }
 });
 
-/* =========================
-   GET MESSAGES
-========================= */
+/* ================= GET MESSAGES ================= */
 
 router.get("/messages/:hoiThoaiId", async (req, res) => {
   try {
-    const { hoiThoaiId } = req.params;
+    const messages = await getMessages(req.params.hoiThoaiId);
 
-    if (!hoiThoaiId) {
-      return res.status(400).json({
-        success: false,
-        message: "Thiếu hoiThoaiId",
-      });
-    }
-
-    const messages = await getMessages(hoiThoaiId);
-
-    return res.json({
+    res.json({
       success: true,
       data: messages,
     });
   } catch (error) {
-    console.error("MESSAGES ERROR:", error);
-
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
-      message: error.message || "Server error",
+      message: error.message,
     });
   }
 });
 
-/* =========================
-   DELETE CONVERSATION
-========================= */
+/* ================= DELETE ================= */
 
 router.delete("/conversation/:hoiThoaiId", async (req, res) => {
   try {
-    const { hoiThoaiId } = req.params;
+    await deleteConversation(req.params.hoiThoaiId);
 
-    if (!hoiThoaiId) {
-      return res.status(400).json({
-        success: false,
-        message: "Thiếu hoiThoaiId",
-      });
-    }
-
-    await deleteConversation(hoiThoaiId);
-
-    return res.json({
+    res.json({
       success: true,
     });
   } catch (error) {
-    console.error("DELETE ERROR:", error);
-
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
-      message: error.message || "Server error",
-    });
-  }
-});
-
-/* =========================
-   RENAME CONVERSATION
-========================= */
-
-router.put("/conversation/rename", async (req, res) => {
-  try {
-    const { hoiThoaiId, title } = req.body;
-
-    if (!hoiThoaiId || !title?.trim()) {
-      return res.status(400).json({
-        success: false,
-        message: "Thiếu dữ liệu rename",
-      });
-    }
-
-    await renameConversation(hoiThoaiId, title.trim());
-
-    return res.json({
-      success: true,
-    });
-  } catch (error) {
-    console.error("RENAME ERROR:", error);
-
-    return res.status(500).json({
-      success: false,
-      message: error.message || "Server error",
+      message: error.message,
     });
   }
 });

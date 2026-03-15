@@ -297,5 +297,43 @@
   "sound": "Sound",
   "volume": "Volume",
   "vibration": "Vibration",
-  "soundVibration": "Sound & Vibration"
+  "soundVibration": "Sound & Vibration",
+    "sharedConversations": "Shared Conversations",
+  "noSharedConversations": "No shared conversations",
+  "steps": "Steps",
+  "@steps": {
+    "description": "Number of steps"
+  },
+
+  "distance": "Distance",
+  "@distance": {
+    "description": "Distance travelled"
+  },
+
+  "calories": "Calories",
+  "@calories": {
+    "description": "Calories burned"
+  },
+
+  "temperature": "Temperature",
+  "@temperature": {
+    "description": "Body temperature"
+  },
+
+  "sleep": "Sleep",
+  "@sleep": {
+    "description": "Sleep duration"
+  },
+
+  "normal": "Normal",
+  "@normal": {
+    "description": "Normal health status"
+  },
+
+  "stepsUnit": "steps",
+  "@stepsUnit": {
+    "description": "Steps unit"
+  },
+    "deleteConversation": "Delete conversation",
+  "confirmDeleteConversation": "Are you sure you want to delete this conversation?"
 }

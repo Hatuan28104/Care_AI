@@ -298,5 +298,43 @@
   "sound": "Âm thanh",
   "volume": "Âm lượng",
   "vibration": "Rung",
-  "soundVibration": "Âm thanh & Rung"
+  "soundVibration": "Âm thanh & Rung",
+    "sharedConversations": "Cuộc trò chuyện được chia sẻ",
+  "noSharedConversations": "Không có cuộc trò chuyện nào",
+  "steps": "Số bước",
+  "@steps": {
+    "description": "Number of steps"
+  },
+
+  "distance": "Quãng đường",
+  "@distance": {
+    "description": "Distance travelled"
+  },
+
+  "calories": "Calo",
+  "@calories": {
+    "description": "Calories burned"
+  },
+
+  "temperature": "Nhiệt độ",
+  "@temperature": {
+    "description": "Body temperature"
+  },
+
+  "sleep": "Ngủ",
+  "@sleep": {
+    "description": "Sleep duration"
+  },
+
+  "normal": "Bình thường",
+  "@normal": {
+    "description": "Normal health status"
+  },
+
+  "stepsUnit": "bước",
+  "@stepsUnit": {
+    "description": "Steps unit"
+  },
+    "deleteConversation": "Xóa cuộc trò chuyện",
+  "confirmDeleteConversation": "Bạn có chắc muốn xóa cuộc trò chuyện này không?"
 }

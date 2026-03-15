@@ -627,13 +627,13 @@ abstract class AppLocalizations {
   /// **'Blood Pressure'**
   String get bloodPressure;
 
-  /// No description provided for @steps.
+  /// Number of steps
   ///
   /// In en, this message translates to:
   /// **'Steps'**
   String get steps;
 
-  /// No description provided for @sleep.
+  /// Sleep duration
   ///
   /// In en, this message translates to:
   /// **'Sleep'**
@@ -651,7 +651,7 @@ abstract class AppLocalizations {
   /// **'No data available'**
   String get noData;
 
-  /// No description provided for @distance.
+  /// Distance travelled
   ///
   /// In en, this message translates to:
   /// **'Distance'**
@@ -1695,10 +1695,10 @@ abstract class AppLocalizations {
   /// **'Please select a valid gender'**
   String get invalidGender;
 
-  /// No description provided for @calories.
+  /// Calories burned
   ///
   /// In en, this message translates to:
-  /// **'Calories Burned'**
+  /// **'Calories'**
   String get calories;
 
   /// No description provided for @spo2.
@@ -1880,6 +1880,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Vibration'**
   String get vibration;
+
+  /// No description provided for @sharedConversations.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared Conversations'**
+  String get sharedConversations;
+
+  /// No description provided for @noSharedConversations.
+  ///
+  /// In en, this message translates to:
+  /// **'No shared conversations'**
+  String get noSharedConversations;
+
+  /// Body temperature
+  ///
+  /// In en, this message translates to:
+  /// **'Temperature'**
+  String get temperature;
+
+  /// Normal health status
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get normal;
+
+  /// Steps unit
+  ///
+  /// In en, this message translates to:
+  /// **'steps'**
+  String get stepsUnit;
+
+  /// No description provided for @deleteConversation.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete conversation'**
+  String get deleteConversation;
+
+  /// No description provided for @confirmDeleteConversation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this conversation?'**
+  String get confirmDeleteConversation;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

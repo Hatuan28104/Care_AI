@@ -16,9 +16,7 @@ class GuardianProfile extends StatefulWidget {
 }
 
 class _GuardianProfileState extends State<GuardianProfile> {
-  static const Color blue = Color(0xFF1877F2);
   static const Color bg = Color(0xFFF6F6F6);
-  static const Color itemBg = Color(0xFFF6F7FB);
 
   Map<String, dynamic>? data;
   bool loading = true;
@@ -33,7 +31,7 @@ class _GuardianProfileState extends State<GuardianProfile> {
   Future<void> _loadProfile() async {
     try {
       final res = await FamilyApi.getRelationshipProfile(widget.quanHeId);
-
+      print(res);
       setState(() {
         data = res;
         loading = false;
@@ -178,7 +176,10 @@ class _GuardianProfileState extends State<GuardianProfile> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => const ConfigurePermissionsScreen(),
+            builder: (_) => ConfigurePermissionsScreen(
+              userId: data!['NguoiDuocGiamHo_ID'],
+              quanHeId: widget.quanHeId,
+            ),
           ),
         );
       },
@@ -193,7 +194,7 @@ class _GuardianProfileState extends State<GuardianProfile> {
           ),
         ),
         child: Row(
-          children:  [
+          children: [
             Text(
               context.tr.shareData,
               style: TextStyle(

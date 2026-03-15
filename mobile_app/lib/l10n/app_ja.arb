@@ -296,5 +296,43 @@
   "volume": "音量",
   "vibration": "バイブレーション",
   "soundVibration": "音とバイブレーション",
-"rename": "名前を変更"
+"rename": "名前を変更",
+  "sharedConversations": "共有された会話",
+  "noSharedConversations": "共有された会話はありません",
+  "steps": "歩数",
+  "@steps": {
+    "description": "Number of steps"
+  },
+
+  "distance": "距離",
+  "@distance": {
+    "description": "Distance travelled"
+  },
+
+  "calories": "カロリー",
+  "@calories": {
+    "description": "Calories burned"
+  },
+
+  "temperature": "体温",
+  "@temperature": {
+    "description": "Body temperature"
+  },
+
+  "sleep": "睡眠",
+  "@sleep": {
+    "description": "Sleep duration"
+  },
+
+  "normal": "正常",
+  "@normal": {
+    "description": "Normal health status"
+  },
+
+  "stepsUnit": "歩",
+  "@stepsUnit": {
+    "description": "Steps unit"
+  },
+    "deleteConversation": "会話を削除",
+  "confirmDeleteConversation": "この会話を削除してもよろしいですか？"
 }

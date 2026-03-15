@@ -187,8 +187,7 @@ class FamilyApi {
    QUYỀN THEO QUAN HỆ
 ========================= */
   static Future<List<dynamic>> getPermissionConfigs(String quanHeId) async {
-    final url = Uri.parse('$_baseUrl/family/permission/$quanHeId');
-
+    final url = Uri.parse('$_baseUrl/family/permission/config/$quanHeId');
     final response = await http.get(
       url,
       headers: await _authHeaders(),
@@ -211,7 +210,7 @@ class FamilyApi {
     required String quyenId,
     required bool active,
   }) async {
-    final url = Uri.parse('$_baseUrl/family/permission');
+    final url = Uri.parse('$_baseUrl/family/permission/save');
 
     final response = await http.post(
       url,
@@ -228,6 +227,28 @@ class FamilyApi {
     if (response.statusCode != 200 || data['success'] != true) {
       throw Exception(data['message'] ?? 'Không lưu được quyền');
     }
+  }
+
+/* =========================
+   LẤY CONVERSATION ĐƯỢC SHARE
+========================= */
+  static Future<List<dynamic>> getSharedConversation(String quanHeId) async {
+    final url = Uri.parse(
+      '$_baseUrl/family/permission/getSharedConversation/$quanHeId',
+    );
+
+    final response = await http.get(
+      url,
+      headers: await _authHeaders(),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode != 200 || data['success'] != true) {
+      throw Exception('Không lấy được danh sách hội thoại');
+    }
+
+    return data['data']; // 👈 QUAN TRỌNG
   }
 
   /* =========================
@@ -294,6 +315,31 @@ class FamilyApi {
     if (response.statusCode != 200 || data['success'] != true) {
       throw Exception(data['message'] ?? 'Không thể hủy lời mời');
     }
+  }
+
+/* =========================
+   LẤY HEALTH REPORT
+========================= */
+  static Future<Map<String, dynamic>> getHealthReport(
+    String deviceId,
+    String type,
+  ) async {
+    final url = Uri.parse(
+      '$_baseUrl/health/report/$deviceId?type=$type',
+    );
+
+    final response = await http.get(
+      url,
+      headers: await _authHeaders(),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode != 200 || data['success'] != true) {
+      throw Exception(data['message'] ?? 'Không lấy được báo cáo');
+    }
+
+    return data['data'];
   }
 
   /* =========================
