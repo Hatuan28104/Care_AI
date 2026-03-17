@@ -216,7 +216,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get confirmDelete => '确认删除';
 
   @override
-  String get confirmDeleteGuardian => '您确定要将此监护人从家庭中移除吗？';
+  String get confirmDeleteDependent => '您确定要将该被抚养人从家庭中移除吗？';
 
   @override
   String get confirmInvite => '确认邀请';

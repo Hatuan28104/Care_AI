@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:Care_AI/api/family_api.dart';
 import '../../../models/tr.dart';
+import 'package:Care_AI/widgets/app_header.dart';
 
 class ReportDetailScreen extends StatefulWidget {
-  final String type; // day | week | month
+  final String type;
   final String quanHeId;
 
   const ReportDetailScreen({
@@ -57,46 +58,46 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF6F6F6),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: const BackButton(color: Colors.blue),
-        title: Text(
-          title(context),
-          style: const TextStyle(color: Colors.black),
+      body: SafeArea(
+        child: Column(
+          children: [
+            AppHeader(
+              title: title(context),
+            ),
+            Expanded(
+              child: loading
+                  ? const Center(child: CircularProgressIndicator())
+                  : ListView(
+                      padding: const EdgeInsets.all(16),
+                      children: [
+                        _heartCard(context),
+                        const SizedBox(height: 16),
+                        _grid(),
+                        const SizedBox(height: 16),
+                        _statItem(
+                          context.tr.steps,
+                          report?["steps"] != null
+                              ? "${report!["steps"]} ${context.tr.stepsUnit}"
+                              : "--",
+                        ),
+                        _statItem(
+                          context.tr.distance,
+                          report?["distance"] != null
+                              ? "${report!["distance"]} km"
+                              : "--",
+                        ),
+                        _statItem(
+                          context.tr.calories,
+                          report?["calories"] != null
+                              ? "${report!["calories"]} kcal"
+                              : "--",
+                        ),
+                      ],
+                    ),
+            ),
+          ],
         ),
       ),
-      body: loading
-          ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  _heartCard(context),
-                  const SizedBox(height: 16),
-                  _grid(),
-                  const SizedBox(height: 16),
-                  _statItem(
-                    context.tr.steps,
-                    report?["steps"] != null
-                        ? "${report!["steps"]} ${context.tr.stepsUnit}"
-                        : "--",
-                  ),
-                  _statItem(
-                    context.tr.distance,
-                    report?["distance"] != null
-                        ? "${report!["distance"]} km"
-                        : "--",
-                  ),
-                  _statItem(
-                    context.tr.calories,
-                    report?["calories"] != null
-                        ? "${report!["calories"]} kcal"
-                        : "--",
-                  ),
-                ],
-              ),
-            ),
     );
   }
 

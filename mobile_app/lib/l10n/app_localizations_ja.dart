@@ -216,7 +216,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get confirmDelete => '削除の確認';
 
   @override
-  String get confirmDeleteGuardian => 'この保護者を家族から削除してもよろしいですか？';
+  String get confirmDeleteDependent => 'この被扶養者を家族から削除してもよろしいですか？';
 
   @override
   String get confirmInvite => '招待の確認';

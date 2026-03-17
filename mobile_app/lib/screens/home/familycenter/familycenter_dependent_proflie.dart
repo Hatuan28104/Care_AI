@@ -12,13 +12,14 @@ class DependentProfileScreen extends StatefulWidget {
     required this.quanHeId,
   });
 
-  static const Color _bg = Color(0xFFF6F6F6);
-
   @override
   State<DependentProfileScreen> createState() => _DependentProfileScreenState();
 }
 
 class _DependentProfileScreenState extends State<DependentProfileScreen> {
+  static const Color _bg = Color(0xFFF6F6F6);
+  static const Color blue = Color(0xFF1877F2);
+
   Map<String, dynamic>? data;
   bool loading = true;
   String? error;
@@ -102,7 +103,7 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: DependentProfileScreen._bg,
+      backgroundColor: _bg,
       body: SafeArea(
         child: loading
             ? const Center(child: CircularProgressIndicator())
@@ -126,32 +127,62 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
 
     return Column(
       children: [
-        Align(
-          alignment: Alignment.centerLeft,
-          child: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new, size: 18),
-            onPressed: () => Navigator.pop(context),
+        // ===== BACK (TRÁI) =====
+        Padding(
+          padding: const EdgeInsets.only(left: 12, top: 8),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.arrow_back_ios_new,
+                    size: 18,
+                    color: blue,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    context.tr.back,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: blue,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
-        const SizedBox(height: 4),
-        CircleAvatar(
-          radius: 52,
-          backgroundImage:
-              avatar != null && avatar.isNotEmpty ? NetworkImage(avatar) : null,
-          child: avatar == null ? const Icon(Icons.person, size: 42) : null,
-        ),
-        const SizedBox(height: 12),
-        Text(
-          data?['TenND'] ?? '',
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
+
+        const SizedBox(height: 16),
+
+        Center(
+          child: Column(
+            children: [
+              CircleAvatar(
+                radius: 52,
+                backgroundImage: avatar != null && avatar.isNotEmpty
+                    ? NetworkImage(avatar)
+                    : null,
+                child:
+                    avatar == null ? const Icon(Icons.person, size: 42) : null,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                data?['TenND'] ?? '',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
           ),
         ),
       ],
     );
   }
-
   // ================= CONTENT =================
 
   Widget _content() {

@@ -25,8 +25,12 @@ class ChatDetailScreen extends StatefulWidget {
 class _ChatDetailScreenState extends State<ChatDetailScreen> {
   final TextEditingController controller = TextEditingController();
   final ScrollController scrollController = ScrollController();
+  final FocusNode _focusNode = FocusNode();
 
+  bool _isFocused = false;
+  bool _sending = false;
   bool loading = true;
+
   String? conversationId;
 
   List<Map<String, dynamic>> messages = [];
@@ -42,35 +46,49 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     } else {
       loading = false;
     }
+
+    _focusNode.addListener(() {
+      setState(() {
+        _isFocused = _focusNode.hasFocus;
+      });
+    });
   }
 
   @override
   void dispose() {
     controller.dispose();
     scrollController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
-  /* ================= LOAD MESSAGES ================= */
+  /* ================= LOAD ================= */
 
   Future<void> loadMessages() async {
-    final data = await ChatApi.getMessages(conversationId!);
+    try {
+      final data = await ChatApi.getMessages(conversationId!);
 
-    final list = data.map<Map<String, dynamic>>((msg) {
-      bool laDigital = msg["LaDigital"] == true || msg["LaDigital"] == 1;
+      final list = data.map<Map<String, dynamic>>((msg) {
+        bool laDigital = msg["LaDigital"] == true || msg["LaDigital"] == 1;
 
-      return {
-        "text": msg["NoiDung"] ?? "",
-        "isUser": !laDigital,
-      };
-    }).toList();
+        return {
+          "text": msg["NoiDung"] ?? "",
+          "isUser": !laDigital,
+        };
+      }).toList();
 
-    setState(() {
-      messages = list;
-      loading = false;
-    });
+      if (!mounted) return;
 
-    scrollToBottom();
+      setState(() {
+        messages = list;
+        loading = false;
+      });
+
+      scrollToBottom();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => loading = false);
+    }
   }
 
   /* ================= SCROLL ================= */
@@ -87,11 +105,13 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     });
   }
 
-  /* ================= SEND MESSAGE ================= */
+  /* ================= SEND ================= */
 
   Future<void> sendMessage() async {
     final text = controller.text.trim();
-    if (text.isEmpty) return;
+    if (text.isEmpty || _sending) return;
+
+    _sending = true;
 
     setState(() {
       messages.add({"text": text, "isUser": true});
@@ -113,73 +133,86 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         conversationId = response["hoiThoaiId"];
       }
 
+      if (!mounted) return;
+
       setState(() {
         messages.removeWhere((m) => m["isTyping"] == true);
 
         messages.add({
           "text": response["reply"] ?? context.tr.serverError,
-          "isUser": false
+          "isUser": false,
         });
       });
-    } catch (e) {
+    } catch (_) {
+      if (!mounted) return;
+
       setState(() {
         messages.removeWhere((m) => m["isTyping"] == true);
 
-        messages.add({"text": context.tr.serverError, "isUser": false});
+        messages.add({
+          "text": context.tr.serverError,
+          "isUser": false,
+        });
       });
     }
+
+    _sending = false;
 
     Future.delayed(const Duration(milliseconds: 100), scrollToBottom);
   }
 
-  /* ================= MESSAGE UI ================= */
+  /* ================= MESSAGE ================= */
 
   Widget messageBubble(Map<String, dynamic> msg) {
     final isUser = msg["isUser"] == true;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisAlignment:
-            isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
-        children: [
-          if (!isUser)
-            Padding(
-              padding: const EdgeInsets.only(right: 6),
-              child: CircleAvatar(
-                radius: 16,
-                backgroundImage:
-                    widget.image.isNotEmpty ? NetworkImage(widget.image) : null,
-                child:
-                    widget.image.isEmpty ? const Icon(Icons.smart_toy) : null,
-              ),
-            ),
-          Flexible(
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 10,
-              ),
-              decoration: BoxDecoration(
-                color: isUser ? const Color(0xFF1F41BB) : Colors.grey[200],
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: msg["isTyping"] == true
-                  ? Text(
-                      context.tr.typing,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    )
-                  : Text(
-                      msg["text"] ?? "",
-                      style: TextStyle(
-                        color: isUser ? Colors.white : Colors.black87,
-                      ),
-                    ),
+    return Row(
+      mainAxisAlignment:
+          isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+      children: [
+        if (!isUser)
+          Padding(
+            padding: const EdgeInsets.only(left: 8),
+            child: CircleAvatar(
+              radius: 18,
+              backgroundImage:
+                  widget.image.isNotEmpty ? NetworkImage(widget.image) : null,
+              child: widget.image.isEmpty ? const Icon(Icons.smart_toy) : null,
             ),
           ),
-        ],
-      ),
+        Flexible(
+          child: Container(
+            margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+            padding: const EdgeInsets.all(12),
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width * 0.7,
+            ),
+            decoration: BoxDecoration(
+              color: isUser ? Colors.blue : Colors.grey[300],
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: msg["isTyping"] == true
+                ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      SizedBox(
+                        width: 12,
+                        height: 12,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                      SizedBox(width: 8),
+                      Text("Typing..."),
+                    ],
+                  )
+                : Text(
+                    msg["text"] ?? "",
+                    style: TextStyle(
+                      color: isUser ? Colors.white : Colors.black,
+                    ),
+                  ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -187,18 +220,40 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
 
   Widget inputBar() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+      padding: const EdgeInsets.fromLTRB(8, 6, 8, 6),
       decoration: const BoxDecoration(
-        border: Border(top: BorderSide(color: Colors.black12)),
         color: Colors.white,
+        border: Border(top: BorderSide(color: Colors.black12)),
       ),
       child: Row(
         children: [
+          if (_isFocused)
+            IconButton(
+              icon: const Icon(Icons.keyboard_arrow_right,
+                  color: Colors.blue, size: 28),
+              onPressed: () => FocusScope.of(context).unfocus(),
+            ),
+          if (!_isFocused) ...[
+            IconButton(
+              icon: const Icon(Icons.add_circle_outline, color: Colors.blue),
+              onPressed: () => _focusNode.requestFocus(),
+            ),
+            IconButton(
+              icon: const Icon(Icons.camera_alt_outlined, color: Colors.blue),
+              onPressed: () => _focusNode.requestFocus(),
+            ),
+            IconButton(
+              icon: const Icon(Icons.mic_none, color: Colors.blue),
+              onPressed: () => _focusNode.requestFocus(),
+            ),
+          ],
           Expanded(
+            flex: _isFocused ? 10 : 6,
             child: TextField(
               controller: controller,
+              focusNode: _focusNode,
               decoration: InputDecoration(
-                hintText: context.tr.enterMessage,
+                hintText: _isFocused ? null : context.tr.enterMessage,
                 filled: true,
                 fillColor: const Color(0xFFF6F6F6),
                 border: OutlineInputBorder(
@@ -213,12 +268,12 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
           ),
           const SizedBox(width: 6),
           CircleAvatar(
-            backgroundColor: const Color(0xFF1F41BB),
+            backgroundColor: Colors.blue,
             child: IconButton(
               icon: const Icon(Icons.send, color: Colors.white),
               onPressed: sendMessage,
             ),
-          )
+          ),
         ],
       ),
     );
@@ -230,6 +285,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF6F6F6),
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 1,
@@ -256,9 +312,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                     controller: scrollController,
                     padding: const EdgeInsets.all(8),
                     itemCount: messages.length,
-                    itemBuilder: (context, index) {
-                      return messageBubble(messages[index]);
-                    },
+                    itemBuilder: (_, i) => messageBubble(messages[i]),
                   ),
           ),
           inputBar(),

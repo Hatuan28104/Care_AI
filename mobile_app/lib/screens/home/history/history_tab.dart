@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:Care_AI/api/chat_api.dart';
 import 'history_detail.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import '../../../models/tr.dart';
+import 'package:Care_AI/models/tr.dart';
+import 'package:Care_AI/widgets/common_confirm_dialog.dart';
 
 class HistoryTab extends StatefulWidget {
   final String userId;
@@ -148,27 +149,13 @@ class _HistoryTabState extends State<HistoryTab> {
         children: [
           CustomSlidableAction(
             onPressed: (_) async {
-              final ok = await showDialog(
-                context: context,
-                builder: (_) => AlertDialog(
-                  title: Text(context.tr.deleteConversation),
-                  content: Text(context.tr.confirmDeleteConversation),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: Text(context.tr.cancel),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      child: Text(
-                        context.tr.delete,
-                        style: const TextStyle(color: Colors.red),
-                      ),
-                    ),
-                  ],
-                ),
+              final ok = await showConfirmDialog(
+                context,
+                title: context.tr.deleteConversation,
+                message: context.tr.confirmDeleteConversation,
+                confirmText: context.tr.delete,
+                cancelText: context.tr.cancel,
               );
-
               if (ok == true) {
                 await ChatApi.deleteConversation(hoiThoaiId);
                 loadHistory();

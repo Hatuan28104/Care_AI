@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../app_settings.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import '../../../models/tr.dart';
+import 'package:Care_AI/models/tr.dart';
+import 'package:Care_AI/widgets/common_confirm_dialog.dart';
 
 class AlertScreen extends StatefulWidget {
   const AlertScreen({super.key});
@@ -165,11 +166,17 @@ class _AlertScreenState extends State<AlertScreen> {
         children: [
           CustomSlidableAction(
             onPressed: (_) async {
-              final ok = await _showDeleteConfirm(context);
+              final ok = await showConfirmDialog(
+                context,
+                title: context.tr.deleteAlertTitle,
+                message: context.tr.deleteAlertWarning,
+                confirmText: context.tr.accept,
+                cancelText: context.tr.cancel,
+                confirmColor: Colors.red,
+              );
               if (ok == true) {
                 setState(() => _alerts.remove(item));
                 _syncBadge();
-                await _showDeletedSuccess(context);
               }
             },
             backgroundColor: Colors.red,
@@ -259,141 +266,6 @@ class _AlertScreenState extends State<AlertScreen> {
         ),
       ),
     );
-  }
-
-  // ===== DIALOGS =====
-  Future<bool?> _showDeleteConfirm(BuildContext context) {
-    return showDialog<bool>(
-      context: context,
-      builder: (ctx) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.red, width: 2),
-                  ),
-                  child: const Icon(Icons.priority_high, color: Colors.red),
-                ),
-                const SizedBox(height: 14),
-                Text(
-                  context.tr.deleteAlertTitle,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  context.tr.deleteAlertWarning,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Color.fromARGB(1, 98, 98, 98),
-                    fontWeight: FontWeight.w400,
-                    fontSize: 15,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pop(ctx, true),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(125, 255, 100, 100),
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    child: Text(
-                      context.tr.accept,
-                      style: TextStyle(
-                        color: Color.fromARGB(221, 140, 24, 35),
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pop(ctx, false),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(209, 211, 217, 237),
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    child: Text(
-                      context.tr.cancel,
-                      style: TextStyle(
-                        color: Colors.black87,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> _showDeletedSuccess(BuildContext context) async {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.green, width: 2),
-                  ),
-                  child: const Icon(Icons.check, color: Colors.green),
-                ),
-                const SizedBox(height: 14),
-                Text(
-                  context.tr.deletedSuccessfully,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-
-    await Future.delayed(const Duration(seconds: 1));
-    if (context.mounted) Navigator.pop(context);
   }
 }
 

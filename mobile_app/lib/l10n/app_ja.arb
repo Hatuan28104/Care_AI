@@ -58,6 +58,9 @@
   "save": "保存",
   "guardians": "保護者",
   "dependents": "被扶養者",
+  
+  "confirmDeleteDependent": "この被扶養者を家族から削除してもよろしいですか？",
+
   "add": "追加",
   "addNew": "新規追加",
   "enterPhone": "電話番号を入力",

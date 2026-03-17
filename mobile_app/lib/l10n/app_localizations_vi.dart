@@ -168,7 +168,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get chooseConversation => 'Chọn cuộc trò chuyện';
 
   @override
-  String get shareConversationHistory => 'Chia sẻ lịch sử trò chuyện';
+  String get shareConversationHistory => 'Chia sẻ lịch sử hội thoại';
 
   @override
   String get basicHealthData => 'Dữ liệu sức khỏe cơ bản';
@@ -216,7 +216,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get confirmDelete => 'Xác nhận xóa';
 
   @override
-  String get confirmDeleteGuardian => 'Bạn có chắc chắn muốn xóa người giám hộ này khỏi gia đình không?';
+  String get confirmDeleteDependent => 'Bạn có chắc chắn muốn xóa người phụ thuộc này khỏi gia đình không?';
 
   @override
   String get confirmInvite => 'Xác nhận lời mời';

@@ -68,7 +68,7 @@
   "reject": "Reject",
   "delete": "Delete",
   "confirmDelete": "Confirm Delete",
-  "confirmDeleteGuardian": "Are you sure you want to remove this guardian from the family?",
+  "confirmDeleteDependent": "Are you sure you want to remove this dependent from the family?",
   "confirmInvite": "Confirm Invite",
   "acceptInviteQuestion": "Do you want to accept the invitation?",
   "confirmRejectInvite": "Confirm Reject Invite",

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:Care_AI/api/family_api.dart';
 import 'dart:async';
 import '../../../models/tr.dart';
+import 'package:Care_AI/widgets/app_header.dart';
 
 class AddGuardians extends StatefulWidget {
   const AddGuardians({super.key});
@@ -28,7 +29,9 @@ class _AddGuardiansState extends State<AddGuardians> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _subHeader(context),
+            AppHeader(
+              title: context.tr.addNew,
+            ),
             _description(),
             _phoneInput(),
             const SizedBox(height: 18),
@@ -68,26 +71,6 @@ class _AddGuardiansState extends State<AddGuardians> {
       itemBuilder: (context, index) {
         return _guardianStyleCard(_foundUsers[index]);
       },
-    );
-  }
-
-  // ================= SUB HEADER =================
-  Widget _subHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(6, 6, 18, 12),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new, size: 18),
-            onPressed: () => Navigator.pop(context),
-          ),
-          const SizedBox(width: 2),
-          Text(
-            context.tr.addNew,
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
-          ),
-        ],
-      ),
     );
   }
 
@@ -279,7 +262,7 @@ class _AddGuardiansState extends State<AddGuardians> {
                   child: const Icon(
                     Icons.check,
                     color: Colors.white,
-                    size: 40,
+                    size: 50,
                   ),
                 ),
                 const SizedBox(height: 20),

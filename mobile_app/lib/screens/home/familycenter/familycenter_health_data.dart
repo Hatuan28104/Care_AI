@@ -3,6 +3,7 @@ import 'package:Care_AI/models/health_icon_mapper.dart';
 import 'package:Care_AI/api/health_api.dart';
 import 'package:Care_AI/api/family_api.dart';
 import '../../../models/tr.dart';
+import 'package:Care_AI/widgets/app_header.dart';
 
 class HealthDataScreen extends StatefulWidget {
   final String quanHeId;
@@ -90,37 +91,12 @@ class _HealthDataScreenState extends State<HealthDataScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            _titleBar(context),
+            AppHeader(
+              title: context.tr.healthData,
+            ),
             Expanded(child: _content()),
           ],
         ),
-      ),
-    );
-  }
-
-  /// ================= TITLE =================
-  Widget _titleBar(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(6, 6, 18, 12),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new, size: 18),
-            onPressed: () => Navigator.pop(context),
-          ),
-          Expanded(
-            child: Center(
-              child: Text(
-                context.tr.healthData,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 48),
-        ],
       ),
     );
   }

@@ -216,7 +216,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmDelete => 'Confirm Delete';
 
   @override
-  String get confirmDeleteGuardian => 'Are you sure you want to remove this guardian from the family?';
+  String get confirmDeleteDependent => 'Are you sure you want to remove this dependent from the family?';
 
   @override
   String get confirmInvite => 'Confirm Invite';

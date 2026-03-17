@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:Care_AI/api/health_api.dart';
 import 'package:Care_AI/models/metric_config.dart';
-import '../../../../models/tr.dart';
+import 'package:Care_AI/widgets/app_header.dart';
+import 'package:Care_AI/models/tr.dart';
 
 const TextStyle _axisTextStyle = TextStyle(
   fontSize: 11,
@@ -87,59 +88,33 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final latest = _values.isNotEmpty ? _values.last : 0.0;
-
+    final hasData = _values.isNotEmpty;
+    final latest = hasData ? _values.last : null;
     return Scaffold(
       backgroundColor: _bg,
       body: SafeArea(
         child: Column(
           children: [
-            _header(context),
-            const SizedBox(height: 10),
-            _rangeTabs(),
-            const SizedBox(height: 10),
-            _valueSection(latest),
-            const SizedBox(height: 12),
-            _chartCard(),
-            const SizedBox(height: 10),
-            _latestRow(latest),
-            const Spacer(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /* =========================
-        HEADER
-  ========================= */
-
-  Widget _header(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(18, 14, 18, 10),
-      child: Row(
-        children: [
-          InkWell(
-            onTap: () => Navigator.pop(context),
-            borderRadius: BorderRadius.circular(999),
-            child: const Padding(
-              padding: EdgeInsets.all(6),
-              child: Icon(Icons.arrow_back_ios_new, size: 20),
+            AppHeader(
+              title: widget.title,
             ),
-          ),
-          Expanded(
-            child: Center(
-              child: Text(
-                widget.title,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                ),
+            Expanded(
+              child: ListView(
+                children: [
+                  const SizedBox(height: 10),
+                  _rangeTabs(),
+                  const SizedBox(height: 10),
+                  _valueSection(latest),
+                  const SizedBox(height: 12),
+                  _chartCard(),
+                  const SizedBox(height: 10),
+                  _latestRow(latest),
+                  const SizedBox(height: 20),
+                ],
               ),
             ),
-          ),
-          const SizedBox(width: 24),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -205,7 +180,7 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
         VALUE
   ========================= */
 
-  Widget _valueSection(double latest) {
+  Widget _valueSection(double? latest) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Align(
@@ -226,7 +201,9 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  latest.toStringAsFixed(_config.decimals),
+                  latest != null
+                      ? latest.toStringAsFixed(_config.decimals)
+                      : "--",
                   style: const TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.w700,
@@ -302,10 +279,16 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children:
-                  _labels.map((e) => Text(e, style: _axisTextStyle)).toList(),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: _labels
+                    .map((e) => Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: Text(e, style: _axisTextStyle),
+                        ))
+                    .toList(),
+              ),
             ),
           ],
         ),
@@ -317,7 +300,7 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
         LATEST
   ========================= */
 
-  Widget _latestRow(double latest) {
+  Widget _latestRow(double? latest) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Container(
@@ -331,7 +314,9 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
             Text(context.tr.latest),
             const Spacer(),
             Text(
-              '${latest.toStringAsFixed(_config.decimals)} ${_config.unit}',
+              latest != null
+                  ? '${latest.toStringAsFixed(_config.decimals)} ${_config.unit}'
+                  : "--",
               style: const TextStyle(fontWeight: FontWeight.w700),
             ),
           ],

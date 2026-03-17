@@ -3,7 +3,8 @@ import 'package:Care_AI/api/family_api.dart';
 import 'familycenter_guardian_add.dart';
 import 'familycenter_guardian_profile.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import '../../../models/tr.dart';
+import 'package:Care_AI/models/tr.dart';
+import 'package:Care_AI/widgets/common_confirm_dialog.dart';
 
 class MyGuardiansScreen extends StatefulWidget {
   const MyGuardiansScreen({super.key});
@@ -62,18 +63,17 @@ class _MyGuardiansScreenState extends State<MyGuardiansScreen> {
               MaterialPageRoute(builder: (_) => const AddGuardians()),
             );
 
-            // 🔥 GIỜ GỌI ĐƯỢC
             _loadGuardians();
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFFFE4343),
             foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(10),
             ),
           ),
           child: Text(
-            context.tr.add,
+            context.tr.addNew,
             style: TextStyle(fontWeight: FontWeight.w700),
           ),
         ),
@@ -109,7 +109,13 @@ class _MyGuardiansScreenState extends State<MyGuardiansScreen> {
             children: [
               CustomSlidableAction(
                 onPressed: (_) async {
-                  final ok = await _showDeleteConfirm(context);
+                  final ok = await showConfirmDialog(
+                    context,
+                    title: context.tr.confirmDelete,
+                    message: context.tr.deleteGuardianConfirm,
+                    confirmText: context.tr.delete,
+                    cancelText: context.tr.cancel,
+                  );
                   if (ok == true) {
                     await FamilyApi.endRelationship(g['QuanHeGiamHo_ID']);
                     _loadGuardians();
@@ -137,94 +143,6 @@ class _MyGuardiansScreenState extends State<MyGuardiansScreen> {
                 ),
               );
             },
-          ),
-        );
-      },
-    );
-  }
-
-  Future<bool?> _showDeleteConfirm(BuildContext context) {
-    return showDialog<bool>(
-      context: context,
-      builder: (ctx) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.red, width: 4),
-                  ),
-                  child: const Icon(Icons.priority_high, color: Colors.red),
-                ),
-                const SizedBox(height: 14),
-                Text(
-                  context.tr.confirmDelete,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  context.tr.deleteGuardianConfirm,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.black54),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pop(ctx, true),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(125, 255, 100, 100),
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    child: Text(
-                      context.tr.delete,
-                      style: TextStyle(
-                        color: Color.fromARGB(255, 135, 13, 25),
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pop(ctx, false),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xD1D1D3D9),
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    child: Text(
-                      context.tr.cancel,
-                      style: TextStyle(
-                        color: Color.fromARGB(255, 71, 71, 71),
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ),
         );
       },

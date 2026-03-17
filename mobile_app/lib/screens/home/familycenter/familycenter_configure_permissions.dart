@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'familycenter_health_data.dart';
 import 'familycenter_conversation.dart';
 import '../../../models/tr.dart';
+import 'package:Care_AI/widgets/app_header.dart';
 
 class ConfigurePermissionsScreen extends StatelessWidget {
   final String userId;
@@ -24,37 +25,12 @@ class ConfigurePermissionsScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            _titleBar(context),
+            AppHeader(
+              title: context.tr.configurePermissions,
+            ),
             Expanded(child: _content(context)),
           ],
         ),
-      ),
-    );
-  }
-
-  // ================= TITLE BAR =================
-  Widget _titleBar(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(6, 6, 18, 12),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new, size: 18),
-            onPressed: () => Navigator.pop(context),
-          ),
-          Expanded(
-            child: Center(
-              child: Text(
-                context.tr.configurePermissions,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 48),
-        ],
       ),
     );
   }
@@ -64,24 +40,6 @@ class ConfigurePermissionsScreen extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(18, 8, 18, 18),
       children: [
-        _permissionCard(
-          icon: Icons.chat_bubble_outline,
-          title: context.tr.conversationHistory,
-          desc: context.tr.chooseConversationsToShare,
-          buttonText: context.tr.chooseConversation,
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ConversationScreen(
-                  userId: userId,
-                  quanHeId: quanHeId,
-                ),
-              ),
-            );
-          },
-        ),
-        const SizedBox(height: 16),
         _permissionCard(
           icon: Icons.favorite,
           iconColor: Colors.redAccent,
@@ -93,6 +51,24 @@ class ConfigurePermissionsScreen extends StatelessWidget {
               context,
               MaterialPageRoute(
                 builder: (_) => HealthDataScreen(
+                  quanHeId: quanHeId,
+                ),
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 16),
+        _permissionCard(
+          icon: Icons.chat_bubble_outline,
+          title: context.tr.conversationHistory,
+          desc: context.tr.chooseConversationsToShare,
+          buttonText: context.tr.chooseConversation,
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ConversationScreen(
+                  userId: userId,
                   quanHeId: quanHeId,
                 ),
               ),

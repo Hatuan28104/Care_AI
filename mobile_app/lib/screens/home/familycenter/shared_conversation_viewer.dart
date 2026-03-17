@@ -58,7 +58,7 @@ class _SharedConversationViewerState extends State<SharedConversationViewer> {
         padding: const EdgeInsets.all(12),
         constraints: const BoxConstraints(maxWidth: 260),
         decoration: BoxDecoration(
-          color: isUser ? const Color(0xFF1F41BB) : Colors.grey.shade200,
+          color: isUser ? const Color(0xFF1877F2) : Colors.grey.shade200,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Text(
@@ -78,17 +78,37 @@ class _SharedConversationViewerState extends State<SharedConversationViewer> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            size: 18,
+            color: Color(0xFF1877F2),
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
         titleSpacing: 0,
         title: Row(
           children: [
             CircleAvatar(
+              radius: 18,
               backgroundImage: widget.image.isNotEmpty
                   ? NetworkImage("http://10.0.2.2:3000/${widget.image}")
                   : null,
-              child: widget.image.isEmpty ? const Icon(Icons.smart_toy) : null,
+              child: widget.image.isEmpty
+                  ? const Icon(Icons.smart_toy, size: 18)
+                  : null,
             ),
             const SizedBox(width: 10),
-            Text(widget.title),
+            Expanded(
+              child: Text(
+                widget.title,
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ],
         ),
       ),

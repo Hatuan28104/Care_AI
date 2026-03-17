@@ -334,5 +334,7 @@
     "description": "Steps unit"
   },
     "deleteConversation": "删除对话",
-  "confirmDeleteConversation": "确定要删除此对话吗？"
+  "confirmDeleteConversation": "确定要删除此对话吗？",
+    "confirmDeleteDependent": "您确定要将该被抚养人从家庭中移除吗？"
+
 }

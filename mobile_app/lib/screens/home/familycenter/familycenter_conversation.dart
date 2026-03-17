@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../models/tr.dart';
 import '../../../api/chat_api.dart';
 import '../../../api/family_api.dart';
+import 'package:Care_AI/widgets/app_header.dart';
 
 class ConversationScreen extends StatefulWidget {
   final String userId;
@@ -66,36 +67,12 @@ class _ConversationSharingScreenState extends State<ConversationScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            _titleBar(context),
+            AppHeader(
+              title: context.tr.conversationHistory,
+            ),
             Expanded(child: _content()),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _titleBar(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(6, 6, 18, 10),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new, size: 18),
-            onPressed: () => Navigator.pop(context),
-          ),
-          Expanded(
-            child: Center(
-              child: Text(
-                context.tr.configureSharingPermissions,
-                style: const TextStyle(
-                  fontSize: 23,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 48),
-        ],
       ),
     );
   }
@@ -113,8 +90,8 @@ class _ConversationSharingScreenState extends State<ConversationScreen> {
           child: Text(
             context.tr.shareConversationHistory,
             style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
               color: _blue,
             ),
           ),

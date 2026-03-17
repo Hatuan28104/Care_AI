@@ -513,11 +513,11 @@ abstract class AppLocalizations {
   /// **'Confirm Delete'**
   String get confirmDelete;
 
-  /// No description provided for @confirmDeleteGuardian.
+  /// No description provided for @confirmDeleteDependent.
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to remove this guardian from the family?'**
-  String get confirmDeleteGuardian;
+  /// **'Are you sure you want to remove this dependent from the family?'**
+  String get confirmDeleteDependent;
 
   /// No description provided for @confirmInvite.
   ///

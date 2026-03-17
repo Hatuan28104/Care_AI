@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:Care_AI/api/health_api.dart';
 import 'package:Care_AI/models/health_icon_mapper.dart';
+import 'package:Care_AI/models/tr.dart';
+import 'package:Care_AI/widgets/app_header.dart';
 import 'metric_item.dart';
 import 'metric_detail.dart';
-import '../../../../models/tr.dart';
 
 class BasicHealthDataScreen extends StatefulWidget {
   const BasicHealthDataScreen({super.key});
@@ -30,9 +31,6 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
     _initData();
   }
 
-  /// =========================
-  /// INIT
-  /// =========================
   Future<void> _initData() async {
     await _loadMetrics();
     await _loadDevice();
@@ -117,7 +115,9 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            _header(context),
+            AppHeader(
+              title: context.tr.healthData,
+            ),
             _searchBox(),
             Expanded(
               child: filteredItems.isEmpty
@@ -125,7 +125,7 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
                   : ListView.separated(
                       padding: _listPadding,
                       itemCount: filteredItems.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 10),
+                      separatorBuilder: (_, __) => const SizedBox(height: 8),
                       itemBuilder: (_, i) => _tile(context, filteredItems[i]),
                     ),
             ),
@@ -135,43 +135,7 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
     );
   }
 
-  /// =========================
-  /// HEADER
-  /// =========================
-  Widget _header(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(18, 14, 18, 6),
-      child: Row(
-        children: [
-          InkWell(
-            onTap: () => Navigator.pop(context),
-            borderRadius: BorderRadius.circular(999),
-            child: const Padding(
-              padding: EdgeInsets.all(6),
-              child: Icon(Icons.arrow_back_ios_new, size: 20),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              context.tr.healthData,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          const SizedBox(width: 34),
-          const SizedBox(height: 50),
-        ],
-      ),
-    );
-  }
-
-  /// =========================
   /// SEARCH
-  /// =========================
   Widget _searchBox() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(18, 0, 18, 12),
@@ -195,15 +159,11 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
     );
   }
 
-  /// =========================
   /// TILE
-  /// =========================
   Widget _tile(BuildContext context, MetricItem m) {
     return InkWell(
       borderRadius: _cardRadius,
       onTap: () {
-        if (_deviceId == null) return;
-
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -217,7 +177,7 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
         );
       },
       child: Container(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: _cardRadius,
@@ -226,7 +186,7 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
         child: Row(
           children: [
             _iconBox(m),
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
             _content(m),
             const SizedBox(width: 10),
             _time(m.time),
@@ -262,13 +222,12 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
               fontSize: 15,
             ),
           ),
-          const SizedBox(height: 6),
           Row(
             children: [
               Text(
                 m.value,
                 style: const TextStyle(
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w600,
                   fontSize: 18,
                 ),
               ),
@@ -277,7 +236,7 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
                 m.unit,
                 style: const TextStyle(
                   color: Colors.black54,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],
@@ -292,7 +251,7 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
       t,
       style: const TextStyle(
         color: Colors.black45,
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w600,
       ),
     );
   }
