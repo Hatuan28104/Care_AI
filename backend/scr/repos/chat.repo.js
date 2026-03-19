@@ -327,7 +327,24 @@ export async function getMessages(hoiThoaiId) {
 
   return result.recordset;
 }
+/* =========================
+   GET CONVERSATIONS (DASHBOARD)
+========================= */
+export async function getConversationsStats() {
+  const pool = await getDB();
 
+  const result = await pool.request().query(`
+    SELECT 
+      CONVERT(VARCHAR(10), LanCuoiTuongTac, 23) AS date, 
+      COUNT(*) AS total
+    FROM HoiThoai
+    WHERE DaXoa = 0
+    GROUP BY CONVERT(VARCHAR(10), LanCuoiTuongTac, 23)
+    ORDER BY date
+  `);
+
+  return result.recordset || [];
+}
 /* =========================
    DELETE CONVERSATION
 ========================= */

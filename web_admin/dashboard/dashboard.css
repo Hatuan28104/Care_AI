@@ -15,7 +15,9 @@
   font-size: 20px;
   margin-top: 8px;
 }
-
+.chart-container {
+  height: 300px;
+}
 /* DATE FILTER */
 .dashboard-page .date-filter {
   margin: 8px 0;

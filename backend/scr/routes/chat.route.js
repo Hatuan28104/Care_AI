@@ -4,6 +4,7 @@ import {
   getChatHistory,
   getMessages,
   deleteConversation,
+  getConversationsStats   
 } from "../repos/chat.repo.js";
 
 const router = express.Router();
@@ -97,5 +98,22 @@ router.delete("/conversation/:hoiThoaiId", async (req, res) => {
     });
   }
 });
+router.get("/conversations", async (req, res) => {
+  try {
+    const data = await getConversationsStats();
 
+    res.json({
+      success: true,
+      data
+    });
+
+  } catch (err) {
+    console.error("CONVERSATIONS ERROR:", err);
+
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
+  }
+});
 export default router;

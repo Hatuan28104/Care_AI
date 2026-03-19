@@ -45,19 +45,15 @@
       <div class="stats">
         <div class="card">
           <p>Tổng số người dùng</p>
-          <h2>0</h2>
+          <h2 id="totalUsers">0</h2>
         </div>
         <div class="card">
           <p>Tổng số lượt tương tác</p>
-          <h2>0</h2>
+          <h2 id="totalInteractions">0</h2>
         </div>
         <div class="card">
           <p>Cảnh báo chung</p>
-          <h2>0</h2>
-        </div>
-        <div class="card">
-          <p>Tổng doanh thu</p>
-          <h2>0</h2>
+          <h2 id="totalAlerts">0</h2>
         </div>
       </div>
 
@@ -84,19 +80,16 @@
             Cảnh báo
           </button>
 
-          <button>
-            <i class="fa-solid fa-dollar-sign"></i>
-            Doanh thu
-          </button>
+    
 
-          <button class="export">
+          <button class="export" id="exportBtn">
             <i class="fa-solid fa-download"></i>
             Xuất dữ liệu
           </button>
         </div>
 
-        <div class="chart-placeholder">
-          <p>Biểu đồ hiển thị tại đây</p>
+        <div class="chart-container">
+          <canvas id="mainChart"></canvas>
         </div>
       </div>
 
@@ -110,6 +103,7 @@
   <span>Xuất file thành công</span>
 </div>
 <script src="../layout/layout.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="dashboard.js"></script>
 
 </body>

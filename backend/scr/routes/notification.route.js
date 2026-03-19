@@ -87,5 +87,31 @@ router.delete("/:id", async (req, res) => {
 
   res.json({ success: true });
 });
+/* =========================
+   GET REAL ALERTS (CHUẨN)
+========================= */
+router.get("/alerts", async (req, res) => {
+  try {
+    const db = await getDB();
 
+    const result = await db.request().query(`
+      SELECT 
+        CanhBaoTinNhan_ID,
+        MoTaCanhBao,
+        ThoiGianCanhBao AS CreatedAt
+      FROM CanhBaoTinNhan
+      WHERE DaXoa = 0
+      ORDER BY ThoiGianCanhBao DESC
+    `);
+
+    res.json({
+      success: true,
+      data: result.recordset
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false });
+  }
+});
 export default router;
