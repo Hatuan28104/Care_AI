@@ -133,7 +133,7 @@
   "done": "Done",
   "configureSharingPermissions": "Configure Sharing Permissions",
   "lastMessage": "Last message",
-  "welcomeTitle": "Care AI, hello",
+  "welcomeTitle": "Hello, Care AI",
   "welcomeSubtitle": "Your digital companion, peace of mind for the whole family.",
   "welcomeBack": "Welcome back!",
   "searchCountry": "Search country",
@@ -335,5 +335,9 @@
     "description": "Steps unit"
   },
     "deleteConversation": "Delete conversation",
-  "confirmDeleteConversation": "Are you sure you want to delete this conversation?"
+  "confirmDeleteConversation": "Are you sure you want to delete this conversation?",
+  "dangerDetected": "Danger detected",
+  "noAlerts": "No alerts",
+  "alert": "Alert",
+  "notifications": "Notifications"
 }

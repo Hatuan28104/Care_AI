@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'auth_storage.dart';
+import '../config/api_config.dart';
 
 class FamilyApi {
-  static const String _baseUrl = 'http://10.0.2.2:3000';
-  // 10.0.2.2 = localhost cho Android emulator
+static String get _baseUrl => ApiConfig.baseUrl;
 
   static Future<Map<String, String>> _authHeaders() async {
     final token = await AuthStorage.getToken();

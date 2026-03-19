@@ -411,7 +411,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lastMessage => 'Last message';
 
   @override
-  String get welcomeTitle => 'Care AI, hello';
+  String get welcomeTitle => 'Hello, Care AI';
 
   @override
   String get welcomeSubtitle => 'Your digital companion, peace of mind for the whole family.';
@@ -921,4 +921,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get confirmDeleteConversation => 'Are you sure you want to delete this conversation?';
+
+  @override
+  String get dangerDetected => 'Danger detected';
+
+  @override
+  String get noAlerts => 'No alerts';
 }

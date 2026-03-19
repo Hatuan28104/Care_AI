@@ -58,7 +58,10 @@
   "save": "保存",
   "guardians": "保護者",
   "dependents": "被扶養者",
-  
+    "dangerDetected": "危険が検出されました",
+  "noAlerts": "通知はありません",
+  "alert": "警告",
+  "notifications": "通知",
   "confirmDeleteDependent": "この被扶養者を家族から削除してもよろしいですか？",
 
   "add": "追加",

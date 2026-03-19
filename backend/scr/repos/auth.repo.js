@@ -52,7 +52,7 @@ export async function requestRegisterOtp(phone) {
     expires: Date.now() + 2 * 60 * 1000,
   });
 
-  console.log(`📩 REGISTER OTP ${phone}: ${otp}`);
+  console.log(`REGISTER OTP ${phone}: ${otp}`);
 }
 
 /* =========================
@@ -72,7 +72,7 @@ export async function requestLoginOtp(phone) {
     expires: Date.now() + 2 * 60 * 1000,
   });
 
-  console.log(`📩 LOGIN OTP ${phone}: ${otp}`);
+  console.log(`LOGIN OTP ${phone}: ${otp}`);
 }
 
 /* =========================
@@ -211,14 +211,14 @@ export async function getLoginHistory(userId) {
 export async function saveFcmToken(userId, fcmToken) {
   const db = await getDB();
 
-  await db
-    .request()
+  await db.request()
     .input("uid", sql.Char(12), userId)
-    .input("fcm", sql.NVarChar(255), fcmToken)
+    .input("token", sql.NVarChar(255), fcmToken)
     .query(`
-      UPDATE NguoiDung
-      SET FcmToken = @fcm
-      WHERE NguoiDung_ID = @uid
+      DELETE FROM FcmTokens WHERE Token = @token;
+
+      INSERT INTO FcmTokens (NguoiDung_ID, Token)
+      VALUES (@uid, @token);
     `);
 
   return true;
@@ -229,19 +229,35 @@ export async function sendTestPush(userId) {
   const rs = await db
     .request()
     .input("uid", sql.Char(12), userId)
-    .query("SELECT FcmToken FROM NguoiDung WHERE NguoiDung_ID = @uid");
+    .query(`
+      SELECT Token FROM FcmTokens
+      WHERE NguoiDung_ID = @uid
+    `);
 
-  const token = rs.recordset[0]?.FcmToken;
+  if (rs.recordset.length === 0) {
+    throw new Error("User chưa có FCM token");
+  }
 
-  if (!token) throw new Error("User chưa có FCM token");
+  for (let t of rs.recordset) {
+    await admin.messaging().send({
+      token: t.Token,
+      notification: {
+        title: "CareAI",
+        body: "Thông báo test thành công!",
+      },
+    });
+  }
 
-  await admin.messaging().send({
-    token,
-    notification: {
-      title: "🔥 CareAI",
-      body: "Thông báo test thành công!",
-    },
-  });
+  return true;
+}
+export async function removeFcmToken(token) {
+  const db = await getDB();
+
+  await db.request()
+    .input("token", sql.NVarChar(255), token)
+    .query(`
+      DELETE FROM FcmTokens WHERE Token = @token
+    `);
 
   return true;
 }

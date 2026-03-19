@@ -206,201 +206,38 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
     });
   }
 
-  // ================= ACCEPT POPUP =================
-  void _showAcceptDialog(String loiMoiId) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 26, 20, 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 64,
-                  height: 64,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: _blue,
-                  ),
-                  child: const Icon(
-                    Icons.check,
-                    color: Colors.white,
-                    size: 46,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  context.tr.confirmInvite,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  context.tr.acceptInviteQuestion,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Color.fromARGB(255, 65, 65, 65)),
-                ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  height: 44,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _blue,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      elevation: 0,
-                    ),
-                    onPressed: () async {
-                      Navigator.pop(ctx);
-                      await _acceptConfirmed(loiMoiId);
-                    },
-                    child: Text(
-                      context.tr.confirm,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  width: double.infinity,
-                  height: 44,
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      backgroundColor: const Color(0xFFD1D3D9),
-                      side: BorderSide.none,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                    ),
-                    onPressed: () => Navigator.pop(ctx),
-                    child: Text(
-                      context.tr.cancel,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF626262),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+  void _showAcceptDialog(String loiMoiId) async {
+    final ok = await showConfirmDialog(
+      context,
+      title: context.tr.confirmInvite,
+      message: context.tr.acceptInviteQuestion,
+      confirmText: context.tr.confirm,
+      cancelText: context.tr.cancel,
+      confirmColor: _blue,
+      confirmBackgroundColor: _blue,
+      confirmTextColor: Colors.white,
+      icon: Icons.check,
     );
+
+    if (ok == true) {
+      await _acceptConfirmed(loiMoiId);
+    }
   }
 
-  // ================= REJECT POPUP =================
-  void _showRejectDialog(String loiMoiId) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 26, 20, 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: _red, width: 4),
-                  ),
-                  child: const Icon(
-                    Icons.priority_high,
-                    color: _red,
-                    size: 36,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  context.tr.confirmDeleteInvite,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  context.tr.rejectInviteConfirm,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Color.fromARGB(255, 65, 65, 65)),
-                ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  height: 44,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _red.withOpacity(.3),
-                      foregroundColor: _red,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      elevation: 0,
-                    ),
-                    onPressed: () async {
-                      Navigator.pop(ctx);
-                      await _rejectConfirmed(loiMoiId);
-                    },
-                    child: Text(
-                      context.tr.delete,
-                      style: TextStyle(
-                        color: Color.fromARGB(255, 135, 13, 25),
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pop(ctx, false),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xD1D1D3D9),
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    child: Text(
-                      context.tr.cancel,
-                      style: TextStyle(
-                        color: Color.fromARGB(255, 71, 71, 71),
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+  void _showRejectDialog(String loiMoiId) async {
+    final ok = await showConfirmDialog(
+      context,
+      title: context.tr.confirmDeleteInvite,
+      message: context.tr.rejectInviteQuestion,
+      confirmText: context.tr.delete,
+      cancelText: context.tr.cancel,
+      confirmColor: _red,
+      icon: Icons.priority_high,
     );
+
+    if (ok == true) {
+      await _rejectConfirmed(loiMoiId);
+    }
   }
 
   // ================= UI HELPERS =================

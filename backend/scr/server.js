@@ -14,7 +14,6 @@ import notificationRoute from "./routes/notification.route.js";
 import healthMetricRoute from "./routes/healthMetric.route.js";
 import chatRoute from "./routes/chat.route.js";
 import digitalHumanRoute from "./routes/digitalHuman.route.js";
-
 const app = express();
 app.use(cors()); 
 // middleware chung
@@ -25,7 +24,6 @@ app.use("/profile", profileRoute);
 
 /* ===== NOTIFICATION ===== */
 app.use("/notification", notificationRoute);
-
 /* ===== FAMILY CENTER ===== */
 app.use("/family/invite", inviteRoute);
 app.use("/family/relationship", relationshipRoute);

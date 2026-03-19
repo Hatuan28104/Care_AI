@@ -163,7 +163,11 @@ class _HistoryTabState extends State<HistoryTab> {
             },
             backgroundColor: Colors.red,
             borderRadius: BorderRadius.circular(20),
-            child: const Icon(Icons.delete, color: Colors.white, size: 28),
+            child: Container(
+              height: double.infinity,
+              alignment: Alignment.center,
+              child: const Icon(Icons.delete, color: Colors.white, size: 28),
+            ),
           ),
         ],
       ),

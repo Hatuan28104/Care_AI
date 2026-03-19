@@ -146,4 +146,15 @@ router.post("/test-push", auth, async (req, res) => {
     });
   }
 });
+router.post("/remove-fcm-token", async (req, res) => {
+  try {
+    const { fcmToken } = req.body;
+
+    await removeFcmToken(fcmToken);
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false });
+  }
+});
 export default router;

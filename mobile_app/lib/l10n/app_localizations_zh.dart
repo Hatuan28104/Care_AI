@@ -921,4 +921,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get confirmDeleteConversation => '确定要删除此对话吗？';
+
+  @override
+  String get dangerDetected => '检测到危险';
+
+  @override
+  String get noAlerts => '没有通知';
 }

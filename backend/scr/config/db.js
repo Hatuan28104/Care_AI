@@ -15,9 +15,9 @@ const config = {
 let pool;
 
 export async function getDB() {
-  if (pool) return pool;      // đã connect rồi thì dùng lại
+  if (pool) return pool;      
 
   pool = await sql.connect(config);
-  console.log("✅ DB connected");
+  console.log("DB connected");
   return pool;
 }

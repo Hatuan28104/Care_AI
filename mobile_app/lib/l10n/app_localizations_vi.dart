@@ -921,4 +921,10 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get confirmDeleteConversation => 'Bạn có chắc muốn xóa cuộc trò chuyện này không?';
+
+  @override
+  String get dangerDetected => 'Phát hiện nguy hiểm';
+
+  @override
+  String get noAlerts => 'Không có cảnh báo';
 }

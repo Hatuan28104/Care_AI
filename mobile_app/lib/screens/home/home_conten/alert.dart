@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../app_settings.dart';
+import 'package:Care_AI/app_settings.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:Care_AI/models/tr.dart';
 import 'package:Care_AI/widgets/common_confirm_dialog.dart';
+import 'package:Care_AI/api/alert_api.dart';
+import 'package:Care_AI/models/current_user.dart';
+import 'package:Care_AI/widgets/app_header.dart';
 
 class AlertScreen extends StatefulWidget {
   const AlertScreen({super.key});
@@ -15,62 +18,78 @@ class _AlertScreenState extends State<AlertScreen> {
   static const _bg = Color(0xFFF6F6F6);
   static const _blue = Color(0xFF1877F2);
 
-  final List<_AlertItem> _alerts = [
-    _AlertItem(
-      id: 'a1',
-      icon: Icons.favorite,
-      iconColor: Colors.red,
-      title: 'Abnormally increased heart rate',
-      time: '17:35 Today',
-      detail:
-          'Your heart rate increased abnormally. Consider resting and re-measuring in 5 minutes.',
-    ),
-    _AlertItem(
-      id: 'a2',
-      icon: Icons.sentiment_dissatisfied,
-      iconColor: Colors.orange,
-      title: 'Negative emotions',
-      time: '14:35 Today',
-      detail:
-          'We detected signs of negative emotions. Try breathing exercises or talk to someone you trust.',
-    ),
-    _AlertItem(
-      id: 'a3',
-      icon: Icons.access_time,
-      iconColor: Colors.black54,
-      title: 'No response for a long time',
-      time: '23:05 yesterday',
-      detail:
-          'You have not interacted with the device for a long time. Please check connection.',
-      isRead: true,
-    ),
-    _AlertItem(
-      id: 'a4',
-      icon: Icons.bedtime,
-      iconColor: Colors.indigo,
-      title: 'Abnormal sleep',
-      time: '21:05 yesterday',
-      detail:
-          'Your sleep pattern appears unusual. Try to keep a consistent bedtime.',
-      isRead: true,
-    ),
-  ];
+  final List<_AlertItem> _alerts = [];
 
   @override
   void initState() {
     super.initState();
+
+    loadAlerts();
+    AppSettings.alertVersion.addListener(_onNewAlert);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+  }
+
+  void _onNewAlert() {
+    loadAlerts();
+  }
+
+  @override
+  void dispose() {
+    AppSettings.alertVersion.removeListener(_onNewAlert);
+    super.dispose();
+  }
+  /* ================= LOAD ALERT ================= */
+
+  Future<void> loadAlerts() async {
+    final user = CurrentUser.user;
+
+    if (user == null) {
+      return;
+    }
+
+    final userId = user.nguoiDungId;
+    final data = await AlertApi.getAlerts(userId);
+
+    if (!mounted) return;
+
+    setState(() {
+      _alerts.clear();
+
+      _alerts.addAll(data.map((e) => _AlertItem(
+            id: e["Notification_ID"],
+            icon: Icons.warning_amber_rounded,
+            iconColor: Colors.red,
+            title: e["TieuDe"] ?? "Thông báo",
+            time: _formatTime(e["ThoiGian"]),
+            detail: e["NoiDung"],
+            isRead: e["DaDoc"] ?? false,
+          )));
+    });
+
     _syncBadge();
+  }
+
+  String _formatTime(String? iso) {
+    if (iso == null || iso.isEmpty) return "";
+
+    final date = DateTime.parse(iso).toLocal();
+    return "${date.hour}:${date.minute.toString().padLeft(2, '0')}  •  ${date.day}/${date.month}";
   }
 
   void _syncBadge() {
     final unread = _alerts.where((e) => !e.isRead).length;
-    if (AppSettings.unreadAlertCount.value == unread) return;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       AppSettings.unreadAlertCount.value = unread;
     });
   }
+
+  /* ================= BUILD ================= */
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +98,10 @@ class _AlertScreenState extends State<AlertScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            _header(context),
+            AppHeader(
+              title: context.tr.notifications,
+              showBack: true,
+            ),
             Expanded(child: _list()),
           ],
         ),
@@ -87,76 +109,39 @@ class _AlertScreenState extends State<AlertScreen> {
     );
   }
 
-  // ===== HEADER =====
-  Widget _header(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(18, 14, 18, 10),
-      child: Row(
-        children: [
-          InkWell(
-            onTap: () => Navigator.pop(context),
-            child: const Icon(Icons.arrow_back_ios_new, size: 20),
-          ),
-          Expanded(
-            child: Center(
+  /* ================= LIST ================= */
+
+  Widget _list() {
+    if (_alerts.isEmpty) {
+      return RefreshIndicator(
+        onRefresh: loadAlerts,
+        child: ListView(
+          children: [
+            const SizedBox(height: 20),
+            Center(
               child: Text(
-                context.tr.notifications,
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
+                context.tr.noAlerts,
+                style: const TextStyle(fontSize: 16),
               ),
             ),
-          ),
-          const SizedBox(width: 20),
-        ],
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: loadAlerts,
+      child: ListView.separated(
+        padding: const EdgeInsets.fromLTRB(18, 6, 18, 18),
+        itemCount: _alerts.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 8),
+        itemBuilder: (_, i) => _tile(context, _alerts[i]),
       ),
     );
   }
 
-  // ===== LIST =====
-  Widget _list() {
-    return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(18, 6, 18, 18),
-      itemCount: _alerts.length + 1,
-      separatorBuilder: (_, __) => const SizedBox(height: 10),
-      itemBuilder: (_, i) {
-        if (i == 0) {
-          return Row(
-            children: [
-              Text(
-                context.tr.today.toUpperCase(),
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black54,
-                ),
-              ),
-              const Spacer(),
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    for (final a in _alerts) {
-                      a.isRead = true;
-                    }
-                  });
-                  _syncBadge();
-                },
-                child: Text(
-                  context.tr.markAllRead,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: _blue,
-                  ),
-                ),
-              ),
-            ],
-          );
-        }
-        return _tile(context, _alerts[i - 1]);
-      },
-    );
-  }
+  /* ================= ITEM ================= */
 
-  // ===== ITEM =====
   Widget _tile(BuildContext context, _AlertItem item) {
     return Slidable(
       key: ValueKey(item.id),
@@ -174,31 +159,41 @@ class _AlertScreenState extends State<AlertScreen> {
                 cancelText: context.tr.cancel,
                 confirmColor: Colors.red,
               );
+
               if (ok == true) {
+                final user = CurrentUser.user;
+
+                if (user != null) {
+                  await AlertApi.deleteAlert(item.id, user.nguoiDungId);
+                }
+
                 setState(() => _alerts.remove(item));
                 _syncBadge();
               }
             },
             backgroundColor: Colors.red,
             borderRadius: BorderRadius.circular(10),
-            child: const Center(
-              child: Icon(
-                Icons.delete,
-                size: 28,
-                color: Colors.white,
-              ),
-            ),
+            child: const Icon(Icons.delete, size: 26, color: Colors.white),
           ),
         ],
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12),
         onTap: () async {
           await Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => _AlertDetail(item: item)),
+            MaterialPageRoute(
+              builder: (_) => _AlertDetail(item: item),
+            ),
           );
+
           if (!item.isRead) {
+            final user = CurrentUser.user;
+
+            if (user != null) {
+              await AlertApi.markAsRead(item.id, user.nguoiDungId);
+            }
+
             setState(() => item.isRead = true);
             _syncBadge();
           }
@@ -206,37 +201,23 @@ class _AlertScreenState extends State<AlertScreen> {
         child: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(10),
+            color: item.isRead ? Colors.white : const Color(0xFFFFF4F4),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: item.isRead ? Colors.transparent : Colors.red.shade200,
+              width: item.isRead ? 0 : 1.2,
+            ),
             boxShadow: const [
               BoxShadow(
-                blurRadius: 8,
+                blurRadius: 6,
                 color: Color(0x11000000),
-                offset: Offset(0, 3),
+                offset: Offset(0, 2),
               ),
             ],
           ),
           child: Row(
             children: [
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Icon(item.icon, color: item.iconColor, size: 22),
-                  if (!item.isRead)
-                    Positioned(
-                      right: -6,
-                      top: -6,
-                      child: Container(
-                        width: 10,
-                        height: 10,
-                        decoration: const BoxDecoration(
-                          color: _blue,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
+              Icon(item.icon, color: item.iconColor, size: 24),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -245,22 +226,20 @@ class _AlertScreenState extends State<AlertScreen> {
                     Text(
                       item.title,
                       style: const TextStyle(
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w600,
                         fontSize: 15,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       item.time,
-                      style: const TextStyle(
-                        color: Color.fromARGB(200, 0, 0, 0),
-                        fontWeight: FontWeight.w500,
-                        fontSize: 10,
-                      ),
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ],
                 ),
               ),
+              if (!item.isRead)
+                const Icon(Icons.circle, size: 10, color: _blue),
             ],
           ),
         ),
@@ -269,7 +248,8 @@ class _AlertScreenState extends State<AlertScreen> {
   }
 }
 
-// ===== DETAIL SCREEN =====
+/* ================= DETAIL ================= */
+
 class _AlertDetail extends StatelessWidget {
   const _AlertDetail({required this.item});
   final _AlertItem item;
@@ -277,37 +257,91 @@ class _AlertDetail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F5F9),
+      backgroundColor: const Color(0xFFF6F6F6),
       body: SafeArea(
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(18, 14, 18, 10),
-              child: Row(
-                children: [
-                  InkWell(
-                    onTap: () => Navigator.pop(context),
-                    child: const Icon(Icons.arrow_back_ios_new),
-                  ),
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        context.tr.alert,
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                        ),
+            AppHeader(
+              title: context.tr.alert,
+              showBack: true,
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 500),
+                    child: Container(
+                      padding: const EdgeInsets.all(18),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                            color: const Color.fromARGB(255, 254, 136, 136)),
+                        boxShadow: const [
+                          BoxShadow(
+                            blurRadius: 12,
+                            color: Color(0x11000000),
+                            offset: Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                item.icon,
+                                color: item.iconColor,
+                                size: 24,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  item.title,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 17,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              const Icon(Icons.access_time,
+                                  size: 14, color: Colors.grey),
+                              const SizedBox(width: 6),
+                              Text(
+                                item.time,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          Container(
+                            height: 1,
+                            color: Colors.grey.shade200,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            item.detail,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              height: 1.5,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  const SizedBox(width: 20),
-                ],
+                ),
               ),
-            ),
-            const SizedBox(height: 100),
-            Padding(
-              padding: const EdgeInsets.all(18),
-              child: _HeartRateCard(item: item),
             ),
           ],
         ),
@@ -316,160 +350,8 @@ class _AlertDetail extends StatelessWidget {
   }
 }
 
-// ===== CARD =====
-class _HeartRateCard extends StatelessWidget {
-  const _HeartRateCard({required this.item});
-  final _AlertItem item;
+/* ================= MODEL ================= */
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: const Color.fromARGB(255, 173, 173, 173),
-          width: 2,
-        ),
-        boxShadow: const [
-          BoxShadow(
-            blurRadius: 12,
-            color: Color(0x22000000),
-            offset: Offset(0, 6),
-          )
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // icon + title
-          Row(
-            children: [
-              Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFECEC),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(item.icon, color: Colors.red, size: 100),
-              ),
-              const SizedBox(width: 60),
-              Text(
-                context.tr.heartRateTitle,
-                style: TextStyle(
-                  fontSize: 40,
-                  fontWeight: FontWeight.w600,
-                  height: 1.1,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 8),
-
-          // BPM
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic, // 👈 BẮT BUỘC
-            children: const [
-              Text(
-                '140',
-                style: TextStyle(
-                  fontSize: 50,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              SizedBox(width: 6),
-              Text(
-                'BPM',
-                style: TextStyle(
-                  fontSize: 24,
-                  color: Colors.black54,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-
-          // High badge
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 3),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color.fromARGB(208, 244, 67, 54)),
-            ),
-            child: Text(
-              context.tr.high,
-              style: TextStyle(
-                color: const Color.fromARGB(208, 244, 67, 54),
-                fontWeight: FontWeight.w600,
-                fontSize: 15,
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 18),
-
-          // user
-          const Row(
-            children: [
-              Icon(Icons.person, size: 30, color: Colors.black54),
-              SizedBox(width: 8),
-              Text(
-                'Alizabeth Browns',
-                style: TextStyle(
-                  fontWeight: FontWeight.w400,
-                  fontSize: 16,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 10),
-
-          // time + date
-          const Row(
-            children: [
-              Icon(Icons.access_time, size: 30, color: Colors.black54),
-              SizedBox(width: 6),
-              Text('10:30 – 11:00'),
-              SizedBox(width: 20),
-              Icon(Icons.calendar_today, size: 24, color: Colors.black54),
-              SizedBox(width: 6),
-              Text('October 28th, 2025'),
-            ],
-          ),
-
-          const SizedBox(height: 10),
-
-          RichText(
-            text: TextSpan(
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.black,
-                height: 1.5,
-              ),
-              children: [
-                TextSpan(
-                  text: context.tr.detailedDescription,
-                  style: TextStyle(fontWeight: FontWeight.w700),
-                ),
-                TextSpan(
-                  text: context.tr.unstableHeartRate,
-                  style: TextStyle(fontWeight: FontWeight.w400),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ===== MODEL =====
 class _AlertItem {
   final String id;
   final IconData icon;

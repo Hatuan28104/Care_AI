@@ -7,9 +7,13 @@ Future<bool?> showConfirmDialog(
   String confirmText = "OK",
   String cancelText = "Cancel",
   Color confirmColor = Colors.red,
+  Color? confirmBackgroundColor,
+  Color confirmTextColor = const Color(0xFF8C1823),
+  IconData icon = Icons.priority_high,
 }) {
   return showDialog<bool>(
     context: context,
+    barrierDismissible: false,
     builder: (ctx) {
       return Dialog(
         shape: RoundedRectangleBorder(
@@ -20,6 +24,7 @@ Future<bool?> showConfirmDialog(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              /// 🔹 ICON
               Container(
                 width: 56,
                 height: 56,
@@ -27,11 +32,11 @@ Future<bool?> showConfirmDialog(
                   shape: BoxShape.circle,
                   border: Border.all(color: confirmColor, width: 4),
                 ),
-                child: Icon(Icons.priority_high, color: confirmColor),
+                child: Icon(icon, color: confirmColor),
               ),
+
               const SizedBox(height: 14),
 
-              /// 🔹 TITLE (dynamic)
               Text(
                 title,
                 style: const TextStyle(
@@ -42,7 +47,6 @@ Future<bool?> showConfirmDialog(
 
               const SizedBox(height: 6),
 
-              /// 🔹 MESSAGE (dynamic)
               Text(
                 message,
                 textAlign: TextAlign.center,
@@ -57,13 +61,18 @@ Future<bool?> showConfirmDialog(
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(ctx, true),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: confirmColor.withOpacity(0.2),
+                    backgroundColor: confirmBackgroundColor ??
+                        confirmColor.withOpacity(0.46),
                     elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   child: Text(
                     confirmText,
                     style: TextStyle(
-                      color: confirmColor,
+                      color: confirmTextColor,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -78,13 +87,17 @@ Future<bool?> showConfirmDialog(
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(ctx, false),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xD1D1D3D9),
+                    backgroundColor: const Color(0x8AD1D3D9),
                     elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   child: Text(
                     cancelText,
                     style: const TextStyle(
-                      color: Color.fromARGB(255, 71, 71, 71),
+                      color: Color(0xFF626262),
                       fontWeight: FontWeight.w700,
                     ),
                   ),

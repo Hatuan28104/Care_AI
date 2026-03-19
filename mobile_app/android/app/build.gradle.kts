@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.demo_app"
+    namespace = "com.careai.app"
     compileSdk = flutter.compileSdkVersion
 
     ndkVersion = "28.2.13676358"
@@ -24,7 +24,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.demo_app"
+        applicationId = "com.careai.app"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

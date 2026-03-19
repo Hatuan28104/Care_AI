@@ -84,7 +84,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get latest => '最新';
 
   @override
-  String get alert => 'アラート';
+  String get alert => '警告';
 
   @override
   String get today => '今日';
@@ -921,4 +921,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get confirmDeleteConversation => 'この会話を削除してもよろしいですか？';
+
+  @override
+  String get dangerDetected => '危険が検出されました';
+
+  @override
+  String get noAlerts => '通知はありません';
 }

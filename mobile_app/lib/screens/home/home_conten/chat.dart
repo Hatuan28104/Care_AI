@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Care_AI/api/chat_api.dart';
-import '../../../models/tr.dart';
+import 'package:Care_AI/models/tr.dart';
 
 class ChatScreen extends StatefulWidget {
   final String name;
@@ -73,6 +73,7 @@ class _ChatScreenState extends State<ChatScreen> {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
 
+    if (!mounted) return;
     setState(() {
       messages.add({"text": text, "isUser": true});
       messages.add({"isUser": false, "isTyping": true});
@@ -90,6 +91,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
       if (!mounted) return;
 
+      final bool canhBao = response["canhBao"] == true;
+      final int mucDo = response["mucDo"] ?? 0;
+
       setState(() {
         messages.removeWhere((m) => m["isTyping"] == true);
 
@@ -100,12 +104,35 @@ class _ChatScreenState extends State<ChatScreen> {
           "isUser": false,
         });
       });
+
+      if (canhBao) {
+        if (!mounted) return;
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text("Cảnh báo"),
+            content: const Text("Phát hiện nội dung nguy hiểm"),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("OK"),
+              ),
+            ],
+          ),
+        );
+      } else if (mucDo == 2) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(" Nội dung có dấu hiệu tiêu cực"),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
     } catch (e) {
       if (!mounted) return;
 
       setState(() {
         messages.removeWhere((m) => m["isTyping"] == true);
-
         messages.add({
           "text": context.tr.serverError,
           "isUser": false,

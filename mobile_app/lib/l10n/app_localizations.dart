@@ -906,7 +906,7 @@ abstract class AppLocalizations {
   /// No description provided for @welcomeTitle.
   ///
   /// In en, this message translates to:
-  /// **'Care AI, hello'**
+  /// **'Hello, Care AI'**
   String get welcomeTitle;
 
   /// No description provided for @welcomeSubtitle.
@@ -1922,6 +1922,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Are you sure you want to delete this conversation?'**
   String get confirmDeleteConversation;
+
+  /// No description provided for @dangerDetected.
+  ///
+  /// In en, this message translates to:
+  /// **'Danger detected'**
+  String get dangerDetected;
+
+  /// No description provided for @noAlerts.
+  ///
+  /// In en, this message translates to:
+  /// **'No alerts'**
+  String get noAlerts;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

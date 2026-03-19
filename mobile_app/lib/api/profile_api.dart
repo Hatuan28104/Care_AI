@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:io';
+import '../config/api_config.dart';
 
 class ProfileApi {
-  static const _baseUrl = 'http://10.0.2.2:3000';
+  static String get _baseUrl => ApiConfig.baseUrl;
 
   /* =========================
      UPDATE PROFILE

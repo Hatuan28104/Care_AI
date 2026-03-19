@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'auth_storage.dart';
+import '../config/api_config.dart';
 
 class SettingsApi {
-  static const String _baseUrl = 'http://10.0.2.2:3000/api/settings';
-  static const String _authBaseUrl = 'http://10.0.2.2:3000/auth';
+  static String get _baseUrl => "${ApiConfig.baseUrl}/api/settings";
+  static String get _authBaseUrl => "${ApiConfig.baseUrl}/auth";
 
   // 🔹 GET settings (KHÔNG cần userId)
   static Future<Map<String, dynamic>> getSettings() async {

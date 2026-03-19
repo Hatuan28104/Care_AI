@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../config/api_config.dart';
 
 class ChatApi {
-  static const String baseUrl = "http://10.0.2.2:3000/api/chat";
+  static String get baseUrl => "${ApiConfig.baseUrl}/api/chat";
 
   static const headers = {
     "Content-Type": "application/json",
@@ -43,7 +44,8 @@ class ChatApi {
       }
 
       final data = jsonDecode(res.body);
-
+      data["mucDo"] ??= 0;
+      data["canhBao"] ??= false;
       return data;
     } catch (e) {
       return {"success": false, "message": e.toString()};

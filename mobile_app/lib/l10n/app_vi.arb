@@ -265,7 +265,10 @@
   "updatePhoto": "Cập nhật ảnh",
   "invalidHeightWeight": "Chiều cao / cân nặng không hợp lệ",
   "invalidGender": "Vui lòng chọn giới tính hợp lệ",
-
+  "dangerDetected": "Phát hiện nguy hiểm",
+  "noAlerts": "Không có cảnh báo",
+  "alert": "Cảnh báo",
+  "notifications": "Thông báo",
   "calories": "Lượng calo tiêu thụ",
   "spo2": "Nồng độ oxy trong máu – SpO₂",
   "goodHealthDesc": "Các chỉ số của bạn đều nằm trong ngưỡng bình thường. Hãy tiếp tục duy trì lối sống lành mạnh!",

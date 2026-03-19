@@ -4,7 +4,8 @@ import 'models/login_history_item.dart';
 
 class AppSettings {
   static final ValueNotifier<double> textScale = ValueNotifier<double>(1.1);
-
+  static VoidCallback? reloadAlert;
+  static ValueNotifier<int> alertVersion = ValueNotifier(0);
   static final ValueNotifier<Locale> locale =
       ValueNotifier(WidgetsBinding.instance.platformDispatcher.locale);
   static final ValueNotifier<bool> notificationOn = ValueNotifier<bool>(true);
@@ -21,7 +22,7 @@ class AppSettings {
       ValueNotifier<List<LoginHistoryItem>>([]);
 
   static SharedPreferences? _prefs;
-
+  static Function(String message)? addGlobalAlert;
   static Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
 

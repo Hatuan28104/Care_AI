@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../config/api_config.dart';
 
 class HealthApi {
-  static const String _baseUrl = 'http://10.0.2.2:3000';
+  static String get _baseUrl => ApiConfig.baseUrl;
 
   /* =========================
      DANH SÁCH CHỈ SỐ SỨC KHỎE

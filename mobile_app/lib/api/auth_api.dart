@@ -5,9 +5,10 @@ import 'auth_storage.dart';
 import '../models/login_history_item.dart';
 import '../app_settings.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import '../config/api_config.dart';
 
 class AuthApi {
-  static const String baseUrl = 'http://10.0.2.2:3000';
+  static String get baseUrl => ApiConfig.baseUrl;
 
   /* =========================
      REGISTER – GỬI OTP
@@ -64,14 +65,12 @@ class AuthApi {
         throw Exception('Không nhận được token');
       }
 
-      // ✅ Lưu JWT
       await AuthStorage.saveToken(token);
 
       final user = User.fromJson(data['user']);
 
       AppSettings.phoneNumber.value = user.soDienThoai ?? '';
 
-      // 🔥 LẤY FCM TOKEN SAU LOGIN
       FirebaseMessaging messaging = FirebaseMessaging.instance;
       String? fcmToken = await messaging.getToken();
 
@@ -129,7 +128,6 @@ class AuthApi {
     }
   }
 
-  // 🔥 THÊM DƯỚI changePhone()
   static Future<List<LoginHistoryItem>> getLoginHistory() async {
     final headers = await _authHeaders();
 
@@ -158,6 +156,24 @@ class AuthApi {
 
   static String _mapIpToLocation(String? ip) {
     if (ip == null || ip.isEmpty) return 'Không xác định';
-    return 'Việt Nam'; // demo, sau map tỉnh
+    return 'Việt Nam';
+  }
+
+  static Future<void> logout() async {
+    try {
+      String? fcmToken = await FirebaseMessaging.instance.getToken();
+      final headers = await _authHeaders();
+
+      if (fcmToken != null) {
+        await http.post(
+          Uri.parse('$baseUrl/auth/remove-fcm-token'),
+          headers: headers,
+          body: jsonEncode({'fcmToken': fcmToken}),
+        );
+      }
+    } catch (e) {
+    }
+
+    await AuthStorage.clear();
   }
 }

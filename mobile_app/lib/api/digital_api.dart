@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../config/api_config.dart';
 
 class DigitalApi {
-  static const String baseUrl = "http://10.0.2.2:3000/api/digital-human";
+  static String get baseUrl => "${ApiConfig.baseUrl}/api/digital-human";
   static Future<List<dynamic>> getAll() async {
     final response = await http.get(Uri.parse(baseUrl));
 
