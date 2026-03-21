@@ -6,6 +6,7 @@ class User {
 
   final String nguoiDungId;
   final String? tenND;
+  final bool profileCompleted;
 
   User({
     required this.taiKhoanId,
@@ -14,16 +15,31 @@ class User {
     required this.token,
     required this.nguoiDungId,
     this.tenND,
+    this.profileCompleted = false,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
+    final nestedNguoiDung = json['nguoidung'] is Map<String, dynamic>
+        ? json['nguoidung'] as Map<String, dynamic>
+        : <String, dynamic>{};
+
+    final nguoiDungIdValue =
+        json['NguoiDung_ID'] ?? json['nguoiDungId'] ?? nestedNguoiDung['nguoidung_id'];
+    final soDienThoaiValue = json['SoDienThoai'] ?? json['sodienthoai'] ?? '';
+    final tenNdValue = json['TenND'] ?? json['tenND'] ?? nestedNguoiDung['tennd'];
+
     return User(
-      taiKhoanId: json['TaiKhoan_ID'].toString(),
-      soDienThoai: json['SoDienThoai'].toString(),
-      laAdmin: json['LaAdmin'] == true,
+      taiKhoanId: (json['TaiKhoan_ID'] ??
+              json['taiKhoanId'] ??
+              json['taikhoan_id'] ??
+              '')
+          .toString(),
+      soDienThoai: soDienThoaiValue.toString(),
+      laAdmin: json['LaAdmin'] == true || json['laadmin'] == true,
       token: json['token'] ?? '',
-      nguoiDungId: json['NguoiDung_ID'].toString(),
-      tenND: json['TenND'],
+      nguoiDungId: nguoiDungIdValue?.toString() ?? '',
+      tenND: tenNdValue?.toString(),
+      profileCompleted: json['profileCompleted'] == true,
     );
   }
 }

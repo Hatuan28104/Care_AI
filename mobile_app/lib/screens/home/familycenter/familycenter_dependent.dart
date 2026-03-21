@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:Care_AI/api/family_api.dart';
+import 'dart:async';
+import 'package:demo_app/api/family_api.dart';
 import 'familycenter_dependent_proflie.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:Care_AI/models/tr.dart';
-import 'package:Care_AI/widgets/common_confirm_dialog.dart';
+import 'package:demo_app/models/tr.dart';
+import 'package:demo_app/widgets/common_confirm_dialog.dart';
 
 class MyDependentsScreen extends StatefulWidget {
   const MyDependentsScreen({super.key});
@@ -12,31 +13,56 @@ class MyDependentsScreen extends StatefulWidget {
   State<MyDependentsScreen> createState() => _MyDependentsScreenState();
 }
 
-class _MyDependentsScreenState extends State<MyDependentsScreen> {
+class _MyDependentsScreenState extends State<MyDependentsScreen>
+    with WidgetsBindingObserver {
   static const Color _blue = Color(0xFF1877F2);
   static const Color _red = Color(0xFFFE4343);
 
   List<dynamic> invites = [];
   List<dynamic> dependents = [];
   bool loading = true;
+  Timer? _pollTimer;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadData();
+    _pollTimer = Timer.periodic(const Duration(seconds: 6), (_) {
+      _loadData(silent: true);
+    });
   }
 
-  Future<void> _loadData() async {
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _pollTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _loadData(silent: true);
+    }
+  }
+
+  Future<void> _loadData({bool silent = false}) async {
+    if (!silent && mounted) {
+      setState(() => loading = true);
+    }
     try {
       final incoming = await FamilyApi.getIncomingInvites();
       final deps = await FamilyApi.getMyDependents();
 
+      if (!mounted) return;
       setState(() {
         invites = incoming;
         dependents = deps;
         loading = false;
       });
     } catch (_) {
+      if (!mounted) return;
       setState(() => loading = false);
     }
   }
@@ -74,7 +100,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
       decoration: _cardDecoration(),
       child: Row(
         children: [
-          _avatar(inv['AvatarUrl']),
+          _avatar(inv['nguoidung']?['avatarurl']),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.only(left: 30),
@@ -83,7 +109,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    inv['TenND'] ?? context.tr.unknownName,
+                    inv['nguoidung']?['tennd'] ?? context.tr.unknownName,
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
@@ -93,12 +119,12 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                   Row(
                     children: [
                       GestureDetector(
-                        onTap: () => _showAcceptDialog(inv['LoiMoi_ID']),
+                        onTap: () => _showAcceptDialog(inv['loimoi_id']),
                         child: _actionBtn(context.tr.accept, _blue),
                       ),
                       const SizedBox(width: 16),
                       GestureDetector(
-                        onTap: () => _showRejectDialog(inv['LoiMoi_ID']),
+                        onTap: () => _showRejectDialog(inv['loimoi_id']),
                         child: _actionBtn(context.tr.reject, _red),
                       ),
                     ],
@@ -115,7 +141,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
   // ================= JOINED CARD =================
   Widget _joinedCard(dynamic dep) {
     return Slidable(
-      key: ValueKey(dep['QuanHeGiamHo_ID']),
+      key: ValueKey(dep['quanhegiamho_id']),
       endActionPane: ActionPane(
         motion: const DrawerMotion(),
         extentRatio: 0.25,
@@ -130,8 +156,8 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                 cancelText: context.tr.cancel,
               );
               if (ok == true) {
-                await FamilyApi.endRelationship(dep['QuanHeGiamHo_ID']);
-                _loadData();
+                await FamilyApi.endRelationship(dep['quanhegiamho_id']);
+                _loadData(silent: true);
               }
             },
             backgroundColor: const Color(0xFFFE4343),
@@ -148,7 +174,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
             context,
             MaterialPageRoute(
               builder: (_) => DependentProfileScreen(
-                quanHeId: dep['QuanHeGiamHo_ID'],
+                quanHeId: dep['quanhegiamho_id'],
               ),
             ),
           );
@@ -159,7 +185,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
           decoration: _cardDecoration(),
           child: Row(
             children: [
-              _avatar(dep['AvatarUrl']),
+              _avatar(dep['nguoidung']?['avatarurl']),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
@@ -167,7 +193,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      dep['TenND'] ?? context.tr.unknownName,
+                      dep['nguoidung']?['tennd'] ?? context.tr.unknownName,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -175,7 +201,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      '${context.tr.joinDate}: ${_formatDate(dep['NgayBatDau'])}',
+                      '${context.tr.joinDate}: ${_formatDate(dep['ngaybatdau'])}',
                       style: const TextStyle(
                         fontSize: 12,
                         color: Colors.grey,
@@ -195,14 +221,14 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
   Future<void> _acceptConfirmed(String loiMoiId) async {
     await FamilyApi.acceptInvite(loiMoiId);
 
-    await _loadData(); // reload lại danh sách
+    await _loadData(silent: true); // reload lại danh sách
   }
 
   Future<void> _rejectConfirmed(String loiMoiId) async {
     await FamilyApi.rejectInvite(loiMoiId);
 
     setState(() {
-      invites.removeWhere((e) => e['LoiMoi_ID'] == loiMoiId);
+      invites.removeWhere((e) => e['loimoi_id'] == loiMoiId);
     });
   }
 
@@ -263,7 +289,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen> {
       height: 72,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        color: avatar == null ? _blue.withOpacity(.1) : null,
+        color: avatar == null ? _blue.withValues(alpha: 0.1) : null,
         image: avatar != null
             ? DecorationImage(
                 image: NetworkImage(avatar),

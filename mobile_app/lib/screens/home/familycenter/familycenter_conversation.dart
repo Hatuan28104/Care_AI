@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../models/tr.dart';
 import '../../../api/chat_api.dart';
 import '../../../api/family_api.dart';
-import 'package:Care_AI/widgets/app_header.dart';
+import '../../../config/api_config.dart';
+import 'package:demo_app/widgets/app_header.dart';
 
 class ConversationScreen extends StatefulWidget {
   final String userId;
@@ -32,32 +33,39 @@ class _ConversationSharingScreenState extends State<ConversationScreen> {
   }
 
   Future<void> _loadHistory() async {
-    final history = await ChatApi.getHistory(widget.userId);
-    final permissions = await FamilyApi.getPermissionConfigs(widget.quanHeId);
+    try {
+      final history = await ChatApi.getHistory(widget.userId);
+      final permissions = await FamilyApi.getPermissionConfigs(widget.quanHeId);
 
-    final permissionMap = {
-      for (var p in permissions) p["Quyen_ID"]: p["DaKichHoat"]
-    };
+      final permissionMap = {
+        for (var p in permissions) p["quyen_id"]: p["dakichhoat"]
+      };
 
-    setState(() {
-      _users.clear();
+      if (!mounted) return;
+      setState(() {
+        _users.clear();
 
-      for (var item in history) {
-        final hoiThoaiId = item["HoiThoai_ID"];
-
-        bool enabled =
-            permissionMap[hoiThoaiId] == 1 || permissionMap[hoiThoaiId] == true;
-        _users.add({
-          "name": item["TenDigitalHuman"] ?? "Conversation",
-          "date": item["LanCuoiTuongTac"] ?? "",
-          "hoiThoaiId": hoiThoaiId,
-          "image": item["ImageUrl"] ?? "",
-          "enabled": enabled,
-        });
-      }
-
-      _loading = false;
-    });
+        for (var item in history) {
+          final hoiThoaiId = item["hoithoai_id"];
+          final enabled =
+              permissionMap[hoiThoaiId] == 1 || permissionMap[hoiThoaiId] == true;
+          _users.add({
+            "name": item["tendigitalhuman"] ?? "Conversation",
+            "date": item["lancuoituongtac"] ?? "",
+            "hoiThoaiId": hoiThoaiId,
+            "image": item["imageurl"] ?? "",
+            "enabled": enabled,
+          });
+        }
+        _loading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    }
   }
 
   @override
@@ -135,12 +143,14 @@ class _ConversationSharingScreenState extends State<ConversationScreen> {
                 ? ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: Image.network(
-                      "http://10.0.2.2:3000/$image",
+                      image.startsWith("http")
+                          ? image
+                          : "${ApiConfig.baseUrl}${image.startsWith("/") ? image : "/$image"}",
                       fit: BoxFit.cover,
                     ),
                   )
                 : Container(
-                    color: _blue.withOpacity(.1),
+                    color: _blue.withValues(alpha: 0.1),
                     child: const Icon(Icons.person, color: _blue),
                   ),
           ),

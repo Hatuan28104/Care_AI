@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:Care_AI/api/digital_api.dart';
+import 'package:demo_app/api/digital_api.dart';
+import 'package:demo_app/config/api_config.dart';
 import 'digital_human.dart';
 import 'chat.dart';
 import 'data/basic_health_data.dart';
@@ -20,6 +21,14 @@ class HomeTab extends StatefulWidget {
 
 class _HomeTabState extends State<HomeTab> {
   late Future<List<dynamic>> _futureHumans;
+
+  String _imageUrlFrom(dynamic raw) {
+    final value = raw?.toString() ?? '';
+    if (value.isEmpty) return '';
+    if (value.startsWith('http://') || value.startsWith('https://')) return value;
+    final clean = value.startsWith('/') ? value : '/$value';
+    return '${ApiConfig.baseUrl}$clean';
+  }
 
   @override
   void initState() {
@@ -169,13 +178,14 @@ class _HomeTabState extends State<HomeTab> {
 
               return GestureDetector(
                 onTap: () {
+                  final imageUrl = _imageUrlFrom(human['imageurl']);
                   _go(
                     context,
                     ChatScreen(
-                      name: human['TenDigitalHuman'],
-                      image: "http://10.0.2.2:3000/${human['ImageUrl']}",
+                      name: (human['tendigitalhuman'] ?? '').toString(),
+                      image: imageUrl,
                       intro: context.tr.aiIntro,
-                      digitalId: human['DigitalHuman_ID'].toString().trim(),
+                      digitalId: (human['digitalhuman_id'] ?? '').toString().trim(),
                       userId: widget.userId,
                     ),
                   );
@@ -192,7 +202,7 @@ class _HomeTabState extends State<HomeTab> {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(25),
                     child: Image.network(
-                      "http://10.0.2.2:3000/${human['ImageUrl']}",
+                      _imageUrlFrom(human['imageurl']),
                       fit: BoxFit.cover,
                     ),
                   ),

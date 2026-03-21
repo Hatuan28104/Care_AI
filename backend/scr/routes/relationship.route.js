@@ -15,7 +15,7 @@ const router = express.Router();
 router.get("/profile/:id", auth, async (req, res) => {
   try {
     const qhId = req.params.id;
-    const userId = req.user.NguoiDung_ID;
+    const userId = req.user.nguoidung_id;
 
     const data = await getRelationshipProfile(qhId, userId);
     res.json({ success: true, data });
@@ -29,7 +29,7 @@ router.get("/profile/:id", auth, async (req, res) => {
 ========================= */
 router.get("/guardians", auth, async (req, res) => {
   try {
-    const userId = req.user.NguoiDung_ID;
+    const userId = req.user.nguoidung_id;
     const data = await getMyGuardians(userId);
     res.json({ success: true, data });
   } catch (e) {
@@ -42,7 +42,7 @@ router.get("/guardians", auth, async (req, res) => {
 ========================= */
 router.get("/dependents", auth, async (req, res) => {
   try {
-    const userId = req.user.NguoiDung_ID;
+    const userId = req.user.nguoidung_id;
     const data = await getMyDependents(userId);
     res.json({ success: true, data });
   } catch (e) {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:Care_AI/api/family_api.dart';
+import 'package:demo_app/api/family_api.dart';
+import 'package:demo_app/config/api_config.dart';
 import 'report_detail_screen.dart';
 import '../../../models/tr.dart';
 import 'shared_conversation_viewer.dart';
@@ -55,6 +56,7 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
   // ================= LOAD CONVERSATIONS =================
   Future<void> _loadConversations() async {
     try {
+      setState(() => loadingConversation = true);
       print("QUANHE ID SEND: ${widget.quanHeId}");
 
       final res = await FamilyApi.getSharedConversation(widget.quanHeId);
@@ -62,9 +64,11 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
 
       setState(() {
         conversations = List<Map<String, dynamic>>.from(res);
+        loadingConversation = false;
       });
     } catch (e) {
       print(e);
+      setState(() => loadingConversation = false);
     }
   }
   // ================= FORMAT =================
@@ -123,7 +127,7 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
   // ================= PROFILE HEADER =================
 
   Widget _profileHeader() {
-    final avatar = FamilyApi.normalizeAvatar(data?['AvatarUrl']);
+    final avatar = FamilyApi.normalizeAvatar(data?['avatarurl']);
 
     return Column(
       children: [
@@ -171,7 +175,7 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
               ),
               const SizedBox(height: 12),
               Text(
-                data?['TenND'] ?? '',
+                data?['tennd'] ?? '',
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
@@ -189,10 +193,10 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(18, 8, 18, 18),
       children: [
-        _infoItem(context.tr.fullName, data?['TenND'] ?? ""),
-        _infoItem(context.tr.birthDate, _formatDate(data?['NgaySinh'])),
-        _infoItem(context.tr.gender, _genderText(data?['GioiTinh'])),
-        _infoItem(context.tr.joinDate, _formatDate(data?['NgayBatDau'])),
+        _infoItem(context.tr.fullName, data?['tennd'] ?? ""),
+        _infoItem(context.tr.birthDate, _formatDate(data?['ngaysinh'])),
+        _infoItem(context.tr.gender, _genderText(data?['gioitinh'])),
+        _infoItem(context.tr.joinDate, _formatDate(data?['ngaybatdau'])),
         const SizedBox(height: 8),
         Text(
           context.tr.report,
@@ -265,17 +269,24 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
   // ================= CONVERSATION CARD =================
 
   Widget _conversationCard(Map<String, dynamic> item) {
-    final image = item["ImageUrl"] ?? "";
+    final chatId = item["hoithoai_id"]?.toString() ?? "";
+    final image = (item["imageurl"] ?? "").toString();
+    final imageUrl = image.isEmpty
+        ? ""
+        : (image.startsWith("http")
+            ? image
+            : "${ApiConfig.baseUrl}${image.startsWith("/") ? image : "/$image"}");
 
     return InkWell(
       onTap: () {
+        if (chatId.isEmpty) return;
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (_) => SharedConversationViewer(
-              chatId: item["HoiThoai_ID"]?.toString() ?? "",
-              title: item["TenDigitalHuman"]?.toString() ?? "Conversation",
-              image: item["ImageUrl"]?.toString() ?? "",
+              chatId: chatId,
+              title: item["tendigitalhuman"]?.toString() ?? "Conversation",
+              image: image,
             ),
           ),
         );
@@ -303,7 +314,7 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: Image.network(
-                        "http://10.0.2.2:3000/$image",
+                        imageUrl,
                         fit: BoxFit.cover,
                       ),
                     )
@@ -318,7 +329,7 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    item["TenDigitalHuman"] ?? "Conversation",
+                    item["tendigitalhuman"] ?? "Conversation",
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
@@ -326,7 +337,7 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    formatTime(item["LanCuoiTuongTac"]),
+                    formatTime(item["lancuoituongtac"]),
                     style: const TextStyle(
                       color: Colors.grey,
                       fontSize: 13,

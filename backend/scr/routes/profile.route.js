@@ -6,24 +6,27 @@ import {
   getProfileById,
   getAllUsers,
   deleteUser,
+  getUserStats,
 } from "../repos/profile.repo.js";
+
 const router = express.Router();
 
 /* ======================
    MULTER CONFIG
 ====================== */
 const storage = multer.diskStorage({
-  destination: "uploads/avatars",
+  destination: path.join(process.cwd(), "uploads/avatars"),
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
-    cb(null, `${req.body.nguoiDungId}-${Date.now()}${ext}`);
+    cb(null, `${req.params.id}-${Date.now()}${ext}`);
   },
 });
 
 const upload = multer({
   storage,
-  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
+  limits: { fileSize: 2 * 1024 * 1024 },
 });
+
 /* ======================
    GET ALL USERS
 ====================== */
@@ -33,108 +36,104 @@ router.get("/", async (req, res) => {
 
     res.json({
       success: true,
-      data: users
+      data: users,
     });
-
   } catch (e) {
     res.status(500).json({
       success: false,
-      message: e.message
+      message: e.message,
     });
   }
 });
-
-
-
 /* ======================
-   UPDATE PROFILE
+   DASHBOARD USERS
 ====================== */
-router.put("/update", upload.single("avatar"), async (req, res) => {
-
+router.get("/dashboard/users", async (req, res) => {
   try {
-
-    const avatarUrl = req.file
-      ? `/uploads/avatars/${req.file.filename}`
-      : undefined;
-
-    await updateProfile({
-      ...req.body,
-      avatarUrl
-    });
+    const data = await getUserStats();
 
     res.json({
-      success: true
+      success: true,
+      data
     });
 
-  } catch (e) {
-
-   res.status(400).json({
-  success: false,
-  message: e.message,
-  errors: e.errors || null
-});
-
-  }
-
-});
-
-
-/* ======================
-   DELETE USER
-====================== */
-router.delete("/:id", async (req, res) => {
-
-  try {
-
-    await deleteUser(req.params.id);
-
-    res.json({
-      success: true
-    });
-
-  } catch (e) {
-
+  } catch (err) {
     res.status(500).json({
       success: false,
-      message: e.message
+      message: err.message
     });
-
   }
-
 });
-
-
 /* ======================
    GET PROFILE BY ID
 ====================== */
 router.get("/:id", async (req, res) => {
-
   try {
-
     const profile = await getProfileById(req.params.id);
 
     if (!profile) {
       return res.status(404).json({
         success: false,
-        message: "Chưa có hồ sơ"
+        message: "Chưa có hồ sơ",
       });
     }
 
     res.json({
       success: true,
-      data: profile
+      data: profile,
     });
-
   } catch (e) {
-
     res.status(500).json({
       success: false,
-      message: e.message
+      message: e.message,
     });
-
   }
-
 });
 
+/* ======================
+   UPDATE PROFILE
+====================== */
+router.put("/:id", upload.single("avatar"), async (req, res) => {
+  try {
+    const avatarUrl = req.file
+      ? `/uploads/avatars/${req.file.filename}`
+      : undefined;
+
+    const updated = await updateProfile({
+      ...req.body,
+      nguoiDungId: req.params.id,
+      avatarUrl,
+    });
+
+    res.json({
+      success: true,
+      data: updated,
+    });
+  } catch (e) {
+    res.status(400).json({
+      success: false,
+      message: e.message,
+      errors: e.errors || null,
+    });
+  }
+});
+
+/* ======================
+   DELETE USER
+====================== */
+router.delete("/:id", async (req, res) => {
+  try {
+    await deleteUser(req.params.id);
+
+    res.json({
+      success: true,
+    });
+  } catch (e) {
+    res.status(500).json({
+      success: false,
+      message: e.message,
+    });
+  }
+});
 
 export default router;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/tr.dart';
+import '../../widgets/app_header.dart';
 
 class HelpSupportScreen extends StatefulWidget {
   const HelpSupportScreen({super.key});
@@ -33,45 +34,32 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFF6F6F6),
-      appBar: _appBar(context),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(22, 10, 22, 18),
+      body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _sectionTitle(context.tr.quickContact),
-            const SizedBox(height: 12),
-            _quickContact(),
-            const SizedBox(height: 22),
-            _sectionTitle(context.tr.sendSupportRequest),
-            const SizedBox(height: 12),
-            _formCard(context),
-            const SizedBox(height: 12),
-            _contactInfoCard(),
-            const SizedBox(height: 12),
-            _faqCard(),
+            AppHeader(title: context.tr.helpSupport),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(22, 10, 22, 18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _sectionTitle(context.tr.quickContact),
+                    const SizedBox(height: 12),
+                    _quickContact(),
+                    const SizedBox(height: 22),
+                    _sectionTitle(context.tr.sendSupportRequest),
+                    const SizedBox(height: 12),
+                    _formCard(context),
+                    const SizedBox(height: 12),
+                    _contactInfoCard(),
+                    const SizedBox(height: 12),
+                    _faqCard(),
+                  ],
+                ),
+              ),
+            ),
           ],
-        ),
-      ),
-    );
-  }
-
-  PreferredSizeWidget _appBar(BuildContext context) {
-    return AppBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      centerTitle: true,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new_rounded,
-            color: Colors.black, size: 20),
-        onPressed: () => Navigator.pop(context),
-      ),
-      title: Text(
-        context.tr.helpSupport,
-        style: TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.w700,
-          color: Colors.black,
         ),
       ),
     );

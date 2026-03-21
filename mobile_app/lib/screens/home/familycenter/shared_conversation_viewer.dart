@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:Care_AI/api/chat_api.dart';
+import 'package:demo_app/api/chat_api.dart';
+import 'package:demo_app/config/api_config.dart';
 
 class SharedConversationViewer extends StatefulWidget {
   final String chatId;
@@ -19,8 +20,9 @@ class SharedConversationViewer extends StatefulWidget {
 }
 
 class _SharedConversationViewerState extends State<SharedConversationViewer> {
-  List messages = [];
+  List<Map<String, dynamic>> messages = [];
   bool loading = true;
+  String? error;
 
   @override
   void initState() {
@@ -30,26 +32,25 @@ class _SharedConversationViewerState extends State<SharedConversationViewer> {
 
   Future<void> loadMessages() async {
     try {
-      final res = await ChatApi.getMessages(widget.chatId);
-
-      print("CHAT ID: ${widget.chatId}");
-      print("API RESULT: $res");
+      final res = await ChatApi.getMessages(widget.chatId.trim());
 
       setState(() {
         messages = List<Map<String, dynamic>>.from(res);
         loading = false;
+        error = null;
       });
     } catch (e) {
-      print("LOAD ERROR: $e");
-
       setState(() {
         loading = false;
+        error = e.toString();
       });
     }
   }
 
   Widget messageBubble(Map msg) {
-    bool isUser = msg["LaDigital"] == 0 || msg["LaDigital"] == false;
+    final isDigital = msg["ladigital"] == true;
+    final content = (msg["noidung"] ?? "").toString();
+    final isUser = !isDigital;
 
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
@@ -62,7 +63,7 @@ class _SharedConversationViewerState extends State<SharedConversationViewer> {
           borderRadius: BorderRadius.circular(12),
         ),
         child: Text(
-          msg["NoiDung"] ?? "",
+          content,
           style: TextStyle(
             color: isUser ? Colors.white : Colors.black87,
           ),
@@ -92,7 +93,11 @@ class _SharedConversationViewerState extends State<SharedConversationViewer> {
             CircleAvatar(
               radius: 18,
               backgroundImage: widget.image.isNotEmpty
-                  ? NetworkImage("http://10.0.2.2:3000/${widget.image}")
+                  ? NetworkImage(
+                      widget.image.startsWith("http")
+                          ? widget.image
+                          : "${ApiConfig.baseUrl}${widget.image.startsWith("/") ? widget.image : "/${widget.image}"}",
+                    )
                   : null,
               child: widget.image.isEmpty
                   ? const Icon(Icons.smart_toy, size: 18)
@@ -114,13 +119,32 @@ class _SharedConversationViewerState extends State<SharedConversationViewer> {
       ),
       body: loading
           ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: messages.length,
-              itemBuilder: (context, index) {
-                return messageBubble(messages[index]);
-              },
-            ),
+          : error != null
+              ? Center(child: Text(error!))
+              : messages.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text("Chưa có nội dung hội thoại"),
+                          const SizedBox(height: 10),
+                          TextButton(
+                            onPressed: loadMessages,
+                            child: const Text("Tải lại"),
+                          ),
+                        ],
+                      ),
+                    )
+                  : RefreshIndicator(
+                      onRefresh: loadMessages,
+                      child: ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: messages.length,
+                        itemBuilder: (context, index) {
+                          return messageBubble(messages[index]);
+                        },
+                      ),
+                    ),
     );
   }
 }

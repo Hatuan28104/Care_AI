@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../models/tr.dart';
+import '../../../widgets/app_header.dart';
 
 class TermsOfServiceScreen extends StatelessWidget {
   const TermsOfServiceScreen({super.key});
@@ -9,32 +10,18 @@ class TermsOfServiceScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFF6F6F6),
-      appBar: _appBar(context),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(32, 12, 32, 24),
-          child: const _Content(),
+        child: Column(
+          children: [
+            AppHeader(title: context.tr.termsOfService),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(32, 12, 32, 24),
+                child: const _Content(),
+              ),
+            ),
+          ],
         ),
-      ),
-    );
-  }
-
-  PreferredSizeWidget _appBar(BuildContext context) {
-    return AppBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      leading: IconButton(
-        icon: const Icon(
-          Icons.arrow_back_ios_new_rounded,
-          color: Colors.black,
-          size: 20,
-        ),
-        onPressed: () => Navigator.pop(context),
-      ),
-      title: Text(
-        context.tr.termsOfService,
-        style: TextStyle(
-            fontSize: 24, fontWeight: FontWeight.w700, color: Colors.black),
       ),
     );
   }

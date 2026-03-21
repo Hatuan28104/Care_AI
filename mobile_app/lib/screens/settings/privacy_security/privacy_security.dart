@@ -6,6 +6,7 @@ import 'privacy_policy.dart';
 import 'terms_of_service.dart';
 import '../../../api/auth_api.dart';
 import '../../../models/login_history_item.dart';
+import '../../../widgets/app_header.dart';
 
 class PrivacySecurityScreen extends StatefulWidget {
   const PrivacySecurityScreen({super.key});
@@ -30,41 +31,29 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFF6F6F6),
-      appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          centerTitle: false,
-          leading: IconButton(
-            icon: const Icon(
-              Icons.arrow_back_ios_new_rounded,
-              color: Colors.black,
-              size: 20,
-            ),
-            onPressed: () => Navigator.pop(context),
-          ),
-          title: Text(
-            context.tr.privacySecurity,
-            style: const TextStyle(
-              fontWeight: FontWeight.w700,
-              color: Colors.black,
-            ),
-          )),
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(18, 12, 18, 24),
+        child: Column(
           children: [
-            _sectionTitle(context.tr.phoneNumber),
-            _phoneCard(),
-            const SizedBox(height: 14),
-            _sectionTitle(context.tr.verification),
-            _verifyCard(),
-            const SizedBox(height: 14),
-            _loginHeader(),
-            const SizedBox(height: 2),
-            _loginHistoryCard(),
-            const SizedBox(height: 14),
-            _sectionTitle(context.tr.privacy),
-            _privacyCard(context),
+            AppHeader(title: context.tr.privacySecurity),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(18, 12, 18, 24),
+                children: [
+                  _sectionTitle(context.tr.phoneNumber),
+                  _phoneCard(),
+                  const SizedBox(height: 14),
+                  _sectionTitle(context.tr.verification),
+                  _verifyCard(),
+                  const SizedBox(height: 14),
+                  _loginHeader(),
+                  const SizedBox(height: 2),
+                  _loginHistoryCard(),
+                  const SizedBox(height: 14),
+                  _sectionTitle(context.tr.privacy),
+                  _privacyCard(context),
+                ],
+              ),
+            ),
           ],
         ),
       ),

@@ -1,4 +1,3 @@
-import sql from "mssql";
 import { getDB } from "../config/db.js";
 import jwt from "jsonwebtoken";
 import admin from "../config/firebase.js";
@@ -22,24 +21,38 @@ function normalizeVnPhone(phone) {
   return digits;
 }
 
-async function phoneExists(db, localPhone) {
-  const rs = await db
-    .request()
-    .input("sdt", sql.NVarChar(10), localPhone)
-    .query("SELECT 1 FROM TaiKhoan WHERE SoDienThoai = @sdt");
+async function phoneExists(db, phone) {
+  const { data, error } = await db
+    .from("taikhoan")
+    .select("sodienthoai")
+    .eq("sodienthoai", phone)
+    .maybeSingle();
 
-  return rs.recordset.length > 0;
+  if (error) throw error;
+  return !!data;
 }
 
 function generateOtp() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
+function isProfileCompleted(nguoidung) {
+  if (!nguoidung) return false;
+  const name = String(nguoidung.tennd || "").trim().toLowerCase();
+  const hasName =
+    name.length > 0 && name !== "người dùng mới" && name !== "nguoi dung moi";
+  const hasDob = !!nguoidung.ngaysinh;
+  const hasGender = typeof nguoidung.gioitinh === "boolean";
+  const hasHeight = Number(nguoidung.chieucao) > 0;
+  const hasWeight = Number(nguoidung.cannang) > 0;
+  return hasName && hasDob && hasGender && hasHeight && hasWeight;
+}
+
 /* =========================
    REGISTER – REQUEST OTP
 ========================= */
 export async function requestRegisterOtp(phone) {
-  const db = await getDB();
+  const db = getDB();
   const localPhone = normalizeVnPhone(phone);
 
   if (await phoneExists(db, localPhone)) {
@@ -59,11 +72,11 @@ export async function requestRegisterOtp(phone) {
    LOGIN – REQUEST OTP
 ========================= */
 export async function requestLoginOtp(phone) {
-  const db = await getDB();
+  const db = getDB();
   const localPhone = normalizeVnPhone(phone);
 
   if (!(await phoneExists(db, localPhone))) {
-    throw new Error("Số điện thoại chưa đăng ký tài khoản");
+    throw new Error("Số điện thoại chưa đăng ký");
   }
 
   const otp = generateOtp();
@@ -76,87 +89,96 @@ export async function requestLoginOtp(phone) {
 }
 
 /* =========================
-   VERIFY OTP (CHUNG)
+   VERIFY OTP
 ========================= */
 export async function verifyOtp(phone, otp, req) {
   const data = otpStore.get(phone);
+
   if (!data) throw new Error("OTP không tồn tại");
   if (Date.now() > data.expires) throw new Error("OTP hết hạn");
   if (data.otp !== otp) throw new Error("OTP không đúng");
 
   otpStore.delete(phone);
 
-  const db = await getDB();
+  const db = getDB();
   const localPhone = normalizeVnPhone(phone);
 
-  if (!(await phoneExists(db, localPhone))) {
-    const rs = await db
-      .request()
-      .input("sodienthoai", sql.NVarChar(10), localPhone)
-      .output("ret", sql.Bit)
-      .execute("dbo.sp_TaoTaiKhoan");
+  /* ===== CHECK USER ===== */
+  let { data: user } = await db
+    .from("taikhoan")
+    .select(`
+      sodienthoai,
+      nguoidung:nguoidung_id (
+        nguoidung_id,
+        tennd,
+        ngaysinh,
+        gioitinh,
+        chieucao,
+        cannang
+      )
+    `)
+    .eq("sodienthoai", localPhone)
+    .maybeSingle();
 
-    if (!rs.output.ret) throw new Error("Tạo tài khoản thất bại");
+  /* ===== CREATE IF NOT EXIST ===== */
+  if (!user) {
+    const newUserId = "ND" + Date.now().toString().slice(-10);
+    const newAccountId = "TK" + Date.now().toString().slice(-10);
+
+    const { error: insertNguoiDungErr } = await db.from("nguoidung").insert({
+      nguoidung_id: newUserId,
+      tennd: null,
+    });
+    if (insertNguoiDungErr) throw insertNguoiDungErr;
+
+    const { error: insertTaiKhoanErr } = await db.from("taikhoan").insert({
+      taikhoan_id: newAccountId,
+      nguoidung_id: newUserId,
+      sodienthoai: localPhone,
+      laadmin: false,
+      ngaytao: new Date().toISOString().slice(0, 10),
+    });
+    if (insertTaiKhoanErr) throw insertTaiKhoanErr;
+
+    user = {
+      sodienthoai: localPhone,
+      nguoidung: {
+        nguoidung_id: newUserId,
+        tennd: null,
+      },
+    };
   }
-
-  const userRs = await db
-    .request()
-    .input("sdt", sql.NVarChar(10), localPhone)
-    .query(`
-      SELECT 
-        TK.SoDienThoai,
-        ND.NguoiDung_ID,
-        ND.TenND
-      FROM TaiKhoan TK
-      JOIN NguoiDung ND ON TK.NguoiDung_ID = ND.NguoiDung_ID
-      WHERE TK.SoDienThoai = @sdt
-    `);
-
-  const user = userRs.recordset[0];
 
   const token = jwt.sign(
     {
-      NguoiDung_ID: user.NguoiDung_ID,
-      SoDienThoai: user.SoDienThoai,
+      nguoidung_id: user.nguoidung.nguoidung_id,
+      sodienthoai: user.sodienthoai,
     },
-    process.env.JWT_SECRET || "my_secret_key",
+    process.env.JWT_SECRET || "secret",
     { expiresIn: "7d" }
   );
 
-  /* ========= LOGIN HISTORY ========= */
+  /* ===== LOGIN HISTORY ===== */
   const userAgent = req.headers["user-agent"] || "Unknown";
   const ip =
     req.headers["x-forwarded-for"]?.split(",")[0] ||
     req.socket.remoteAddress ||
     "";
 
-  await db
-    .request()
-    .input("uid", sql.Char(12), user.NguoiDung_ID)
-    .input("device", sql.NVarChar(255), userAgent)
-    .input("ip", sql.NVarChar(50), ip)
-    .query(`
-      INSERT INTO LichSuDangNhap (
-        LichSu_ID,
-        NguoiDung_ID,
-        ThietBi,
-        IP,
-        ThoiGian
-      )
-      VALUES (
-        'LS' + RIGHT(REPLACE(NEWID(), '-', ''), 10),
-        @uid,
-        @device,
-        @ip,
-        GETDATE()
-      )
-    `);
+  const { error: loginHistoryErr } = await db.from("lichsudangnhap").insert({
+    lichsu_id: "LS" + Date.now().toString().slice(-10),
+    nguoidung_id: user.nguoidung.nguoidung_id,
+    thietbi: userAgent,
+    ip,
+    thoigian: new Date().toISOString(),
+  });
+  if (loginHistoryErr) throw loginHistoryErr;
 
   return {
     success: true,
-    message: "Xác thực thành công",
     user,
     token,
+    profileCompleted: isProfileCompleted(user?.nguoidung),
   };
 }
 
@@ -164,22 +186,19 @@ export async function verifyOtp(phone, otp, req) {
    CHANGE PHONE
 ========================= */
 export async function changePhone(userId, newPhone) {
-  const db = await getDB();
-  const localPhone = normalizeVnPhone(newPhone);
+  const db = getDB();
+  const phone = normalizeVnPhone(newPhone);
 
-  if (await phoneExists(db, localPhone)) {
+  if (await phoneExists(db, phone)) {
     throw new Error("Số điện thoại đã tồn tại");
   }
 
-  await db
-    .request()
-    .input("uid", sql.Char(12), userId)
-    .input("phone", sql.NVarChar(10), localPhone)
-    .query(`
-      UPDATE TaiKhoan
-      SET SoDienThoai = @phone
-      WHERE NguoiDung_ID = @uid
-    `);
+  const { error } = await db
+    .from("taikhoan")
+    .update({ sodienthoai: phone })
+    .eq("nguoidung_id", userId);
+
+  if (error) throw error;
 
   return true;
 }
@@ -188,76 +207,68 @@ export async function changePhone(userId, newPhone) {
    LOGIN HISTORY
 ========================= */
 export async function getLoginHistory(userId) {
-  const db = await getDB();
+  const db = getDB();
 
-  const rs = await db
-    .request()
-    .input("uid", sql.Char(12), userId)
-    .query(`
-      SELECT TOP 10
-        ThoiGian,
-        ThietBi,
-        IP
-      FROM LichSuDangNhap
-      WHERE NguoiDung_ID = @uid
-      ORDER BY ThoiGian DESC
-    `);
+  const { data, error } = await db
+    .from("lichsudangnhap")
+    .select("thoigian, thietbi, ip")
+    .eq("nguoidung_id", userId)
+    .order("thoigian", { ascending: false })
+    .limit(10);
 
-  return rs.recordset;
+  if (error) throw error;
+
+  return data;
 }
+
 /* =========================
-   SAVE FCM TOKEN
+   FCM TOKEN
 ========================= */
-export async function saveFcmToken(userId, fcmToken) {
-  const db = await getDB();
+export async function saveFcmToken(userId, token) {
+  const db = getDB();
 
-  await db.request()
-    .input("uid", sql.Char(12), userId)
-    .input("token", sql.NVarChar(255), fcmToken)
-    .query(`
-      DELETE FROM FcmTokens WHERE Token = @token;
+  await db.from("fcmtokens").delete().eq("token", token);
 
-      INSERT INTO FcmTokens (NguoiDung_ID, Token)
-      VALUES (@uid, @token);
-    `);
+  const { error } = await db.from("fcmtokens").insert({
+    fcmtoken_id: "FCM" + Date.now().toString().slice(-10),
+    nguoidung_id: userId,
+    token,
+  });
+
+  if (error) throw error;
+
+  return true;
+}
+
+export async function removeFcmToken(token) {
+  const db = getDB();
+
+  await db.from("fcmtokens").delete().eq("token", token);
 
   return true;
 }
 export async function sendTestPush(userId) {
-  const db = await getDB();
+  const db = getDB();
 
-  const rs = await db
-    .request()
-    .input("uid", sql.Char(12), userId)
-    .query(`
-      SELECT Token FROM FcmTokens
-      WHERE NguoiDung_ID = @uid
-    `);
+  const { data, error } = await db
+    .from("fcmtokens")
+    .select("token")
+    .eq("nguoidung_id", userId);
 
-  if (rs.recordset.length === 0) {
+  if (error) throw error;
+  if (!data || data.length === 0) {
     throw new Error("User chưa có FCM token");
   }
 
-  for (let t of rs.recordset) {
+  for (let t of data) {
     await admin.messaging().send({
-      token: t.Token,
+      token: t.token,
       notification: {
         title: "CareAI",
         body: "Thông báo test thành công!",
       },
     });
   }
-
-  return true;
-}
-export async function removeFcmToken(token) {
-  const db = await getDB();
-
-  await db.request()
-    .input("token", sql.NVarChar(255), token)
-    .query(`
-      DELETE FROM FcmTokens WHERE Token = @token
-    `);
 
   return true;
 }

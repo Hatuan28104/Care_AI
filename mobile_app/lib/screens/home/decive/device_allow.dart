@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:Care_AI/screens/home/decive/device_syncing.dart';
+import 'package:demo_app/screens/home/decive/device_syncing.dart';
 import '../../../models/tr.dart';
 
 class AllowDeviceScreen extends StatelessWidget {

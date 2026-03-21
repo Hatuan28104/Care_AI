@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:Care_AI/api/health_api.dart';
-import 'package:Care_AI/models/metric_config.dart';
-import 'package:Care_AI/widgets/app_header.dart';
-import 'package:Care_AI/models/tr.dart';
+import 'package:demo_app/api/health_api.dart';
+import 'package:demo_app/models/metric_config.dart';
+import 'package:demo_app/widgets/app_header.dart';
+import 'package:demo_app/models/tr.dart';
 
 const TextStyle _axisTextStyle = TextStyle(
   fontSize: 11,
@@ -70,10 +70,14 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
       );
 
       final values =
-          data.map<double>((e) => (e['GiaTri'] as num).toDouble()).toList();
+          data
+              .map<double>((e) => ((e['giatri'] ?? 0) as num).toDouble())
+              .toList();
 
       final labels = data.map<String>((e) {
-        final t = DateTime.parse(e['ThoiGian']);
+        final raw = (e['thoigiancapnhat'] ?? '').toString();
+        if (raw.isEmpty) return '--:--';
+        final t = DateTime.parse(raw);
         return "${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}";
       }).toList();
 

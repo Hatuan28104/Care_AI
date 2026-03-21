@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:Care_AI/api/family_api.dart';
+import 'package:demo_app/api/family_api.dart';
 import 'familycenter_configure_permissions.dart';
 import '../../../models/tr.dart';
 
@@ -82,7 +82,7 @@ class _GuardianProfileState extends State<GuardianProfile> {
 
   // ================= PROFILE HEADER =================
   Widget _profileHeader(BuildContext context) {
-    final avatar = FamilyApi.normalizeAvatar(data?['AvatarUrl']);
+    final avatar = FamilyApi.normalizeAvatar(data?['avatarurl']);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -129,7 +129,7 @@ class _GuardianProfileState extends State<GuardianProfile> {
               ),
               const SizedBox(height: 14),
               Text(
-                data?['TenND'] ?? '',
+                data?['tennd'] ?? '',
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
@@ -148,10 +148,10 @@ class _GuardianProfileState extends State<GuardianProfile> {
       padding: const EdgeInsets.symmetric(horizontal: 18),
       child: Column(
         children: [
-          _infoItem(context.tr.fullName, data?['TenND']),
-          _infoItem(context.tr.birthDate, _formatDate(data?['NgaySinh'])),
-          _infoItem(context.tr.gender, _genderText(data?['GioiTinh'])),
-          _infoItem(context.tr.joinDate, _formatDate(data?['NgayBatDau'])),
+          _infoItem(context.tr.fullName, data?['tennd']),
+          _infoItem(context.tr.birthDate, _formatDate(data?['ngaysinh'])),
+          _infoItem(context.tr.gender, _genderText(data?['gioitinh'])),
+          _infoItem(context.tr.joinDate, _formatDate(data?['ngaybatdau'])),
           _permissionItem(context),
         ],
       ),
@@ -196,7 +196,7 @@ class _GuardianProfileState extends State<GuardianProfile> {
 
   // ================= PERMISSION ITEM =================
   Widget _permissionItem(BuildContext context) {
-    if (data?['VaiTro'] != 'GUARDIAN') {
+    if (data?['role'] != 'GUARDIAN') {
       return const SizedBox.shrink();
     }
 
@@ -206,7 +206,7 @@ class _GuardianProfileState extends State<GuardianProfile> {
           context,
           MaterialPageRoute(
             builder: (_) => ConfigurePermissionsScreen(
-              userId: data!['NguoiDuocGiamHo_ID'],
+              userId: data!['nguoiduocgiamho_id'],
               quanHeId: widget.quanHeId,
             ),
           ),

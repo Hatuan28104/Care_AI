@@ -1,5 +1,20 @@
-const API = "http://localhost:3000/api/digital-human";
+export const API_BASE = window.location.origin;
+const API = `${API_BASE}/api/digital-human`;
 
+function toAbsoluteImageUrl(path) {
+  if (!path) return "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+  if (/^https?:\/\//i.test(path)) return path;
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
+  return `${API_BASE}${cleanPath}`;
+}
+
+function toStoredImagePath(urlOrPath) {
+  if (!urlOrPath) return "";
+  if (/^https?:\/\//i.test(urlOrPath)) {
+    return urlOrPath.replace(`${API_BASE}/`, "").replace(`${API_BASE}`, "");
+  }
+  return urlOrPath.startsWith("/") ? urlOrPath.slice(1) : urlOrPath;
+}
 document.addEventListener("DOMContentLoaded", () => {
 
   const page = document.body.dataset.page;
@@ -25,16 +40,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
       result.data.forEach(d => {
 
-        const gender = d.GioiTinh === 1 ? "Nam" : "Nữ";
+        const gender = d.gioitinh ? "Nam" : "Nữ";
 
-        const avatar = d.ImageUrl
-          ? `http://localhost:3000/${d.ImageUrl}`
-          : "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+      const avatar = toAbsoluteImageUrl(d.imageurl);
 
         const row = `
-          <tr data-id="${d.DigitalHuman_ID}">
-            <td>${d.DigitalHuman_ID}</td>
-            <td>${d.TenDigitalHuman}</td>
+          <tr data-id="${d.digitalhuman_id}">
+            <td>${d.digitalhuman_id}</td>
+            <td>${d.tendigitalhuman}</td>
             <td>
               <img src="${avatar}" class="avatar" />
             </td>
@@ -112,128 +125,120 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ===============================
      SAVE (ADD + EDIT)
   =============================== */
-if (page === "digital-add" || page === "digital-edit") {
+  if (page === "digital-add" || page === "digital-edit") {
 
-  const digitalId = document.getElementById("digitalId");
-  const digitalName = document.getElementById("digitalName");
-  const gender = document.getElementById("gender");
-  const jobId = document.getElementById("jobId");
-  const appearance = document.getElementById("appearance");
-  const systemPrompt = document.getElementById("systemPrompt");
+    const digitalId = document.getElementById("digitalId");
+    const digitalName = document.getElementById("digitalName");
+    const gender = document.getElementById("gender");
+    const jobId = document.getElementById("jobId");
+    const appearance = document.getElementById("appearance");
+    const systemPrompt = document.getElementById("systemPrompt");
 
-  /* ===============================
-     LOAD DATA WHEN EDIT
-  =============================== */
+    if (page === "digital-edit") {
 
-  if (page === "digital-edit") {
+      const id = new URLSearchParams(window.location.search).get("id");
 
-    const id = new URLSearchParams(window.location.search).get("id");
+      fetch(`${API}/${id}`)
+        .then(res => res.json())
+        .then(json => {
 
-    fetch(`${API}/${id}`)
-      .then(res => res.json())
-      .then(json => {
+          const d = json.data;
+          if (!d) return;
 
-        const d = json.data;
-        if (!d) return;
+          digitalId.value = d.digitalhuman_id;
+          digitalId.disabled = true;
 
-        digitalId.value = d.DigitalHuman_ID;
-        digitalId.disabled = true; // ❗ không cho sửa ID
+          digitalName.value = d.tendigitalhuman || "";
+          gender.value = d.gioitinh ? "1" : "0";
+          jobId.value = (d.nghenghiep_id || "").trim();
+          appearance.value = d.ngoaihinh || "";
+          systemPrompt.value = d.systemprompt || "";
 
-        digitalName.value = d.TenDigitalHuman || "";
-        gender.value = d.GioiTinh ? "1" : "0";
-        jobId.value = (d.NgheNghiep_ID || "").trim();
-        appearance.value = d.NgoaiHinh || "";
-        systemPrompt.value = d.SystemPrompt || "";
+          if (d.imageurl && avatarPreview) {
+            avatarPreview.src = toAbsoluteImageUrl(d.imageurl);
+            avatarPreview.classList.remove("hidden");
+          }
 
-        if (d.ImageUrl && avatarPreview) {
-          avatarPreview.src = `http://localhost:3000/${d.ImageUrl}`;
-          avatarPreview.classList.remove("hidden");
+        });
+
+    }
+
+    document.getElementById("btnSave")?.addEventListener("click", () => {
+
+      confirmSave(async () => {
+
+        const form = new FormData();
+
+        form.append("id", digitalId?.value || "");
+        form.append("name", digitalName?.value || "");
+        form.append("gender", gender?.value || "");
+        form.append("jobId", jobId?.value || "");
+        form.append("appearance", appearance?.value || "");
+        form.append("prompt", systemPrompt?.value || "");
+
+        const file = avatarInput?.files?.[0];
+
+        if (file) {
+          form.append("avatar", file);
+        } else if (avatarPreview?.src) {
+          form.append(
+            "image",
+            toStoredImagePath(avatarPreview.src)
+          );
+        }
+
+        try {
+
+          if (page === "digital-add") {
+
+            const res = await fetch(API, {
+              method: "POST",
+              body: form
+            });
+
+            const json = await res.json();
+
+            if (!json.success) {
+              alert(json.message || "Thêm thất bại");
+              return;
+            }
+
+          }
+
+          if (page === "digital-edit") {
+
+            const id = new URLSearchParams(window.location.search).get("id");
+
+            await fetch(`${API}/${id}`, {
+              method: "PUT",
+              body: form
+            });
+
+          }
+
+          showToast(
+            page === "digital-add"
+              ? "Thêm thành công"
+              : "Cập nhật thành công"
+          );
+
+          setTimeout(() => {
+            window.location.href = "./digital.html";
+          }, 1200);
+
+        } catch (err) {
+          console.error(err);
         }
 
       });
 
-  }
-
-  /* ===============================
-     SAVE BUTTON
-  =============================== */
-
-  document.getElementById("btnSave")?.addEventListener("click", () => {
-
-    confirmSave(async () => {
-
-      const form = new FormData();
-
-      form.append("id", digitalId?.value || "");
-      form.append("name", digitalName?.value || "");
-      form.append("gender", gender?.value || "");
-      form.append("jobId", jobId?.value || "");
-      form.append("appearance", appearance?.value || "");
-      form.append("prompt", systemPrompt?.value || "");
-
-      const file = avatarInput?.files?.[0];
-
-      if (file) {
-        form.append("avatar", file);
-      } else if (avatarPreview?.src) {
-        form.append(
-          "image",
-          avatarPreview.src.replace("http://localhost:3000/", "")
-        );
-      }
-
-      try {
-
-        if (page === "digital-add") {
-
-          const res = await fetch(API, {
-            method: "POST",
-            body: form
-          });
-
-          const json = await res.json();
-
-          if (!json.success) {
-            alert(json.message || "Thêm thất bại");
-            return;
-          }
-
-        }
-
-        if (page === "digital-edit") {
-
-          const id = new URLSearchParams(window.location.search).get("id");
-
-          await fetch(`${API}/${id}`, {
-            method: "PUT",
-            body: form
-          });
-
-        }
-
-        showToast(
-          page === "digital-add"
-            ? "Thêm thành công"
-            : "Cập nhật thành công"
-        );
-
-        setTimeout(() => {
-          window.location.href = "./digital.html";
-        }, 1200);
-
-      } catch (err) {
-        console.error(err);
-      }
-
     });
 
-  });
+    document.getElementById("btnCancel")?.addEventListener("click", () => {
+      window.location.href = "./digital.html";
+    });
 
-  document.getElementById("btnCancel")?.addEventListener("click", () => {
-    window.location.href = "./digital.html";
-  });
-
-}
+  }
 
   /* ===============================
      ACTION MENU
@@ -279,10 +284,6 @@ if (page === "digital-add" || page === "digital-edit") {
 
   }
 
-  /* ===============================
-     ACTION CLICK
-  =============================== */
-
   document.addEventListener("click", async e => {
 
     if (page !== "digital") return;
@@ -320,10 +321,6 @@ if (page === "digital-add" || page === "digital-edit") {
 
   });
 
-  /* ===============================
-     VIEW PAGE
-  =============================== */
-
   if (page === "digital-view") {
 
     const id = new URLSearchParams(window.location.search).get("id");
@@ -342,27 +339,25 @@ if (page === "digital-add" || page === "digital-edit") {
 
       if (!d) return;
 
-      document.getElementById("digitalTitle").innerText = d.TenDigitalHuman;
-      document.getElementById("digitalId").innerText = d.DigitalHuman_ID;
-      document.getElementById("digitalName").innerText = d.TenDigitalHuman;
+      document.getElementById("digitalTitle").innerText = d.tendigitalhuman;
+      document.getElementById("digitalId").innerText = d.digitalhuman_id;
+      document.getElementById("digitalName").innerText = d.tendigitalhuman;
 
       document.getElementById("digitalGender").innerText =
-        d.GioiTinh === 1 ? "Nam" : "Nữ";
+        d.gioitinh ? "Nam" : "Nữ";
 
       document.getElementById("digitalJob").innerText =
-        d.NgheNghiep_ID || "-";
+        d.nghenghiep_id || "-";
 
       document.getElementById("digitalAppearance").innerText =
-        d.NgoaiHinh || "-";
+        d.ngoaihinh || "-";
 
       document.getElementById("digitalPrompt").innerText =
-        d.SystemPrompt || "-";
+        d.systemprompt || "-";
 
       const avatar = document.getElementById("digitalAvatar");
 
-      avatar.src = d.ImageUrl
-        ? `http://localhost:3000/${d.ImageUrl}`
-        : "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+    avatar.src = toAbsoluteImageUrl(d.imageurl);
 
     } catch (err) {
       console.error(err);

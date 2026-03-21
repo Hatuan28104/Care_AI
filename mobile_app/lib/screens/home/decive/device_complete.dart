@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:Care_AI/screens/home/decive/device_detail.dart';
+import 'package:demo_app/screens/home/decive/device_detail.dart';
 import '../../../models/tr.dart';
 
 class DeviceCompleteScreen extends StatelessWidget {

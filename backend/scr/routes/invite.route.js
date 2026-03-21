@@ -17,7 +17,7 @@ const router = express.Router();
 router.post("/by-phone", auth, async (req, res) => {
   try {
     const { phone } = req.body;
-    const fromUserId = req.user.NguoiDung_ID; // 🔥 ĐÃ CÓ
+    const fromUserId = req.user.nguoidung_id; // 🔥 ĐÃ CÓ
 
     if (!phone) throw new Error("Thiếu số điện thoại");
 
@@ -37,7 +37,7 @@ router.get("/find-by-phone", auth, async (req, res) => {
     const { phone } = req.query;
     if (!phone) throw new Error("Thiếu số điện thoại");
 
-    const currentUserId = req.user.NguoiDung_ID; 
+    const currentUserId = req.user.nguoidung_id; 
 
     const users = await findUserByPhone(phone, currentUserId);
 
@@ -98,7 +98,7 @@ router.post("/reject", auth, async (req, res) => {
 ========================= */
 router.get("/incoming", auth, async (req, res) => {
   try {
-    const userId = req.user?.NguoiDung_ID;
+    const userId = req.user?.nguoidung_id;
     const data = await getInvites(userId);
 
     res.json({ success: true, data });
@@ -112,7 +112,7 @@ router.get("/incoming", auth, async (req, res) => {
 router.post("/cancel", auth, async (req, res) => {
   try {
     const { loiMoiId } = req.body;
-    const fromId = req.user.NguoiDung_ID; // 🔥 BẮT BUỘC
+    const fromId = req.user.nguoidung_id; // 🔥 BẮT BUỘC
 
     if (!loiMoiId) throw new Error("Thiếu ID lời mời");
 

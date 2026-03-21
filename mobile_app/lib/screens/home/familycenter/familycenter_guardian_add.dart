@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:Care_AI/api/family_api.dart';
+import 'package:demo_app/api/family_api.dart';
 import 'dart:async';
 import '../../../models/tr.dart';
-import 'package:Care_AI/widgets/app_header.dart';
+import 'package:demo_app/widgets/app_header.dart';
 
 class AddGuardians extends StatefulWidget {
   const AddGuardians({super.key});
@@ -116,8 +116,7 @@ class _AddGuardiansState extends State<AddGuardians> {
 
   // ================= CARD =================
   Widget _guardianStyleCard(Map<String, dynamic> user) {
-    print('DEBUG USER = $user');
-    final avatar = FamilyApi.normalizeAvatar(user['AvatarUrl']);
+    final avatar = FamilyApi.normalizeAvatar(user['avatarurl']);
     final status = user['inviteStatus'];
 
     return Container(
@@ -160,7 +159,7 @@ class _AddGuardiansState extends State<AddGuardians> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  user['TenND'] ?? context.tr.unknownName,
+                  user['tennd'] ?? context.tr.unknownName,
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
@@ -171,7 +170,7 @@ class _AddGuardiansState extends State<AddGuardians> {
                   children: [
                     if (status == 'none') ...[
                       _actionBtn(context.tr.sendInvite, blue, () {
-                        _sendInvite(user['SoDienThoai']);
+                        _sendInvite(user['sodienthoai']);
                       }),
                       const SizedBox(width: 12),
                       _actionBtn(context.tr.cancel, Colors.red, () {
@@ -181,8 +180,12 @@ class _AddGuardiansState extends State<AddGuardians> {
                     if (status == 'pending')
                       _actionBtn(context.tr.cancelRequest,
                           const Color.fromARGB(174, 158, 158, 158), () {
-                        _cancelInvite(user['LoiMoi_ID']);
+                        _cancelInvite(user['loimoi_id']);
                       }),
+                    if (status == 'incoming')
+                      _statusBadge("Đã nhận lời mời từ người này"),
+                    if (status == 'related')
+                      _statusBadge("Đã có quan hệ giám hộ"),
                   ],
                 ),
               ],
@@ -214,13 +217,36 @@ class _AddGuardiansState extends State<AddGuardians> {
     );
   }
 
+  Widget _statusBadge(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE9ECEF),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: Colors.black54,
+        ),
+      ),
+    );
+  }
+
   // ================= SEND INVITE =================
   Future<void> _sendInvite(String phone) async {
     try {
       await FamilyApi.sendInviteByPhone(phone);
       _showSuccessDialog();
       _searchUser();
-    } catch (_) {}
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    }
   }
 
   Future<void> _cancelInvite(String loiMoiId) async {

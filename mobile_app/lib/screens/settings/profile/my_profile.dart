@@ -5,8 +5,9 @@ import '../../../models/tr.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
-import 'package:Care_AI/api/profile_api.dart' as profile_api;
-import 'package:Care_AI/models/current_user.dart';
+import 'package:demo_app/api/profile_api.dart' as profile_api;
+import 'package:demo_app/models/current_user.dart';
+import 'package:demo_app/config/api_config.dart';
 
 class MyProfileScreen extends StatefulWidget {
   const MyProfileScreen({super.key});
@@ -16,6 +17,14 @@ class MyProfileScreen extends StatefulWidget {
 }
 
 class _MyProfileScreenState extends State<MyProfileScreen> {
+  String _toAbsoluteImageUrl(String path) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+    final cleanPath = path.startsWith('/') ? path : '/$path';
+    return '${ApiConfig.baseUrl}$cleanPath';
+  }
+
   // ===== COLORS =====
   static const _blue = Color(0xFF1877F2);
   static const _bg = Color(0xFFF6F6F6);
@@ -105,7 +114,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
 
       if (avatar != null && avatar.isNotEmpty) {
         _avatarFile = null;
-        _avatarNetworkUrl = 'http://10.0.2.2:3000$avatar';
+        _avatarNetworkUrl = _toAbsoluteImageUrl(avatar);
       }
 
       setState(() {});

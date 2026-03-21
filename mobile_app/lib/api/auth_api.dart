@@ -67,9 +67,22 @@ class AuthApi {
 
       await AuthStorage.saveToken(token);
 
-      final user = User.fromJson(data['user']);
-
-      AppSettings.phoneNumber.value = user.soDienThoai ?? '';
+      final userRaw = data['user'] is Map<String, dynamic>
+          ? data['user'] as Map<String, dynamic>
+          : <String, dynamic>{};
+      final user = User.fromJson({
+        ...userRaw,
+        'token': token,
+        'profileCompleted': data['profileCompleted'] == true,
+      });
+      if (user.nguoiDungId.isEmpty) {
+        throw Exception('Không nhận được nguoiDungId');
+      }
+      await AuthStorage.saveUserId(user.nguoiDungId);
+      AppSettings.phoneNumber.value =
+          userRaw['sodienthoai']?.toString() ??
+          userRaw['SoDienThoai']?.toString() ??
+          '';
 
       FirebaseMessaging messaging = FirebaseMessaging.instance;
       String? fcmToken = await messaging.getToken();
@@ -136,6 +149,9 @@ class AuthApi {
       headers: headers,
     );
 
+    print("LOGIN HISTORY STATUS: ${res.statusCode}");
+    print("LOGIN HISTORY BODY: ${res.body}");
+
     final data = jsonDecode(res.body);
 
     if (res.statusCode != 200 || data['success'] != true) {
@@ -145,11 +161,20 @@ class AuthApi {
     final List list = data['data'] is List ? data['data'] : [];
 
     return list.map((e) {
+      final rawTime = (e['thoigian'] ?? '').toString();
+      String timeText = 'Không xác định';
+      if (rawTime.isNotEmpty) {
+        try {
+          timeText = DateTime.parse(rawTime)
+              .toLocal()
+              .toString()
+              .substring(0, 16);
+        } catch (_) {}
+      }
       return LoginHistoryItem(
-        device: e['ThietBi'] ?? 'Unknown device',
-        location: _mapIpToLocation(e['IP']),
-        time:
-            DateTime.parse(e['ThoiGian']).toLocal().toString().substring(0, 16),
+        device: e['thietbi'] ?? 'Unknown device',
+        location: _mapIpToLocation(e['ip']),
+        time: timeText,
       );
     }).toList();
   }
@@ -171,8 +196,7 @@ class AuthApi {
           body: jsonEncode({'fcmToken': fcmToken}),
         );
       }
-    } catch (e) {
-    }
+    } catch (e) {}
 
     await AuthStorage.clear();
   }

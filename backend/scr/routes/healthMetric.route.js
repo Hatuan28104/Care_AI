@@ -41,10 +41,12 @@ router.get("/metrics", async (req, res) => {
 ========================= */
 router.post("/metrics", async (req, res) => {
   try {
+    const loaichiso_id = req.body.loaichiso_id ?? req.body.LoaiChiSo_ID;
+    const tenchiso = req.body.tenchiso ?? req.body.TenChiSo;
+    const donvido = req.body.donvido ?? req.body.DonViDo;
+    const category = req.body.category ?? req.body.Category;
 
-    const { LoaiChiSo_ID, TenChiSo, DonViDo, Category } = req.body;
-
-    if (!LoaiChiSo_ID || !TenChiSo || !DonViDo) {
+    if (!loaichiso_id || !tenchiso || !donvido) {
       return res.status(400).json({
         success: false,
         message: "Thiếu dữ liệu"
@@ -52,10 +54,10 @@ router.post("/metrics", async (req, res) => {
     }
 
     await createHealthMetric({
-      LoaiChiSo_ID,
-      TenChiSo,
-      DonViDo,
-      Category
+      loaichiso_id,
+      tenchiso,
+      donvido,
+      category
     });
 
     res.json({
@@ -79,10 +81,11 @@ router.post("/metrics", async (req, res) => {
 ========================= */
 router.post("/data", async (req, res) => {
   try {
+    const giatri = req.body.giatri ?? req.body.GiaTri;
+    const thietbi_id = req.body.thietbi_id ?? req.body.ThietBi_ID;
+    const loaichiso_id = req.body.loaichiso_id ?? req.body.LoaiChiSo_ID;
 
-    const { GiaTri, ThietBi_ID, LoaiChiSo_ID } = req.body;
-
-    if (!GiaTri || !ThietBi_ID || !LoaiChiSo_ID) {
+    if (!giatri || !thietbi_id || !loaichiso_id) {
       return res.status(400).json({
         success: false,
         message: "Thiếu dữ liệu"
@@ -90,9 +93,9 @@ router.post("/data", async (req, res) => {
     }
 
     await saveHealthData({
-      GiaTri,
-      ThietBi_ID,
-      LoaiChiSo_ID
+      giatri,
+      thietbi_id,
+      loaichiso_id
     });
 
     res.json({
@@ -109,8 +112,6 @@ router.post("/data", async (req, res) => {
     });
   }
 });
-
-
 /* =========================
    LẤY DỮ LIỆU MỚI NHẤT
 ========================= */

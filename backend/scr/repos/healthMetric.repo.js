@@ -4,157 +4,159 @@ import { getDB } from "../config/db.js";
    LẤY DANH SÁCH CHỈ SỐ
 ========================= */
 export async function getAllHealthMetrics() {
-  const pool = await getDB();
+  const db = getDB();
 
-  const result = await pool.request().query(`
-    SELECT 
-        LoaiChiSo_ID,
-        TenChiSo,
-        DonViDo,
-        MoTa,
-        Category
-    FROM LoaiChiSoSucKhoe
-  `);
+  const { data, error } = await db
+    .from("loaichisosuckhoe")
+    .select("loaichiso_id, tenchiso, donvido, mota, loai");
 
-  return result.recordset;
+  if (error) throw error;
+
+  return data;
 }
-
 
 /* =========================
    TẠO CHỈ SỐ MỚI
 ========================= */
 export async function createHealthMetric(data) {
+  const db = getDB();
 
-  const pool = await getDB();
+  const { error } = await db.from("loaichisosuckhoe").insert({
+    loaichiso_id: data.loaichiso_id,
+    tenchiso: data.tenchiso,
+    donvido: data.donvido,
+    mota: "",
+    loai: data.category,
+  });
 
-  await pool.request()
-    .input("LoaiChiSo_ID", data.LoaiChiSo_ID)
-    .input("TenChiSo", data.TenChiSo)
-    .input("DonViDo", data.DonViDo)
-    .input("MoTa", "")
-    .input("Category", data.Category)
-    .query(`
-      INSERT INTO LoaiChiSoSucKhoe
-      (LoaiChiSo_ID, TenChiSo, DonViDo, MoTa, Category)
-      VALUES
-      (@LoaiChiSo_ID, @TenChiSo, @DonViDo, @MoTa, @Category)
-    `);
+  if (error) throw error;
 }
-
 
 /* =========================
    LƯU DỮ LIỆU SỨC KHỎE
 ========================= */
 export async function saveHealthData(data) {
+  const db = getDB();
 
-  const pool = await getDB();
+  const id = Date.now().toString().slice(0, 12);
 
-  const id = Date.now().toString().slice(0,12);
+  const { error } = await db.from("dulieusuckhoe").insert({
+    dulieusk_id: id,
+    giatri: data.giatri,
+    thoigiancapnhat: new Date().toISOString(),
+    thietbi_id: data.thietbi_id,
+    loaichiso_id: data.loaichiso_id,
+  });
 
-  await pool.request()
-    .input("DuLieuSK_ID", id)
-    .input("GiaTri", data.GiaTri)
-    .input("ThoiGianCapNhat", new Date())
-    .input("ThietBi_ID", data.ThietBi_ID)
-    .input("LoaiChiSo_ID", data.LoaiChiSo_ID)
-    .query(`
-      INSERT INTO DuLieuSucKhoe
-      (DuLieuSK_ID, GiaTri, ThoiGianCapNhat, ThietBi_ID, LoaiChiSo_ID)
-      VALUES
-      (@DuLieuSK_ID, @GiaTri, @ThoiGianCapNhat, @ThietBi_ID, @LoaiChiSo_ID)
-    `);
+  if (error) throw error;
 }
-
 
 /* =========================
    LẤY DỮ LIỆU MỚI NHẤT
 ========================= */
 export async function getLatestHealthData(thietBiId) {
+  const db = getDB();
 
-  const pool = await getDB();
-
-  const result = await pool.request()
-    .input("ThietBi_ID", thietBiId)
-    .query(`
-      SELECT 
-          l.LoaiChiSo_ID,
-          l.TenChiSo,
-          l.DonViDo,
-          d.GiaTri,
-          d.ThoiGianCapNhat
-      FROM DuLieuSucKhoe d
-      JOIN LoaiChiSoSucKhoe l
-        ON d.LoaiChiSo_ID = l.LoaiChiSo_ID
-      WHERE d.ThietBi_ID = @ThietBi_ID
-      AND d.ThoiGianCapNhat = (
-          SELECT MAX(ThoiGianCapNhat)
-          FROM DuLieuSucKhoe
-          WHERE ThietBi_ID = @ThietBi_ID
-          AND LoaiChiSo_ID = d.LoaiChiSo_ID
+  const { data, error } = await db
+    .from("dulieusuckhoe")
+    .select(`
+      giatri,
+      thoigiancapnhat,
+      loaichisosuckhoe (
+        loaichiso_id,
+        tenchiso,
+        donvido
       )
-    `);
+    `)
+    .eq("thietbi_id", thietBiId)
+    .order("thoigiancapnhat", { ascending: false });
 
-  return result.recordset;
+  if (error) throw error;
+
+  // lấy record mới nhất mỗi loại
+  const map = {};
+
+  for (let item of data) {
+    const key = item.loaichisosuckhoe.loaichiso_id;
+    if (!map[key]) {
+      map[key] = item;
+    }
+  }
+
+  return Object.values(map);
 }
-
 
 /* =========================
    LỊCH SỬ CHỈ SỐ
 ========================= */
 export async function getHealthHistory(thietBiId, loaiChiSoId) {
+  const db = getDB();
 
-  const pool = await getDB();
+  const { data, error } = await db
+    .from("dulieusuckhoe")
+    .select("giatri, thoigiancapnhat")
+    .eq("thietbi_id", thietBiId)
+    .eq("loaichiso_id", loaiChiSoId)
+    .order("thoigiancapnhat", { ascending: false })
+    .limit(50);
 
-  const result = await pool.request()
-    .input("ThietBi_ID", thietBiId)
-    .input("LoaiChiSo_ID", loaiChiSoId)
-    .query(`
-      SELECT TOP 50
-        GiaTri,
-        ThoiGianCapNhat
-      FROM DuLieuSucKhoe
-      WHERE ThietBi_ID = @ThietBi_ID
-      AND LoaiChiSo_ID = @LoaiChiSo_ID
-      ORDER BY ThoiGianCapNhat DESC
-    `);
+  if (error) throw error;
 
-  return result.recordset;
+  return data;
 }
+
 /* =========================
    REPORT HEALTH DATA
 ========================= */
 export async function getHealthReport(thietBiId, type) {
+  const db = getDB();
 
-  const pool = await getDB();
-
-  let condition = "";
+  let fromDate = new Date();
 
   if (type === "day") {
-    condition = "DATEDIFF(day, d.ThoiGianCapNhat, GETDATE()) = 0";
+    fromDate.setDate(fromDate.getDate());
+  } else if (type === "week") {
+    fromDate.setDate(fromDate.getDate() - 7);
+  } else if (type === "month") {
+    fromDate.setDate(fromDate.getDate() - 30);
   }
 
-  if (type === "week") {
-    condition = "DATEDIFF(day, d.ThoiGianCapNhat, GETDATE()) <= 7";
+  const { data, error } = await db
+    .from("dulieusuckhoe")
+    .select(`
+      giatri,
+      loaichisosuckhoe (
+        tenchiso,
+        donvido
+      )
+    `)
+    .eq("thietbi_id", thietBiId)
+    .gte("thoigiancapnhat", fromDate.toISOString());
+
+  if (error) throw error;
+
+  // group JS
+  const map = {};
+
+  for (let item of data) {
+    const key = item.loaichisosuckhoe.tenchiso;
+
+    if (!map[key]) {
+      map[key] = {
+        tenchiso: key,
+        donvido: item.loaichisosuckhoe.donvido,
+        total: 0,
+        count: 0,
+      };
+    }
+
+    map[key].total += item.giatri;
+    map[key].count++;
   }
 
-  if (type === "month") {
-    condition = "DATEDIFF(day, d.ThoiGianCapNhat, GETDATE()) <= 30";
-  }
-
-  const result = await pool.request()
-    .input("ThietBi_ID", thietBiId)
-    .query(`
-      SELECT 
-        l.TenChiSo,
-        l.DonViDo,
-        AVG(d.GiaTri) AS GiaTri
-      FROM DuLieuSucKhoe d
-      JOIN LoaiChiSoSucKhoe l
-        ON l.LoaiChiSo_ID = d.LoaiChiSo_ID
-      WHERE d.ThietBi_ID = @ThietBi_ID
-      AND ${condition}
-      GROUP BY l.TenChiSo, l.DonViDo
-    `);
-
-  return result.recordset;
+  return Object.values(map).map(i => ({
+    tenchiso: i.tenchiso,
+    donvido: i.donvido,
+    giatri: i.total / i.count,
+  }));
 }

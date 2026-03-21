@@ -1,61 +1,70 @@
-import sql from "mssql";
 import { getDB } from "../config/db.js";
 
 /* =========================
    DANH SÁCH NGƯỜI GIÁM HỘ CỦA TÔI
 ========================= */
 export async function getMyGuardians(userId) {
-  const db = await getDB();
+  const db = getDB();
 
-  const rs = await db.request()
-    .input("uid", sql.Char(12), userId)
-    .query(`
-      SELECT QH.QuanHeGiamHo_ID,QH.NgayBatDau AS NgayBatDau, ND.NguoiDung_ID, ND.TenND, ND.AvatarUrl
-      FROM QuanHeGiamHo QH
-      JOIN NguoiDung ND ON ND.NguoiDung_ID = QH.NguoiGiamHo_ID
-      WHERE QH.NguoiDuocGiamHo_ID = @uid
-        AND QH.DaXoa = 0
-    `);
+  const { data, error } = await db
+    .from("quanhegiamho")
+    .select(`
+      quanhegiamho_id,
+      ngaybatdau,
+      nguoidung:nguoigiamho_id (
+        nguoidung_id,
+        tennd,
+        avatarurl
+      )
+    `)
+    .eq("nguoiduocgiamho_id", userId)
+    .eq("daxoa", false);
 
-  return rs.recordset;
+  if (error) throw error;
+
+  return data;
 }
-
 /* =========================
    DANH SÁCH NGƯỜI TÔI GIÁM HỘ
 ========================= */
 export async function getMyDependents(userId) {
-  const db = await getDB();
+  const db = getDB();
 
-  const rs = await db.request()
-    .input("uid", sql.Char(12), userId)
-    .query(`
-      SELECT QH.QuanHeGiamHo_ID,QH.NgayBatDau AS NgayBatDau, ND.NguoiDung_ID, ND.TenND,ND.AvatarUrl
-      FROM QuanHeGiamHo QH
-      JOIN NguoiDung ND ON ND.NguoiDung_ID = QH.NguoiDuocGiamHo_ID
-      WHERE QH.NguoiGiamHo_ID = @uid
-        AND QH.DaXoa = 0
-    `);
+  const { data, error } = await db
+    .from("quanhegiamho")
+    .select(`
+      quanhegiamho_id,
+      ngaybatdau,
+      nguoidung:nguoiduocgiamho_id (
+        nguoidung_id,
+        tennd,
+        avatarurl
+      )
+    `)
+    .eq("nguoigiamho_id", userId)
+    .eq("daxoa", false);
 
-  return rs.recordset;
+  if (error) throw error;
+
+  return data;
 }
-
 /* =========================
    KẾT THÚC QUAN HỆ
 ========================= */
 export async function endRelationship(qhId) {
-  const db = await getDB();
+  const db = getDB();
 
-  const rs = await db.request()
-    .input("id", sql.Char(12), qhId)
-    .query(`
-      UPDATE QuanHeGiamHo
-      SET DaXoa = 1,
-          NgayKetThuc = GETDATE()
-      WHERE QuanHeGiamHo_ID = @id
-        AND DaXoa = 0
-    `);
+  const { data } = await db
+    .from("quanhegiamho")
+    .update({
+      daxoa: true,
+      ngayketthuc: new Date().toISOString(),
+    })
+    .eq("quanhegiamho_id", qhId)
+    .eq("daxoa", false)
+    .select();
 
-  if (rs.rowsAffected[0] === 0) {
+  if (!data || data.length === 0) {
     throw new Error("Quan hệ không hợp lệ");
   }
 }
@@ -63,53 +72,61 @@ export async function endRelationship(qhId) {
    PROFILE QUAN HỆ (GIÁM HỘ / PHỤ THUỘC)
 ========================= */
 export async function getRelationshipProfile(qhId, userId) {
-  const db = await getDB();
+  const db = getDB();
 
-  const rs = await db.request()
-    .input("qhId", sql.Char(12), qhId)
-    .input("uid", sql.Char(12), userId)
-    .query(`
-      SELECT
-  QH.QuanHeGiamHo_ID,
-  QH.NgayBatDau,
+  const { data: rel, error } = await db
+    .from("quanhegiamho")
+    .select(`
+      quanhegiamho_id,
+      ngaybatdau,
+      nguoigiamho_id,
+      nguoiduocgiamho_id
+    `)
+    .eq("quanhegiamho_id", qhId)
+    .eq("daxoa", false)
+    .maybeSingle();
 
-  QH.NguoiGiamHo_ID,
-  QH.NguoiDuocGiamHo_ID,
+  if (error) throw error;
+  if (!rel) throw new Error("Không tìm thấy quan hệ");
 
-  CASE 
-    WHEN QH.NguoiDuocGiamHo_ID = @uid THEN 'GUARDIAN'
-    WHEN QH.NguoiGiamHo_ID = @uid THEN 'DEPENDENT'
-  END AS VaiTro,
+  // xác định role
+  let role = null;
+  let targetUserId = null;
 
-  ND.NguoiDung_ID,
-  ND.TenND,
-  ND.AvatarUrl,
-  ND.GioiTinh,
-  ND.NgaySinh,
-  TK.SoDienThoai
-
-FROM QuanHeGiamHo QH
-
-JOIN NguoiDung ND
-  ON ND.NguoiDung_ID =
-    CASE
-      WHEN QH.NguoiDuocGiamHo_ID = @uid
-        THEN QH.NguoiGiamHo_ID
-      WHEN QH.NguoiGiamHo_ID = @uid
-        THEN QH.NguoiDuocGiamHo_ID
-    END
-
-JOIN TaiKhoan TK
-  ON TK.NguoiDung_ID = ND.NguoiDung_ID
-
-WHERE QH.QuanHeGiamHo_ID = @qhId
-  AND QH.DaXoa = 0
-  AND (@uid IN (QH.NguoiDuocGiamHo_ID, QH.NguoiGiamHo_ID))
-    `);
-
-  if (rs.recordset.length === 0) {
-    throw new Error("Không tìm thấy quan hệ hoặc không có quyền xem");
+  if (rel.nguoiduocgiamho_id === userId) {
+    role = "GUARDIAN";
+    targetUserId = rel.nguoigiamho_id;
+  } else if (rel.nguoigiamho_id === userId) {
+    role = "DEPENDENT";
+    targetUserId = rel.nguoiduocgiamho_id;
+  } else {
+    throw new Error("Không có quyền xem");
   }
 
-  return rs.recordset[0];
+  // lấy user info
+  const { data: user } = await db
+    .from("nguoidung")
+    .select(`
+      nguoidung_id,
+      tennd,
+      avatarurl,
+      gioitinh,
+      ngaysinh,
+      taikhoan (
+        sodienthoai
+      )
+    `)
+    .eq("nguoidung_id", targetUserId)
+    .maybeSingle();
+
+  if (!user) throw new Error("Không tìm thấy user");
+
+  return {
+    quanhegiamho_id: rel.quanhegiamho_id,
+    ngaybatdau: rel.ngaybatdau,
+    nguoigiamho_id: rel.nguoigiamho_id,
+    nguoiduocgiamho_id: rel.nguoiduocgiamho_id,
+    role,
+    ...user,
+  };
 }

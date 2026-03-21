@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:Care_AI/app_settings.dart';
+import 'dart:async';
+import 'package:demo_app/app_settings.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:Care_AI/models/tr.dart';
-import 'package:Care_AI/widgets/common_confirm_dialog.dart';
-import 'package:Care_AI/api/alert_api.dart';
-import 'package:Care_AI/models/current_user.dart';
-import 'package:Care_AI/widgets/app_header.dart';
+import 'package:demo_app/models/tr.dart';
+import 'package:demo_app/widgets/common_confirm_dialog.dart';
+import 'package:demo_app/api/alert_api.dart';
+import 'package:demo_app/widgets/app_header.dart';
 
 class AlertScreen extends StatefulWidget {
   const AlertScreen({super.key});
@@ -14,18 +14,23 @@ class AlertScreen extends StatefulWidget {
   State<AlertScreen> createState() => _AlertScreenState();
 }
 
-class _AlertScreenState extends State<AlertScreen> {
+class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
   static const _bg = Color(0xFFF6F6F6);
   static const _blue = Color(0xFF1877F2);
 
   final List<_AlertItem> _alerts = [];
+  Timer? _pollTimer;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
 
     loadAlerts();
     AppSettings.alertVersion.addListener(_onNewAlert);
+    _pollTimer = Timer.periodic(const Duration(seconds: 8), (_) {
+      loadAlerts();
+    });
   }
 
   @override
@@ -39,45 +44,54 @@ class _AlertScreenState extends State<AlertScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _pollTimer?.cancel();
     AppSettings.alertVersion.removeListener(_onNewAlert);
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      loadAlerts();
+    }
   }
   /* ================= LOAD ALERT ================= */
 
   Future<void> loadAlerts() async {
-    final user = CurrentUser.user;
+    try {
+      final data = await AlertApi.getAlerts();
+      if (!mounted) return;
 
-    if (user == null) {
-      return;
+      setState(() {
+        _alerts.clear();
+        _alerts.addAll(data.map((e) => _AlertItem(
+              id: e["notification_id"].toString(),
+              icon: Icons.warning_amber_rounded,
+              iconColor: Colors.red,
+              title: (e["tieude"] ?? "Thông báo").toString(),
+              time: _formatTime(e["thoigian"]?.toString()),
+              detail: (e["noidung"] ?? "").toString(),
+              isRead: e["dadoc"] == true,
+            )));
+      });
+      _syncBadge();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
     }
-
-    final userId = user.nguoiDungId;
-    final data = await AlertApi.getAlerts(userId);
-
-    if (!mounted) return;
-
-    setState(() {
-      _alerts.clear();
-
-      _alerts.addAll(data.map((e) => _AlertItem(
-            id: e["Notification_ID"],
-            icon: Icons.warning_amber_rounded,
-            iconColor: Colors.red,
-            title: e["TieuDe"] ?? "Thông báo",
-            time: _formatTime(e["ThoiGian"]),
-            detail: e["NoiDung"],
-            isRead: e["DaDoc"] ?? false,
-          )));
-    });
-
-    _syncBadge();
   }
 
   String _formatTime(String? iso) {
     if (iso == null || iso.isEmpty) return "";
-
-    final date = DateTime.parse(iso).toLocal();
-    return "${date.hour}:${date.minute.toString().padLeft(2, '0')}  •  ${date.day}/${date.month}";
+    try {
+      final date = DateTime.parse(iso).toLocal();
+      return "${date.hour}:${date.minute.toString().padLeft(2, '0')}  •  ${date.day}/${date.month}";
+    } catch (_) {
+      return "";
+    }
   }
 
   void _syncBadge() {
@@ -161,14 +175,16 @@ class _AlertScreenState extends State<AlertScreen> {
               );
 
               if (ok == true) {
-                final user = CurrentUser.user;
-
-                if (user != null) {
-                  await AlertApi.deleteAlert(item.id, user.nguoiDungId);
+                try {
+                  await AlertApi.deleteAlert(item.id);
+                  setState(() => _alerts.remove(item));
+                  _syncBadge();
+                } catch (e) {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(e.toString())),
+                  );
                 }
-
-                setState(() => _alerts.remove(item));
-                _syncBadge();
               }
             },
             backgroundColor: Colors.red,
@@ -188,14 +204,16 @@ class _AlertScreenState extends State<AlertScreen> {
           );
 
           if (!item.isRead) {
-            final user = CurrentUser.user;
-
-            if (user != null) {
-              await AlertApi.markAsRead(item.id, user.nguoiDungId);
+            try {
+              await AlertApi.markAsRead(item.id);
+              setState(() => item.isRead = true);
+              _syncBadge();
+            } catch (e) {
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(e.toString())),
+              );
             }
-
-            setState(() => item.isRead = true);
-            _syncBadge();
           }
         },
         child: Container(

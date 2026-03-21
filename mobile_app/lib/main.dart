@@ -16,18 +16,30 @@ final baseUrl = kIsWeb ? "http://localhost:3000" : "http://10.0.2.2:3000";
 
 // ✅ Background handler
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  try {
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    }
+  } on FirebaseException catch (e) {
+    if (e.code != "duplicate-app") rethrow;
+  }
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // ✅ Init Firebase đúng chuẩn (web + mobile)
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  try {
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    }
+  } on FirebaseException catch (e) {
+    if (e.code != "duplicate-app") rethrow;
+  }
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 

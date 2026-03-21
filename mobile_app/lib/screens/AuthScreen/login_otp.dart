@@ -1,15 +1,15 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:Care_AI/api/auth_api.dart';
-import 'package:Care_AI/api/profile_api.dart' as profile_api;
-import 'package:Care_AI/models/current_user.dart';
-import 'package:Care_AI/screens/home/home.dart';
-import 'package:Care_AI/api/auth_storage.dart';
+import 'package:demo_app/api/auth_api.dart';
+import 'package:demo_app/api/profile_api.dart' as profile_api;
+import 'package:demo_app/models/current_user.dart';
+import 'package:demo_app/screens/home/home.dart';
+import 'package:demo_app/api/auth_storage.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:Care_AI/api/settings_api.dart';
-import 'package:Care_AI/screens/settings/profile/create_profile.dart';
+import 'package:demo_app/api/settings_api.dart';
+import 'package:demo_app/screens/settings/profile/create_profile.dart';
 import '../../models/tr.dart';
 
 class LoginOtpScreen extends StatefulWidget {
@@ -125,6 +125,19 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
       // 3️⃣ Check profile
       Map<String, dynamic>? profile;
 
+      if (user.profileCompleted != true) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => CreateProfileScreen(
+              nguoiDungId: user.nguoiDungId,
+              phone: user.soDienThoai,
+            ),
+          ),
+        );
+        return;
+      }
+
       try {
         print('🟡 CHECK PROFILE ID = ${user.nguoiDungId}');
 
@@ -140,13 +153,9 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
 
       if (!mounted) return;
 
-      bool profileIncomplete = profile == null ||
-          profile['tenND'] == null ||
-          profile['ngaySinh'] == null ||
-          profile['chieuCao'] == null ||
-          profile['canNang'] == null;
+      final hasValidProfile = _isProfileCompleted(profile);
 
-      if (profileIncomplete) {
+      if (!hasValidProfile) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -180,6 +189,27 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
         _loading = false;
       });
     }
+  }
+
+  bool _isProfileCompleted(Map<String, dynamic>? profile) {
+    if (profile == null) return false;
+
+    final fullName = (profile['tenND'] ?? '').toString().trim();
+    final birthDate = (profile['ngaySinh'] ?? '').toString().trim();
+    final gender = profile['gioiTinh'];
+    final height = (profile['chieuCao'] as num?)?.toDouble();
+    final weight = (profile['canNang'] as num?)?.toDouble();
+
+    final normalizedName = fullName.toLowerCase();
+    final hasName = fullName.isNotEmpty &&
+        normalizedName != 'người dùng mới' &&
+        normalizedName != 'nguoi dung moi';
+    final hasBirthDate = birthDate.isNotEmpty;
+    final hasGender = gender == 0 || gender == 1;
+    final hasHeight = height != null && height > 0;
+    final hasWeight = weight != null && weight > 0;
+
+    return hasName && hasBirthDate && hasGender && hasHeight && hasWeight;
   }
 
   Future<void> _syncUserData(String userId) async {

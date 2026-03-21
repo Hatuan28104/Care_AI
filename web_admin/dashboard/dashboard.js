@@ -1,5 +1,4 @@
-const API_BASE = "http://localhost:3000";
-
+export const API_BASE = "https://web-admin-ck6m.onrender.com";
 let chartInstance = null;
 let currentTab = 0;
 let selectedStart = null;
@@ -24,14 +23,27 @@ function groupByDate(data, dateField, valueField = null) {
   const map = {};
 
   data.forEach(item => {
-    if (!item[dateField]) return;
+    console.log("ITEM:", item); // 🔥 xem từng record
+
+    if (!item[dateField]) {
+      console.warn("MISSING FIELD:", dateField, item);
+      return;
+    }
 
     const d = new Date(item[dateField]);
+    if (isNaN(d)) {
+      console.warn("INVALID DATE:", item[dateField]);
+      return;
+    }
+
     if (!isInRange(d, selectedStart, selectedEnd)) return;
 
-    const key = d.toLocaleDateString("vi-VN");
+    const key = d.toISOString().split("T")[0];
+
     map[key] = (map[key] || 0) + (valueField ? item[valueField] : 1);
   });
+
+  console.log("MAP:", map);
 
   return map;
 }
@@ -64,10 +76,13 @@ function renderChart(labels, data, label, type = "line") {
 }
 
 /* ==========================
-   LOAD CHART (GỘP)
+   LOAD CHART
 ========================== */
 async function loadChart(url, dateField, label, valueField = null) {
   const data = await fetchData(url);
+
+  console.log("DATA:", data); // 🔥 debug
+
   const map = groupByDate(data, dateField, valueField);
 
   const sorted = Object.entries(map).sort(
@@ -75,7 +90,7 @@ async function loadChart(url, dateField, label, valueField = null) {
   );
 
   renderChart(
-    sorted.map(i => i[0]),
+    sorted.map(i => new Date(i[0]).toLocaleDateString("vi-VN")),
     sorted.map(i => i[1]),
     label
   );
@@ -86,13 +101,13 @@ async function loadChart(url, dateField, label, valueField = null) {
 ========================== */
 function loadCurrentChart() {
   if (currentTab === 0)
-    loadChart(`${API_BASE}/profile`, "NgayTao", "Người dùng");
+    loadChart(`${API_BASE}/profile/dashboard/users`, "ngaytao", "Người dùng");
 
   if (currentTab === 1)
     loadChart(`${API_BASE}/api/chat/conversations`, "date", "Hội thoại", "total");
 
   if (currentTab === 2)
-    loadChart(`${API_BASE}/notification/alerts`, "CreatedAt", "Cảnh báo");
+    loadChart(`${API_BASE}/notification/alerts`, "createdat", "Cảnh báo");
 }
 
 /* ==========================
@@ -138,14 +153,14 @@ function initExport() {
       const rows = [];
 
       const [users, conversations, alerts] = await Promise.all([
-        fetchData(`${API_BASE}/profile`),
+        fetchData(`${API_BASE}/profile/dashboard/users`),
         fetchData(`${API_BASE}/api/chat/conversations`),
         fetchData(`${API_BASE}/notification/alerts`)
       ]);
 
-      const userMap = groupByDate(users, "NgayTao");
+      const userMap = groupByDate(users, "ngaytao");
       const interactionMap = groupByDate(conversations, "date", "total");
-      const alertMap = groupByDate(alerts, "CreatedAt");
+      const alertMap = groupByDate(alerts, "createdat");
 
       pushSection(rows, "USERS", userMap);
       pushSection(rows, "INTERACTIONS", interactionMap);
@@ -166,7 +181,7 @@ function initExport() {
    DATE FORMAT
 ========================== */
 function formatDate(date) {
-  return date.toLocaleDateString("en-US", {
+  return date.toLocaleDateString("vi-VN", {
     month: "short",
     day: "numeric",
     year: "numeric"
@@ -184,6 +199,7 @@ function initDatePicker() {
 
   flatpickr("#dateRange", {
     mode: "range",
+    locale: "vn",
     dateFormat: "M d, Y",
     defaultDate: [today, today],
 
@@ -209,13 +225,13 @@ function initDatePicker() {
 async function loadStats() {
   try {
     const [users, conversations, alerts] = await Promise.all([
-      fetchData(`${API_BASE}/profile`),
+      fetchData(`${API_BASE}/profile/dashboard/users`),
       fetchData(`${API_BASE}/api/chat/conversations`),
       fetchData(`${API_BASE}/notification/alerts`)
     ]);
 
     const totalUsers = users.filter(u =>
-      u.NgayTao && isInRange(new Date(u.NgayTao), selectedStart, selectedEnd)
+      u.ngaytao && isInRange(new Date(u.ngaytao), selectedStart, selectedEnd)
     ).length;
 
     const totalInteractions = conversations.reduce((sum, c) => {
@@ -226,7 +242,7 @@ async function loadStats() {
     }, 0);
 
     const totalAlerts = alerts.filter(a =>
-      a.CreatedAt && isInRange(new Date(a.CreatedAt), selectedStart, selectedEnd)
+      a.createdat && isInRange(new Date(a.createdat), selectedStart, selectedEnd)
     ).length;
 
     document.getElementById("totalUsers").innerText = totalUsers;

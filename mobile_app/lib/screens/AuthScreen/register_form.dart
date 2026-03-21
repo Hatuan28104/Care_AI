@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:intl_phone_field/phone_number.dart' as ipn;
-import 'package:Care_AI/screens/settings/privacy_security/terms_of_service.dart';
-import 'package:Care_AI/screens/settings/privacy_security/privacy_policy.dart';
-import 'package:Care_AI/api/auth_api.dart';
+import 'package:demo_app/screens/settings/privacy_security/terms_of_service.dart';
+import 'package:demo_app/screens/settings/privacy_security/privacy_policy.dart';
+import 'package:demo_app/api/auth_api.dart';
 import '../../models/tr.dart';
 
 class RegisterForm extends StatefulWidget {

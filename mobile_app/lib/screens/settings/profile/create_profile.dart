@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:Care_AI/screens/home/home.dart';
+import 'package:demo_app/screens/home/home.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'dart:convert';
-import 'package:Care_AI/api/profile_api.dart' as ProfileApi;
+import 'package:demo_app/api/profile_api.dart' as ProfileApi;
 import '../../../models/tr.dart';
 
 class CreateProfileScreen extends StatefulWidget {

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:Care_AI/api/health_api.dart';
-import 'package:Care_AI/models/health_icon_mapper.dart';
-import 'package:Care_AI/models/tr.dart';
-import 'package:Care_AI/widgets/app_header.dart';
+import 'package:demo_app/api/health_api.dart';
+import 'package:demo_app/models/health_icon_mapper.dart';
+import 'package:demo_app/models/tr.dart';
+import 'package:demo_app/widgets/app_header.dart';
 import 'metric_item.dart';
 import 'metric_detail.dart';
 
@@ -59,15 +59,16 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
       final data = await HealthApi.getMetrics();
 
       final items =
-          data.where((e) => e['Category'] == 'health').map<MetricItem>((e) {
-        final iconData = getHealthIcon(e['TenChiSo']);
+          data.where((e) => e['loai'] == 'health').map<MetricItem>((e) {
+        final iconData = getHealthIcon(e['tenchiso']);
 
         return MetricItem(
+          metricId: (e['loaichiso_id'] ?? '').toString(),
           icon: iconData.icon,
           iconColor: iconData.color,
-          title: e['TenChiSo'],
+          title: e['tenchiso'],
           value: '--',
-          unit: e['DonViDo'],
+          unit: e['donvido'],
           time: '--:--',
         );
       }).toList();
@@ -89,13 +90,13 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
 
       setState(() {
         for (var item in _items) {
-          final match = data.where((e) => e['TenChiSo'] == item.title);
+          final match = data.where((e) => e['tenchiso'] == item.title);
 
           if (match.isNotEmpty) {
             final m = match.first;
 
-            item.value = m['GiaTri'].toString();
-            item.time = m['ThoiGian'] ?? '--:--';
+            item.value = (m['giatri'] ?? '--').toString();
+            item.time = (m['thoigiancapnhat'] ?? '--:--').toString();
           }
         }
       });
@@ -170,7 +171,7 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
             builder: (_) => MetricDetailScreen(
               title: m.title,
               deviceId: _deviceId!,
-              metricId: m.title,
+              metricId: m.metricId,
               accent: m.iconColor,
             ),
           ),

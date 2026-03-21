@@ -1,121 +1,106 @@
-import sql from "mssql";
 import { getDB } from "../config/db.js";
+
+function normalizeVnPhone(phone) {
+  let digits = String(phone || "").replace(/\D/g, "");
+  if (!digits) return "";
+  if (digits.startsWith("84")) {
+    digits = "0" + digits.slice(2);
+  }
+  return digits;
+}
 
 /* =========================
    GỬI LỜI MỜI
 ========================= */
 export async function sendInvite(fromId, toId) {
-  const db = await getDB();
+  const db = getDB();
 
   if (fromId === toId) throw new Error("Không thể mời chính mình");
 
-  const check = await db.request()
-    .input("f", sql.Char(12), fromId)
-    .input("t", sql.Char(12), toId)
-    .query(`
-      SELECT 1 FROM LoiMoi
-      WHERE NguoiMoi_ID = @f
-        AND NguoiDuocMoi_ID = @t
-        AND TrangThaiLoiMoi = 0
-    `);
+  const { data: existing } = await db
+    .from("loimoi")
+    .select("loimoi_id")
+    .eq("nguoimoi_id", fromId)
+    .eq("nguoiduocmoi_id", toId)
+    .eq("trangthailoimoi", "0")
+    .maybeSingle();
 
-  if (check.recordset.length) {
-    throw new Error("Lời mời đã tồn tại");
-  }
+  if (existing) throw new Error("Lời mời đã tồn tại");
 
-await db.request()
-  .input("from", sql.Char(12), fromId)
-  .input("to", sql.Char(12), toId)
-  .query(`
-    INSERT INTO LoiMoi (
-      LoiMoi_ID, NgayGui, TrangThaiLoiMoi,
-      NguoiMoi_ID, NguoiDuocMoi_ID
-    )
-    VALUES (
-      'LM' + RIGHT(NEWID(), 10),
-      GETDATE(), 0,
-      @from, @to
-    )
-  `);
+  const { error } = await db.from("loimoi").insert({
+    loimoi_id: "LM" + Date.now().toString().slice(-10),
+    ngaygui: new Date().toISOString(),
+    trangthailoimoi: "0",
+    nguoimoi_id: fromId,
+    nguoiduocmoi_id: toId,
+  });
 
+  if (error) throw error;
 }
 
 /* =========================
    ACCEPT
 ========================= */
 export async function acceptInvite(loiMoiId) {
-  const db = await getDB();
-  const tx = new sql.Transaction(db);
-  await tx.begin();
+  const db = getDB();
 
-  try {
-    const up = await tx.request().query(`
-      UPDATE LoiMoi
-      SET TrangThaiLoiMoi = 1,
-          NgayPhanHoi = GETDATE()
-      WHERE LoiMoi_ID = '${loiMoiId}'
-        AND TrangThaiLoiMoi = 0
-    `);
+  // update
+  const { data: updated, error: errUp } = await db
+    .from("loimoi")
+    .update({
+      trangthailoimoi: "1",
+      ngayphanhoi: new Date().toISOString(),
+    })
+    .eq("loimoi_id", loiMoiId)
+    .eq("trangthailoimoi", "0")
+    .select()
+    .maybeSingle();
 
-    if (up.rowsAffected[0] === 0) {
-      throw new Error("Lời mời không hợp lệ");
-    }
+  if (errUp) throw errUp;
+  if (!updated) throw new Error("Lời mời không hợp lệ");
 
-    await tx.request().query(`
-  INSERT INTO QuanHeGiamHo (
-    QuanHeGiamHo_ID, LoiMoi_ID,
-    NguoiDuocGiamHo_ID, 
-    NguoiGiamHo_ID,
-    NgayBatDau, DaXoa
-  )
-  SELECT
-    'QH' + RIGHT(NEWID(), 10),
-    LoiMoi_ID,
-    NguoiMoi_ID,       
-    NguoiDuocMoi_ID,   
-    GETDATE(), 0
-  FROM LoiMoi
-  WHERE LoiMoi_ID = '${loiMoiId}'
-`);
+  // insert quan hệ
+  const { data: relation, error: errRel } = await db
+    .from("quanhegiamho")
+    .insert({
+      quanhegiamho_id: "QH" + Date.now().toString().slice(-10),
+      loimoi_id: loiMoiId,
+      nguoigiamho_id: updated.nguoiduocmoi_id,   
+      nguoiduocgiamho_id: updated.nguoimoi_id,   
+      ngaybatdau: new Date().toISOString(),
+      daxoa: false,
+    })
+    .select(`
+      quanhegiamho_id,
+      ngaybatdau,
+      nguoidung:nguoigiamho_id (
+        tennd,
+        avatarurl
+      )
+    `)
+    .single();
 
-    // 🔥 LẤY RELATIONSHIP VỪA TẠO
-   const newDep = await tx.request().query(`
-  SELECT TOP 1
-    QH.QuanHeGiamHo_ID,
-    QH.NgayBatDau,
-    ND.TenND,
-    ND.AvatarUrl
-  FROM QuanHeGiamHo QH
-  JOIN LoiMoi LM ON LM.LoiMoi_ID = QH.LoiMoi_ID
-  JOIN NguoiDung ND ON ND.NguoiDung_ID = QH.NguoiGiamHo_ID
-  WHERE LM.LoiMoi_ID = '${loiMoiId}'
-  ORDER BY QH.NgayBatDau DESC
-`);
+  if (errRel) throw errRel;
 
-    await tx.commit();
-
-    return newDep.recordset[0]; // 🔥 QUAN TRỌNG
-  } catch (e) {
-    await tx.rollback();
-    throw e;
-  }
+  return relation;
 }
-
 /* =========================
    TỪ CHỐI
 ========================= */
 export async function rejectInvite(loiMoiId) {
-  const db = await getDB();
+  const db = getDB();
 
-  const rs = await db.request().query(`
-    UPDATE LoiMoi
-    SET TrangThaiLoiMoi = 2,
-        NgayPhanHoi = GETDATE()
-    WHERE LoiMoi_ID = '${loiMoiId}'
-      AND TrangThaiLoiMoi = 0
-  `);
+  const { data } = await db
+    .from("loimoi")
+    .update({
+      trangthailoimoi: "2",
+      ngayphanhoi: new Date().toISOString(),
+    })
+    .eq("loimoi_id", loiMoiId)
+    .eq("trangthailoimoi", "0")
+    .select();
 
-  if (rs.rowsAffected[0] === 0) {
+  if (!data || data.length === 0) {
     throw new Error("Lời mời không hợp lệ");
   }
 }
@@ -124,103 +109,160 @@ export async function rejectInvite(loiMoiId) {
    DANH SÁCH LỜI MỜI ĐẾN
 ========================= */
 export async function getInvites(userId) {
-  const db = await getDB();
+  const db = getDB();
 
-  const rs = await db.request()
-    .input("uid", sql.Char(12), userId)
-    .query(`
-      SELECT
-        LM.LoiMoi_ID,
-        LM.NgayGui,
-        ND.NguoiDung_ID AS NguoiMoi_ID,
-        ND.AvatarUrl,
-        ND.TenND,
-        TK.SoDienThoai
-      FROM LoiMoi LM
-      JOIN NguoiDung ND
-        ON ND.NguoiDung_ID = LM.NguoiMoi_ID
-      JOIN TaiKhoan TK
-        ON TK.NguoiDung_ID = ND.NguoiDung_ID
-      WHERE LM.NguoiDuocMoi_ID = @uid
-        AND LM.TrangThaiLoiMoi = 0
-      ORDER BY LM.NgayGui DESC
-    `);
+  const { data, error } = await db
+    .from("loimoi")
+    .select(`
+      loimoi_id,
+      ngaygui,
+      nguoidung:nguoimoi_id (
+        nguoidung_id,
+        tennd,
+        avatarurl,
+        taikhoan (
+          sodienthoai
+        )
+      )
+    `)
+    .eq("nguoiduocmoi_id", userId)
+    .eq("trangthailoimoi", "0")
+    .order("ngaygui", { ascending: false });
 
-  return rs.recordset;
+  if (error) throw error;
+
+  return data;
 }
-
 /* =========================
    GỬI LỜI MỜI BẰNG SĐT
 ========================= */
 export async function sendInviteByPhone(fromId, phone) {
-  const db = await getDB();
+  const db = getDB();
+  const normalizedPhone = normalizeVnPhone(phone);
+  if (!normalizedPhone) throw new Error("Thiếu số điện thoại");
 
-  if (!fromId) throw new Error("Thiếu người gửi");
-  if (!phone) throw new Error("Thiếu số điện thoại");
+  const { data: user } = await db
+    .from("taikhoan")
+    .select("nguoidung_id")
+    .eq("sodienthoai", normalizedPhone)
+    .maybeSingle();
 
-  // 1. tìm user theo SĐT
-  const rs = await db.request()
-    .input("phone", sql.NVarChar(15), phone)
-    .query(`
-      SELECT NguoiDung_ID
-      FROM TaiKhoan
-      WHERE SoDienThoai = @phone
-    `);
+  if (!user) throw new Error("Số điện thoại chưa đăng ký");
 
-  if (rs.recordset.length === 0) {
-    throw new Error("Số điện thoại chưa đăng ký");
-  }
-
-  const toUserId = rs.recordset[0].NguoiDung_ID;
-
-  // 2. gọi lại logic cũ
-  return sendInvite(fromId, toUserId);
+  return sendInvite(fromId, user.nguoidung_id);
 }
 export async function findUserByPhone(phone, currentUserId) {
-  const db = await getDB();
+  const db = getDB();
+  const normalizedPhone = normalizeVnPhone(phone);
+  if (!normalizedPhone) return [];
 
-  const rs = await db.request()
-    .input("phone", sql.NVarChar(15), phone)
-    .input("me", sql.Char(12), currentUserId)
-    .query(`
-      SELECT 
-        ND.NguoiDung_ID,
-        ND.TenND,
-        ND.AvatarUrl,
-        TK.SoDienThoai,
-        LM.LoiMoi_ID,
-        LM.TrangThaiLoiMoi
-      FROM TaiKhoan TK
-      JOIN NguoiDung ND 
-        ON TK.NguoiDung_ID = ND.NguoiDung_ID
-      LEFT JOIN LoiMoi LM
-        ON LM.NguoiMoi_ID = @me
-       AND LM.NguoiDuocMoi_ID = ND.NguoiDung_ID
-       AND LM.TrangThaiLoiMoi = 0
-      WHERE TK.SoDienThoai LIKE @phone + '%'
-    `);
+  const { data, error } = await db
+    .from("taikhoan")
+    .select(`
+      sodienthoai,
+      nguoidung (
+        nguoidung_id,
+        tennd,
+        avatarurl
+      )
+    `)
+    .ilike("sodienthoai", `${normalizedPhone}%`);
 
-  return rs.recordset.map(u => ({
-    ...u,
-    inviteStatus: u.TrangThaiLoiMoi === 0 ? "pending" : "none"
-  }));
+  if (error) throw error;
+
+  const users = (data || [])
+    .map(u => ({
+      ...u.nguoidung,
+      sodienthoai: u.sodienthoai,
+    }))
+    .filter(u => u?.nguoidung_id && u.nguoidung_id !== currentUserId);
+
+  if (users.length === 0) return [];
+
+  const ids = users.map(u => u.nguoidung_id);
+
+  const { data: invites, error: inviteErr } = await db
+    .from("loimoi")
+    .select("loimoi_id, nguoimoi_id, nguoiduocmoi_id, trangthailoimoi")
+    .or(
+      `and(nguoimoi_id.eq.${currentUserId},nguoiduocmoi_id.in.(${ids.join(",")})),and(nguoiduocmoi_id.eq.${currentUserId},nguoimoi_id.in.(${ids.join(",")}))`
+    );
+  if (inviteErr) throw inviteErr;
+
+  const { data: relations, error: relErr } = await db
+    .from("quanhegiamho")
+    .select("nguoigiamho_id, nguoiduocgiamho_id, daxoa")
+    .or(
+      `and(nguoigiamho_id.eq.${currentUserId},nguoiduocgiamho_id.in.(${ids.join(",")})),and(nguoiduocgiamho_id.eq.${currentUserId},nguoigiamho_id.in.(${ids.join(",")}))`
+    )
+    .eq("daxoa", false);
+  if (relErr) throw relErr;
+
+  return users.map(u => {
+    const related = (relations || []).some(r => {
+      return (
+        (r.nguoigiamho_id === currentUserId &&
+          r.nguoiduocgiamho_id === u.nguoidung_id) ||
+        (r.nguoiduocgiamho_id === currentUserId &&
+          r.nguoigiamho_id === u.nguoidung_id)
+      );
+    });
+
+    if (related) {
+      return {
+        ...u,
+        inviteStatus: "related",
+      };
+    }
+
+    const outgoingPending = (invites || []).find(i => {
+      return (
+        i.nguoimoi_id === currentUserId &&
+        i.nguoiduocmoi_id === u.nguoidung_id &&
+        i.trangthailoimoi === "0"
+      );
+    });
+    if (outgoingPending) {
+      return {
+        ...u,
+        inviteStatus: "pending",
+        loimoi_id: outgoingPending.loimoi_id,
+      };
+    }
+
+    const incomingPending = (invites || []).find(i => {
+      return (
+        i.nguoiduocmoi_id === currentUserId &&
+        i.nguoimoi_id === u.nguoidung_id &&
+        i.trangthailoimoi === "0"
+      );
+    });
+    if (incomingPending) {
+      return {
+        ...u,
+        inviteStatus: "incoming",
+        loimoi_id: incomingPending.loimoi_id,
+      };
+    }
+
+    return {
+      ...u,
+      inviteStatus: "none",
+    };
+  });
 }
 export async function cancelInvite(loiMoiId, fromId) {
-  const db = await getDB();
+  const db = getDB();
 
-  const rs = await db.request()
-    .input("id", sql.Char(12), loiMoiId)
-    .input("from", sql.Char(12), fromId)
-    .query(`
-      UPDATE LoiMoi
-      SET TrangThaiLoiMoi = 3
-      WHERE LoiMoi_ID = @id
-        AND NguoiMoi_ID = @from
-        AND TrangThaiLoiMoi = 0
-    `);
+  const { data } = await db
+    .from("loimoi")
+    .update({ trangthailoimoi: "3" })
+    .eq("loimoi_id", loiMoiId)
+    .eq("nguoimoi_id", fromId)
+    .eq("trangthailoimoi", "0")
+    .select();
 
-  if (rs.rowsAffected[0] === 0) {
+  if (!data || data.length === 0) {
     throw new Error("Không thể hủy lời mời");
   }
 }
-

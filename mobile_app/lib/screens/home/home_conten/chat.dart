@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:Care_AI/api/chat_api.dart';
-import 'package:Care_AI/models/tr.dart';
+import 'package:demo_app/api/chat_api.dart';
+import 'package:demo_app/models/tr.dart';
 
 class ChatScreen extends StatefulWidget {
   final String name;
@@ -91,16 +91,14 @@ class _ChatScreenState extends State<ChatScreen> {
 
       if (!mounted) return;
 
-      final bool canhBao = response["canhBao"] == true;
-      final int mucDo = response["mucDo"] ?? 0;
+      final bool canhBao = response["canh_bao"] == true;
+      final int mucDo = int.tryParse((response["muc_do"] ?? 0).toString()) ?? 0;
 
       setState(() {
         messages.removeWhere((m) => m["isTyping"] == true);
 
         messages.add({
-          "text": response["success"] == true
-              ? response["reply"]
-              : "${context.tr.error}: ${response["message"]}",
+          "text": (response["reply"] ?? "").toString(),
           "isUser": false,
         });
       });
@@ -134,7 +132,7 @@ class _ChatScreenState extends State<ChatScreen> {
       setState(() {
         messages.removeWhere((m) => m["isTyping"] == true);
         messages.add({
-          "text": context.tr.serverError,
+          "text": "${context.tr.error}: $e",
           "isUser": false,
         });
       });

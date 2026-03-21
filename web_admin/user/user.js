@@ -1,5 +1,12 @@
-const API_BASE = "http://localhost:3000";
 
+export const API_BASE = window.location.origin;
+
+function toAbsoluteImageUrl(path) {
+  if (!path) return "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+  if (/^https?:\/\//i.test(path)) return path;
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
+  return `${API_BASE}${cleanPath}`;
+}
 document.addEventListener("DOMContentLoaded", () => {
 
   const page = document.body.dataset.page;
@@ -83,7 +90,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (action === "edit") {
       window.location.href = `user-edit.html?id=${userId}`;
     }
-
     if (action === "delete") {
 
       rowToDelete = row;
@@ -92,9 +98,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
 
-          await fetch(`${API_BASE}/profile/${userId}`, {
+          const res = await fetch(`${API_BASE}/profile/${userId}`, {
             method: "DELETE"
           });
+
+          const json = await res.json();
+
+          if (!json.success) {
+            alert(json.message || "Xóa thất bại");
+            return;
+          }
 
           rowToDelete.remove();
           showToast("Xoá thành công");
@@ -102,11 +115,11 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (err) {
 
           console.error(err);
-          alert("Xóa thất bại");
+          alert("Lỗi kết nối server");
 
+        } finally {
+          rowToDelete = null;
         }
-
-        rowToDelete = null;
 
       });
 
@@ -152,32 +165,32 @@ if (page === "user-detail") {
 const id = params.get("id");
 
 loadUserEdit(id);
-
-    document.querySelector(".btn-save")?.addEventListener("click", () => {
+document.querySelector(".btn-save")?.addEventListener("click", () => {
 
   confirmUserSave(async () => {
 
     try {
 
-      const form = new FormData();
+      const avatarInput = document.getElementById("avatarInput");
 
-      form.append("nguoiDungId", id);
-      form.append("tenND", document.getElementById("tenND").value);
-      form.append("ngaySinh", document.getElementById("ngaySinh").value);
-      form.append("gioiTinh", document.getElementById("gioiTinh").value);
-      form.append("chieuCao", document.getElementById("chieuCao").value);
-      form.append("canNang", document.getElementById("canNang").value);
-      form.append("email", document.getElementById("email").value);
-      form.append("diaChi", document.getElementById("diaChi").value);
+      const formData = new FormData();
 
-      const avatar = document.getElementById("avatarInput")?.files[0];
-      if (avatar) {
-        form.append("avatar", avatar);
+      formData.append("tenND", document.getElementById("tenND").value);
+      formData.append("ngaySinh", document.getElementById("ngaySinh").value);
+      formData.append("gioiTinh", document.getElementById("gioiTinh").value);
+      formData.append("chieuCao", document.getElementById("chieuCao").value);
+      formData.append("canNang", document.getElementById("canNang").value);
+      formData.append("email", document.getElementById("email").value);
+      formData.append("diaChi", document.getElementById("diaChi").value);
+
+      // 👇 upload avatar nếu có
+      if (avatarInput.files[0]) {
+        formData.append("avatar", avatarInput.files[0]);
       }
 
-      const res = await fetch(`${API_BASE}/profile/update`, {
+      const res = await fetch(`${API_BASE}/profile/${id}`, {
         method: "PUT",
-        body: form
+        body: formData
       });
 
       const json = await res.json();
@@ -194,16 +207,13 @@ loadUserEdit(id);
       }, 1200);
 
     } catch (err) {
-
       console.error(err);
       alert("Lỗi kết nối server");
-
     }
 
   });
 
 });
-
     document.querySelector(".btn-cancel")?.addEventListener("click", () => {
       window.location.href = "./user.html";
     });
@@ -271,27 +281,27 @@ async function loadUsers() {
 
     tbody.innerHTML = "";
 
-   users.forEach((u, index) => {
+    users.forEach((u, index) => {
 
-  const tr = document.createElement("tr");
+      const tr = document.createElement("tr");
 
-  tr.dataset.id = u.NguoiDung_ID;
+      tr.dataset.id = u.nguoiDungId;
 
-  tr.innerHTML = `
-    <td>${index + 1}</td>
-    <td>${u.TenND ?? "(Chưa cập nhật)"}</td>
-    <td>${u.SoDienThoai ?? "-"}</td>
-    <td>${formatDate(u.NgaySinh)}</td>
-    <td>${u.NgayTao ? formatDate(u.NgayTao) : "-"}</td>
-    <td class="actions">
-      <i class="fa-solid fa-ellipsis-vertical action-toggle"></i>
-      <div class="action-menu"></div>
-    </td>
-  `;
+      tr.innerHTML = `
+        <td>${index + 1}</td>
+        <td>${u.tenND ?? "(Chưa cập nhật)"}</td>
+        <td>${u.soDienThoai ?? "-"}</td>
+        <td>${formatDate(u.ngaySinh)}</td>
+        <td>${u.ngayTao ? formatDate(u.ngayTao) : "-"}</td>
+        <td class="actions">
+          <i class="fa-solid fa-ellipsis-vertical action-toggle"></i>
+          <div class="action-menu"></div>
+        </td>
+      `;
 
-  tbody.appendChild(tr);
+      tbody.appendChild(tr);
 
-});
+    });
 
     initActionMenus();
 
@@ -313,43 +323,41 @@ async function loadUserDetail(id){
     if(!u) return;
     const avatar = document.getElementById("avatar");
 
-if (u.AvatarUrl) {
-  avatar.src = `${API_BASE}${u.AvatarUrl}`;
-    } else {
-      avatar.src =
-        "https://cdn-icons-png.flaticon.com/512/149/149071.png";
-    }
-    document.getElementById("name").innerText = u.TenND ?? "-";
-    const lastUpdate = u.NgayCapNhat || u.NgayTao;
+    avatar.src = toAbsoluteImageUrl(u.avatarUrl);
+
+    document.getElementById("name").innerText = u.tenND ?? "-";
+
+    const lastUpdate = u.ngayCapNhat || u.ngayTao;
 
     document.getElementById("updated").innerText =
       lastUpdate
         ? "Cập nhật lần cuối: " + formatDate(lastUpdate)
         : "-";
-    document.getElementById("fullName").innerText = u.TenND ?? "-";
-    document.getElementById("phone").innerText =
-      u.SoDienThoai ?? "-";
+
+    document.getElementById("fullName").innerText = u.tenND ?? "-";
+    document.getElementById("phone").innerText = u.soDienThoai ?? "-";
+
     document.getElementById("dob").innerText =
-      formatDate(u.NgaySinh);
+      formatDate(u.ngaySinh);
 
     document.getElementById("gender").innerText =
-      u.GioiTinh ? "Nam" : "Nữ";
+      u.gioiTinh ? "Nam" : "Nữ";
 
     document.getElementById("height").innerText =
-      u.ChieuCao ? `${u.ChieuCao} cm` : "-";
+      u.chieuCao ? `${u.chieuCao} cm` : "-";
 
     document.getElementById("weight").innerText =
-      u.CanNang ? `${u.CanNang} kg` : "-";
+      u.canNang ? `${u.canNang} kg` : "-";
 
     document.getElementById("email").innerText =
-      u.Email ?? "-";
+      u.email ?? "-";
 
     document.getElementById("address").innerText =
-      u.DiaChi ?? "-";
+      u.diaChi ?? "-";
+
     document.getElementById("editBtn").href =
       `./user-edit.html?id=${id}`;
-  }
-  
+    }
   catch(e){
     console.error(e);
   }
@@ -359,12 +367,12 @@ if (u.AvatarUrl) {
    FORMAT DATE
 ========================== */
 function formatDate(dateStr) {
-
   if (!dateStr) return "-";
 
   const d = new Date(dateStr);
-  return d.toLocaleDateString("vi-VN");
+  if (isNaN(d)) return "-";
 
+  return d.toLocaleDateString("vi-VN");
 }
 
 /* ==========================
@@ -424,31 +432,26 @@ console.log("User data:", u);
     if (!u) return;
 
     // TEXT INPUT
-    document.getElementById("tenND").value = u.TenND || "";
-    document.getElementById("email").value = u.Email || "";
-    document.getElementById("diaChi").value = u.DiaChi || "";
-    document.getElementById("chieuCao").value = u.ChieuCao || "";
-    document.getElementById("canNang").value = u.CanNang || "";
-    document.getElementById("soDienThoai").value = u.SoDienThoai || "";
+    document.getElementById("tenND").value = u.tenND || "";
+    document.getElementById("email").value = u.email || "";
+    document.getElementById("diaChi").value = u.diaChi || "";
+    document.getElementById("chieuCao").value = u.chieuCao || "";
+    document.getElementById("canNang").value = u.canNang || "";
+    document.getElementById("soDienThoai").value = u.soDienThoai || "";
 
-    // DATE
-    if (u.NgaySinh) {
-      const date = new Date(u.NgaySinh);
+    if (u.ngaySinh) {
+      const date = new Date(u.ngaySinh);
       document.getElementById("ngaySinh").value =
         date.toISOString().split("T")[0];
     }
 
-    // GENDER
     document.getElementById("gioiTinh").value =
-      u.GioiTinh ? "1" : "0";
+      u.gioiTinh ? "1" : "0";
 
-    // AVATAR
     const avatar = document.getElementById("avatarPreview");
 
     if (avatar) {
-      avatar.src = u.AvatarUrl
-        ? `${API_BASE}${u.AvatarUrl}`
-        : "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+      avatar.src = toAbsoluteImageUrl(u.avatarUrl);
     }
 
   } catch (err) {

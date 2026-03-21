@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:Care_AI/widgets/success_dialog.dart';
-import 'package:Care_AI/screens/welcome_screen.dart';
-import 'package:Care_AI/api/auth_api.dart';
+import 'package:demo_app/widgets/success_dialog.dart';
+import 'package:demo_app/screens/welcome_screen.dart';
+import 'package:demo_app/api/auth_api.dart';
 import '../../models/tr.dart';
 
 class RegisterOtp extends StatefulWidget {

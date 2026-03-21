@@ -1,6 +1,5 @@
 import admin from "firebase-admin";
 import { getDB } from "../config/db.js";
-import sql from "mssql";
 
 function mapGuardianTitle(level) {
   switch (level) {
@@ -16,26 +15,24 @@ function mapGuardianTitle(level) {
    INSERT NOTIFICATION
 ========================= */
 async function insertNoti(db, userId, title, body) {
-  await db.request()
-    .input("uid", sql.Char(12), userId)
-    .input("title", sql.NVarChar(255), title)
-    .input("body", sql.NVarChar(sql.MAX), body)
-    .query(`
-      INSERT INTO Notifications (
-        NguoiDung_ID,
-        TieuDe,
-        NoiDung,
-        ThoiGian,
-        DaDoc
-      )
-      VALUES (
-        @uid,
-        @title,
-        @body,
-        GETDATE(),
-        0
-      )
-    `);
+  const id = `NT${Date.now().toString().slice(-9)}${Math.floor(
+    Math.random() * 1000
+  )
+    .toString()
+    .padStart(3, "0")}`;
+
+  const { error } = await db
+    .from("notifications")
+    .insert({
+      notification_id: id,
+      nguoidung_id: userId,
+      tieude: title,
+      noidung: body,
+      thoigian: new Date().toISOString(),
+      dadoc: false,
+    });
+
+  if (error) throw error;
 }
 
 /* =========================
@@ -43,23 +40,19 @@ async function insertNoti(db, userId, title, body) {
 ========================= */
 async function sendFCM(db, token, title, body) {
   try {
-    console.log("Sending FCM to:", token);
-
-    const res = await admin.messaging().send({
+    await admin.messaging().send({
       token,
       notification: { title, body },
     });
-
-
   } catch (err) {
-    if (err.errorInfo?.code === 'messaging/registration-token-not-registered') {
-      console.log("Token chết → xoá khỏi DB:", token);
+    if (err.errorInfo?.code === "messaging/registration-token-not-registered") {
+      console.log("Token chết → xoá:", token);
 
-      await db.request()
-        .input("token", sql.NVarChar(255), token)
-        .query(`DELETE FROM FcmTokens WHERE Token = @token`);
+      await db
+        .from("fcmtokens")
+        .delete()
+        .eq("token", token);
     }
-
   }
 }
 
@@ -68,83 +61,84 @@ async function sendFCM(db, token, title, body) {
 ========================= */
 export async function sendNotification(userId, title, body, level = 1) {
   try {
-    const db = await getDB();
+    const db = getDB();
 
     // ===== 1. CHECK SETTING =====
-    const setting = await db.request()
-      .input("userId", sql.Char(12), userId)
-      .query(`
-        SELECT NotificationOn
-        FROM AppSettings
-        WHERE NguoiDung_ID = @userId
-      `);
+    const { data: setting, error: settingErr } = await db
+      .from("appsettings")
+      .select("notificationon")
+      .eq("nguoidung_id", userId)
+      .maybeSingle();
 
-    if (
-      setting.recordset.length > 0 &&
-      setting.recordset[0].NotificationOn === false
-    ) {
+    if (settingErr) {
+      console.log("Bỏ qua check appsettings:", settingErr.message);
+    }
+
+    if (!settingErr && setting && setting.notificationon === false) {
       console.log("🔕 User tắt thông báo");
       return;
     }
 
     // ===== 2. GET USER NAME =====
-    const userRs = await db.request()
-      .input("userId", sql.Char(12), userId)
-      .query(`
-        SELECT TenND
-        FROM NguoiDung
-        WHERE NguoiDung_ID = @userId
-      `);
+    const { data: user } = await db
+      .from("nguoidung")
+      .select("tennd")
+      .eq("nguoidung_id", userId)
+      .single();
 
-    const userName = userRs.recordset[0]?.TenND || userId;
+    const userName = user?.tennd || userId;
 
     // ===== 3. SEND TO USER =====
-    const userTokens = await db.request()
-      .input("userId", sql.Char(12), userId)
-      .query(`
-        SELECT Token FROM FcmTokens
-        WHERE NguoiDung_ID = @userId
-      `);
+    const { data: userTokens } = await db
+      .from("fcmtokens")
+      .select("token")
+      .eq("nguoidung_id", userId);
 
-    for (let t of userTokens.recordset) {
-      await sendFCM(db, t.Token, title, body);
+    for (let t of userTokens || []) {
+      await sendFCM(db, t.token, title, body);
     }
 
     await insertNoti(db, userId, title, body);
 
     // ===== 4. GET GUARDIANS =====
-    const guardians = await db.request()
-      .input("userId", sql.Char(12), userId)
-      .query(`
-        SELECT NguoiGiamHo_ID
-        FROM QuanHeGiamHo
-        WHERE NguoiDuocGiamHo_ID = @userId
-          AND DaXoa = 0
-      `);
+    const { data: relations } = await db
+      .from("quanhegiamho")
+      .select("nguoigiamho_id, nguoiduocgiamho_id")
+      .or(`nguoiduocgiamho_id.eq.${userId},nguoigiamho_id.eq.${userId}`)
+      .eq("daxoa", false);
+
+    const guardianIds = Array.from(
+      new Set(
+        (relations || [])
+          .map(r =>
+            r.nguoiduocgiamho_id === userId
+              ? r.nguoigiamho_id
+              : r.nguoiduocgiamho_id
+          )
+          .filter(id => !!id && id !== userId)
+      )
+    );
 
     // ===== 5. SEND TO GUARDIANS =====
-    for (let g of guardians.recordset) {
-      const guardianId = g.NguoiGiamHo_ID;
+    for (let guardianId of guardianIds) {
 
       const gTitle = mapGuardianTitle(level);
       const gBody = `${userName}: "${body}"`;
 
-      const tokens = await db.request()
-        .input("gid", sql.Char(12), guardianId)
-        .query(`
-          SELECT Token FROM FcmTokens
-          WHERE NguoiDung_ID = @gid
-        `);
+      const { data: tokens } = await db
+        .from("fcmtokens")
+        .select("token")
+        .eq("nguoidung_id", guardianId);
 
-      for (let t of tokens.recordset) {
-        await sendFCM(db, t.Token, gTitle, gBody);
+      for (let t of tokens || []) {
+        await sendFCM(db, t.token, gTitle, gBody);
       }
 
       await insertNoti(db, guardianId, gTitle, gBody);
     }
 
-
   } catch (err) {
+    console.error("sendNotification error:", err);
   }
 }
 
@@ -160,46 +154,43 @@ export async function sendToAll(title, body) {
   console.log("Broadcast sent");
 }
 export async function markAsRead(notificationId, userId) {
-  const db = await getDB();
+  const db = getDB();
 
-  await db.request()
-    .input("id", sql.Char(12), notificationId)
-    .input("uid", sql.Char(12), userId)
-    .query(`
-      UPDATE Notifications
-      SET DaDoc = 1
-      WHERE Notification_ID = @id
-        AND NguoiDung_ID = @uid
-    `);
+  const { error } = await db
+    .from("notifications")
+    .update({ dadoc: true })
+    .eq("notification_id", notificationId)
+    .eq("nguoidung_id", userId);
+
+  if (error) throw error;
 }
 export async function deleteNotification(notificationId, userId) {
-  const db = await getDB();
+  const db = getDB();
 
-  await db.request()
-    .input("id", sql.Char(12), notificationId)
-    .input("uid", sql.Char(12), userId)
-    .query(`
-      DELETE FROM Notifications
-      WHERE Notification_ID = @id
-        AND NguoiDung_ID = @uid
-    `);
+  const { error } = await db
+    .from("notifications")
+    .delete()
+    .eq("notification_id", notificationId)
+    .eq("nguoidung_id", userId);
+
+  if (error) throw error;
 }
 export async function getAlerts(userId) {
-  const db = await getDB();
+  const db = getDB();
 
-  const result = await db.request()
-    .input("uid", sql.Char(12), userId)
-    .query(`
-      SELECT 
-        Notification_ID,
-        TieuDe,
-        NoiDung,
-        ThoiGian,
-        DaDoc
-      FROM Notifications
-      WHERE NguoiDung_ID = @uid
-      ORDER BY ThoiGian DESC
-    `);
+  const { data, error } = await db
+    .from("notifications")
+    .select(`
+      notification_id,
+      tieude,
+      noidung,
+      thoigian,
+      dadoc
+    `)
+    .eq("nguoidung_id", userId)
+    .order("thoigian", { ascending: false });
 
-  return result.recordset;
+  if (error) throw error;
+
+  return data;
 }

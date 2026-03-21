@@ -1,14 +1,15 @@
 import express from "express";
-import {
+import { 
   requestRegisterOtp,
   requestLoginOtp,
   verifyOtp,
   changePhone,
-  getLoginHistory,  
-   saveFcmToken, 
+  getLoginHistory,
+  saveFcmToken,
+  sendTestPush,
+  removeFcmToken   
 } from "../repos/auth.repo.js";
 import { auth } from "../middlewares/auth.middleware.js";
-import { sendTestPush } from "../repos/auth.repo.js";
 
 const router = express.Router();
 
@@ -82,7 +83,7 @@ router.post("/verify-otp", async (req, res) => {
 router.post("/change-phone", auth, async (req, res) => {
   try {
     const { phone } = req.body;
-    const userId = req.user.NguoiDung_ID;
+    const userId = req.user.nguoidung_id;
 
     await changePhone(userId, phone);
 
@@ -100,7 +101,7 @@ router.post("/change-phone", auth, async (req, res) => {
 ========================= */
 router.get("/login-history", auth, async (req, res) => {
   try {
-    const userId = req.user.NguoiDung_ID;
+    const userId = req.user.nguoidung_id;
 
     const data = await getLoginHistory(userId);
 
@@ -117,7 +118,7 @@ router.get("/login-history", auth, async (req, res) => {
 });
 router.post("/save-fcm-token", auth, async (req, res) => {
   try {
-    const userId = req.user.NguoiDung_ID;
+    const userId = req.user.nguoidung_id;
     const { fcmToken } = req.body;
 
     if (!fcmToken) {
@@ -134,7 +135,7 @@ router.post("/save-fcm-token", auth, async (req, res) => {
 });
 router.post("/test-push", auth, async (req, res) => {
   try {
-    const userId = req.user.NguoiDung_ID;
+    const userId = req.user.nguoidung_id;
 
     await sendTestPush(userId);
 
@@ -146,8 +147,8 @@ router.post("/test-push", auth, async (req, res) => {
     });
   }
 });
-router.post("/remove-fcm-token", async (req, res) => {
-  try {
+router.post("/remove-fcm-token", auth, async (req, res) => {
+    try {
     const { fcmToken } = req.body;
 
     await removeFcmToken(fcmToken);

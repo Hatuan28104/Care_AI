@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:Care_AI/app_settings.dart';
-import 'package:Care_AI/screens/settings/settings.dart';
+import 'package:demo_app/app_settings.dart';
+import 'package:demo_app/screens/settings/settings.dart';
+import 'package:demo_app/api/profile_api.dart' as profile_api;
+import 'package:demo_app/screens/settings/profile/create_profile.dart';
 import '../../models/tr.dart';
 
 import 'home_conten/home_tab.dart';
@@ -23,6 +25,67 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
+  bool _checkingProfile = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _ensureCompletedProfile();
+  }
+
+  Future<void> _ensureCompletedProfile() async {
+    try {
+      final profile = await profile_api.ProfileApi.getProfile(widget.userId);
+      if (!_isProfileCompleted(profile)) {
+        if (!mounted) return;
+        final phone = (profile?['soDienThoai'] ?? '').toString();
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => CreateProfileScreen(
+              nguoiDungId: widget.userId,
+              phone: phone,
+            ),
+          ),
+        );
+        return;
+      }
+    } catch (_) {
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => CreateProfileScreen(
+            nguoiDungId: widget.userId,
+            phone: '',
+          ),
+        ),
+      );
+      return;
+    }
+
+    if (!mounted) return;
+    setState(() => _checkingProfile = false);
+  }
+
+  bool _isProfileCompleted(Map<String, dynamic>? profile) {
+    if (profile == null) return false;
+    final fullName = (profile['tenND'] ?? '').toString().trim();
+    final normalizedName = fullName.toLowerCase();
+    final birthDate = (profile['ngaySinh'] ?? '').toString().trim();
+    final gender = profile['gioiTinh'];
+    final height = (profile['chieuCao'] as num?)?.toDouble();
+    final weight = (profile['canNang'] as num?)?.toDouble();
+
+    final hasName = fullName.isNotEmpty &&
+        normalizedName != 'người dùng mới' &&
+        normalizedName != 'nguoi dung moi';
+    final hasBirthDate = birthDate.isNotEmpty;
+    final hasGender = gender == 0 || gender == 1;
+    final hasHeight = height != null && height > 0;
+    final hasWeight = weight != null && weight > 0;
+    return hasName && hasBirthDate && hasGender && hasHeight && hasWeight;
+  }
 
   List<Widget> get _tabs => [
         HomeTab(userId: widget.userId),
@@ -33,6 +96,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_checkingProfile) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFF6F6F6),
       body: SafeArea(
@@ -42,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Container(
               height: 1,
               width: double.infinity,
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha: 0.08),
             ),
             Expanded(
               child: IndexedStack(

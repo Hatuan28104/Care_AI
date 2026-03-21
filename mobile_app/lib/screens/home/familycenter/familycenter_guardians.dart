@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:Care_AI/api/family_api.dart';
+import 'dart:async';
+import 'package:demo_app/api/family_api.dart';
 import 'familycenter_guardian_add.dart';
 import 'familycenter_guardian_profile.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:Care_AI/models/tr.dart';
-import 'package:Care_AI/widgets/common_confirm_dialog.dart';
+import 'package:demo_app/models/tr.dart';
+import 'package:demo_app/widgets/common_confirm_dialog.dart';
 
 class MyGuardiansScreen extends StatefulWidget {
   const MyGuardiansScreen({super.key});
@@ -13,24 +14,49 @@ class MyGuardiansScreen extends StatefulWidget {
   State<MyGuardiansScreen> createState() => _MyGuardiansScreenState();
 }
 
-class _MyGuardiansScreenState extends State<MyGuardiansScreen> {
+class _MyGuardiansScreenState extends State<MyGuardiansScreen>
+    with WidgetsBindingObserver {
   List<dynamic> guardians = [];
   bool loading = true;
+  Timer? _pollTimer;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadGuardians();
+    _pollTimer = Timer.periodic(const Duration(seconds: 6), (_) {
+      _loadGuardians(silent: true);
+    });
   }
 
-  Future<void> _loadGuardians() async {
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _pollTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _loadGuardians(silent: true);
+    }
+  }
+
+  Future<void> _loadGuardians({bool silent = false}) async {
+    if (!silent && mounted) {
+      setState(() => loading = true);
+    }
     try {
       final data = await FamilyApi.getMyGuardians();
+      if (!mounted) return;
       setState(() {
         guardians = data;
         loading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         loading = false;
       });
@@ -63,7 +89,7 @@ class _MyGuardiansScreenState extends State<MyGuardiansScreen> {
               MaterialPageRoute(builder: (_) => const AddGuardians()),
             );
 
-            _loadGuardians();
+            _loadGuardians(silent: true);
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFFFE4343),
@@ -102,7 +128,7 @@ class _MyGuardiansScreenState extends State<MyGuardiansScreen> {
         final g = guardians[index];
 
         return Slidable(
-          key: ValueKey(g['QuanHeGiamHo_ID']),
+          key: ValueKey(g['quanhegiamho_id']),
           endActionPane: ActionPane(
             motion: const DrawerMotion(),
             extentRatio: 0.25,
@@ -117,8 +143,8 @@ class _MyGuardiansScreenState extends State<MyGuardiansScreen> {
                     cancelText: context.tr.cancel,
                   );
                   if (ok == true) {
-                    await FamilyApi.endRelationship(g['QuanHeGiamHo_ID']);
-                    _loadGuardians();
+                    await FamilyApi.endRelationship(g['quanhegiamho_id']);
+                    _loadGuardians(silent: true);
                   }
                 },
                 backgroundColor: const Color(0xFFFE4343),
@@ -130,15 +156,15 @@ class _MyGuardiansScreenState extends State<MyGuardiansScreen> {
             ],
           ),
           child: GuardianCard(
-            name: g['TenND'] ?? context.tr.unknownName,
-            date: _formatDate(g['NgayBatDau']),
-            avatar: FamilyApi.normalizeAvatar(g['AvatarUrl']),
+            name: g['nguoidung']?['tennd'] ?? context.tr.unknownName,
+            date: _formatDate(g['ngaybatdau']),
+            avatar: FamilyApi.normalizeAvatar(g['nguoidung']?['avatarurl']),
             onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) => GuardianProfile(
-                    quanHeId: g['QuanHeGiamHo_ID'],
+                    quanHeId: g['quanhegiamho_id'],
                   ),
                 ),
               );
@@ -177,7 +203,7 @@ class GuardianCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
+              color: Colors.black.withValues(alpha: 0.06),
               blurRadius: 10,
               offset: const Offset(0, 5),
             ),
@@ -189,7 +215,7 @@ class GuardianCard extends StatelessWidget {
               width: 72, // 👈 avatar nhỏ
               height: 72,
               decoration: BoxDecoration(
-                color: const Color(0xFF1877F2).withOpacity(.1),
+                color: const Color(0xFF1877F2).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: avatar != null

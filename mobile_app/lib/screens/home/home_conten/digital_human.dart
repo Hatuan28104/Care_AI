@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:Care_AI/api/digital_api.dart';
+import 'package:demo_app/api/digital_api.dart';
+import 'package:demo_app/config/api_config.dart';
 import 'chat.dart';
 import '../../../models/tr.dart';
 
@@ -17,6 +18,14 @@ class DigitalHumanAllScreen extends StatefulWidget {
 
 class _DigitalHumanAllScreenState extends State<DigitalHumanAllScreen> {
   late Future<List<dynamic>> _futureHumans;
+
+  String _imageUrlFrom(dynamic raw) {
+    final value = raw?.toString() ?? '';
+    if (value.isEmpty) return '';
+    if (value.startsWith('http://') || value.startsWith('https://')) return value;
+    final clean = value.startsWith('/') ? value : '/$value';
+    return '${ApiConfig.baseUrl}$clean';
+  }
 
   @override
   void initState() {
@@ -73,14 +82,15 @@ class _DigitalHumanAllScreenState extends State<DigitalHumanAllScreen> {
 
               return GestureDetector(
                 onTap: () {
+                  final imageUrl = _imageUrlFrom(human['imageurl']);
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (_) => ChatScreen(
-                        name: human['TenDigitalHuman'],
-                        image: "http://10.0.2.2:3000/${human['ImageUrl']}",
+                        name: (human['tendigitalhuman'] ?? '').toString(),
+                        image: imageUrl,
                         intro: context.tr.aiIntro,
-                        digitalId: human['DigitalHuman_ID'],
+                        digitalId: (human['digitalhuman_id'] ?? '').toString(),
                         userId: widget.userId,
                       ),
                     ),
@@ -100,7 +110,7 @@ class _DigitalHumanAllScreenState extends State<DigitalHumanAllScreen> {
                       children: [
                         Positioned.fill(
                             child: Image.network(
-                          "http://10.0.2.2:3000/${human['ImageUrl']}",
+                          _imageUrlFrom(human['imageurl']),
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => const Icon(
                             Icons.person,
@@ -113,7 +123,7 @@ class _DigitalHumanAllScreenState extends State<DigitalHumanAllScreen> {
                           right: 12,
                           bottom: 12,
                           child: Text(
-                            human['TenDigitalHuman'],
+                            (human['tendigitalhuman'] ?? '').toString(),
                             style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.w600,

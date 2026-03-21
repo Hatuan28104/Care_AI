@@ -234,7 +234,7 @@ static String get _baseUrl => ApiConfig.baseUrl;
 ========================= */
   static Future<List<dynamic>> getSharedConversation(String quanHeId) async {
     final url = Uri.parse(
-      '$_baseUrl/family/permission/getSharedConversation/$quanHeId',
+      '$_baseUrl/family/permission/shared/$quanHeId',
     );
 
     final response = await http.get(
@@ -248,7 +248,18 @@ static String get _baseUrl => ApiConfig.baseUrl;
       throw Exception('Không lấy được danh sách hội thoại');
     }
 
-    return data['data']; // 👈 QUAN TRỌNG
+    final list = data['data'] is List ? data['data'] as List : <dynamic>[];
+    return list.map((item) {
+      final row = item is Map<String, dynamic>
+          ? item
+          : (item is Map ? Map<String, dynamic>.from(item) : <String, dynamic>{});
+      return <String, dynamic>{
+        "hoithoai_id": row["hoithoai_id"]?.toString() ?? "",
+        "tendigitalhuman": row["tendigitalhuman"]?.toString() ?? "Conversation",
+        "imageurl": row["imageurl"]?.toString() ?? "",
+        "lancuoituongtac": row["lancuoituongtac"]?.toString() ?? "",
+      };
+    }).toList();
   }
 
   /* =========================

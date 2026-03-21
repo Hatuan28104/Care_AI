@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:Care_AI/api/family_api.dart';
+import 'package:demo_app/api/family_api.dart';
 import '../../../models/tr.dart';
-import 'package:Care_AI/widgets/app_header.dart';
+import 'package:demo_app/widgets/app_header.dart';
 
 class ReportDetailScreen extends StatefulWidget {
   final String type;

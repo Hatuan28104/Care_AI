@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:Care_AI/api/chat_api.dart';
+import 'package:demo_app/api/chat_api.dart';
 import 'history_detail.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:Care_AI/models/tr.dart';
-import 'package:Care_AI/widgets/common_confirm_dialog.dart';
+import 'package:demo_app/models/tr.dart';
+import 'package:demo_app/widgets/common_confirm_dialog.dart';
+import 'package:demo_app/config/api_config.dart';
 
 class HistoryTab extends StatefulWidget {
   final String userId;
@@ -112,12 +113,12 @@ class _HistoryTabState extends State<HistoryTab> {
       itemBuilder: (context, index) {
         final item = histories[index];
 
-        final hoiThoaiId = item["HoiThoai_ID"] ?? "";
-        final digitalId = item["DigitalHuman_ID"] ?? "";
-        final name = item["TenDigitalHuman"] ?? "";
-        final job = item["NgheNghiep"] ?? "";
-        final image = normalizeImage(item["ImageUrl"]);
-        final time = formatTime(item["LanCuoiTuongTac"]);
+        final hoiThoaiId = (item["hoithoai_id"] ?? "").toString();
+        final digitalId = (item["digitalhuman_id"] ?? "").toString();
+        final name = (item["tendigitalhuman"] ?? "").toString();
+        final job = (item["tennghenghiep"] ?? "").toString();
+        final image = normalizeImage(item["imageurl"]?.toString());
+        final time = formatTime(item["lancuoituongtac"]);
 
         return _historyItem(
           hoiThoaiId,
@@ -157,8 +158,15 @@ class _HistoryTabState extends State<HistoryTab> {
                 cancelText: context.tr.cancel,
               );
               if (ok == true) {
-                await ChatApi.deleteConversation(hoiThoaiId);
-                loadHistory();
+                try {
+                  await ChatApi.deleteConversation(hoiThoaiId);
+                  loadHistory();
+                } catch (e) {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(e.toString())),
+                  );
+                }
               }
             },
             backgroundColor: Colors.red,
@@ -258,6 +266,7 @@ class _HistoryTabState extends State<HistoryTab> {
 
     if (img.startsWith("http")) return img;
 
-    return "http://10.0.2.2:3000/$img";
+    final cleanPath = img.startsWith("/") ? img : "/$img";
+    return "${ApiConfig.baseUrl}$cleanPath";
   }
 }

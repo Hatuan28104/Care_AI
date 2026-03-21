@@ -2,9 +2,23 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:io';
 import '../config/api_config.dart';
+import 'auth_storage.dart';
 
 class ProfileApi {
   static String get _baseUrl => ApiConfig.baseUrl;
+
+  /* =========================
+     HEADER AUTH
+  ========================= */
+  static Future<Map<String, String>> _authHeaders() async {
+    final token = await AuthStorage.getToken();
+    if (token == null || token.isEmpty) {
+      throw Exception('Chưa đăng nhập');
+    }
+    return {
+      "Authorization": "Bearer $token",
+    };
+  }
 
   /* =========================
      UPDATE PROFILE
@@ -20,10 +34,13 @@ class ProfileApi {
     String? diaChi,
     File? avatarFile,
   }) async {
+    final headers = await _authHeaders();
     final req = http.MultipartRequest(
       'PUT',
-      Uri.parse('$_baseUrl/profile/update'),
+      Uri.parse('$_baseUrl/profile/$nguoiDungId'),
     );
+
+    req.headers.addAll(headers);
 
     // ===== fields =====
     req.fields.addAll({
@@ -50,23 +67,21 @@ class ProfileApi {
     final res = await req.send();
     final body = await res.stream.bytesToString();
 
+    print("UPDATE STATUS: ${res.statusCode}");
+    print("UPDATE BODY: $body");
+
     if (body.isEmpty) {
-      throw Exception(jsonEncode({
-        "message": "Server không phản hồi",
-      }));
+      throw Exception("Server không phản hồi");
     }
 
     final data = jsonDecode(body);
 
-    // 🔥 QUAN TRỌNG: throw full message + errors
     if (res.statusCode != 200 || data['success'] != true) {
       throw Exception(jsonEncode({
         "message": data['message'] ?? "Cập nhật thất bại",
         "errors": data['errors']
       }));
     }
-    print("STATUS: ${res.statusCode}");
-    print("BODY: $body");
   }
 
   /* =========================
@@ -74,9 +89,14 @@ class ProfileApi {
   ========================= */
   static Future<Map<String, dynamic>?> getProfile(String nguoiDungId) async {
     try {
+      final headers = await _authHeaders();
       final res = await http.get(
         Uri.parse('$_baseUrl/profile/$nguoiDungId'),
+        headers: headers,
       );
+
+      print("GET PROFILE STATUS: ${res.statusCode}");
+      print("GET PROFILE BODY: ${res.body}");
 
       if (res.statusCode == 404) return null;
       if (res.body.isEmpty) return null;
@@ -87,21 +107,37 @@ class ProfileApi {
         return null;
       }
 
-      final raw = body['data'];
+      final raw = body['data'] is Map<String, dynamic>
+          ? body['data'] as Map<String, dynamic>
+          : null;
+
+      if (raw == null) return null;
 
       return {
-        'nguoiDungId': raw['NguoiDung_ID'],
-        'tenND': raw['TenND'],
-        'ngaySinh': raw['NgaySinh'],
-        'gioiTinh': raw['GioiTinh'] == 1 || raw['GioiTinh'] == true ? 1 : 0,
-        'chieuCao': (raw['ChieuCao'] as num?)?.toDouble(),
-        'canNang': (raw['CanNang'] as num?)?.toDouble(),
-        'email': raw['Email'],
-        'diaChi': raw['DiaChi'],
-        'avatarUrl': raw['AvatarUrl'],
+        'nguoiDungId': raw['nguoiDungId'] ?? raw['nguoidung_id'],
+        'tenND': raw['tenND'] ?? raw['tennd'],
+        'ngaySinh': raw['ngaySinh'] ?? raw['ngaysinh'],
+        'gioiTinh': (() {
+          final gt = raw['gioiTinh'] ?? raw['gioitinh'];
+          if (gt == null) return null;
+          if (gt is bool) return gt ? 1 : 0;
+          if (gt is num) return gt.toInt();
+          final s = gt.toString().trim().toLowerCase();
+          if (s == '1' || s == 'true') return 1;
+          if (s == '0' || s == 'false') return 0;
+          return null;
+        })(),
+        'chieuCao': ((raw['chieuCao'] ?? raw['chieucao']) as num?)?.toDouble(),
+        'canNang': ((raw['canNang'] ?? raw['cannang']) as num?)?.toDouble(),
+        'email': raw['email'],
+        'diaChi': raw['diaChi'] ?? raw['diachi'],
+        'avatarUrl': raw['avatarUrl'] ?? raw['avatarurl'],
+        'soDienThoai': raw['soDienThoai'] ?? raw['sodienthoai'],
+        'ngayTao': raw['ngayTao'] ?? raw['ngaytao'],
       };
     } catch (e) {
-      return null;
+      print("GET PROFILE ERROR: $e");
+      throw e;
     }
   }
 }

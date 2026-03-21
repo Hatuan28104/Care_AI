@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:Care_AI/models/health_icon_mapper.dart';
-import 'package:Care_AI/api/health_api.dart';
-import 'package:Care_AI/api/family_api.dart';
+import 'package:demo_app/models/health_icon_mapper.dart';
+import 'package:demo_app/api/health_api.dart';
+import 'package:demo_app/api/family_api.dart';
 import '../../../models/tr.dart';
-import 'package:Care_AI/widgets/app_header.dart';
+import 'package:demo_app/widgets/app_header.dart';
 
 class HealthDataScreen extends StatefulWidget {
   final String quanHeId;
@@ -39,7 +39,7 @@ class _HealthDataScreenState extends State<HealthDataScreen> {
 
       final permissionMap = {
         for (var p in permissions)
-          p["Quyen_ID"].toString().trim(): p["DaKichHoat"]
+          p["quyen_id"].toString().trim(): p["dakichhoat"]
       };
 
       print("PERMISSION MAP:");
@@ -48,11 +48,11 @@ class _HealthDataScreenState extends State<HealthDataScreen> {
       _metrics.clear();
 
       for (var e in metrics) {
-        if (e['Category'].toString().toLowerCase() != 'health') continue;
+        if ((e['loai'] ?? '').toString().toLowerCase() != 'health') continue;
 
-        final iconData = getHealthIcon(e['TenChiSo']);
+        final iconData = getHealthIcon((e['tenchiso'] ?? '').toString());
 
-        final id = e['LoaiChiSo_ID'].toString().trim();
+        final id = (e['loaichiso_id'] ?? '').toString().trim();
 
         final raw = permissionMap[id];
 
@@ -68,7 +68,7 @@ class _HealthDataScreenState extends State<HealthDataScreen> {
 
         _metrics.add({
           "id": id,
-          "name": e['TenChiSo'],
+          "name": e['tenchiso'],
           "enabled": enabled,
           "icon": iconData.icon,
           "color": iconData.color,

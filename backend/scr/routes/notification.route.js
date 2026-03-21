@@ -1,18 +1,18 @@
 import express from "express";
-import sql from "mssql";
-import { getDB } from "../config/db.js";
 import {
   sendNotification,
   sendToAll,
   markAsRead,
   deleteNotification,
+  getAlerts
 } from "../repos/notification.repo.js";
+import { auth } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
 /* ===== TEST ===== */
-router.post("/test", async (req, res) => {
-  const { userId } = req.body;
+router.post("/test", auth, async (req, res) => {
+  const userId = req.user.nguoidung_id;
 
   await sendNotification(
     userId,
@@ -34,32 +34,23 @@ router.post("/broadcast", async (req, res) => {
 });
 
 /* =========================
-   GET ALERTS (FIX ROUTE)
+   GET NOTIFICATION (CHÍNH USER)
 ========================= */
-router.get("/user/:userId", async (req, res) => {
+router.get("/user", auth, async (req, res) => {
   try {
-    const pool = await getDB();
+    const userId = req.user.nguoidung_id;
 
-    const result = await pool.request()
-      .input("userId", sql.Char(12), req.params.userId)
-      .query(`
-        SELECT 
-          Notification_ID,
-          TieuDe,
-          NoiDung,
-          ThoiGian,
-          DaDoc
-        FROM Notifications
-        WHERE RTRIM(NguoiDung_ID) = RTRIM(@userId)
-        ORDER BY ThoiGian DESC
-      `);
+    const data = await getAlerts(userId);
 
-    res.json(result.recordset); // 🔥 trả thẳng cho Flutter dễ dùng
+    res.json({
+      success: true,
+      data
+    });
 
   } catch (err) {
     res.status(500).json({
       success: false,
-      message: err.message,
+      message: err.message
     });
   }
 });
@@ -67,46 +58,54 @@ router.get("/user/:userId", async (req, res) => {
 /* =========================
    MARK AS READ
 ========================= */
-router.post("/read/:id", async (req, res) => {
-  const { id } = req.params;
-  const { userId } = req.body;
+router.post("/read/:id", auth, async (req, res) => {
+  try {
+    const userId = req.user.nguoidung_id;
+    const { id } = req.params;
 
-  await markAsRead(id, userId);
+    await markAsRead(id, userId);
 
-  res.json({ success: true });
+    res.json({ success: true });
+
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
+  }
 });
 
 /* =========================
    DELETE
 ========================= */
-router.delete("/:id", async (req, res) => {
-  const { id } = req.params;
-  const { userId } = req.body;
-
-  await deleteNotification(id, userId);
-
-  res.json({ success: true });
-});
-/* =========================
-   GET REAL ALERTS (CHUẨN)
-========================= */
-router.get("/alerts", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   try {
-    const db = await getDB();
+    const userId = req.user.nguoidung_id;
+    const { id } = req.params;
 
-    const result = await db.request().query(`
-      SELECT 
-        CanhBaoTinNhan_ID,
-        MoTaCanhBao,
-        ThoiGianCanhBao AS CreatedAt
-      FROM CanhBaoTinNhan
-      WHERE DaXoa = 0
-      ORDER BY ThoiGianCanhBao DESC
-    `);
+    await deleteNotification(id, userId);
+
+    res.json({ success: true });
+
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
+  }
+});
+
+/* =========================
+   GET ALERTS (CANH BAO)
+========================= */
+router.get("/alerts", auth, async (req, res) => {
+  try {
+    const userId = req.user.nguoidung_id;
+    const data = await getAlerts(userId);
 
     res.json({
       success: true,
-      data: result.recordset
+      data
     });
 
   } catch (err) {
@@ -114,4 +113,5 @@ router.get("/alerts", async (req, res) => {
     res.status(500).json({ success: false });
   }
 });
+
 export default router;

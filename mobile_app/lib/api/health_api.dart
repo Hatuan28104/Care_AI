@@ -1,9 +1,34 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
+import 'api_exception.dart';
 
 class HealthApi {
   static String get _baseUrl => ApiConfig.baseUrl;
+
+  static Map<String, dynamic> _normalizeMetric(Map<String, dynamic> raw) {
+    return {
+      "loaichiso_id": (raw["loaichiso_id"] ?? "").toString(),
+      "tenchiso": (raw["tenchiso"] ?? "").toString(),
+      "donvido": (raw["donvido"] ?? "").toString(),
+      "loai": (raw["loai"] ?? "").toString(),
+    };
+  }
+
+  static Map<String, dynamic> _normalizeHealthData(Map<String, dynamic> raw) {
+    final metricRaw = raw["loaichisosuckhoe"];
+    final metric = metricRaw is Map<String, dynamic>
+        ? metricRaw
+        : (metricRaw is Map ? Map<String, dynamic>.from(metricRaw) : {});
+    return {
+      "giatri": raw["giatri"],
+      "thoigiancapnhat": (raw["thoigiancapnhat"] ?? "").toString(),
+      "tenchiso": (metric["tenchiso"] ?? raw["tenchiso"] ?? "").toString(),
+      "donvido": (metric["donvido"] ?? raw["donvido"] ?? "").toString(),
+      "loaichiso_id": (metric["loaichiso_id"] ?? raw["loaichiso_id"] ?? "")
+          .toString(),
+    };
+  }
 
   /* =========================
      DANH SÁCH CHỈ SỐ SỨC KHỎE
@@ -13,13 +38,21 @@ class HealthApi {
 
     final response = await http.get(url);
 
-    final data = jsonDecode(response.body);
+    final data = _decodeBody(response.body);
 
     if (response.statusCode != 200 || data['success'] != true) {
-      throw Exception('Không lấy được danh sách chỉ số');
+      throw ApiException(
+        (data['message'] ?? 'Không lấy được danh sách chỉ số').toString(),
+        statusCode: response.statusCode,
+      );
     }
 
-    return data['data'];
+    final list = data['data'] is List ? data['data'] as List : <dynamic>[];
+    return list.map((e) {
+      if (e is Map<String, dynamic>) return _normalizeMetric(e);
+      if (e is Map) return _normalizeMetric(Map<String, dynamic>.from(e));
+      return <String, dynamic>{};
+    }).toList();
   }
 
   /* =========================
@@ -39,17 +72,20 @@ class HealthApi {
         'Content-Type': 'application/json',
       },
       body: jsonEncode({
-        'LoaiChiSo_ID': loaiChiSoId,
-        'TenChiSo': tenChiSo,
-        'DonViDo': donViDo,
-        'Category': category,
+        'loaichiso_id': loaiChiSoId,
+        'tenchiso': tenChiSo,
+        'donvido': donViDo,
+        'loai': category,
       }),
     );
 
-    final data = jsonDecode(response.body);
+    final data = _decodeBody(response.body);
 
     if (response.statusCode != 200 || data['success'] != true) {
-      throw Exception(data['message'] ?? 'Không thêm được chỉ số');
+      throw ApiException(
+        (data['message'] ?? 'Không thêm được chỉ số').toString(),
+        statusCode: response.statusCode,
+      );
     }
   }
 
@@ -69,16 +105,19 @@ class HealthApi {
         'Content-Type': 'application/json',
       },
       body: jsonEncode({
-        'GiaTri': giaTri,
-        'ThietBi_ID': thietBiId,
-        'LoaiChiSo_ID': loaiChiSoId,
+        'giatri': giaTri,
+        'thietbi_id': thietBiId,
+        'loaichiso_id': loaiChiSoId,
       }),
     );
 
-    final data = jsonDecode(response.body);
+    final data = _decodeBody(response.body);
 
     if (response.statusCode != 200 || data['success'] != true) {
-      throw Exception(data['message'] ?? 'Không lưu được dữ liệu');
+      throw ApiException(
+        (data['message'] ?? 'Không lưu được dữ liệu').toString(),
+        statusCode: response.statusCode,
+      );
     }
   }
 
@@ -90,13 +129,21 @@ class HealthApi {
 
     final response = await http.get(url);
 
-    final data = jsonDecode(response.body);
+    final data = _decodeBody(response.body);
 
     if (response.statusCode != 200 || data['success'] != true) {
-      throw Exception('Không lấy được dữ liệu mới nhất');
+      throw ApiException(
+        (data['message'] ?? 'Không lấy được dữ liệu mới nhất').toString(),
+        statusCode: response.statusCode,
+      );
     }
 
-    return data['data'];
+    final list = data['data'] is List ? data['data'] as List : <dynamic>[];
+    return list.map((e) {
+      if (e is Map<String, dynamic>) return _normalizeHealthData(e);
+      if (e is Map) return _normalizeHealthData(Map<String, dynamic>.from(e));
+      return <String, dynamic>{};
+    }).toList();
   }
 
   /* =========================
@@ -112,12 +159,31 @@ class HealthApi {
     );
 
     final response = await http.get(url);
-    final data = jsonDecode(response.body);
+    final data = _decodeBody(response.body);
 
     if (response.statusCode != 200 || data['success'] != true) {
-      throw Exception('Không lấy được lịch sử dữ liệu');
+      throw ApiException(
+        (data['message'] ?? 'Không lấy được lịch sử dữ liệu').toString(),
+        statusCode: response.statusCode,
+      );
     }
 
-    return data['data'];
+    final list = data['data'] is List ? data['data'] as List : <dynamic>[];
+    return list.map((e) {
+      if (e is Map<String, dynamic>) return _normalizeHealthData(e);
+      if (e is Map) return _normalizeHealthData(Map<String, dynamic>.from(e));
+      return <String, dynamic>{};
+    }).toList();
+  }
+
+  static Map<String, dynamic> _decodeBody(String body) {
+    try {
+      final decoded = jsonDecode(body);
+      return decoded is Map<String, dynamic>
+          ? decoded
+          : <String, dynamic>{"message": "Dữ liệu trả về không hợp lệ"};
+    } catch (_) {
+      return <String, dynamic>{"message": "Dữ liệu trả về không hợp lệ"};
+    }
   }
 }

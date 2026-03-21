@@ -1,23 +1,15 @@
-import sql from "mssql";
+import { createClient } from "@supabase/supabase-js";
 
-const config = {
-  server: "127.0.0.1",
-  port: 1433,
-  database: "CAREAI",
-  user: "careai_user",
-  password: "123",
-  options: {
-    encrypt: false,
-    trustServerCertificate: true,
-  },
-};
+let supabase;
 
-let pool;
+export function getDB() {
+  if (supabase) return supabase;
 
-export async function getDB() {
-  if (pool) return pool;      
+  supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
 
-  pool = await sql.connect(config);
-  console.log("DB connected");
-  return pool;
+  console.log("Supabase connected");
+  return supabase;
 }

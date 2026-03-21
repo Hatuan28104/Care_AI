@@ -13,31 +13,21 @@ const router = express.Router();
 import { auth } from "../middlewares/auth.middleware.js";
 
 router.get("/", auth, async (req, res) => {
-  const userId = req.user.NguoiDung_ID;
-
-  const data = await getSettings(userId);
-  res.json(data);
+  try {
+    const userId = req.user.nguoidung_id;
+    const data = await getSettings(userId);
+    res.json(data);
+  } catch (err) {
+    console.error("GET SETTINGS ERROR:", err);
+    res.status(500).json({ message: err.message });
+  }
 });
 
 router.put("/", auth, async (req, res) => {
-  const userId = req.user.NguoiDung_ID;
-  const { key, value } = req.body;
-
-  await updateSetting(userId, key, value);
-
-  res.json({ success: true });
-});
-
-/* =========================
-   UPDATE SETTING
-   PUT /api/settings
-========================= */
-router.put("/", async (req, res) => {
   try {
-    const { userId, key, value } = req.body;
-
+    const userId = req.user.nguoidung_id;
+    const { key, value } = req.body;
     await updateSetting(userId, key, value);
-
     res.json({ success: true });
   } catch (err) {
     console.error("UPDATE SETTINGS ERROR:", err);

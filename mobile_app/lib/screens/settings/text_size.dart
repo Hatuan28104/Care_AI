@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../app_settings.dart';
 import '../../models/tr.dart';
+import '../../widgets/app_header.dart';
 
 class TextSizeScreen extends StatefulWidget {
   const TextSizeScreen({super.key});
@@ -24,39 +25,23 @@ class _TextSizeScreenState extends State<TextSizeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _appBar(context),
+      backgroundColor: Color(0xFFF6F6F6),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(18, 24, 18, 24),
-          child: Column(
-            children: [
-              _previewText(),
-              const Spacer(),
-              _slider(),
-            ],
+        child: Column(children: [
+          AppHeader(title: context.tr.textSize),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(18, 24, 18, 24),
+              child: Column(
+                children: [
+                  _previewText(),
+                  const Spacer(),
+                  _slider(),
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
-    );
-  }
-
-  PreferredSizeWidget _appBar(BuildContext context) {
-    return AppBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      centerTitle: true,
-      leading: IconButton(
-        icon: const Icon(
-          Icons.arrow_back_ios_new_rounded,
-          color: Colors.black,
-          size: 20,
-        ),
-        onPressed: () => Navigator.pop(context),
-      ),
-      title: Text(
-        context.tr.textSize,
-        style: TextStyle(
-            fontSize: 24, fontWeight: FontWeight.w700, color: Colors.black),
+        ]),
       ),
     );
   }

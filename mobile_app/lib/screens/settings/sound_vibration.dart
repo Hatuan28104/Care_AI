@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/tr.dart';
 import '../../api/settings_api.dart';
+import '../../widgets/app_header.dart';
 
 class SoundVibrationScreen extends StatefulWidget {
   const SoundVibrationScreen({super.key});
@@ -38,7 +39,10 @@ class _SoundVibrationScreenState extends State<SoundVibrationScreen> {
         _loading = false;
       });
     } catch (e) {
-      _loading = false;
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+      });
     }
   }
 
@@ -71,39 +75,27 @@ class _SoundVibrationScreenState extends State<SoundVibrationScreen> {
     }
 
     return Scaffold(
-      appBar: _appBar(context),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 10, 20, 17),
-        children: [
-          const SizedBox(height: 12),
-          _BigSectionTitle(context.tr.soundNotification),
-          const SizedBox(height: 6),
-          _notificationCard(),
-          const SizedBox(height: 24),
-          _BigSectionTitle(context.tr.vibration),
-          const SizedBox(height: 6),
-          _vibrationCard(),
-        ],
-      ),
-    );
-  }
-
-  PreferredSizeWidget _appBar(BuildContext context) {
-    return AppBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      centerTitle: true,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new_rounded,
-            size: 20, color: Colors.black),
-        onPressed: () => Navigator.pop(context),
-      ),
-      title: Text(
-        context.tr.soundVibration,
-        style: const TextStyle(
-          fontWeight: FontWeight.w700,
-          fontSize: 24,
-          color: Colors.black,
+      backgroundColor: Color(0xFFF6F6F6),
+      body: SafeArea(
+        child: Column(
+          children: [
+            AppHeader(title: context.tr.soundVibration),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 17),
+                children: [
+                  const SizedBox(height: 12),
+                  _BigSectionTitle(context.tr.soundNotification),
+                  const SizedBox(height: 6),
+                  _notificationCard(),
+                  const SizedBox(height: 24),
+                  _BigSectionTitle(context.tr.vibration),
+                  const SizedBox(height: 6),
+                  _vibrationCard(),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

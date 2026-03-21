@@ -23,6 +23,9 @@ class SettingsApi {
       },
     ).timeout(const Duration(seconds: 8));
 
+    print("GET SETTINGS STATUS: ${res.statusCode}");
+    print("GET SETTINGS BODY: ${res.body}");
+
     if (res.statusCode == 200) {
       final data = jsonDecode(res.body);
 
@@ -58,6 +61,9 @@ class SettingsApi {
           }),
         )
         .timeout(const Duration(seconds: 8));
+
+    print("UPDATE SETTING STATUS: ${res.statusCode}");
+    print("UPDATE SETTING BODY: ${res.body}");
 
     if (res.statusCode != 200) {
       throw Exception("Update setting thất bại (${res.statusCode})");

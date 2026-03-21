@@ -1,78 +1,88 @@
-import sql from "mssql";
 import { getDB } from "../config/db.js";
 
 /* =========================
    GET SETTINGS
 ========================= */
 export async function getSettings(userId) {
-  const db = await getDB();
+  const db = getDB();
 
-  const result = await db.request()
-    .input("userId", sql.Char(12), userId)
-    .query(`
-      SELECT 
-        NotificationOn,
-        HealthAlertOn,
-        SyncDataOn,
-        SoundOn,
-        VibrationOn,
-        Volume
-      FROM AppSettings
-      WHERE NguoiDung_ID = @userId
-    `);
+  let { data, error } = await db
+    .from("appsettings")
+    .select(`
+      notificationon,
+      healthalerton,
+      syncdataon,
+      soundon,
+      vibrationon,
+      volume
+    `)
+    .eq("nguoidung_id", userId)
+    .maybeSingle();
 
-  if (result.recordset.length === 0) {
-    return {
-      notificationOn: true,
-      healthAlertOn: true,
-      syncDataOn: true,
-      soundOn: true,
-      vibrationOn: true,
-      volume: 0.6
+  if (error) throw error;
+
+  if (!data) {
+    const { error: insertErr } = await db.from("appsettings").insert({
+      nguoidung_id: userId,
+      notificationon: true,
+      healthalerton: true,
+      syncdataon: true,
+      soundon: true,
+      vibrationon: true,
+      volume: 0.6,
+    });
+    if (insertErr) throw insertErr;
+
+    data = {
+      notificationon: true,
+      healthalerton: true,
+      syncdataon: true,
+      soundon: true,
+      vibrationon: true,
+      volume: 0.6,
     };
   }
 
-  const row = result.recordset[0];
-
   return {
-    notificationOn: row.NotificationOn,
-    healthAlertOn: row.HealthAlertOn,
-    syncDataOn: row.SyncDataOn,
-    soundOn: row.SoundOn,
-    vibrationOn: row.VibrationOn,
-    volume: row.Volume
+    notificationOn: data.notificationon === true,
+    healthAlertOn: data.healthalerton === true,
+    syncDataOn: data.syncdataon === true,
+    soundOn: data.soundon === true,
+    vibrationOn: data.vibrationon === true,
+    volume: data.volume ?? 0.6,
   };
 }
-
 /* =========================
    UPDATE 1 FIELD
 ========================= */
 export async function updateSetting(userId, key, value) {
-  const db = await getDB();
+  const db = getDB();
 
   const allowedFields = [
-    "NotificationOn",
-    "HealthAlertOn",
-    "SyncDataOn",
-    "SoundOn",
-    "VibrationOn",
-    "Volume"
+    "notificationon",
+    "healthalerton",
+    "syncdataon",
+    "soundon",
+    "vibrationon",
+    "volume"
   ];
 
-  if (!allowedFields.includes(key)) {
+  const field = key.toLowerCase();
+
+  if (!allowedFields.includes(field)) {
     throw new Error("Invalid setting key");
   }
 
-  await db.request()
-    .input("userId", sql.Char(12), userId)
-    .input("value", key === "Volume" ? sql.Float : sql.Bit, value)
-    .query(`
-      IF EXISTS (SELECT 1 FROM AppSettings WHERE NguoiDung_ID = @userId)
-        UPDATE AppSettings
-        SET ${key} = @value
-        WHERE NguoiDung_ID = @userId
-      ELSE
-        INSERT INTO AppSettings (NguoiDung_ID, ${key})
-        VALUES (@userId, @value)
-    `);
+  const payload = {
+    nguoidung_id: userId,
+    [field]: value,
+  };
+
+  const { error } = await db
+    .from("appsettings")
+    .upsert(payload, {
+      onConflict: ["nguoidung_id"],
+    });
+
+  if (error) throw error;
 }

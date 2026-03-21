@@ -1,107 +1,143 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import sql from "mssql";
 import { getDB } from "../config/db.js";
 
 /* =========================
    DANH SÁCH QUYỀN
 ========================= */
 export async function getAllPermissions() {
-  const db = await getDB();
+  const db = getDB();
 
-  const rs = await db.request().query(`
-    SELECT Quyen_ID, TenQuyen
-    FROM QuyenChiaSe
-    ORDER BY Quyen_ID
-  `);
+  const { data, error } = await db
+    .from("loaichisosuckhoe")
+    .select("loaichiso_id, tenchiso")
+    .order("loaichiso_id", { ascending: true });
 
-  return rs.recordset;
+  if (error) throw error;
+
+  return (data || []).map(i => ({
+    quyen_id: i.loaichiso_id,
+    tenquyen: i.tenchiso,
+  }));
 }
 
 /* =========================
    QUYỀN ĐÃ CẤU HÌNH THEO QUAN HỆ
 ========================= */
 export async function getPermissionConfigs(quanHeId) {
-  const db = await getDB();
+  const db = getDB();
 
-  const rs = await db.request()
-    .input("qh", sql.Char(12), quanHeId)
-    .query(`
-      SELECT
-        Quyen_ID,
-        CASE 
-          WHEN DaKichHoat = 1 THEN 1
-          ELSE 0
-        END AS DaKichHoat
-      FROM CauHinhDuLieu
-      WHERE QuanHeGiamHo_ID = @qh
-    `);
+  const { data, error } = await db
+    .from("cauhinhdulieu")
+    .select("quyen, dakichhoat")
+    .eq("quanhegiamho_id", quanHeId);
 
-  return rs.recordset;
+  if (error) throw error;
+
+  return data.map(i => ({
+    quyen_id: i.quyen,
+    dakichhoat: i.dakichhoat ? 1 : 0,
+  }));
 }
 
 /* =========================
    BẬT / TẮT QUYỀN
 ========================= */
 export async function savePermissionConfig(quanHeId, quyenId, active) {
-  const db = await getDB();
+  const db = getDB();
 
-  await db.request()
-    .input("qh", sql.Char(12), quanHeId)
-    .input("q", sql.Char(12), quyenId)
-    .input("a", sql.Bit, active)
-    .query(`
-      MERGE CauHinhDuLieu AS T
-      USING (SELECT @qh AS QH, @q AS Q) AS S
-      ON T.QuanHeGiamHo_ID = S.QH
-     AND T.Quyen_ID = S.Q
-      WHEN MATCHED THEN
-        UPDATE SET 
-          DaKichHoat = @a,
-          ThoiGianCH = GETDATE()
-      WHEN NOT MATCHED THEN
-        INSERT (
-          CauHinhDuLieu_ID,
-          QuanHeGiamHo_ID,
-          Quyen_ID,
-          DaKichHoat,
-          ThoiGianCH
-        )
-        VALUES (
-          'CHDL' + RIGHT(REPLACE(NEWID(),'-',''),8),
-          @qh,
-          @q,
-          @a,
-          GETDATE()
-        );
-    `);
+  const { data: existing, error: checkErr } = await db
+    .from("cauhinhdulieu")
+    .select("cauhinhdulieu_id")
+    .eq("quanhegiamho_id", quanHeId)
+    .eq("quyen", quyenId)
+    .maybeSingle();
+
+  if (checkErr) throw checkErr;
+
+  if (existing) {
+    const { error } = await db
+      .from("cauhinhdulieu")
+      .update({
+        dakichhoat: active,
+        thoigianch: new Date().toISOString(),
+      })
+      .eq("cauhinhdulieu_id", existing.cauhinhdulieu_id);
+    if (error) throw error;
+    return;
+  }
+
+  const { error } = await db.from("cauhinhdulieu").insert({
+    cauhinhdulieu_id: "CHDL" + Date.now().toString().slice(-8),
+    quanhegiamho_id: quanHeId,
+    quyen: quyenId,
+    dakichhoat: active,
+    thoigianch: new Date().toISOString(),
+  });
+  if (error) throw error;
 }
 /* =========================
    LẤY CONVERSATION ĐƯỢC SHARE
 ========================= */
 export async function getSharedConversation(quanHeId) {
+  const db = getDB();
 
-  const db = await getDB();
+  const { data: configs, error } = await db
+    .from("cauhinhdulieu")
+    .select("quyen")
+    .eq("quanhegiamho_id", quanHeId)
+    .eq("dakichhoat", true)
+    .like("quyen", "HT%");
 
-  const rs = await db.request()
-    .input("qh", sql.Char(12), quanHeId)
-    .query(`
-      SELECT
-        H.HoiThoai_ID,
-        DH.TenDigitalHuman,
-        DH.ImageUrl,
-        H.LanCuoiTuongTac
-      FROM CauHinhDuLieu CH
-      JOIN HoiThoai H
-        ON H.HoiThoai_ID = CH.Quyen_ID
-      JOIN DigitalHuman DH
-        ON DH.DigitalHuman_ID = H.DigitalHuman_ID
-      WHERE CH.QuanHeGiamHo_ID = @qh
-        AND CH.DaKichHoat = 1
-        AND CH.Quyen_ID LIKE 'HT%'
-      ORDER BY H.LanCuoiTuongTac DESC
-    `);
+  if (error) throw error;
+  const hoiThoaiIds = (configs || []).map(i => i.quyen).filter(Boolean);
+  if (hoiThoaiIds.length === 0) return [];
 
-  return rs.recordset;
+  const { data: conversations, error: convErr } = await db
+    .from("hoithoai")
+    .select(`
+      hoithoai_id,
+      lancuoituongtac,
+      digitalhuman (
+        tendigitalhuman,
+        imageurl
+      )
+    `)
+    .in("hoithoai_id", hoiThoaiIds)
+    .eq("daxoa", false)
+    .order("lancuoituongtac", { ascending: false });
+
+  if (convErr) throw convErr;
+
+  const convList = conversations || [];
+  if (convList.length === 0) return [];
+
+  const convIds = convList.map(i => i.hoithoai_id);
+  const { data: messages, error: msgErr } = await db
+    .from("tinnhan")
+    .select("hoithoai_id, noidung, thoigiangui")
+    .in("hoithoai_id", convIds)
+    .order("thoigiangui", { ascending: false });
+  if (msgErr) throw msgErr;
+
+  const latestMessageByConversation = {};
+  for (const m of messages || []) {
+    if (!latestMessageByConversation[m.hoithoai_id]) {
+      latestMessageByConversation[m.hoithoai_id] = {
+        noidung: m.noidung,
+        thoigiangui: m.thoigiangui,
+      };
+    }
+  }
+
+  return convList.map(i => ({
+    hoithoai_id: i.hoithoai_id,
+    tendigitalhuman: i.digitalhuman?.tendigitalhuman || "",
+    imageurl: i.digitalhuman?.imageurl || "",
+    lancuoituongtac: i.lancuoituongtac,
+    last_message: latestMessageByConversation[i.hoithoai_id]?.noidung || "",
+    last_message_time:
+      latestMessageByConversation[i.hoithoai_id]?.thoigiangui || null,
+  }));
 }

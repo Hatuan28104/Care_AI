@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:Care_AI/screens/home/decive/device_complete.dart';
+import 'package:demo_app/screens/home/decive/device_complete.dart';
 import '../../../models/tr.dart';
 
 class DeviceSyncingScreen extends StatelessWidget {

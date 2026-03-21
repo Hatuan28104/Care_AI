@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:Care_AI/screens/home/decive/device_pair.dart';
+import 'package:demo_app/screens/home/decive/device_pair.dart';
 import '../../../models/tr.dart';
 
 class ConnectDeviceScreen extends StatefulWidget {

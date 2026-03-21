@@ -4,85 +4,71 @@ import { getDB } from "../config/db.js";
    GET ALL DIGITAL HUMAN
 ========================= */
 export async function getAllDigitalHuman() {
-  const pool = await getDB();
+  const db = getDB();
 
-  const result = await pool.request().query(`
-    SELECT 
-        DigitalHuman_ID,
-        TenDigitalHuman,
-        ImageUrl,
-        SystemPrompt,
-        GioiTinh,
-        NgheNghiep_ID,
-        NgoaiHinh
-    FROM DigitalHuman
-  `);
+  const { data, error } = await db
+    .from("digitalhuman")
+    .select(`
+      digitalhuman_id,
+      tendigitalhuman,
+      imageurl,
+      systemprompt,
+      gioitinh,
+      nghenghiep_id,
+      ngoaihinh
+    `);
 
-  return result.recordset;
+  if (error) throw error;
+
+  return data;
 }
 
 /* =========================
    GET DIGITAL HUMAN BY ID
 ========================= */
 export async function getDigitalHumanById(id) {
-  const pool = await getDB();
+  const db = getDB();
 
-  const result = await pool
-    .request()
-    .input("id", id)
-    .query(`
-      SELECT 
-        DigitalHuman_ID,
-        TenDigitalHuman,
-        ImageUrl,
-        SystemPrompt,
-        GioiTinh,
-        NgheNghiep_ID,
-        NgoaiHinh
-      FROM DigitalHuman
-      WHERE DigitalHuman_ID = @id
-    `);
+  const { data, error } = await db
+    .from("digitalhuman")
+    .select(`
+      digitalhuman_id,
+      tendigitalhuman,
+      imageurl,
+      systemprompt,
+      gioitinh,
+      nghenghiep_id,
+      ngoaihinh
+    `)
+    .eq("digitalhuman_id", id)
+    .single();
 
-  return result.recordset[0];
+  if (error) throw error;
+
+  return data;
 }
 
 /* =========================
    CREATE DIGITAL HUMAN
 ========================= */
-export async function createDigitalHuman(data) {
-  const pool = await getDB();
+export async function createDigitalHuman(dataInput) {
+  const db = getDB();
 
-  await pool
-    .request()
-    .input("id", data.id)
-    .input("name", data.name)
-    .input("image", data.image)
-    .input("prompt", data.prompt)
-    .input("job", data.jobId)
-    .input("gender", data.gender)
-    .input("appearance", data.appearance)
-    .query(`
-      INSERT INTO DigitalHuman
-      (
-        DigitalHuman_ID,
-        TenDigitalHuman,
-        ImageUrl,
-        SystemPrompt,
-        NgheNghiep_ID,
-        GioiTinh,
-        NgoaiHinh
-      )
-      VALUES
-      (
-        @id,
-        @name,
-        @image,
-        @prompt,
-        @job,
-        @gender,
-        @appearance
-      )
-    `);
+  const { error } = await db
+    .from("digitalhuman")
+    .insert([
+      {
+        digitalhuman_id: dataInput.id,
+        tendigitalhuman: dataInput.name,
+        imageurl: dataInput.image,
+        systemprompt: dataInput.prompt,
+        nghenghiep_id: dataInput.jobId,
+        gioitinh: dataInput.gender,
+        ngoaihinh: dataInput.appearance,
+      },
+    ]);
+
+  if (error) throw error;
 
   return { message: "Tạo Digital Human thành công" };
 }
@@ -90,29 +76,22 @@ export async function createDigitalHuman(data) {
 /* =========================
    UPDATE DIGITAL HUMAN
 ========================= */
-export async function updateDigitalHuman(id, data) {
-  const pool = await getDB();
+export async function updateDigitalHuman(id, dataInput) {
+  const db = getDB();
 
-  await pool
-    .request()
-    .input("id", id)
-    .input("name", data.name)
-    .input("image", data.image)
-    .input("prompt", data.prompt)
-    .input("job", data.jobId)
-    .input("gender", data.gender)
-    .input("appearance", data.appearance)
-    .query(`
-      UPDATE DigitalHuman
-      SET
-        TenDigitalHuman = @name,
-        ImageUrl = @image,
-        SystemPrompt = @prompt,
-        NgheNghiep_ID = @job,
-        GioiTinh = @gender,
-        NgoaiHinh = @appearance
-      WHERE DigitalHuman_ID = @id
-    `);
+  const { error } = await db
+    .from("digitalhuman")
+    .update({
+      tendigitalhuman: dataInput.name,
+      imageurl: dataInput.image,
+      systemprompt: dataInput.prompt,
+      nghenghiep_id: dataInput.jobId,
+      gioitinh: dataInput.gender,
+      ngoaihinh: dataInput.appearance,
+    })
+    .eq("digitalhuman_id", id);
+
+  if (error) throw error;
 
   return { message: "Cập nhật Digital Human thành công" };
 }
@@ -121,15 +100,14 @@ export async function updateDigitalHuman(id, data) {
    DELETE DIGITAL HUMAN
 ========================= */
 export async function deleteDigitalHuman(id) {
-  const pool = await getDB();
+  const db = getDB();
 
-  await pool
-    .request()
-    .input("id", id)
-    .query(`
-      DELETE FROM DigitalHuman
-      WHERE DigitalHuman_ID = @id
-    `);
+  const { error } = await db
+    .from("digitalhuman")
+    .delete()
+    .eq("digitalhuman_id", id);
+
+  if (error) throw error;
 
   return { message: "Xóa Digital Human thành công" };
 }

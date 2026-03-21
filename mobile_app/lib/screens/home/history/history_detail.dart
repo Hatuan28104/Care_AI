@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:Care_AI/api/chat_api.dart';
+import 'package:demo_app/api/chat_api.dart';
 import '../../../models/tr.dart';
 
 class ChatDetailScreen extends StatefulWidget {
@@ -66,13 +66,13 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
 
   Future<void> loadMessages() async {
     try {
-      final data = await ChatApi.getMessages(conversationId!);
+      final data = await ChatApi.getMessages(conversationId!.trim());
 
       final list = data.map<Map<String, dynamic>>((msg) {
-        bool laDigital = msg["LaDigital"] == true || msg["LaDigital"] == 1;
+        final laDigital = msg["ladigital"] == true;
 
         return {
-          "text": msg["NoiDung"] ?? "",
+          "text": (msg["noidung"] ?? "").toString(),
           "isUser": !laDigital,
         };
       }).toList();
@@ -85,9 +85,12 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
       });
 
       scrollToBottom();
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
       setState(() => loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
     }
   }
 
@@ -129,8 +132,8 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         hoiThoaiId: conversationId,
       );
 
-      if (response["hoiThoaiId"] != null) {
-        conversationId = response["hoiThoaiId"];
+      if ((response["hoi_thoai_id"] ?? "").toString().isNotEmpty) {
+        conversationId = response["hoi_thoai_id"].toString();
       }
 
       if (!mounted) return;
@@ -139,18 +142,18 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         messages.removeWhere((m) => m["isTyping"] == true);
 
         messages.add({
-          "text": response["reply"] ?? context.tr.serverError,
+          "text": (response["reply"] ?? context.tr.serverError).toString(),
           "isUser": false,
         });
       });
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
 
       setState(() {
         messages.removeWhere((m) => m["isTyping"] == true);
 
         messages.add({
-          "text": context.tr.serverError,
+          "text": "${context.tr.error}: $e",
           "isUser": false,
         });
       });

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:Care_AI/models/tr.dart';
+import 'package:demo_app/models/tr.dart';
 
 class AppHeader extends StatelessWidget {
   final String title;
