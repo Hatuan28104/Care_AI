@@ -194,3 +194,22 @@ export async function getAlerts(userId) {
 
   return data;
 }
+export async function getAllAlerts() {
+  const db = getDB();
+
+  const { data, error } = await db
+    .from("notifications")
+    .select(`
+      notification_id,
+      tieude,
+      noidung,
+      thoigian,
+      dadoc,
+      nguoidung_id
+    `)
+    .order("thoigian", { ascending: false });
+
+  if (error) throw error;
+
+  return data;
+}

@@ -1,4 +1,4 @@
-export const API_BASE = "https://web-admin-ck6m.onrender.com";
+export const API_BASE = "https://care-ai-fb8q.onrender.com";
 let chartInstance = null;
 let currentTab = 0;
 let selectedStart = null;
@@ -107,9 +107,8 @@ function loadCurrentChart() {
     loadChart(`${API_BASE}/api/chat/conversations`, "date", "Hội thoại", "total");
 
   if (currentTab === 2)
-    loadChart(`${API_BASE}/notification/alerts`, "createdat", "Cảnh báo");
+    loadChart(`${API_BASE}/notification/admin/alerts`, "createdat", "Cảnh báo");
 }
-
 /* ==========================
    TABS
 ========================== */

@@ -4,7 +4,8 @@ import {
   sendToAll,
   markAsRead,
   deleteNotification,
-  getAlerts
+  getAlerts,
+  getAllAlerts 
 } from "../repos/notification.repo.js";
 import { auth } from "../middlewares/auth.middleware.js";
 
@@ -113,5 +114,20 @@ router.get("/alerts", auth, async (req, res) => {
     res.status(500).json({ success: false });
   }
 });
+router.get("/admin/alerts", async (req, res) => {
+  try {
+    const data = await getAllAlerts();
 
+    res.json({
+      success: true,
+      data
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
+  }
+});
 export default router;

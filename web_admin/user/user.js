@@ -1,5 +1,5 @@
 
-export const API_BASE = "https://web-admin-ck6m.onrender.com";
+export const API_BASE = "https://care-ai-fb8q.onrender.com";
 
 function toAbsoluteImageUrl(path) {
   if (!path) return "https://cdn-icons-png.flaticon.com/512/149/149071.png";
