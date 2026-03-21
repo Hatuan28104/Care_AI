@@ -1,4 +1,5 @@
-export const API_BASE = window.location.origin;
+export const API_BASE = "https://web-admin-ck6m.onrender.com";
+
 const API = `${API_BASE}/api/digital-human`;
 
 function toAbsoluteImageUrl(path) {
