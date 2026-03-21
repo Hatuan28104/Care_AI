@@ -116,18 +116,31 @@ router.get("/alerts", auth, async (req, res) => {
 });
 router.get("/admin/alerts", async (req, res) => {
   try {
-    const data = await getAllAlerts();
+    const supabase = getDB();
+
+    const { data, error } = await supabase
+      .from("canhbaotinnhan")
+      .select(`
+        canhbaotinnhan_id,
+        motacanhbao,
+        thoigiancanhbao
+      `)
+      .eq("daxoa", false)
+      .order("thoigiancanhbao", { ascending: false });
+
+    if (error) throw error;
 
     res.json({
       success: true,
-      data
+      data: data.map(item => ({
+        ...item,
+        thoigian: item.thoigiancanhbao
+      }))
     });
 
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: err.message
-    });
+    console.error(err);
+    res.status(500).json({ success: false });
   }
 });
 export default router;

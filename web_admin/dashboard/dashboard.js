@@ -107,7 +107,7 @@ function loadCurrentChart() {
     loadChart(`${API_BASE}/api/chat/conversations`, "date", "Hội thoại", "total");
 
   if (currentTab === 2)
-    loadChart(`${API_BASE}/notification/admin/alerts`, "createdat", "Cảnh báo");
+    loadChart(`${API_BASE}/notification/admin/alerts`, "thoigian", "Cảnh báo");
 }
 /* ==========================
    TABS
@@ -154,12 +154,12 @@ function initExport() {
       const [users, conversations, alerts] = await Promise.all([
         fetchData(`${API_BASE}/profile/dashboard/users`),
         fetchData(`${API_BASE}/api/chat/conversations`),
-        fetchData(`${API_BASE}/notification/alerts`)
+        fetchData(`${API_BASE}/notification/admin/alerts`)
       ]);
 
       const userMap = groupByDate(users, "ngaytao");
       const interactionMap = groupByDate(conversations, "date", "total");
-      const alertMap = groupByDate(alerts, "createdat");
+      const alertMap = groupByDate(alerts, "thoigian");
 
       pushSection(rows, "USERS", userMap);
       pushSection(rows, "INTERACTIONS", interactionMap);
@@ -193,7 +193,11 @@ function formatDate(date) {
 function initDatePicker() {
   const trendText = document.getElementById("trendRange");
   const today = new Date();
+  selectedStart = new Date(today);
+  selectedStart.setHours(0, 0, 0, 0);
 
+  selectedEnd = new Date(today);
+  selectedEnd = new Date(); 
   trendText.innerText = `${formatDate(today)} to ${formatDate(today)}`;
 
   flatpickr("#dateRange", {
@@ -226,7 +230,7 @@ async function loadStats() {
     const [users, conversations, alerts] = await Promise.all([
       fetchData(`${API_BASE}/profile/dashboard/users`),
       fetchData(`${API_BASE}/api/chat/conversations`),
-      fetchData(`${API_BASE}/notification/alerts`)
+      fetchData(`${API_BASE}/notification/admin/alerts`)
     ]);
 
     const totalUsers = users.filter(u =>
@@ -241,7 +245,7 @@ async function loadStats() {
     }, 0);
 
     const totalAlerts = alerts.filter(a =>
-      a.createdat && isInRange(new Date(a.createdat), selectedStart, selectedEnd)
+      a.thoigian && isInRange(new Date(a.thoigian), selectedStart, selectedEnd)
     ).length;
 
     document.getElementById("totalUsers").innerText = totalUsers;
