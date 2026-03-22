@@ -12,7 +12,7 @@ class ApiConfig {
         return "http://localhost:3000";
       }
     } else {
-      return "https://care-ai-fb8q.onrender.com";
+      return "https://careai-production.up.railway.app";
     }
   }
 }
