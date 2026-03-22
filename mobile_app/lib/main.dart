@@ -65,10 +65,10 @@ void main() async {
 
   await AuthStorage.init();
 
-  FirebaseMessaging.instance.onTokenRefresh.listen((newToken) async {
+  FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
     final jwt = AuthStorage.getToken();
     if (jwt != null) {
-      await http
+      http
           .post(
             Uri.parse("${ApiConfig.baseUrl}/auth/save-fcm-token"),
             headers: {
@@ -79,7 +79,10 @@ void main() async {
               "fcmToken": newToken,
             }),
           )
-          .timeout(const Duration(seconds: 20));
+          .timeout(const Duration(seconds: 20))
+          .catchError((e) {
+        print("Lỗi gửi token mới: $e");
+      });
     }
   });
 
@@ -89,7 +92,7 @@ void main() async {
   if (token != null) {
     final jwt = AuthStorage.getToken();
     if (jwt != null) {
-      await http
+      http
           .post(
             Uri.parse("${ApiConfig.baseUrl}/auth/save-fcm-token"),
             headers: {
@@ -100,9 +103,12 @@ void main() async {
               "fcmToken": token,
             }),
           )
-          .timeout(const Duration(seconds: 20));
-
-      print("Đã gửi token lên server");
+          .timeout(const Duration(seconds: 60))
+          .then((res) {
+        print("Đã gửi token lên server");
+      }).catchError((e) {
+        print("Lỗi gửi token: $e");
+      });
     }
   }
 
