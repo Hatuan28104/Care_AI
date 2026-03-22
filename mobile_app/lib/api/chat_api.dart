@@ -37,7 +37,7 @@ class ChatApi {
             headers: headers,
             body: jsonEncode(body),
           )
-          .timeout(const Duration(seconds: 20));
+          .timeout(const Duration(seconds: 15));
       final decoded = _decodeBody(res.body);
       if (res.statusCode != 200 || decoded["success"] != true) {
         throw ApiException(
@@ -66,7 +66,7 @@ class ChatApi {
     try {
       final res = await http
           .get(Uri.parse("$baseUrl/history/$userId"))
-          .timeout(const Duration(seconds: 20));
+          .timeout(const Duration(seconds: 15));
       final decoded = _decodeBody(res.body);
       if (res.statusCode != 200 || decoded["success"] != true) {
         throw ApiException(
@@ -114,7 +114,7 @@ class ChatApi {
     try {
       final res = await http
           .get(Uri.parse("$baseUrl/messages/$hoiThoaiId"))
-          .timeout(const Duration(seconds: 20));
+          .timeout(const Duration(seconds: 15));
       final decoded = _decodeBody(res.body);
       if (res.statusCode != 200 || decoded["success"] != true) {
         throw ApiException(
@@ -153,7 +153,7 @@ class ChatApi {
           .delete(
             Uri.parse("$baseUrl/conversation/$hoiThoaiId"),
           )
-          .timeout(const Duration(seconds: 20));
+          .timeout(const Duration(seconds: 15));
       final decoded = _decodeBody(res.body);
       if (res.statusCode != 200 || decoded["success"] != true) {
         throw ApiException(

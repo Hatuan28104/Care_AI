@@ -927,4 +927,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get noAlerts => '没有通知';
+
+  @override
+  String get basicInfo => '基本信息';
 }

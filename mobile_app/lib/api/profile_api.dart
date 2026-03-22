@@ -100,7 +100,7 @@ class ProfileApi {
             Uri.parse('$_baseUrl/profile/$nguoiDungId'),
             headers: headers,
           )
-          .timeout(const Duration(seconds: 20));
+          .timeout(const Duration(seconds: 10));
 
       print("GET PROFILE STATUS: ${res.statusCode}");
       print("GET PROFILE BODY: ${res.body}");

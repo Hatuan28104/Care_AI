@@ -72,6 +72,7 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
               title: (e["tieude"] ?? "Thông báo").toString(),
               time: _formatTime(e["thoigian"]?.toString()),
               detail: (e["noidung"] ?? "").toString(),
+              level: e["level"] ?? 1,
               isRead: e["dadoc"] == true,
             )));
       });
@@ -88,7 +89,7 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
     if (iso == null || iso.isEmpty) return "";
     try {
       final date = DateTime.parse(iso).toLocal();
-      return "${date.hour}:${date.minute.toString().padLeft(2, '0')}  •  ${date.day}/${date.month}";
+      return "${date.hour}:${date.minute.toString().padLeft(2, '0')}  •  ${date.day}/${date.month}/${date.year}";
     } catch (_) {
       return "";
     }
@@ -103,6 +104,16 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
     });
   }
 
+  Color _getBorderColorByLevel(int level) {
+    switch (level) {
+      case 3:
+        return Colors.red;
+      case 2:
+        return Colors.orange;
+      default:
+        return Colors.green;
+    }
+  }
   /* ================= BUILD ================= */
 
   @override
@@ -143,13 +154,39 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
       );
     }
 
+    String? lastDate;
+
     return RefreshIndicator(
       onRefresh: loadAlerts,
       child: ListView.separated(
         padding: const EdgeInsets.fromLTRB(18, 6, 18, 18),
         itemCount: _alerts.length,
         separatorBuilder: (_, __) => const SizedBox(height: 8),
-        itemBuilder: (_, i) => _tile(context, _alerts[i]),
+        itemBuilder: (_, i) {
+          final item = _alerts[i];
+          final date = item.time.split("•").last.trim();
+
+          final showDate = date != lastDate;
+          lastDate = date;
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (showDate)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8, bottom: 4),
+                  child: Text(
+                    date,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ),
+              _tile(context, item),
+            ],
+          );
+        },
       ),
     );
   }
@@ -157,6 +194,8 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
   /* ================= ITEM ================= */
 
   Widget _tile(BuildContext context, _AlertItem item) {
+    final borderColor = _getBorderColorByLevel(item.level);
+
     return Slidable(
       key: ValueKey(item.id),
       endActionPane: ActionPane(
@@ -167,9 +206,9 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
             onPressed: (_) async {
               final ok = await showConfirmDialog(
                 context,
-                title: context.tr.deleteAlertTitle,
+                title: context.tr.confirmDelete,
                 message: context.tr.deleteAlertWarning,
-                confirmText: context.tr.accept,
+                confirmText: context.tr.delete,
                 cancelText: context.tr.cancel,
                 confirmColor: Colors.red,
               );
@@ -219,23 +258,23 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
         child: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: item.isRead ? Colors.white : const Color(0xFFFFF4F4),
+            color: Colors.white,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: item.isRead ? Colors.transparent : Colors.red.shade200,
-              width: item.isRead ? 0 : 1.2,
+              color: item.isRead ? Colors.transparent : borderColor,
+              width: item.isRead ? 0 : 1.5,
             ),
-            boxShadow: const [
+            boxShadow: [
               BoxShadow(
-                blurRadius: 6,
-                color: Color(0x11000000),
-                offset: Offset(0, 2),
+                blurRadius: item.isRead ? 4 : 8,
+                color: borderColor.withOpacity(item.isRead ? 0.1 : 0.3),
+                offset: const Offset(0, 3),
               ),
             ],
           ),
           child: Row(
             children: [
-              Icon(item.icon, color: item.iconColor, size: 24),
+              Icon(item.icon, color: Colors.red, size: 18),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -245,19 +284,21 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
                       item.title,
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
-                        fontSize: 15,
+                        fontSize: 14,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     Text(
-                      item.time,
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                      item.time.split("•").first,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
                     ),
                   ],
                 ),
               ),
-              if (!item.isRead)
-                const Icon(Icons.circle, size: 10, color: _blue),
+              if (!item.isRead) const Icon(Icons.circle, size: 8, color: _blue),
             ],
           ),
         ),
@@ -377,6 +418,7 @@ class _AlertItem {
   final String title;
   final String time;
   final String detail;
+  final int level;
   bool isRead;
 
   _AlertItem({
@@ -386,6 +428,7 @@ class _AlertItem {
     required this.title,
     required this.time,
     required this.detail,
+    required this.level,
     this.isRead = false,
   });
 }

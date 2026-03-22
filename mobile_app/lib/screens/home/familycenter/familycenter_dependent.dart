@@ -221,7 +221,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen>
   Future<void> _acceptConfirmed(String loiMoiId) async {
     await FamilyApi.acceptInvite(loiMoiId);
 
-    await _loadData(silent: true); // reload lại danh sách
+    await _loadData(silent: true);
   }
 
   Future<void> _rejectConfirmed(String loiMoiId) async {

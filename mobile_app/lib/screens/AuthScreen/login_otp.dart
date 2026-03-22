@@ -11,6 +11,7 @@ import 'dart:convert';
 import 'package:demo_app/api/settings_api.dart';
 import 'package:demo_app/screens/settings/profile/create_profile.dart';
 import '../../models/tr.dart';
+import '../../config/api_config.dart';
 
 class LoginOtpScreen extends StatefulWidget {
   final String phoneE164;
@@ -75,9 +76,8 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
 
   String _mmss(int s) => '${s ~/ 60}:${(s % 60).toString().padLeft(2, '0')}';
 
-  // ===== ACTION =====
   Future<void> _onContinue() async {
-    if (_loading) return; // 🔒 chặn double call
+    if (_loading) return;
 
     final otp = _controllers.map((e) => e.text).join();
 
@@ -95,34 +95,12 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
       final user = await AuthApi.verifyOtp(widget.phoneE164, otp);
       if (!mounted) return;
 
-// lưu user
       CurrentUser.user = user;
-      await _syncUserData(user.nguoiDungId);
-      // 🔥 LẤY FCM TOKEN VÀ GỬI LÊN BE
-      try {
-        final fcmToken = await FirebaseMessaging.instance.getToken();
 
-        if (fcmToken != null) {
-          final jwt = await AuthStorage.getToken();
+      _syncUserData(user.nguoiDungId);
 
-          await http.post(
-            Uri.parse("http://10.0.2.2:3000/auth/save-fcm-token"),
-            headers: {
-              "Authorization": "Bearer $jwt",
-              "Content-Type": "application/json",
-            },
-            body: jsonEncode({
-              "fcmToken": fcmToken,
-            }),
-          );
+      _sendFcmToken();
 
-          print("✅ FCM token đã gửi lên BE");
-        }
-      } catch (e) {
-        print("❌ Lỗi gửi FCM token: $e");
-      }
-
-      // 3️⃣ Check profile
       Map<String, dynamic>? profile;
 
       if (user.profileCompleted != true) {
@@ -139,15 +117,12 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
       }
 
       try {
-        print('🟡 CHECK PROFILE ID = ${user.nguoiDungId}');
-
+        print('CHECK PROFILE ID = ${user.nguoiDungId}');
         profile = await profile_api.ProfileApi.getProfile(user.nguoiDungId);
-
-        print('🟢 PROFILE RESULT = $profile');
+        print('PROFILE RESULT = $profile');
       } catch (e, s) {
-        print('🔴 GET PROFILE ERROR = $e');
-        print('📌 STACKTRACE = $s');
-
+        print('GET PROFILE ERROR = $e');
+        print('STACKTRACE = $s');
         profile = null;
       }
 
@@ -174,8 +149,6 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
           builder: (_) => HomeScreen(userId: user.nguoiDungId),
         ),
       );
-
-      return;
     } catch (e) {
       if (!mounted) return;
 
@@ -188,6 +161,34 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
       setState(() {
         _loading = false;
       });
+    }
+  }
+
+  void _sendFcmToken() async {
+    try {
+      final fcmToken = await FirebaseMessaging.instance.getToken();
+      final jwt = await AuthStorage.getToken();
+
+      if (fcmToken != null && jwt != null) {
+        http
+            .post(
+          Uri.parse("${ApiConfig.baseUrl}/auth/save-fcm-token"),
+          headers: {
+            "Authorization": "Bearer $jwt",
+            "Content-Type": "application/json",
+          },
+          body: jsonEncode({
+            "fcmToken": fcmToken,
+          }),
+        )
+            .catchError((e) {
+          print(" Lỗi gửi FCM token: $e");
+        });
+
+        print(" FCM token gửi ngầm");
+      }
+    } catch (e) {
+      print(" FCM error: $e");
     }
   }
 

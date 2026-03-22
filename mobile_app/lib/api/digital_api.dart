@@ -21,7 +21,7 @@ class DigitalApi {
     try {
       final res = await http
           .get(Uri.parse(baseUrl))
-          .timeout(const Duration(seconds: 20));
+          .timeout(const Duration(seconds: 10));
 
       if (res.body.isEmpty) {
         throw ApiException("Server không phản hồi");

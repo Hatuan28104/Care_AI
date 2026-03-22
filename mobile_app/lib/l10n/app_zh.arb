@@ -339,6 +339,7 @@
       "dangerDetected": "检测到危险",
   "noAlerts": "没有通知",
   "alert": "警报",
-  "notifications": "通知"
+  "notifications": "通知",
+  "basicInfo": "基本信息"
 
 }

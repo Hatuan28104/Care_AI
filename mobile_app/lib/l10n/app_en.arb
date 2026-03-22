@@ -339,5 +339,6 @@
   "dangerDetected": "Danger detected",
   "noAlerts": "No alerts",
   "alert": "Alert",
-  "notifications": "Notifications"
+  "notifications": "Notifications",
+  "basicInfo": "Basic Information"
 }

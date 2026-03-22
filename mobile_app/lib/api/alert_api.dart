@@ -31,7 +31,7 @@ class AlertApi {
           "Cache-Control": "no-cache",
           "Pragma": "no-cache",
         },
-      ).timeout(const Duration(seconds: 20));
+      ).timeout(const Duration(seconds: 8));
       final decoded = _decodeBody(res.body);
       if (res.statusCode != 200 || decoded["success"] != true) {
         throw ApiException(
@@ -69,7 +69,7 @@ class AlertApi {
             Uri.parse('$baseUrl/read/$id'),
             headers: await _authHeaders(),
           )
-          .timeout(const Duration(seconds: 20));
+          .timeout(const Duration(seconds: 8));
       final decoded = _decodeBody(res.body);
       if (res.statusCode != 200 || decoded["success"] != true) {
         throw ApiException(
@@ -90,7 +90,7 @@ class AlertApi {
             Uri.parse('$baseUrl/$id'),
             headers: await _authHeaders(),
           )
-          .timeout(const Duration(seconds: 20));
+          .timeout(const Duration(seconds: 8));
       final decoded = _decodeBody(res.body);
       if (res.statusCode != 200 || decoded["success"] != true) {
         throw ApiException(

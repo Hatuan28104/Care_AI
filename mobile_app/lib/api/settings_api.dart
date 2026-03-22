@@ -22,7 +22,7 @@ class SettingsApi {
         "Authorization": "Bearer $token",
         "Accept": "application/json",
       },
-    ).timeout(const Duration(seconds: 20));
+    ).timeout(const Duration(seconds: 5));
 
     print("GET SETTINGS STATUS: ${res.statusCode}");
     print("GET SETTINGS BODY: ${res.body}");
@@ -61,7 +61,7 @@ class SettingsApi {
             "value": value,
           }),
         )
-        .timeout(const Duration(seconds: 20));
+        .timeout(const Duration(seconds: 5));
     print("UPDATE SETTING STATUS: ${res.statusCode}");
     print("UPDATE SETTING BODY: ${res.body}");
 
@@ -93,7 +93,7 @@ class SettingsApi {
             "fcmToken": fcmToken,
           }),
         )
-        .timeout(const Duration(seconds: 20));
+        .timeout(const Duration(seconds: 5));
 
     if (res.statusCode != 200) {
       throw ApiException("Lưu FCM token thất bại (${res.statusCode})");

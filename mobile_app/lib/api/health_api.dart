@@ -36,7 +36,7 @@ class HealthApi {
   static Future<List<dynamic>> getMetrics() async {
     final url = Uri.parse('$_baseUrl/health/metrics');
 
-    final response = await http.get(url).timeout(const Duration(seconds: 20));
+    final response = await http.get(url).timeout(const Duration(seconds: 8));
 
     final data = _decodeBody(response.body);
 
@@ -79,7 +79,7 @@ class HealthApi {
             'loai': category,
           }),
         )
-        .timeout(const Duration(seconds: 20));
+        .timeout(const Duration(seconds: 8));
 
     final data = _decodeBody(response.body);
 
@@ -113,7 +113,7 @@ class HealthApi {
             'loaichiso_id': loaiChiSoId,
           }),
         )
-        .timeout(const Duration(seconds: 20));
+        .timeout(const Duration(seconds: 8));
 
     final data = _decodeBody(response.body);
 
@@ -131,7 +131,7 @@ class HealthApi {
   static Future<List<dynamic>> getLatestHealthData(String deviceId) async {
     final url = Uri.parse('$_baseUrl/health/data/latest/$deviceId');
 
-    final response = await http.get(url).timeout(const Duration(seconds: 20));
+    final response = await http.get(url).timeout(const Duration(seconds: 8));
 
     final data = _decodeBody(response.body);
 
@@ -162,7 +162,7 @@ class HealthApi {
       '$_baseUrl/health/history/$deviceId/$metricId?range=$range',
     );
 
-    final response = await http.get(url).timeout(const Duration(seconds: 20));
+    final response = await http.get(url).timeout(const Duration(seconds: 8));
     final data = _decodeBody(response.body);
 
     if (response.statusCode != 200 || data['success'] != true) {

@@ -83,7 +83,6 @@ export async function handleChat(message, userId, digitalId, hoiThoaiId) {
         const regex = new RegExp(k.pattern, "i");
         if (regex.test(normalized)) matched.push(k);
       } catch (_) {
-        // Pattern lỗi thì bỏ qua keyword đó để tránh crash toàn luồng chat
       }
     } else {
       if (!k.tukhoa) continue;
@@ -114,7 +113,6 @@ export async function handleChat(message, userId, digitalId, hoiThoaiId) {
       );
     }
 
-    // Không phụ thuộc FK embed (schema hiện tại có thể thiếu FK đến mucdotinnhan)
     const levelIds = uniqueMatched
       .map(i => i.mucdotinnhan_id)
       .filter(Boolean);

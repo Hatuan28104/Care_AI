@@ -11,6 +11,16 @@ function mapGuardianTitle(level) {
       return "Người thân có dấu hiệu buồn";
   }
 }
+function mapSelfTitle(level) {
+  switch (level) {
+    case 3:
+      return "Bạn đang ở trạng thái nguy hiểm";
+    case 2:
+      return "Bạn đang gặp áp lực";
+    default:
+      return "Bạn có dấu hiệu buồn";
+  }
+}
 /* =========================
    INSERT NOTIFICATION
 ========================= */
@@ -94,12 +104,13 @@ export async function sendNotification(userId, title, body, level = 1) {
       .select("token")
       .eq("nguoidung_id", userId);
 
+    const selfTitle = mapSelfTitle(level);
+
     for (let t of userTokens || []) {
-      await sendFCM(db, t.token, title, body);
+      await sendFCM(db, t.token, selfTitle, body);
     }
 
-    await insertNoti(db, userId, title, body);
-
+    await insertNoti(db, userId, selfTitle, body);
     // ===== 4. GET GUARDIANS =====
     const { data: relations } = await db
       .from("quanhegiamho")

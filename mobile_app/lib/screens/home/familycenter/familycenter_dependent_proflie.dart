@@ -131,7 +131,6 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
 
     return Column(
       children: [
-        // ===== BACK (TRÁI) =====
         Padding(
           padding: const EdgeInsets.only(left: 12, top: 8),
           child: Align(
@@ -159,9 +158,7 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
             ),
           ),
         ),
-
         const SizedBox(height: 16),
-
         Center(
           child: Column(
             children: [
@@ -193,6 +190,14 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(18, 8, 18, 18),
       children: [
+        Text(
+          context.tr.basicInfo,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 12),
         _infoItem(context.tr.fullName, data?['tennd'] ?? ""),
         _infoItem(context.tr.birthDate, _formatDate(data?['ngaysinh'])),
         _infoItem(context.tr.gender, _genderText(data?['gioitinh'])),
@@ -202,7 +207,7 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
           context.tr.report,
           style: const TextStyle(
             fontSize: 16,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
           ),
         ),
         const SizedBox(height: 12),
@@ -249,7 +254,7 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
           context.tr.sharedConversations,
           style: TextStyle(
             fontSize: 16,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
           ),
         ),
         const SizedBox(height: 12),

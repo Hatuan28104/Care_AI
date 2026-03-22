@@ -340,5 +340,6 @@
     "description": "Steps unit"
   },
     "deleteConversation": "会話を削除",
-  "confirmDeleteConversation": "この会話を削除してもよろしいですか？"
+  "confirmDeleteConversation": "この会話を削除してもよろしいですか？",
+  "basicInfo": "基本情報"
 }

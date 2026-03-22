@@ -21,7 +21,7 @@ class AuthApi {
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({'phone': phone}),
         )
-        .timeout(const Duration(seconds: 20));
+        .timeout(const Duration(seconds: 5));
 
     Map<String, dynamic> data;
     try {
@@ -44,7 +44,7 @@ class AuthApi {
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({'phone': phone}),
         )
-        .timeout(const Duration(seconds: 20));
+        .timeout(const Duration(seconds: 5));
 
     Map<String, dynamic> data;
     try {
@@ -70,7 +70,7 @@ class AuthApi {
             'otp': otp,
           }),
         )
-        .timeout(const Duration(seconds: 20));
+        .timeout(const Duration(seconds: 5));
 
     Map<String, dynamic> data;
     try {
@@ -101,8 +101,7 @@ class AuthApi {
       AppSettings.phoneNumber.value = userRaw['sodienthoai']?.toString() ??
           userRaw['SoDienThoai']?.toString() ??
           '';
-      FirebaseMessaging messaging = FirebaseMessaging.instance;
-      String? fcmToken = await messaging.getToken();
+      FirebaseMessaging.instance.getToken();
 
       return user;
     } else {
@@ -131,7 +130,7 @@ class AuthApi {
           headers: headers,
           body: jsonEncode({'phone': phone}),
         )
-        .timeout(const Duration(seconds: 20));
+        .timeout(const Duration(seconds: 5));
 
     Map<String, dynamic> data;
     try {
@@ -152,7 +151,7 @@ class AuthApi {
           Uri.parse('$baseUrl/auth/login-history'),
           headers: headers,
         )
-        .timeout(const Duration(seconds: 20));
+        .timeout(const Duration(seconds: 5));
 
     print("LOGIN HISTORY STATUS: ${res.statusCode}");
     print("LOGIN HISTORY BODY: ${res.body}");
@@ -203,7 +202,7 @@ class AuthApi {
               headers: headers,
               body: jsonEncode({'fcmToken': fcmToken}),
             )
-            .timeout(const Duration(seconds: 20));
+            .timeout(const Duration(seconds: 5));
       }
     } catch (e) {}
 

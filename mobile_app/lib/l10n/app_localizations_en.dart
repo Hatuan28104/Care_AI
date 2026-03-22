@@ -927,4 +927,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noAlerts => 'No alerts';
+
+  @override
+  String get basicInfo => 'Basic Information';
 }

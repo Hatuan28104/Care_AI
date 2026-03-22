@@ -30,7 +30,7 @@ class FamilyApi {
           headers: await _authHeaders(),
           body: jsonEncode({'phone': phone}),
         )
-        .timeout(const Duration(seconds: 20));
+        .timeout(const Duration(seconds: 8));
 
     Map<String, dynamic> data;
     try {
@@ -56,7 +56,7 @@ class FamilyApi {
           url,
           headers: await _authHeaders(),
         )
-        .timeout(const Duration(seconds: 20));
+        .timeout(const Duration(seconds: 8));
 
     Map<String, dynamic> data;
     try {
@@ -85,7 +85,7 @@ class FamilyApi {
             'loiMoiId': loiMoiId,
           }),
         )
-        .timeout(const Duration(seconds: 20));
+        .timeout(const Duration(seconds: 8));
 
     Map<String, dynamic> data;
     try {
@@ -114,7 +114,7 @@ class FamilyApi {
             'loiMoiId': loiMoiId,
           }),
         )
-        .timeout(const Duration(seconds: 20));
+        .timeout(const Duration(seconds: 8));
 
     Map<String, dynamic> data;
     try {
@@ -138,7 +138,7 @@ class FamilyApi {
           url,
           headers: await _authHeaders(),
         )
-        .timeout(const Duration(seconds: 20));
+        .timeout(const Duration(seconds: 8));
 
     Map<String, dynamic> data;
     try {
@@ -164,7 +164,7 @@ class FamilyApi {
           url,
           headers: await _authHeaders(),
         )
-        .timeout(const Duration(seconds: 20));
+        .timeout(const Duration(seconds: 8));
 
     Map<String, dynamic> data;
     try {
@@ -193,7 +193,7 @@ class FamilyApi {
             'quanHeId': quanHeId,
           }),
         )
-        .timeout(const Duration(seconds: 20));
+        .timeout(const Duration(seconds: 8));
 
     Map<String, dynamic> data;
     try {
@@ -217,7 +217,7 @@ class FamilyApi {
           url,
           headers: await _authHeaders(),
         )
-        .timeout(const Duration(seconds: 20));
+        .timeout(const Duration(seconds: 8));
 
     Map<String, dynamic> data;
     try {
@@ -242,7 +242,7 @@ class FamilyApi {
           url,
           headers: await _authHeaders(),
         )
-        .timeout(const Duration(seconds: 20));
+        .timeout(const Duration(seconds: 8));
 
     Map<String, dynamic> data;
     try {
@@ -277,7 +277,7 @@ class FamilyApi {
             'active': active,
           }),
         )
-        .timeout(const Duration(seconds: 20));
+        .timeout(const Duration(seconds: 8));
 
     Map<String, dynamic> data;
     try {
@@ -303,7 +303,7 @@ class FamilyApi {
           url,
           headers: await _authHeaders(),
         )
-        .timeout(const Duration(seconds: 20));
+        .timeout(const Duration(seconds: 8));
 
     Map<String, dynamic> data;
     try {
@@ -344,7 +344,7 @@ class FamilyApi {
           url,
           headers: await _authHeaders(),
         )
-        .timeout(const Duration(seconds: 20));
+        .timeout(const Duration(seconds: 8));
 
     Map<String, dynamic> data;
     try {
@@ -373,7 +373,7 @@ class FamilyApi {
           url,
           headers: await _authHeaders(),
         )
-        .timeout(const Duration(seconds: 20));
+        .timeout(const Duration(seconds: 8));
 
     Map<String, dynamic> data;
     try {
@@ -402,7 +402,7 @@ class FamilyApi {
             'loiMoiId': loiMoiId,
           }),
         )
-        .timeout(const Duration(seconds: 20));
+        .timeout(const Duration(seconds: 8));
 
     Map<String, dynamic> data;
     try {
@@ -431,7 +431,7 @@ class FamilyApi {
           url,
           headers: await _authHeaders(),
         )
-        .timeout(const Duration(seconds: 20));
+        .timeout(const Duration(seconds: 8));
 
     Map<String, dynamic> data;
     try {

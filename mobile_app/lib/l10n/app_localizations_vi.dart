@@ -737,7 +737,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get deleteAlertTitle => 'Xóa cảnh báo';
 
   @override
-  String get deleteAlertWarning => 'Hành động này có thể gây ra hậu quả nghiêm trọng.';
+  String get deleteAlertWarning => 'Bạn có chắc chắn muốn xóa cảnh báo này không?';
 
   @override
   String get deletedSuccessfully => 'Xóa thành công';
@@ -927,4 +927,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get noAlerts => 'Không có cảnh báo';
+
+  @override
+  String get basicInfo => 'Thông tin cơ bản';
 }

@@ -1934,6 +1934,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No alerts'**
   String get noAlerts;
+
+  /// No description provided for @basicInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic Information'**
+  String get basicInfo;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
