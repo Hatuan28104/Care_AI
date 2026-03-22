@@ -5,7 +5,7 @@ import {
   markAsRead,
   deleteNotification,
   getAlerts,
-  getAllAlerts 
+  getAdminAlerts 
 } from "../repos/notification.repo.js";
 import { auth } from "../middlewares/auth.middleware.js";
 
@@ -116,31 +116,19 @@ router.get("/alerts", auth, async (req, res) => {
 });
 router.get("/admin/alerts", async (req, res) => {
   try {
-    const supabase = getDB();
-
-    const { data, error } = await supabase
-      .from("canhbaotinnhan")
-      .select(`
-        canhbaotinnhan_id,
-        motacanhbao,
-        thoigiancanhbao
-      `)
-      .eq("daxoa", false)
-      .order("thoigiancanhbao", { ascending: false });
-
-    if (error) throw error;
+    const data = await getAdminAlerts();
 
     res.json({
       success: true,
-      data: data.map(item => ({
-        ...item,
-        thoigian: item.thoigiancanhbao
-      }))
+      data
     });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false });
+    console.error("ADMIN ALERT ERROR:", err);
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
   }
 });
 export default router;

@@ -141,3 +141,21 @@ export async function getSharedConversation(quanHeId) {
       latestMessageByConversation[i.hoithoai_id]?.thoigiangui || null,
   }));
 }
+/* =========================
+   CHECK ACCESS
+========================= */
+export async function checkPermissionAccess(userId, quanHeId) {
+  const db = getDB();
+
+  const { data, error } = await db
+    .from("quanhegiamho")
+    .select("quanhegiamho_id")
+    .eq("quanhegiamho_id", quanHeId)
+    .or(`nguoigiamho_id.eq.${userId},nguoiduocgiamho_id.eq.${userId}`)
+    .eq("daxoa", false)
+    .maybeSingle();
+
+  if (error) throw error;
+
+  return !!data;
+}

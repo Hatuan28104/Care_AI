@@ -7,10 +7,15 @@ let selectedEnd = null;
 /* ==========================
    COMMON
 ========================== */
-
 async function fetchData(url) {
   const res = await fetch(url);
   const json = await res.json();
+
+  if (!json.success) {
+    console.error("API ERROR:", url, json);
+    return [];
+  }
+
   return json.data || [];
 }
 
@@ -23,7 +28,7 @@ function groupByDate(data, dateField, valueField = null) {
   const map = {};
 
   data.forEach(item => {
-    console.log("ITEM:", item); // 🔥 xem từng record
+    console.log("ITEM:", item); 
 
     if (!item[dateField]) {
       console.warn("MISSING FIELD:", dateField, item);
@@ -81,7 +86,7 @@ function renderChart(labels, data, label, type = "line") {
 async function loadChart(url, dateField, label, valueField = null) {
   const data = await fetchData(url);
 
-  console.log("DATA:", data); // 🔥 debug
+  console.log("DATA:", data); 
 
   const map = groupByDate(data, dateField, valueField);
 

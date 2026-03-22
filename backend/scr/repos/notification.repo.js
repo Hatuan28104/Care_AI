@@ -194,22 +194,23 @@ export async function getAlerts(userId) {
 
   return data;
 }
-export async function getAllAlerts() {
+export async function getAdminAlerts() {
   const db = getDB();
 
   const { data, error } = await db
-    .from("notifications")
+    .from("canhbaotinnhan")
     .select(`
-      notification_id,
-      tieude,
-      noidung,
-      thoigian,
-      dadoc,
-      nguoidung_id
+      canhbaotinnhan_id,
+      motacanhbao,
+      thoigiancanhbao
     `)
-    .order("thoigian", { ascending: false });
+    .eq("daxoa", false)
+    .order("thoigiancanhbao", { ascending: false });
 
   if (error) throw error;
 
-  return data;
+  return (data || []).map(item => ({
+    ...item,
+    thoigian: item.thoigiancanhbao
+  }));
 }
