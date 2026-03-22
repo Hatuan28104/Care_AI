@@ -70,48 +70,20 @@ void main() async {
     if (jwt != null) {
       http
           .post(
-            Uri.parse("${ApiConfig.baseUrl}/auth/save-fcm-token"),
-            headers: {
-              "Authorization": "Bearer $jwt",
-              "Content-Type": "application/json",
-            },
-            body: jsonEncode({
-              "fcmToken": newToken,
-            }),
-          )
-          .timeout(const Duration(seconds: 20))
+        Uri.parse("${ApiConfig.baseUrl}/auth/save-fcm-token"),
+        headers: {
+          "Authorization": "Bearer $jwt",
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "fcmToken": newToken,
+        }),
+      )
           .catchError((e) {
         print("Lỗi gửi token mới: $e");
       });
     }
   });
-
-  String? token = await messaging.getToken();
-  print("FCM TOKEN: $token");
-
-  if (token != null) {
-    final jwt = AuthStorage.getToken();
-    if (jwt != null) {
-      http
-          .post(
-            Uri.parse("${ApiConfig.baseUrl}/auth/save-fcm-token"),
-            headers: {
-              "Authorization": "Bearer $jwt",
-              "Content-Type": "application/json",
-            },
-            body: jsonEncode({
-              "fcmToken": token,
-            }),
-          )
-          .timeout(const Duration(seconds: 60))
-          .then((res) {
-        print("Đã gửi token lên server");
-      }).catchError((e) {
-        print("Lỗi gửi token: $e");
-      });
-    }
-  }
-
   await AppSettings.init();
 
   runApp(const MyApp());

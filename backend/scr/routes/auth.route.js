@@ -62,12 +62,15 @@ router.post("/login/request-otp", async (req, res) => {
 ========================= */
 router.post("/verify-otp", async (req, res) => {
   try {
-    const { phone, otp } = req.body;
+    const { phone, otp, fcmToken } = req.body;
     if (!phone || !otp) {
       throw new Error("Thiếu số điện thoại hoặc OTP");
     }
 
     const result = await verifyOtp(phone, otp, req);
+    if (fcmToken) {
+      saveFcmToken(result.user.nguoidung.nguoidung_id, fcmToken);
+    }
     res.json(result);
   } catch (e) {
     res.status(401).json({
@@ -116,23 +119,7 @@ router.get("/login-history", auth, async (req, res) => {
     });
   }
 });
-router.post("/save-fcm-token", auth, async (req, res) => {
-  try {
-    const userId = req.user.nguoidung_id;
-    const { fcmToken } = req.body;
 
-    if (!fcmToken) {
-      return res.status(400).json({ success: false });
-    }
-
-    await saveFcmToken(userId, fcmToken);
-
-    res.json({ success: true });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false });
-  }
-});
 router.post("/test-push", auth, async (req, res) => {
   try {
     const userId = req.user.nguoidung_id;

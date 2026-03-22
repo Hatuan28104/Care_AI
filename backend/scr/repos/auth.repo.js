@@ -125,20 +125,19 @@ export async function verifyOtp(phone, otp, req) {
     const newUserId = "ND" + Date.now().toString().slice(-10);
     const newAccountId = "TK" + Date.now().toString().slice(-10);
 
-    const { error: insertNguoiDungErr } = await db.from("nguoidung").insert({
-      nguoidung_id: newUserId,
-      tennd: null,
-    });
-    if (insertNguoiDungErr) throw insertNguoiDungErr;
-
-    const { error: insertTaiKhoanErr } = await db.from("taikhoan").insert({
-      taikhoan_id: newAccountId,
-      nguoidung_id: newUserId,
-      sodienthoai: localPhone,
-      laadmin: false,
-      ngaytao: new Date().toISOString().slice(0, 10),
-    });
-    if (insertTaiKhoanErr) throw insertTaiKhoanErr;
+    await Promise.all([
+      db.from("nguoidung").insert({
+        nguoidung_id: newUserId,
+        tennd: null,
+      }),
+      db.from("taikhoan").insert({
+        taikhoan_id: newAccountId,
+        nguoidung_id: newUserId,
+        sodienthoai: localPhone,
+        laadmin: false,
+        ngaytao: new Date().toISOString().slice(0, 10),
+      })
+    ]);
 
     user = {
       sodienthoai: localPhone,
@@ -165,14 +164,13 @@ export async function verifyOtp(phone, otp, req) {
     req.socket.remoteAddress ||
     "";
 
-  const { error: loginHistoryErr } = await db.from("lichsudangnhap").insert({
+  db.from("lichsudangnhap").insert({
     lichsu_id: "LS" + Date.now().toString().slice(-10),
     nguoidung_id: user.nguoidung.nguoidung_id,
     thietbi: userAgent,
     ip,
     thoigian: new Date().toISOString(),
-  });
-  if (loginHistoryErr) throw loginHistoryErr;
+  }); 
 
   return {
     success: true,

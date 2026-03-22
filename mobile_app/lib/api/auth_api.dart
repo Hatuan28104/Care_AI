@@ -101,35 +101,12 @@ class AuthApi {
       AppSettings.phoneNumber.value = userRaw['sodienthoai']?.toString() ??
           userRaw['SoDienThoai']?.toString() ??
           '';
-
       FirebaseMessaging messaging = FirebaseMessaging.instance;
       String? fcmToken = await messaging.getToken();
-
-      if (fcmToken != null) {
-        await _sendFcmTokenToServer(fcmToken);
-      }
 
       return user;
     } else {
       throw ApiException(data['message'] ?? 'OTP không hợp lệ');
-    }
-  }
-
-  static Future<void> _sendFcmTokenToServer(String fcmToken) async {
-    final headers = await _authHeaders();
-
-    final res = await http
-        .post(
-          Uri.parse('$baseUrl/auth/save-fcm-token'),
-          headers: headers,
-          body: jsonEncode({
-            'fcmToken': fcmToken,
-          }),
-        )
-        .timeout(const Duration(seconds: 20));
-
-    if (res.statusCode != 200) {
-      print("⚠ Không lưu được FCM token");
     }
   }
 
