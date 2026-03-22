@@ -6,6 +6,7 @@ import '../models/login_history_item.dart';
 import '../app_settings.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import '../config/api_config.dart';
+import 'api_exception.dart';
 
 class AuthApi {
   static String get baseUrl => ApiConfig.baseUrl;
@@ -14,16 +15,22 @@ class AuthApi {
      REGISTER – GỬI OTP
   ========================= */
   static Future<void> requestRegisterOtp(String phone) async {
-    final res = await http.post(
-      Uri.parse('$baseUrl/auth/register/request-otp'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'phone': phone}),
-    );
+    final res = await http
+        .post(
+          Uri.parse('$baseUrl/auth/register/request-otp'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({'phone': phone}),
+        )
+        .timeout(const Duration(seconds: 20));
 
-    final data = jsonDecode(res.body);
-
+    Map<String, dynamic> data;
+    try {
+      data = jsonDecode(res.body);
+    } catch (_) {
+      throw ApiException("Server trả dữ liệu lỗi");
+    }
     if (res.statusCode != 200 || data['success'] != true) {
-      throw Exception(data['message'] ?? 'Không thể gửi OTP đăng ký');
+      throw ApiException(data['message'] ?? 'Không thể gửi OTP đăng ký');
     }
   }
 
@@ -31,16 +38,22 @@ class AuthApi {
      LOGIN – GỬI OTP
   ========================= */
   static Future<void> requestLoginOtp(String phone) async {
-    final res = await http.post(
-      Uri.parse('$baseUrl/auth/login/request-otp'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'phone': phone}),
-    );
+    final res = await http
+        .post(
+          Uri.parse('$baseUrl/auth/login/request-otp'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({'phone': phone}),
+        )
+        .timeout(const Duration(seconds: 20));
 
-    final data = jsonDecode(res.body);
-
+    Map<String, dynamic> data;
+    try {
+      data = jsonDecode(res.body);
+    } catch (_) {
+      throw ApiException("Server trả dữ liệu lỗi");
+    }
     if (res.statusCode != 200 || data['success'] != true) {
-      throw Exception(data['message'] ?? 'Không thể gửi OTP đăng nhập');
+      throw ApiException(data['message'] ?? 'Không thể gửi OTP đăng nhập');
     }
   }
 
@@ -48,21 +61,27 @@ class AuthApi {
      VERIFY OTP (CHUNG)
   ========================= */
   static Future<User> verifyOtp(String phone, String otp) async {
-    final res = await http.post(
-      Uri.parse('$baseUrl/auth/verify-otp'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'phone': phone,
-        'otp': otp,
-      }),
-    );
+    final res = await http
+        .post(
+          Uri.parse('$baseUrl/auth/verify-otp'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'phone': phone,
+            'otp': otp,
+          }),
+        )
+        .timeout(const Duration(seconds: 20));
 
-    final data = jsonDecode(res.body);
-
+    Map<String, dynamic> data;
+    try {
+      data = jsonDecode(res.body);
+    } catch (_) {
+      throw ApiException("Server trả dữ liệu lỗi");
+    }
     if (res.statusCode == 200 && data['success'] == true) {
       final token = data['token'];
       if (token == null || token.isEmpty) {
-        throw Exception('Không nhận được token');
+        throw ApiException('Không nhận được token');
       }
 
       await AuthStorage.saveToken(token);
@@ -76,11 +95,10 @@ class AuthApi {
         'profileCompleted': data['profileCompleted'] == true,
       });
       if (user.nguoiDungId.isEmpty) {
-        throw Exception('Không nhận được nguoiDungId');
+        throw ApiException('Không nhận được nguoiDungId');
       }
       await AuthStorage.saveUserId(user.nguoiDungId);
-      AppSettings.phoneNumber.value =
-          userRaw['sodienthoai']?.toString() ??
+      AppSettings.phoneNumber.value = userRaw['sodienthoai']?.toString() ??
           userRaw['SoDienThoai']?.toString() ??
           '';
 
@@ -93,20 +111,22 @@ class AuthApi {
 
       return user;
     } else {
-      throw Exception(data['message'] ?? 'OTP không hợp lệ');
+      throw ApiException(data['message'] ?? 'OTP không hợp lệ');
     }
   }
 
   static Future<void> _sendFcmTokenToServer(String fcmToken) async {
     final headers = await _authHeaders();
 
-    final res = await http.post(
-      Uri.parse('$baseUrl/auth/save-fcm-token'),
-      headers: headers,
-      body: jsonEncode({
-        'fcmToken': fcmToken,
-      }),
-    );
+    final res = await http
+        .post(
+          Uri.parse('$baseUrl/auth/save-fcm-token'),
+          headers: headers,
+          body: jsonEncode({
+            'fcmToken': fcmToken,
+          }),
+        )
+        .timeout(const Duration(seconds: 20));
 
     if (res.statusCode != 200) {
       print("⚠ Không lưu được FCM token");
@@ -116,7 +136,7 @@ class AuthApi {
   static Future<Map<String, String>> _authHeaders() async {
     final token = await AuthStorage.getToken();
     if (token == null || token.isEmpty) {
-      throw Exception('Chưa đăng nhập');
+      throw ApiException('Chưa đăng nhập');
     }
 
     return {
@@ -128,34 +148,46 @@ class AuthApi {
   static Future<void> changePhone(String phone) async {
     final headers = await _authHeaders();
 
-    final res = await http.post(
-      Uri.parse('$baseUrl/auth/change-phone'),
-      headers: headers,
-      body: jsonEncode({'phone': phone}),
-    );
+    final res = await http
+        .post(
+          Uri.parse('$baseUrl/auth/change-phone'),
+          headers: headers,
+          body: jsonEncode({'phone': phone}),
+        )
+        .timeout(const Duration(seconds: 20));
 
-    final data = jsonDecode(res.body);
-
+    Map<String, dynamic> data;
+    try {
+      data = jsonDecode(res.body);
+    } catch (_) {
+      throw ApiException("Server trả dữ liệu lỗi");
+    }
     if (res.statusCode != 200 || data['success'] != true) {
-      throw Exception(data['message'] ?? 'Không thể đổi số điện thoại');
+      throw ApiException(data['message'] ?? 'Không thể đổi số điện thoại');
     }
   }
 
   static Future<List<LoginHistoryItem>> getLoginHistory() async {
     final headers = await _authHeaders();
 
-    final res = await http.get(
-      Uri.parse('$baseUrl/auth/login-history'),
-      headers: headers,
-    );
+    final res = await http
+        .get(
+          Uri.parse('$baseUrl/auth/login-history'),
+          headers: headers,
+        )
+        .timeout(const Duration(seconds: 20));
 
     print("LOGIN HISTORY STATUS: ${res.statusCode}");
     print("LOGIN HISTORY BODY: ${res.body}");
 
-    final data = jsonDecode(res.body);
-
+    Map<String, dynamic> data;
+    try {
+      data = jsonDecode(res.body);
+    } catch (_) {
+      throw ApiException("Server trả dữ liệu lỗi");
+    }
     if (res.statusCode != 200 || data['success'] != true) {
-      throw Exception(data['message'] ?? 'Không lấy được lịch sử đăng nhập');
+      throw ApiException(data['message'] ?? 'Không lấy được lịch sử đăng nhập');
     }
 
     final List list = data['data'] is List ? data['data'] : [];
@@ -165,10 +197,8 @@ class AuthApi {
       String timeText = 'Không xác định';
       if (rawTime.isNotEmpty) {
         try {
-          timeText = DateTime.parse(rawTime)
-              .toLocal()
-              .toString()
-              .substring(0, 16);
+          timeText =
+              DateTime.parse(rawTime).toLocal().toString().substring(0, 16);
         } catch (_) {}
       }
       return LoginHistoryItem(
@@ -190,11 +220,13 @@ class AuthApi {
       final headers = await _authHeaders();
 
       if (fcmToken != null) {
-        await http.post(
-          Uri.parse('$baseUrl/auth/remove-fcm-token'),
-          headers: headers,
-          body: jsonEncode({'fcmToken': fcmToken}),
-        );
+        await http
+            .post(
+              Uri.parse('$baseUrl/auth/remove-fcm-token'),
+              headers: headers,
+              body: jsonEncode({'fcmToken': fcmToken}),
+            )
+            .timeout(const Duration(seconds: 20));
       }
     } catch (e) {}
 

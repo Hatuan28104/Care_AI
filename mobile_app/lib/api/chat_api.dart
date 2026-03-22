@@ -37,8 +37,7 @@ class ChatApi {
             headers: headers,
             body: jsonEncode(body),
           )
-          .timeout(const Duration(seconds: 15));
-
+          .timeout(const Duration(seconds: 20));
       final decoded = _decodeBody(res.body);
       if (res.statusCode != 200 || decoded["success"] != true) {
         throw ApiException(
@@ -67,8 +66,7 @@ class ChatApi {
     try {
       final res = await http
           .get(Uri.parse("$baseUrl/history/$userId"))
-          .timeout(const Duration(seconds: 10));
-
+          .timeout(const Duration(seconds: 20));
       final decoded = _decodeBody(res.body);
       if (res.statusCode != 200 || decoded["success"] != true) {
         throw ApiException(
@@ -77,11 +75,14 @@ class ChatApi {
         );
       }
 
-      final list = decoded["data"] is List ? decoded["data"] as List : <dynamic>[];
+      final list =
+          decoded["data"] is List ? decoded["data"] as List : <dynamic>[];
       return list.map((item) {
         final row = item is Map<String, dynamic>
             ? item
-            : (item is Map ? Map<String, dynamic>.from(item) : <String, dynamic>{});
+            : (item is Map
+                ? Map<String, dynamic>.from(item)
+                : <String, dynamic>{});
         final digital = row["digitalhuman"] is Map<String, dynamic>
             ? row["digitalhuman"] as Map<String, dynamic>
             : <String, dynamic>{};
@@ -108,12 +109,12 @@ class ChatApi {
       GET MESSAGES
   ========================= */
 
-  static Future<List<Map<String, dynamic>>> getMessages(String hoiThoaiId) async {
+  static Future<List<Map<String, dynamic>>> getMessages(
+      String hoiThoaiId) async {
     try {
       final res = await http
           .get(Uri.parse("$baseUrl/messages/$hoiThoaiId"))
-          .timeout(const Duration(seconds: 10));
-
+          .timeout(const Duration(seconds: 20));
       final decoded = _decodeBody(res.body);
       if (res.statusCode != 200 || decoded["success"] != true) {
         throw ApiException(
@@ -122,11 +123,14 @@ class ChatApi {
         );
       }
 
-      final list = decoded["data"] is List ? decoded["data"] as List : <dynamic>[];
+      final list =
+          decoded["data"] is List ? decoded["data"] as List : <dynamic>[];
       return list.map((item) {
         final row = item is Map<String, dynamic>
             ? item
-            : (item is Map ? Map<String, dynamic>.from(item) : <String, dynamic>{});
+            : (item is Map
+                ? Map<String, dynamic>.from(item)
+                : <String, dynamic>{});
         return <String, dynamic>{
           "noidung": row["noidung"]?.toString() ?? "",
           "ladigital": row["ladigital"] == true,
@@ -149,8 +153,7 @@ class ChatApi {
           .delete(
             Uri.parse("$baseUrl/conversation/$hoiThoaiId"),
           )
-          .timeout(const Duration(seconds: 10));
-
+          .timeout(const Duration(seconds: 20));
       final decoded = _decodeBody(res.body);
       if (res.statusCode != 200 || decoded["success"] != true) {
         throw ApiException(
@@ -171,7 +174,7 @@ class ChatApi {
           ? decoded
           : <String, dynamic>{"message": "Dữ liệu trả về không hợp lệ"};
     } catch (_) {
-      return <String, dynamic>{"message": "Dữ liệu trả về không hợp lệ"};
+      return {"success": false, "message": "Dữ liệu trả về không hợp lệ"};
     }
   }
 }

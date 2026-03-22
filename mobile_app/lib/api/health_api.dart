@@ -25,8 +25,8 @@ class HealthApi {
       "thoigiancapnhat": (raw["thoigiancapnhat"] ?? "").toString(),
       "tenchiso": (metric["tenchiso"] ?? raw["tenchiso"] ?? "").toString(),
       "donvido": (metric["donvido"] ?? raw["donvido"] ?? "").toString(),
-      "loaichiso_id": (metric["loaichiso_id"] ?? raw["loaichiso_id"] ?? "")
-          .toString(),
+      "loaichiso_id":
+          (metric["loaichiso_id"] ?? raw["loaichiso_id"] ?? "").toString(),
     };
   }
 
@@ -36,7 +36,7 @@ class HealthApi {
   static Future<List<dynamic>> getMetrics() async {
     final url = Uri.parse('$_baseUrl/health/metrics');
 
-    final response = await http.get(url);
+    final response = await http.get(url).timeout(const Duration(seconds: 20));
 
     final data = _decodeBody(response.body);
 
@@ -66,18 +66,20 @@ class HealthApi {
   }) async {
     final url = Uri.parse('$_baseUrl/health/metrics');
 
-    final response = await http.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'loaichiso_id': loaiChiSoId,
-        'tenchiso': tenChiSo,
-        'donvido': donViDo,
-        'loai': category,
-      }),
-    );
+    final response = await http
+        .post(
+          url,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            'loaichiso_id': loaiChiSoId,
+            'tenchiso': tenChiSo,
+            'donvido': donViDo,
+            'loai': category,
+          }),
+        )
+        .timeout(const Duration(seconds: 20));
 
     final data = _decodeBody(response.body);
 
@@ -99,17 +101,19 @@ class HealthApi {
   }) async {
     final url = Uri.parse('$_baseUrl/health/data');
 
-    final response = await http.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'giatri': giaTri,
-        'thietbi_id': thietBiId,
-        'loaichiso_id': loaiChiSoId,
-      }),
-    );
+    final response = await http
+        .post(
+          url,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            'giatri': giaTri,
+            'thietbi_id': thietBiId,
+            'loaichiso_id': loaiChiSoId,
+          }),
+        )
+        .timeout(const Duration(seconds: 20));
 
     final data = _decodeBody(response.body);
 
@@ -127,7 +131,7 @@ class HealthApi {
   static Future<List<dynamic>> getLatestHealthData(String deviceId) async {
     final url = Uri.parse('$_baseUrl/health/data/latest/$deviceId');
 
-    final response = await http.get(url);
+    final response = await http.get(url).timeout(const Duration(seconds: 20));
 
     final data = _decodeBody(response.body);
 
@@ -158,7 +162,7 @@ class HealthApi {
       '$_baseUrl/health/history/$deviceId/$metricId?range=$range',
     );
 
-    final response = await http.get(url);
+    final response = await http.get(url).timeout(const Duration(seconds: 20));
     final data = _decodeBody(response.body);
 
     if (response.statusCode != 200 || data['success'] != true) {
@@ -183,7 +187,7 @@ class HealthApi {
           ? decoded
           : <String, dynamic>{"message": "Dữ liệu trả về không hợp lệ"};
     } catch (_) {
-      return <String, dynamic>{"message": "Dữ liệu trả về không hợp lệ"};
+      return {"success": false, "message": "Dữ liệu trả về không hợp lệ"};
     }
   }
 }

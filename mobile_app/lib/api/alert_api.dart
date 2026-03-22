@@ -10,7 +10,7 @@ class AlertApi {
   static Future<Map<String, String>> _authHeaders() async {
     final token = await AuthStorage.getToken();
     if (token == null || token.isEmpty) {
-      throw Exception('Chưa đăng nhập');
+      throw ApiException('Chưa đăng nhập', statusCode: 401);
     }
     return {
       "Content-Type": "application/json",
@@ -22,18 +22,16 @@ class AlertApi {
 
   static Future<List<Map<String, dynamic>>> getAlerts() async {
     try {
-      final uri = Uri.parse("$baseUrl/user?t=${DateTime.now().millisecondsSinceEpoch}");
-      final res = await http
-          .get(
-            uri,
-            headers: {
-              ...(await _authHeaders()),
-              "Cache-Control": "no-cache",
-              "Pragma": "no-cache",
-            },
-          )
-          .timeout(const Duration(seconds: 10));
-
+      final uri =
+          Uri.parse("$baseUrl/user?t=${DateTime.now().millisecondsSinceEpoch}");
+      final res = await http.get(
+        uri,
+        headers: {
+          ...(await _authHeaders()),
+          "Cache-Control": "no-cache",
+          "Pragma": "no-cache",
+        },
+      ).timeout(const Duration(seconds: 20));
       final decoded = _decodeBody(res.body);
       if (res.statusCode != 200 || decoded["success"] != true) {
         throw ApiException(
@@ -42,11 +40,14 @@ class AlertApi {
         );
       }
 
-      final list = decoded["data"] is List ? decoded["data"] as List : <dynamic>[];
+      final list =
+          decoded["data"] is List ? decoded["data"] as List : <dynamic>[];
       return list.map((item) {
         final row = item is Map<String, dynamic>
             ? item
-            : (item is Map ? Map<String, dynamic>.from(item) : <String, dynamic>{});
+            : (item is Map
+                ? Map<String, dynamic>.from(item)
+                : <String, dynamic>{});
         return <String, dynamic>{
           "notification_id": row["notification_id"]?.toString() ?? "",
           "tieude": row["tieude"]?.toString() ?? "",
@@ -63,10 +64,12 @@ class AlertApi {
 
   static Future<void> markAsRead(String id) async {
     try {
-      final res = await http.post(
-        Uri.parse('$baseUrl/read/$id'),
-        headers: await _authHeaders(),
-      );
+      final res = await http
+          .post(
+            Uri.parse('$baseUrl/read/$id'),
+            headers: await _authHeaders(),
+          )
+          .timeout(const Duration(seconds: 20));
       final decoded = _decodeBody(res.body);
       if (res.statusCode != 200 || decoded["success"] != true) {
         throw ApiException(
@@ -82,10 +85,12 @@ class AlertApi {
 
   static Future<void> deleteAlert(String id) async {
     try {
-      final res = await http.delete(
-        Uri.parse('$baseUrl/$id'),
-        headers: await _authHeaders(),
-      );
+      final res = await http
+          .delete(
+            Uri.parse('$baseUrl/$id'),
+            headers: await _authHeaders(),
+          )
+          .timeout(const Duration(seconds: 20));
       final decoded = _decodeBody(res.body);
       if (res.statusCode != 200 || decoded["success"] != true) {
         throw ApiException(
@@ -106,7 +111,7 @@ class AlertApi {
           ? decoded
           : <String, dynamic>{"message": "Dữ liệu trả về không hợp lệ"};
     } catch (_) {
-      return <String, dynamic>{"message": "Dữ liệu trả về không hợp lệ"};
+      return {"success": false, "message": "Dữ liệu trả về không hợp lệ"};
     }
   }
 }

@@ -2,15 +2,16 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'auth_storage.dart';
 import '../config/api_config.dart';
+import 'api_exception.dart';
 
 class FamilyApi {
-static String get _baseUrl => ApiConfig.baseUrl;
+  static String get _baseUrl => ApiConfig.baseUrl;
 
   static Future<Map<String, String>> _authHeaders() async {
     final token = await AuthStorage.getToken();
 
     if (token == null || token.isEmpty) {
-      throw Exception('Token null trước khi gọi API');
+      throw ApiException('Token null trước khi gọi API');
     }
 
     return {
@@ -23,16 +24,22 @@ static String get _baseUrl => ApiConfig.baseUrl;
    GỬI LỜI MỜI BẰNG SĐT
 ========================= */
   static Future<void> sendInviteByPhone(String phone) async {
-    final response = await http.post(
-      Uri.parse('$_baseUrl/family/invite/by-phone'),
-      headers: await _authHeaders(), // ✅ BẮT BUỘC await
-      body: jsonEncode({'phone': phone}),
-    );
+    final response = await http
+        .post(
+          Uri.parse('$_baseUrl/family/invite/by-phone'),
+          headers: await _authHeaders(),
+          body: jsonEncode({'phone': phone}),
+        )
+        .timeout(const Duration(seconds: 20));
 
-    final data = jsonDecode(response.body);
-
+    Map<String, dynamic> data;
+    try {
+      data = jsonDecode(response.body);
+    } catch (_) {
+      throw ApiException("Server trả dữ liệu lỗi");
+    }
     if (response.statusCode != 200 || data['success'] != true) {
-      throw Exception(data['message'] ?? 'Gửi lời mời thất bại');
+      throw ApiException(data['message'] ?? 'Gửi lời mời thất bại');
     }
   }
 
@@ -44,15 +51,21 @@ static String get _baseUrl => ApiConfig.baseUrl;
       '$_baseUrl/family/invite/incoming',
     );
 
-    final response = await http.get(
-      url,
-      headers: await _authHeaders(),
-    );
+    final response = await http
+        .get(
+          url,
+          headers: await _authHeaders(),
+        )
+        .timeout(const Duration(seconds: 20));
 
-    final data = jsonDecode(response.body);
-
+    Map<String, dynamic> data;
+    try {
+      data = jsonDecode(response.body);
+    } catch (_) {
+      throw ApiException("Server trả dữ liệu lỗi");
+    }
     if (response.statusCode != 200 || data['success'] != true) {
-      throw Exception('Không lấy được danh sách lời mời');
+      throw ApiException('Không lấy được danh sách lời mời');
     }
 
     return data['data'];
@@ -64,18 +77,24 @@ static String get _baseUrl => ApiConfig.baseUrl;
   static Future<Map<String, dynamic>> acceptInvite(String loiMoiId) async {
     final url = Uri.parse('$_baseUrl/family/invite/accept');
 
-    final response = await http.post(
-      url,
-      headers: await _authHeaders(),
-      body: jsonEncode({
-        'loiMoiId': loiMoiId,
-      }),
-    );
+    final response = await http
+        .post(
+          url,
+          headers: await _authHeaders(),
+          body: jsonEncode({
+            'loiMoiId': loiMoiId,
+          }),
+        )
+        .timeout(const Duration(seconds: 20));
 
-    final data = jsonDecode(response.body);
-
+    Map<String, dynamic> data;
+    try {
+      data = jsonDecode(response.body);
+    } catch (_) {
+      throw ApiException("Server trả dữ liệu lỗi");
+    }
     if (response.statusCode != 200 || data['success'] != true) {
-      throw Exception(data['message'] ?? 'Accept thất bại');
+      throw ApiException(data['message'] ?? 'Accept thất bại');
     }
 
     return data['data']; // 🔥 QUAN TRỌNG
@@ -87,18 +106,24 @@ static String get _baseUrl => ApiConfig.baseUrl;
   static Future<void> rejectInvite(String loiMoiId) async {
     final url = Uri.parse('$_baseUrl/family/invite/reject');
 
-    final response = await http.post(
-      url,
-      headers: await _authHeaders(),
-      body: jsonEncode({
-        'loiMoiId': loiMoiId,
-      }),
-    );
+    final response = await http
+        .post(
+          url,
+          headers: await _authHeaders(),
+          body: jsonEncode({
+            'loiMoiId': loiMoiId,
+          }),
+        )
+        .timeout(const Duration(seconds: 20));
 
-    final data = jsonDecode(response.body);
-
+    Map<String, dynamic> data;
+    try {
+      data = jsonDecode(response.body);
+    } catch (_) {
+      throw ApiException("Server trả dữ liệu lỗi");
+    }
     if (response.statusCode != 200 || data['success'] != true) {
-      throw Exception(data['message'] ?? 'Reject thất bại');
+      throw ApiException(data['message'] ?? 'Reject thất bại');
     }
   }
 
@@ -108,15 +133,21 @@ static String get _baseUrl => ApiConfig.baseUrl;
   static Future<List<dynamic>> getMyGuardians() async {
     final url = Uri.parse('$_baseUrl/family/relationship/guardians');
 
-    final response = await http.get(
-      url,
-      headers: await _authHeaders(),
-    );
+    final response = await http
+        .get(
+          url,
+          headers: await _authHeaders(),
+        )
+        .timeout(const Duration(seconds: 20));
 
-    final data = jsonDecode(response.body);
-
+    Map<String, dynamic> data;
+    try {
+      data = jsonDecode(response.body);
+    } catch (_) {
+      throw ApiException("Server trả dữ liệu lỗi");
+    }
     if (response.statusCode != 200 || data['success'] != true) {
-      throw Exception('Không lấy được danh sách người giám hộ');
+      throw ApiException('Không lấy được danh sách người giám hộ');
     }
 
     return data['data'];
@@ -128,15 +159,21 @@ static String get _baseUrl => ApiConfig.baseUrl;
   static Future<List<dynamic>> getMyDependents() async {
     final url = Uri.parse('$_baseUrl/family/relationship/dependents');
 
-    final response = await http.get(
-      url,
-      headers: await _authHeaders(),
-    );
+    final response = await http
+        .get(
+          url,
+          headers: await _authHeaders(),
+        )
+        .timeout(const Duration(seconds: 20));
 
-    final data = jsonDecode(response.body);
-
+    Map<String, dynamic> data;
+    try {
+      data = jsonDecode(response.body);
+    } catch (_) {
+      throw ApiException("Server trả dữ liệu lỗi");
+    }
     if (response.statusCode != 200 || data['success'] != true) {
-      throw Exception('Không lấy được danh sách người được giám hộ');
+      throw ApiException('Không lấy được danh sách người được giám hộ');
     }
 
     return data['data'];
@@ -148,18 +185,24 @@ static String get _baseUrl => ApiConfig.baseUrl;
   static Future<void> endRelationship(String quanHeId) async {
     final url = Uri.parse('$_baseUrl/family/relationship/end');
 
-    final response = await http.post(
-      url,
-      headers: await _authHeaders(),
-      body: jsonEncode({
-        'quanHeId': quanHeId,
-      }),
-    );
+    final response = await http
+        .post(
+          url,
+          headers: await _authHeaders(),
+          body: jsonEncode({
+            'quanHeId': quanHeId,
+          }),
+        )
+        .timeout(const Duration(seconds: 20));
 
-    final data = jsonDecode(response.body);
-
+    Map<String, dynamic> data;
+    try {
+      data = jsonDecode(response.body);
+    } catch (_) {
+      throw ApiException("Server trả dữ liệu lỗi");
+    }
     if (response.statusCode != 200 || data['success'] != true) {
-      throw Exception(data['message'] ?? 'Không thể kết thúc quan hệ');
+      throw ApiException(data['message'] ?? 'Không thể kết thúc quan hệ');
     }
   }
 
@@ -169,15 +212,21 @@ static String get _baseUrl => ApiConfig.baseUrl;
   static Future<List<dynamic>> getPermissions() async {
     final url = Uri.parse('$_baseUrl/family/permission');
 
-    final response = await http.get(
-      url,
-      headers: await _authHeaders(),
-    );
+    final response = await http
+        .get(
+          url,
+          headers: await _authHeaders(),
+        )
+        .timeout(const Duration(seconds: 20));
 
-    final data = jsonDecode(response.body);
-
+    Map<String, dynamic> data;
+    try {
+      data = jsonDecode(response.body);
+    } catch (_) {
+      throw ApiException("Server trả dữ liệu lỗi");
+    }
     if (response.statusCode != 200 || data['success'] != true) {
-      throw Exception('Không lấy được danh sách quyền');
+      throw ApiException('Không lấy được danh sách quyền');
     }
 
     return data['data'];
@@ -188,15 +237,21 @@ static String get _baseUrl => ApiConfig.baseUrl;
 ========================= */
   static Future<List<dynamic>> getPermissionConfigs(String quanHeId) async {
     final url = Uri.parse('$_baseUrl/family/permission/config/$quanHeId');
-    final response = await http.get(
-      url,
-      headers: await _authHeaders(),
-    );
+    final response = await http
+        .get(
+          url,
+          headers: await _authHeaders(),
+        )
+        .timeout(const Duration(seconds: 20));
 
-    final data = jsonDecode(response.body);
-
+    Map<String, dynamic> data;
+    try {
+      data = jsonDecode(response.body);
+    } catch (_) {
+      throw ApiException("Server trả dữ liệu lỗi");
+    }
     if (response.statusCode != 200 || data['success'] != true) {
-      throw Exception('Không lấy được cấu hình quyền');
+      throw ApiException('Không lấy được cấu hình quyền');
     }
 
     return data['data'];
@@ -212,20 +267,26 @@ static String get _baseUrl => ApiConfig.baseUrl;
   }) async {
     final url = Uri.parse('$_baseUrl/family/permission/save');
 
-    final response = await http.post(
-      url,
-      headers: await _authHeaders(),
-      body: jsonEncode({
-        'quanHeId': quanHeId,
-        'quyenId': quyenId,
-        'active': active,
-      }),
-    );
+    final response = await http
+        .post(
+          url,
+          headers: await _authHeaders(),
+          body: jsonEncode({
+            'quanHeId': quanHeId,
+            'quyenId': quyenId,
+            'active': active,
+          }),
+        )
+        .timeout(const Duration(seconds: 20));
 
-    final data = jsonDecode(response.body);
-
+    Map<String, dynamic> data;
+    try {
+      data = jsonDecode(response.body);
+    } catch (_) {
+      throw ApiException("Server trả dữ liệu lỗi");
+    }
     if (response.statusCode != 200 || data['success'] != true) {
-      throw Exception(data['message'] ?? 'Không lưu được quyền');
+      throw ApiException(data['message'] ?? 'Không lưu được quyền');
     }
   }
 
@@ -237,22 +298,30 @@ static String get _baseUrl => ApiConfig.baseUrl;
       '$_baseUrl/family/permission/shared/$quanHeId',
     );
 
-    final response = await http.get(
-      url,
-      headers: await _authHeaders(),
-    );
+    final response = await http
+        .get(
+          url,
+          headers: await _authHeaders(),
+        )
+        .timeout(const Duration(seconds: 20));
 
-    final data = jsonDecode(response.body);
-
+    Map<String, dynamic> data;
+    try {
+      data = jsonDecode(response.body);
+    } catch (_) {
+      throw ApiException("Server trả dữ liệu lỗi");
+    }
     if (response.statusCode != 200 || data['success'] != true) {
-      throw Exception('Không lấy được danh sách hội thoại');
+      throw ApiException('Không lấy được danh sách hội thoại');
     }
 
     final list = data['data'] is List ? data['data'] as List : <dynamic>[];
     return list.map((item) {
       final row = item is Map<String, dynamic>
           ? item
-          : (item is Map ? Map<String, dynamic>.from(item) : <String, dynamic>{});
+          : (item is Map
+              ? Map<String, dynamic>.from(item)
+              : <String, dynamic>{});
       return <String, dynamic>{
         "hoithoai_id": row["hoithoai_id"]?.toString() ?? "",
         "tendigitalhuman": row["tendigitalhuman"]?.toString() ?? "Conversation",
@@ -270,15 +339,21 @@ static String get _baseUrl => ApiConfig.baseUrl;
       '$_baseUrl/family/invite/find-by-phone?phone=$phone',
     );
 
-    final response = await http.get(
-      url,
-      headers: await _authHeaders(),
-    );
+    final response = await http
+        .get(
+          url,
+          headers: await _authHeaders(),
+        )
+        .timeout(const Duration(seconds: 20));
 
-    final data = jsonDecode(response.body);
-
+    Map<String, dynamic> data;
+    try {
+      data = jsonDecode(response.body);
+    } catch (_) {
+      throw ApiException("Server trả dữ liệu lỗi");
+    }
     if (response.statusCode != 200 || data['success'] != true) {
-      throw Exception('Không tìm được user');
+      throw ApiException('Không tìm được user');
     }
 
     return data['data'] ?? [];
@@ -293,15 +368,21 @@ static String get _baseUrl => ApiConfig.baseUrl;
       '$_baseUrl/family/relationship/profile/$quanHeId',
     );
 
-    final response = await http.get(
-      url,
-      headers: await _authHeaders(),
-    );
+    final response = await http
+        .get(
+          url,
+          headers: await _authHeaders(),
+        )
+        .timeout(const Duration(seconds: 20));
 
-    final data = jsonDecode(response.body);
-
+    Map<String, dynamic> data;
+    try {
+      data = jsonDecode(response.body);
+    } catch (_) {
+      throw ApiException("Server trả dữ liệu lỗi");
+    }
     if (response.statusCode != 200 || data['success'] != true) {
-      throw Exception(data['message'] ?? 'Không lấy được profile quan hệ');
+      throw ApiException(data['message'] ?? 'Không lấy được profile quan hệ');
     }
 
     return data['data'];
@@ -313,18 +394,24 @@ static String get _baseUrl => ApiConfig.baseUrl;
   static Future<void> cancelInvite(String loiMoiId) async {
     final url = Uri.parse('$_baseUrl/family/invite/cancel');
 
-    final response = await http.post(
-      url,
-      headers: await _authHeaders(),
-      body: jsonEncode({
-        'loiMoiId': loiMoiId,
-      }),
-    );
+    final response = await http
+        .post(
+          url,
+          headers: await _authHeaders(),
+          body: jsonEncode({
+            'loiMoiId': loiMoiId,
+          }),
+        )
+        .timeout(const Duration(seconds: 20));
 
-    final data = jsonDecode(response.body);
-
+    Map<String, dynamic> data;
+    try {
+      data = jsonDecode(response.body);
+    } catch (_) {
+      throw ApiException("Server trả dữ liệu lỗi");
+    }
     if (response.statusCode != 200 || data['success'] != true) {
-      throw Exception(data['message'] ?? 'Không thể hủy lời mời');
+      throw ApiException(data['message'] ?? 'Không thể hủy lời mời');
     }
   }
 
@@ -339,15 +426,21 @@ static String get _baseUrl => ApiConfig.baseUrl;
       '$_baseUrl/health/report/$deviceId?type=$type',
     );
 
-    final response = await http.get(
-      url,
-      headers: await _authHeaders(),
-    );
+    final response = await http
+        .get(
+          url,
+          headers: await _authHeaders(),
+        )
+        .timeout(const Duration(seconds: 20));
 
-    final data = jsonDecode(response.body);
-
+    Map<String, dynamic> data;
+    try {
+      data = jsonDecode(response.body);
+    } catch (_) {
+      throw ApiException("Server trả dữ liệu lỗi");
+    }
     if (response.statusCode != 200 || data['success'] != true) {
-      throw Exception(data['message'] ?? 'Không lấy được báo cáo');
+      throw ApiException(data['message'] ?? 'Không lấy được báo cáo');
     }
 
     return data['data'];

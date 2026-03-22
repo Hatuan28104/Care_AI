@@ -9,12 +9,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'firebase_options.dart';
-import 'package:flutter/foundation.dart';
+import 'config/api_config.dart';
 
-// ✅ BASE URL theo platform
-final baseUrl = kIsWeb ? "http://localhost:3000" : "http://10.0.2.2:3000";
-
-// ✅ Background handler
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   try {
     if (Firebase.apps.isEmpty) {
@@ -30,7 +26,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // ✅ Init Firebase đúng chuẩn (web + mobile)
   try {
     if (Firebase.apps.isEmpty) {
       await Firebase.initializeApp(
@@ -45,74 +40,70 @@ void main() async {
 
   FirebaseMessaging messaging = FirebaseMessaging.instance;
 
-  // ✅ xin quyền
   await messaging.requestPermission();
 
-// ✅ nhận noti khi app mở
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    print("📩 Foreground notification:");
+    print("Foreground notification:");
     AppSettings.alertVersion.value++;
 
     print("Title: ${message.notification?.title}");
     print("Body: ${message.notification?.body}");
   });
 
-// ✅ mở từ background
   FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-    print("🔥 OPEN FROM BACKGROUND");
+    print("OPEN FROM BACKGROUND");
     AppSettings.alertVersion.value++;
   });
 
-// ✅ mở từ killed
   RemoteMessage? initialMessage =
       await FirebaseMessaging.instance.getInitialMessage();
 
   if (initialMessage != null) {
-    print("🔥 OPEN FROM TERMINATED");
+    print("OPEN FROM TERMINATED");
     AppSettings.alertVersion.value++;
   }
 
-  // ✅ load storage TRƯỚC
-  await AuthStorage.load();
-  final jwt = await AuthStorage.getToken();
+  await AuthStorage.init();
 
-  // ✅ TOKEN REFRESH
   FirebaseMessaging.instance.onTokenRefresh.listen((newToken) async {
-    print("🔄 New FCM TOKEN: $newToken");
-
+    final jwt = AuthStorage.getToken();
     if (jwt != null) {
-      await http.post(
-        Uri.parse("$baseUrl/auth/save-fcm-token"),
-        headers: {
-          "Authorization": "Bearer $jwt",
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode({
-          "fcmToken": newToken,
-        }),
-      );
-
-      print("✅ Token refreshed → đã update server");
+      await http
+          .post(
+            Uri.parse("${ApiConfig.baseUrl}/auth/save-fcm-token"),
+            headers: {
+              "Authorization": "Bearer $jwt",
+              "Content-Type": "application/json",
+            },
+            body: jsonEncode({
+              "fcmToken": newToken,
+            }),
+          )
+          .timeout(const Duration(seconds: 20));
     }
   });
 
-  // ✅ GET TOKEN LẦN ĐẦU
   String? token = await messaging.getToken();
-  print("🔥 FCM TOKEN: $token");
+  print("FCM TOKEN: $token");
 
-  if (token != null && jwt != null) {
-    await http.post(
-      Uri.parse("$baseUrl/auth/save-fcm-token"),
-      headers: {
-        "Authorization": "Bearer $jwt",
-        "Content-Type": "application/json",
-      },
-      body: jsonEncode({
-        "fcmToken": token,
-      }),
-    );
+  if (token != null) {
+    final jwt = AuthStorage.getToken();
+    if (jwt != null) {
+      await http
+          .post(
+            Uri.parse("${ApiConfig.baseUrl}/auth/save-fcm-token"),
+            headers: {
+              "Authorization": "Bearer $jwt",
+              "Content-Type": "application/json",
+            },
+            body: jsonEncode({
+              "fcmToken": token,
+            }),
+          )
+          .timeout(const Duration(seconds: 20));
 
-    print("✅ Đã gửi token lên server");
+      print("Đã gửi token lên server");
+    }
   }
 
   await AppSettings.init();

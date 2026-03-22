@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'auth_storage.dart';
 import '../config/api_config.dart';
+import 'api_exception.dart';
 
 class SettingsApi {
   static String get _baseUrl => "${ApiConfig.baseUrl}/api/settings";
@@ -12,7 +13,7 @@ class SettingsApi {
     final token = await AuthStorage.getToken();
 
     if (token == null) {
-      throw Exception("Chưa đăng nhập");
+      throw ApiException("Chưa đăng nhập");
     }
 
     final res = await http.get(
@@ -21,7 +22,7 @@ class SettingsApi {
         "Authorization": "Bearer $token",
         "Accept": "application/json",
       },
-    ).timeout(const Duration(seconds: 8));
+    ).timeout(const Duration(seconds: 20));
 
     print("GET SETTINGS STATUS: ${res.statusCode}");
     print("GET SETTINGS BODY: ${res.body}");
@@ -33,10 +34,10 @@ class SettingsApi {
         data["volume"] = (data["volume"] as num).toDouble();
       }
 
-      return data;
+      return data["data"];
     }
 
-    throw Exception("Không load được settings (${res.statusCode})");
+    throw ApiException("Không load được settings (${res.statusCode})");
   }
 
   // 🔹 UPDATE setting
@@ -44,7 +45,7 @@ class SettingsApi {
     final token = await AuthStorage.getToken();
 
     if (token == null) {
-      throw Exception("Chưa đăng nhập");
+      throw ApiException("Chưa đăng nhập");
     }
 
     final res = await http
@@ -60,14 +61,17 @@ class SettingsApi {
             "value": value,
           }),
         )
-        .timeout(const Duration(seconds: 8));
-
+        .timeout(const Duration(seconds: 20));
     print("UPDATE SETTING STATUS: ${res.statusCode}");
     print("UPDATE SETTING BODY: ${res.body}");
 
-    if (res.statusCode != 200) {
-      throw Exception("Update setting thất bại (${res.statusCode})");
+    final data = jsonDecode(res.body);
+
+    if (res.statusCode != 200 || data["success"] != true) {
+      throw ApiException("Không load được settings");
     }
+
+    return data["data"];
   }
 
   // 🔹 UPDATE FCM TOKEN (KHÔNG cần userId)
@@ -75,22 +79,24 @@ class SettingsApi {
     final token = await AuthStorage.getToken();
 
     if (token == null) {
-      throw Exception("Chưa đăng nhập");
+      throw ApiException("Chưa đăng nhập");
     }
 
-    final res = await http.post(
-      Uri.parse("$_authBaseUrl/save-fcm-token"),
-      headers: {
-        "Authorization": "Bearer $token",
-        "Content-Type": "application/json",
-      },
-      body: jsonEncode({
-        "fcmToken": fcmToken,
-      }),
-    );
+    final res = await http
+        .post(
+          Uri.parse("$_authBaseUrl/save-fcm-token"),
+          headers: {
+            "Authorization": "Bearer $token",
+            "Content-Type": "application/json",
+          },
+          body: jsonEncode({
+            "fcmToken": fcmToken,
+          }),
+        )
+        .timeout(const Duration(seconds: 20));
 
     if (res.statusCode != 200) {
-      throw Exception("Lưu FCM token thất bại (${res.statusCode})");
+      throw ApiException("Lưu FCM token thất bại (${res.statusCode})");
     }
   }
 }

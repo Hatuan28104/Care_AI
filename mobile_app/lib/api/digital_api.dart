@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
+import 'api_exception.dart';
 
 class DigitalApi {
   static String get baseUrl => "${ApiConfig.baseUrl}/api/digital-human";
@@ -17,26 +18,43 @@ class DigitalApi {
   }
 
   static Future<List<dynamic>> getAll() async {
-    final response = await http.get(Uri.parse(baseUrl));
+    try {
+      final res = await http
+          .get(Uri.parse(baseUrl))
+          .timeout(const Duration(seconds: 20));
 
-    print("===== DIGITAL API RESPONSE =====");
-    print("STATUS: ${response.statusCode}");
-    print("BODY: ${response.body}");
+      if (res.body.isEmpty) {
+        throw ApiException("Server không phản hồi");
+      }
 
-    if (response.statusCode == 200) {
-      final json = jsonDecode(response.body);
+      Map<String, dynamic> json;
+      try {
+        json = jsonDecode(res.body);
+      } catch (_) {
+        throw ApiException("Dữ liệu trả về không hợp lệ");
+      }
+
+      if (res.statusCode != 200 || json["success"] != true) {
+        throw ApiException(
+          (json["message"] ?? "Không tải được Digital Humans").toString(),
+          statusCode: res.statusCode,
+        );
+      }
+
       final list = json["data"] is List ? json["data"] as List : <dynamic>[];
+
       return list.map((e) {
         if (e is Map<String, dynamic>) return _normalizeDigital(e);
         if (e is Map) return _normalizeDigital(Map<String, dynamic>.from(e));
-        return <String, dynamic>{
+        return {
           "digitalhuman_id": "",
           "tendigitalhuman": "",
           "imageurl": "",
         };
       }).toList();
-    } else {
-      throw Exception("Không tải được Digital Humans");
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException("Không thể kết nối máy chủ");
     }
   }
 }

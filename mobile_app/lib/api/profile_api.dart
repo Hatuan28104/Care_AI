@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:io';
 import '../config/api_config.dart';
 import 'auth_storage.dart';
+import 'api_exception.dart';
 
 class ProfileApi {
   static String get _baseUrl => ApiConfig.baseUrl;
@@ -13,7 +14,7 @@ class ProfileApi {
   static Future<Map<String, String>> _authHeaders() async {
     final token = await AuthStorage.getToken();
     if (token == null || token.isEmpty) {
-      throw Exception('Chưa đăng nhập');
+      throw ApiException('Chưa đăng nhập');
     }
     return {
       "Authorization": "Bearer $token",
@@ -71,13 +72,17 @@ class ProfileApi {
     print("UPDATE BODY: $body");
 
     if (body.isEmpty) {
-      throw Exception("Server không phản hồi");
+      throw ApiException("Server không phản hồi");
     }
 
-    final data = jsonDecode(body);
-
+    Map<String, dynamic> data;
+    try {
+      data = jsonDecode(body);
+    } catch (_) {
+      throw ApiException("Server trả dữ liệu lỗi");
+    }
     if (res.statusCode != 200 || data['success'] != true) {
-      throw Exception(jsonEncode({
+      throw ApiException(jsonEncode({
         "message": data['message'] ?? "Cập nhật thất bại",
         "errors": data['errors']
       }));
@@ -90,10 +95,12 @@ class ProfileApi {
   static Future<Map<String, dynamic>?> getProfile(String nguoiDungId) async {
     try {
       final headers = await _authHeaders();
-      final res = await http.get(
-        Uri.parse('$_baseUrl/profile/$nguoiDungId'),
-        headers: headers,
-      );
+      final res = await http
+          .get(
+            Uri.parse('$_baseUrl/profile/$nguoiDungId'),
+            headers: headers,
+          )
+          .timeout(const Duration(seconds: 20));
 
       print("GET PROFILE STATUS: ${res.statusCode}");
       print("GET PROFILE BODY: ${res.body}");
