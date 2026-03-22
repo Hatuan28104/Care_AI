@@ -1,6 +1,5 @@
 
-export const API_BASE = "https://care-ai-fb8q.onrender.com";
-
+export const API_BASE = "https://careai-production.up.railway.app";
 function toAbsoluteImageUrl(path) {
   if (!path) return "https://cdn-icons-png.flaticon.com/512/149/149071.png";
   if (/^https?:\/\//i.test(path)) return path;

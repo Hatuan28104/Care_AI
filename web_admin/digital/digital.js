@@ -1,4 +1,4 @@
-export const API_BASE = "https://care-ai-fb8q.onrender.com";
+export const API_BASE = "https://careai-production.up.railway.app";
 
 const API = `${API_BASE}/api/digital-human`;
 

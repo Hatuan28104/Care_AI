@@ -1,4 +1,4 @@
-export const API_BASE = "https://care-ai-fb8q.onrender.com";
+export const API_BASE = "https://careai-production.up.railway.app";
 let chartInstance = null;
 let currentTab = 0;
 let selectedStart = null;
