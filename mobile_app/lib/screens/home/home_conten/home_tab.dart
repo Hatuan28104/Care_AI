@@ -5,7 +5,7 @@ import 'digital_human.dart';
 import 'chat.dart';
 import 'data/basic_health_data.dart';
 import 'data/activity_data.dart';
-import '../../../models/tr.dart';
+import 'package:demo_app/models/tr.dart';
 
 class HomeTab extends StatefulWidget {
   final String userId;
@@ -25,7 +25,8 @@ class _HomeTabState extends State<HomeTab> {
   String _imageUrlFrom(dynamic raw) {
     final value = raw?.toString() ?? '';
     if (value.isEmpty) return '';
-    if (value.startsWith('http://') || value.startsWith('https://')) return value;
+    if (value.startsWith('http://') || value.startsWith('https://'))
+      return value;
     final clean = value.startsWith('/') ? value : '/$value';
     return '${ApiConfig.baseUrl}$clean';
   }
@@ -185,7 +186,8 @@ class _HomeTabState extends State<HomeTab> {
                       name: (human['tendigitalhuman'] ?? '').toString(),
                       image: imageUrl,
                       intro: context.tr.aiIntro,
-                      digitalId: (human['digitalhuman_id'] ?? '').toString().trim(),
+                      digitalId:
+                          (human['digitalhuman_id'] ?? '').toString().trim(),
                       userId: widget.userId,
                     ),
                   );

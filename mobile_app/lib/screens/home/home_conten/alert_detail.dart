@@ -73,7 +73,7 @@ class AlertMessageDetail extends StatelessWidget {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F6F6),
+      backgroundColor: Color(0xFFF6F6F6),
       body: SafeArea(
         child: Column(
           children: [

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../app_settings.dart';
-import '../../l10n/app_localizations.dart';
+import 'package:demo_app/app_settings.dart';
+import 'package:demo_app/l10n/app_localizations.dart';
 
 class LanguageScreen extends StatefulWidget {
   const LanguageScreen({super.key});
@@ -59,7 +59,7 @@ class _LanguageScreenState extends State<LanguageScreen> {
     final l = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F6F6),
+      backgroundColor: Color(0xFFF6F6F6),
       appBar: _appBar(context, l),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(28, 14, 28, 24),

@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
-import '../../../models/tr.dart';
-
+import 'package:demo_app/models/tr.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';

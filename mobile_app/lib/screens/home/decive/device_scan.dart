@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../models/tr.dart';
+import 'package:demo_app/models/tr.dart';
 
 class ScanScreen extends StatelessWidget {
   const ScanScreen({super.key});
@@ -7,7 +7,7 @@ class ScanScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F6F6),
+      backgroundColor: Color(0xFFF6F6F6),
       appBar: AppBar(
         title: Text(
           context.tr.device,

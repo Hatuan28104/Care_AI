@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:demo_app/screens/home/decive/device_complete.dart';
-import '../../../models/tr.dart';
+import 'package:demo_app/models/tr.dart';
 
 class DeviceSyncingScreen extends StatelessWidget {
   const DeviceSyncingScreen({super.key});

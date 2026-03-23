@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:demo_app/screens/home/decive/device_detail.dart';
-import '../../../models/tr.dart';
+import 'package:demo_app/models/tr.dart';
 
 class DeviceCompleteScreen extends StatelessWidget {
   const DeviceCompleteScreen({super.key});
@@ -46,7 +46,7 @@ class DeviceCompleteScreen extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 6),
-                   Padding(
+                  Padding(
                     padding: EdgeInsets.symmetric(horizontal: 36),
                     child: Text(
                       context.tr.deviceReady,
@@ -89,7 +89,7 @@ class DeviceCompleteScreen extends StatelessWidget {
                       ),
                       elevation: 4,
                     ),
-                    child:  Text(
+                    child: Text(
                       context.tr.done,
                       style: TextStyle(
                         fontSize: 16,

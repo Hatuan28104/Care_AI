@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../app_settings.dart';
-import '../../models/tr.dart';
-import '../../widgets/app_header.dart';
+import 'package:demo_app/app_settings.dart';
+import 'package:demo_app/models/tr.dart';
+import 'package:demo_app/widgets/app_header.dart';
 
 class TextSizeScreen extends StatefulWidget {
   const TextSizeScreen({super.key});

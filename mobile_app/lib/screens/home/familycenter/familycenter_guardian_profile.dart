@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:demo_app/api/family_api.dart';
 import 'familycenter_configure_permissions.dart';
-import '../../../models/tr.dart';
+import 'package:demo_app/models/tr.dart';
 
 class GuardianProfile extends StatefulWidget {
   final String quanHeId;

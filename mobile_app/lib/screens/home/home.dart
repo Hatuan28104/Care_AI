@@ -3,8 +3,7 @@ import 'package:demo_app/app_settings.dart';
 import 'package:demo_app/screens/settings/settings.dart';
 import 'package:demo_app/api/profile_api.dart' as profile_api;
 import 'package:demo_app/screens/settings/profile/create_profile.dart';
-import '../../models/tr.dart';
-
+import 'package:demo_app/models/tr.dart';
 import 'home_conten/home_tab.dart';
 import 'familycenter/family_tab.dart';
 import 'decive/device_tab.dart';
@@ -103,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F6F6),
+      backgroundColor: Color(0xFFF6F6F6),
       body: SafeArea(
         child: Column(
           children: [

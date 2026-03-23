@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:demo_app/screens/home/decive/device_allow.dart';
-import '../../../models/tr.dart';
+import 'package:demo_app/models/tr.dart';
 
 class DevicePairScreen extends StatelessWidget {
   const DevicePairScreen({super.key});

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'device_scan.dart';
 import 'device_add.dart';
-import '../../../models/tr.dart';
+import 'package:demo_app/models/tr.dart';
 
 class DeviceTab extends StatelessWidget {
   const DeviceTab({super.key});

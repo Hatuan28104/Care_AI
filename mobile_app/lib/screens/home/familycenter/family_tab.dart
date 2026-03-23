@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'familycenter_guardians.dart';
 import 'familycenter_dependent.dart';
-import '../../../models/tr.dart';
+import 'package:demo_app/models/tr.dart';
 
 class FamilyTab extends StatefulWidget {
   const FamilyTab({super.key});

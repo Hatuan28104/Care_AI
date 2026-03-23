@@ -75,7 +75,7 @@ class _SharedConversationViewerState extends State<SharedConversationViewer> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F6F6),
+      backgroundColor: Color(0xFFF6F6F6),
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,

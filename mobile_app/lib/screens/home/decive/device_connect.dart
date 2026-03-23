@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:demo_app/screens/home/decive/device_pair.dart';
-import '../../../models/tr.dart';
+import 'package:demo_app/models/tr.dart';
 
 class ConnectDeviceScreen extends StatefulWidget {
   const ConnectDeviceScreen({super.key});
@@ -196,8 +196,8 @@ class _ConnectDeviceScreenState extends State<ConnectDeviceScreen> {
             ),
 
             const SizedBox(height: 50),
-             Text(
-               context.tr.demoWatch,
+            Text(
+              context.tr.demoWatch,
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),

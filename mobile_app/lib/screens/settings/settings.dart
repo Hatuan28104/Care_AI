@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:demo_app/screens/settings/profile/my_profile.dart';
 import 'package:demo_app/screens/welcome_screen.dart';
-import '../../app_settings.dart';
+import 'package:demo_app/app_settings.dart';
 import 'package:demo_app/widgets/app_header.dart';
 import 'privacy_security/privacy_security.dart';
 import 'text_size.dart';
 import 'language.dart';
 import 'sound_vibration.dart';
 import 'help_support.dart';
-import '../../api/settings_api.dart';
-import '../../api/auth_storage.dart';
-import '../../models/tr.dart';
+import 'package:demo_app/api/settings_api.dart';
+import 'package:demo_app/api/auth_storage.dart';
+import 'package:demo_app/models/tr.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -69,7 +69,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F6F6),
+      backgroundColor: Color(0xFFF6F6F6),
       body: SafeArea(
         child: Column(
           children: [

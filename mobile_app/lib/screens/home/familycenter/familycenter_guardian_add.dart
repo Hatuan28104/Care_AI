@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:demo_app/api/family_api.dart';
 import 'dart:async';
-import '../../../models/tr.dart';
+import 'package:demo_app/models/tr.dart';
 import 'package:demo_app/widgets/app_header.dart';
 
 class AddGuardians extends StatefulWidget {

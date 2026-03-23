@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:demo_app/models/health_icon_mapper.dart';
 import 'package:demo_app/api/health_api.dart';
 import 'package:demo_app/api/family_api.dart';
-import '../../../models/tr.dart';
+import 'package:demo_app/models/tr.dart';
 import 'package:demo_app/widgets/app_header.dart';
 
 class HealthDataScreen extends StatefulWidget {

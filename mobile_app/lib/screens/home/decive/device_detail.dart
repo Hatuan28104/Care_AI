@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../models/tr.dart';
+import 'package:demo_app/models/tr.dart';
 
 class DeviceDetailScreen extends StatelessWidget {
   const DeviceDetailScreen({super.key});

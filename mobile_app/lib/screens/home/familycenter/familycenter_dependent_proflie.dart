@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:demo_app/api/family_api.dart';
 import 'package:demo_app/config/api_config.dart';
 import 'report_detail_screen.dart';
-import '../../../models/tr.dart';
+import 'package:demo_app/models/tr.dart';
 import 'shared_conversation_viewer.dart';
 
 class DependentProfileScreen extends StatefulWidget {

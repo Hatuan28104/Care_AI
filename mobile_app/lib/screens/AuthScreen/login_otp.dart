@@ -10,8 +10,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:demo_app/api/settings_api.dart';
 import 'package:demo_app/screens/settings/profile/create_profile.dart';
-import '../../models/tr.dart';
-import '../../config/api_config.dart';
+import 'package:demo_app/models/tr.dart';
+import 'package:demo_app/config/api_config.dart';
 
 class LoginOtpScreen extends StatefulWidget {
   final String phoneE164;
@@ -80,15 +80,6 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
     if (_loading) return;
 
     final otp = _controllers.map((e) => e.text).join();
-    if (otp == "123456") {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => HomeScreen(userId: "test_user"),
-        ),
-      );
-      return;
-    }
 
     if (!RegExp(r'^\d{6}$').hasMatch(otp)) {
       setState(() => _errorText = context.tr.invalidOtp);

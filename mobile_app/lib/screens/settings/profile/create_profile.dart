@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'dart:convert';
 import 'package:demo_app/api/profile_api.dart' as ProfileApi;
-import '../../../models/tr.dart';
+import 'package:demo_app/models/tr.dart';
 
 class CreateProfileScreen extends StatefulWidget {
   final String nguoiDungId;

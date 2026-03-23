@@ -69,10 +69,9 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
         _range.name,
       );
 
-      final values =
-          data
-              .map<double>((e) => ((e['giatri'] ?? 0) as num).toDouble())
-              .toList();
+      final values = data
+          .map<double>((e) => ((e['giatri'] ?? 0) as num).toDouble())
+          .toList();
 
       final labels = data.map<String>((e) {
         final raw = (e['thoigiancapnhat'] ?? '').toString();

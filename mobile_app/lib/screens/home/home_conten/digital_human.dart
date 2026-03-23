@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:demo_app/api/digital_api.dart';
 import 'package:demo_app/config/api_config.dart';
 import 'chat.dart';
-import '../../../models/tr.dart';
+import 'package:demo_app/models/tr.dart';
 
 class DigitalHumanAllScreen extends StatefulWidget {
   final String userId;
@@ -22,7 +22,8 @@ class _DigitalHumanAllScreenState extends State<DigitalHumanAllScreen> {
   String _imageUrlFrom(dynamic raw) {
     final value = raw?.toString() ?? '';
     if (value.isEmpty) return '';
-    if (value.startsWith('http://') || value.startsWith('https://')) return value;
+    if (value.startsWith('http://') || value.startsWith('https://'))
+      return value;
     final clean = value.startsWith('/') ? value : '/$value';
     return '${ApiConfig.baseUrl}$clean';
   }
@@ -36,7 +37,7 @@ class _DigitalHumanAllScreenState extends State<DigitalHumanAllScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F6F6),
+      backgroundColor: Color(0xFFF6F6F6),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,

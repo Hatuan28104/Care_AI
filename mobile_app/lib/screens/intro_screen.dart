@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'welcome_screen.dart';
-import '../models/tr.dart';
+import 'package:demo_app/models/tr.dart';
 
 class SplashIntroScreen extends StatefulWidget {
   const SplashIntroScreen({super.key});

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:demo_app/api/chat_api.dart';
-import '../../../models/tr.dart';
+import 'package:demo_app/models/tr.dart';
 
 class ChatDetailScreen extends StatefulWidget {
   final String? hoiThoaiId;
@@ -287,7 +287,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F6F6),
+      backgroundColor: Color(0xFFF6F6F6),
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
         backgroundColor: Colors.white,

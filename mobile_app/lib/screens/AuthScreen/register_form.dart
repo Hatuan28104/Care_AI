@@ -5,8 +5,7 @@ import 'package:intl_phone_field/phone_number.dart' as ipn;
 import 'package:demo_app/screens/settings/privacy_security/terms_of_service.dart';
 import 'package:demo_app/screens/settings/privacy_security/privacy_policy.dart';
 import 'package:demo_app/api/auth_api.dart';
-import '../../models/tr.dart';
-
+import 'package:demo_app/models/tr.dart';
 class RegisterForm extends StatefulWidget {
   final void Function(String phoneE164, String displayPhone) onOtp;
 

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../models/tr.dart';
+import 'package:demo_app/models/tr.dart';
 import 'login_form.dart';
 import 'register_form.dart';
 import 'login_otp.dart';
 import 'register_otp.dart';
-
 enum AuthTab { login, register }
 
 enum AuthStep { form, otp }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../models/tr.dart';
-import '../../../widgets/app_header.dart';
+import 'package:demo_app/models/tr.dart';
+import 'package:demo_app/widgets/app_header.dart';
 
 class TermsOfServiceScreen extends StatelessWidget {
   const TermsOfServiceScreen({super.key});

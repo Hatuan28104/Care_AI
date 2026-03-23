@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'familycenter_health_data.dart';
 import 'familycenter_conversation.dart';
-import '../../../models/tr.dart';
+import 'package:demo_app/models/tr.dart';
 import 'package:demo_app/widgets/app_header.dart';
 
 class ConfigurePermissionsScreen extends StatelessWidget {

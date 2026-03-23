@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../models/tr.dart';
-
-import '../../../app_settings.dart';
+import 'package:demo_app/models/tr.dart';
+import 'package:demo_app/app_settings.dart';
 import 'privacy_policy.dart';
 import 'terms_of_service.dart';
-import '../../../api/auth_api.dart';
-import '../../../models/login_history_item.dart';
-import '../../../widgets/app_header.dart';
+import 'package:demo_app/api/auth_api.dart';
+import 'package:demo_app/models/login_history_item.dart';
+import 'package:demo_app/widgets/app_header.dart';
 
 class PrivacySecurityScreen extends StatefulWidget {
   const PrivacySecurityScreen({super.key});

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../models/tr.dart';
-import '../../../api/chat_api.dart';
-import '../../../api/family_api.dart';
-import '../../../config/api_config.dart';
+import 'package:demo_app/models/tr.dart';
+import 'package:demo_app/api/chat_api.dart';
+import 'package:demo_app/api/family_api.dart';
+import 'package:demo_app/config/api_config.dart';
 import 'package:demo_app/widgets/app_header.dart';
 
 class ConversationScreen extends StatefulWidget {
@@ -47,8 +47,8 @@ class _ConversationSharingScreenState extends State<ConversationScreen> {
 
         for (var item in history) {
           final hoiThoaiId = item["hoithoai_id"];
-          final enabled =
-              permissionMap[hoiThoaiId] == 1 || permissionMap[hoiThoaiId] == true;
+          final enabled = permissionMap[hoiThoaiId] == 1 ||
+              permissionMap[hoiThoaiId] == true;
           _users.add({
             "name": item["tendigitalhuman"] ?? "Conversation",
             "date": item["lancuoituongtac"] ?? "",

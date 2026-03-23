@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:intl_phone_field/phone_number.dart' as ipn;
 import 'package:demo_app/api/auth_api.dart';
-import '../../models/tr.dart';
+import 'package:demo_app/models/tr.dart';
 
 class LoginForm extends StatefulWidget {
   final void Function(String phoneE164, String displayPhone) onOtp;

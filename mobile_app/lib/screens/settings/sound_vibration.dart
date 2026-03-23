@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../models/tr.dart';
-import '../../api/settings_api.dart';
-import '../../widgets/app_header.dart';
+import 'package:demo_app/models/tr.dart';
+import 'package:demo_app/api/settings_api.dart';
+import 'package:demo_app/widgets/app_header.dart';
 
 class SoundVibrationScreen extends StatefulWidget {
   const SoundVibrationScreen({super.key});
