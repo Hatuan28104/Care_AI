@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:demo_app/screens/home/decive/device_pair.dart';
-import 'package:demo_app/models/tr.dart';
+import 'package:Care_AI/screens/home/decive/device_pair.dart';
+import 'package:Care_AI/models/tr.dart';
 
 class ConnectDeviceScreen extends StatefulWidget {
   const ConnectDeviceScreen({super.key});
@@ -12,7 +12,6 @@ class ConnectDeviceScreen extends StatefulWidget {
 
 class _ConnectDeviceScreenState extends State<ConnectDeviceScreen> {
   static const blue = Color(0xFF1877F2);
-  static const bg = Color(0xFFF6F6F6);
   Timer? _timer;
 
   @override
@@ -138,12 +137,11 @@ class _ConnectDeviceScreenState extends State<ConnectDeviceScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: Color(0xFFF6F6F6),
       body: SafeArea(
         child: Column(
           children: [
             // ❌ HEADER ĐÃ BỎ
-
             Transform.translate(
               offset: const Offset(0, -12),
               child: Padding(

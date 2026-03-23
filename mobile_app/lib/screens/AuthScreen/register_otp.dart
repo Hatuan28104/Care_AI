@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:demo_app/widgets/success_dialog.dart';
-import 'package:demo_app/screens/welcome_screen.dart';
-import 'package:demo_app/api/auth_api.dart';
-import 'package:demo_app/models/tr.dart';
+import 'package:Care_AI/widgets/success_dialog.dart';
+import 'package:Care_AI/screens/welcome_screen.dart';
+import 'package:Care_AI/api/auth_api.dart';
+import 'package:Care_AI/models/tr.dart';
 
 class RegisterOtp extends StatefulWidget {
-  final String phoneE164; // 🔥 thêm
+  final String phoneE164;
   final String displayPhone;
   final VoidCallback onBack;
 
@@ -89,10 +89,7 @@ class _RegisterOtpState extends State<RegisterOtp> {
 
     try {
       // 🔥 GỌI BACKEND VERIFY OTP
-      await AuthApi.verifyOtp(
-        widget.phoneE164,
-        otp,
-      );
+      await AuthApi.verifyOtp(widget.phoneE164, otp);
 
       if (!mounted) return;
 
@@ -106,9 +103,7 @@ class _RegisterOtpState extends State<RegisterOtp> {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (_) => const WelcomeScreen(),
-        ),
+        MaterialPageRoute(builder: (_) => const WelcomeScreen()),
       );
     } catch (e) {
       setState(() {
@@ -132,9 +127,9 @@ class _RegisterOtpState extends State<RegisterOtp> {
       _focusNodes.first.requestFocus();
       _startTimer();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     }
   }
 
@@ -154,10 +149,7 @@ class _RegisterOtpState extends State<RegisterOtp> {
         const SizedBox(height: 32),
         Text(
           context.tr.otpSentTo(widget.displayPhone),
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w500,
-          ),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 32),
         _otpBoxes(),

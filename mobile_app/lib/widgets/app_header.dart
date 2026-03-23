@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:demo_app/models/tr.dart';
+import 'package:Care_AI/models/tr.dart';
 
 class AppHeader extends StatelessWidget {
   final String title;
@@ -42,10 +42,7 @@ class AppHeader extends StatelessWidget {
           Center(
             child: Text(
               title,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
-              ),
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
             ),
           ),
         ],
@@ -61,10 +58,7 @@ class _BackText extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       context.tr.back,
-      style: const TextStyle(
-        fontSize: 15,
-        color: AppHeader._blue,
-      ),
+      style: const TextStyle(fontSize: 15, color: AppHeader._blue),
     );
   }
 }

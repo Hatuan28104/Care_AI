@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:demo_app/api/health_api.dart';
-import 'package:demo_app/models/metric_config.dart';
-import 'package:demo_app/widgets/app_header.dart';
-import 'package:demo_app/models/tr.dart';
+import 'package:Care_AI/api/health_api.dart';
+import 'package:Care_AI/models/metric_config.dart';
+import 'package:Care_AI/widgets/app_header.dart';
+import 'package:Care_AI/models/tr.dart';
 
 const TextStyle _axisTextStyle = TextStyle(
   fontSize: 11,
@@ -31,8 +31,6 @@ class MetricDetailScreen extends StatefulWidget {
 }
 
 class _MetricDetailScreenState extends State<MetricDetailScreen> {
-  static const _bg = Color(0xFFF6F6F6);
-
   MetricRange _range = MetricRange.h;
 
   List<double> _values = [];
@@ -40,12 +38,7 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
 
   MetricConfig get _config =>
       metricConfigs[widget.metricId.trim()] ??
-      const MetricConfig(
-        min: 0,
-        max: 100,
-        unit: "",
-        divisions: 4,
-      );
+      const MetricConfig(min: 0, max: 100, unit: "", divisions: 4);
 
   double get _minY => _config.min;
   double get _maxY => _config.max;
@@ -94,13 +87,11 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
     final hasData = _values.isNotEmpty;
     final latest = hasData ? _values.last : null;
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: Color(0xFFF6F6F6),
       body: SafeArea(
         child: Column(
           children: [
-            AppHeader(
-              title: widget.title,
-            ),
+            AppHeader(title: widget.title),
             Expanded(
               child: ListView(
                 children: [
@@ -265,18 +256,14 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
                   const SizedBox(width: 6),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: List.generate(
-                      _config.divisions + 1,
-                      (i) {
-                        final value =
-                            _maxY - (i * (_rangeY / _config.divisions));
+                    children: List.generate(_config.divisions + 1, (i) {
+                      final value = _maxY - (i * (_rangeY / _config.divisions));
 
-                        return Text(
-                          value.toStringAsFixed(_config.decimals),
-                          style: _axisTextStyle,
-                        );
-                      },
-                    ),
+                      return Text(
+                        value.toStringAsFixed(_config.decimals),
+                        style: _axisTextStyle,
+                      );
+                    }),
                   ),
                 ],
               ),
@@ -286,10 +273,12 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: _labels
-                    .map((e) => Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: Text(e, style: _axisTextStyle),
-                        ))
+                    .map(
+                      (e) => Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: Text(e, style: _axisTextStyle),
+                      ),
+                    )
                     .toList(),
               ),
             ),

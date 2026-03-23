@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:demo_app/api/family_api.dart';
+import 'package:Care_AI/api/family_api.dart';
 import 'dart:async';
-import 'package:demo_app/models/tr.dart';
-import 'package:demo_app/widgets/app_header.dart';
+import 'package:Care_AI/models/tr.dart';
+import 'package:Care_AI/widgets/app_header.dart';
 
 class AddGuardians extends StatefulWidget {
   const AddGuardians({super.key});
@@ -24,20 +24,16 @@ class _AddGuardiansState extends State<AddGuardians> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: Color(0xFFF6F6F6),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            AppHeader(
-              title: context.tr.addNew,
-            ),
+            AppHeader(title: context.tr.addNew),
             _description(),
             _phoneInput(),
             const SizedBox(height: 18),
-            Expanded(
-              child: _buildResultArea(),
-            ),
+            Expanded(child: _buildResultArea()),
           ],
         ),
       ),
@@ -46,18 +42,13 @@ class _AddGuardiansState extends State<AddGuardians> {
 
   Widget _buildResultArea() {
     if (_loading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (_error != null) {
       return Padding(
         padding: const EdgeInsets.all(18),
-        child: Text(
-          _error!,
-          style: const TextStyle(color: Colors.red),
-        ),
+        child: Text(_error!, style: const TextStyle(color: Colors.red)),
       );
     }
 
@@ -99,8 +90,10 @@ class _AddGuardiansState extends State<AddGuardians> {
           hintText: context.tr.enterPhoneNumber,
           filled: true,
           fillColor: Colors.white,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 14,
+            vertical: 14,
+          ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
             borderSide: const BorderSide(color: blue),
@@ -178,10 +171,13 @@ class _AddGuardiansState extends State<AddGuardians> {
                       }),
                     ],
                     if (status == 'pending')
-                      _actionBtn(context.tr.cancelRequest,
-                          const Color.fromARGB(174, 158, 158, 158), () {
-                        _cancelInvite(user['loimoi_id']);
-                      }),
+                      _actionBtn(
+                        context.tr.cancelRequest,
+                        const Color.fromARGB(174, 158, 158, 158),
+                        () {
+                          _cancelInvite(user['loimoi_id']);
+                        },
+                      ),
                     if (status == 'incoming')
                       _statusBadge("Đã nhận lời mời từ người này"),
                     if (status == 'related')
@@ -243,9 +239,9 @@ class _AddGuardiansState extends State<AddGuardians> {
       _searchUser();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     }
   }
 
@@ -258,7 +254,7 @@ class _AddGuardiansState extends State<AddGuardians> {
     }
   }
 
-// ================= SUCCESS POPUP =================
+  // ================= SUCCESS POPUP =================
   void _showSuccessDialog() {
     showDialog(
       context: context,
@@ -271,8 +267,9 @@ class _AddGuardiansState extends State<AddGuardians> {
         });
 
         return Dialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 30, 20, 26),
             child: Column(
@@ -285,20 +282,13 @@ class _AddGuardiansState extends State<AddGuardians> {
                     color: blue,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
-                    Icons.check,
-                    color: Colors.white,
-                    size: 50,
-                  ),
+                  child: const Icon(Icons.check, color: Colors.white, size: 50),
                 ),
                 const SizedBox(height: 20),
                 Text(
                   context.tr.inviteSentSuccess,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 24),
               ],

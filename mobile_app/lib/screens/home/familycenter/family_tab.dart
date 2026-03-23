@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'familycenter_guardians.dart';
 import 'familycenter_dependent.dart';
-import 'package:demo_app/models/tr.dart';
+import 'package:Care_AI/models/tr.dart';
 
 class FamilyTab extends StatefulWidget {
   const FamilyTab({super.key});
@@ -22,10 +22,7 @@ class _FamilyTabState extends State<FamilyTab> {
         Expanded(
           child: IndexedStack(
             index: _index,
-            children: const [
-              MyGuardiansScreen(),
-              MyDependentsScreen(),
-            ],
+            children: const [MyGuardiansScreen(), MyDependentsScreen()],
           ),
         ),
       ],

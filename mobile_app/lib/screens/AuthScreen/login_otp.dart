@@ -1,17 +1,17 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:demo_app/api/auth_api.dart';
-import 'package:demo_app/api/profile_api.dart' as profile_api;
-import 'package:demo_app/models/current_user.dart';
-import 'package:demo_app/screens/home/home.dart';
-import 'package:demo_app/api/auth_storage.dart';
+import 'package:Care_AI/api/auth_api.dart';
+import 'package:Care_AI/api/profile_api.dart' as profile_api;
+import 'package:Care_AI/models/current_user.dart';
+import 'package:Care_AI/screens/home/home.dart';
+import 'package:Care_AI/api/auth_storage.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:demo_app/api/settings_api.dart';
-import 'package:demo_app/screens/settings/profile/create_profile.dart';
-import 'package:demo_app/models/tr.dart';
-import 'package:demo_app/config/api_config.dart';
+import 'package:Care_AI/api/settings_api.dart';
+import 'package:Care_AI/screens/settings/profile/create_profile.dart';
+import 'package:Care_AI/models/tr.dart';
+import 'package:Care_AI/config/api_config.dart';
 
 class LoginOtpScreen extends StatefulWidget {
   final String phoneE164;
@@ -145,9 +145,7 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (_) => HomeScreen(userId: user.nguoiDungId),
-        ),
+        MaterialPageRoute(builder: (_) => HomeScreen(userId: user.nguoiDungId)),
       );
     } catch (e) {
       if (!mounted) return;
@@ -177,9 +175,7 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
             "Authorization": "Bearer $jwt",
             "Content-Type": "application/json",
           },
-          body: jsonEncode({
-            "fcmToken": fcmToken,
-          }),
+          body: jsonEncode({"fcmToken": fcmToken}),
         )
             .catchError((e) {
           print(" Lỗi gửi FCM token: $e");
@@ -236,15 +232,11 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
       _startTimer();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(
-          e.toString().replaceFirst('Exception: ', ''),
-        )),
+        SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
       );
     }
   }
 
-  // ===== UI (COPY TỪ REGISTER OTP) =====
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -260,10 +252,7 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
         const SizedBox(height: 32),
         Text(
           context.tr.otpSentTo(widget.displayPhone),
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w500,
-          ),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 32),
         _otpBoxes(),

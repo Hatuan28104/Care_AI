@@ -1,12 +1,12 @@
 import 'dart:io';
 import 'dart:convert';
-import 'package:demo_app/models/tr.dart';
+import 'package:Care_AI/models/tr.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
-import 'package:demo_app/api/profile_api.dart' as profile_api;
-import 'package:demo_app/models/current_user.dart';
-import 'package:demo_app/config/api_config.dart';
+import 'package:Care_AI/api/profile_api.dart' as profile_api;
+import 'package:Care_AI/models/current_user.dart';
+import 'package:Care_AI/config/api_config.dart';
 
 class MyProfileScreen extends StatefulWidget {
   const MyProfileScreen({super.key});
@@ -26,7 +26,6 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
 
   // ===== COLORS =====
   static const _blue = Color(0xFF1877F2);
-  static const _bg = Color(0xFFF6F6F6);
   static const _borderBlue = Color(0xFF1F41BB);
 
   // ===== UI CONSTANTS =====
@@ -48,8 +47,10 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     fontWeight: FontWeight.w400,
   );
 
-  static const _fieldPadding =
-      EdgeInsets.symmetric(horizontal: 12, vertical: 10);
+  static const _fieldPadding = EdgeInsets.symmetric(
+    horizontal: 12,
+    vertical: 10,
+  );
 
   // ===== STATE =====
   bool _isEditing = false;
@@ -153,8 +154,10 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   // ===== ACTIONS =====
   Future<void> _pickAvatar() async {
     if (!_isEditing) return;
-    final picked =
-        await _picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
+    final picked = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 80,
+    );
     if (picked == null) return;
     setState(() => _avatarFile = File(picked.path));
   }
@@ -186,9 +189,9 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
       final weight = double.tryParse(_weightCtrl.text);
 
       if (height == null || weight == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.tr.invalidHeightWeight)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(context.tr.invalidHeightWeight)));
         return;
       }
 
@@ -199,9 +202,9 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
               : null;
 
       if (gioiTinh == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.tr.invalidGender)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(context.tr.invalidGender)));
         return;
       }
 
@@ -233,8 +236,9 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
           });
         });
       } catch (_) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(context.tr.errorOccurred)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(context.tr.errorOccurred)));
       }
     }
   }
@@ -248,7 +252,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: Color(0xFFF6F6F6),
       appBar: _appBar(),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -278,8 +282,11 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                         onTap: _pickDob,
                         child: Padding(
                           padding: const EdgeInsets.only(right: 8),
-                          child: Icon(Icons.calendar_month,
-                              color: _blue, size: 18),
+                          child: Icon(
+                            Icons.calendar_month,
+                            color: _blue,
+                            size: 18,
+                          ),
                         ),
                       ),
                     ),
@@ -460,9 +467,10 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
       ),
       child: Column(
         children: [
-          Text(title,
-              style:
-                  const TextStyle(fontWeight: FontWeight.w700, fontSize: 18)),
+          Text(
+            title,
+            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+          ),
           const SizedBox(height: 14),
           child,
         ],
@@ -508,9 +516,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
             isDense: true,
 
             // 🔒 KHÓA CHIỀU CAO — CỰC KỲ QUAN TRỌNG
-            constraints: const BoxConstraints(
-              minHeight: 44,
-            ),
+            constraints: const BoxConstraints(minHeight: 44),
 
             contentPadding: _fieldPadding,
 
@@ -531,8 +537,10 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
 
             // ✅ ICON: calendar / dropdown → DÙNG suffixIcon
             suffixIcon: suffixIcon,
-            suffixIconConstraints:
-                const BoxConstraints(minWidth: 36, minHeight: 36),
+            suffixIconConstraints: const BoxConstraints(
+              minWidth: 36,
+              minHeight: 36,
+            ),
 
             enabledBorder: _outline(_borderBlue, 1.2),
             focusedBorder: _outline(_borderBlue, 1.6),
@@ -585,13 +593,12 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                 contentPadding: _fieldPadding,
                 suffixIcon: Padding(
                   padding: const EdgeInsets.only(right: 8),
-                  child: Icon(
-                    Icons.arrow_drop_down,
-                    color: _blue,
-                  ),
+                  child: Icon(Icons.arrow_drop_down, color: _blue),
                 ),
-                suffixIconConstraints:
-                    const BoxConstraints(minWidth: 0, minHeight: 0),
+                suffixIconConstraints: const BoxConstraints(
+                  minWidth: 0,
+                  minHeight: 0,
+                ),
                 enabledBorder: _outline(_borderBlue, 1.2),
                 focusedBorder: _outline(_borderBlue, 1.6),
                 errorBorder: _outline(Colors.red, 1.2),
@@ -611,25 +618,31 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
 
   void _showGenderMenu(TapDownDetails d) async {
     final selected = await showMenu<String>(
-        context: context,
-        position: RelativeRect.fromLTRB(
-          d.globalPosition.dx,
-          d.globalPosition.dy + 20,
-          0,
-          0,
+      context: context,
+      position: RelativeRect.fromLTRB(
+        d.globalPosition.dx,
+        d.globalPosition.dy + 20,
+        0,
+        0,
+      ),
+      items: [
+        PopupMenuItem(
+          value: context.tr.male,
+          height: 32,
+          child: Text(context.tr.male),
         ),
-        items: [
-          PopupMenuItem(
-              value: context.tr.male, height: 32, child: Text(context.tr.male)),
-          PopupMenuItem(
-              value: context.tr.female,
-              height: 32,
-              child: Text(context.tr.female)),
-          PopupMenuItem(
-              value: context.tr.other,
-              height: 32,
-              child: Text(context.tr.other)),
-        ]);
+        PopupMenuItem(
+          value: context.tr.female,
+          height: 32,
+          child: Text(context.tr.female),
+        ),
+        PopupMenuItem(
+          value: context.tr.other,
+          height: 32,
+          child: Text(context.tr.other),
+        ),
+      ],
+    );
 
     if (selected != null) {
       setState(() {

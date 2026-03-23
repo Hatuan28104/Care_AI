@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:demo_app/api/chat_api.dart';
+import 'package:Care_AI/api/chat_api.dart';
 import 'history_detail.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:demo_app/models/tr.dart';
-import 'package:demo_app/widgets/common_confirm_dialog.dart';
-import 'package:demo_app/config/api_config.dart';
+import 'package:Care_AI/models/tr.dart';
+import 'package:Care_AI/widgets/common_confirm_dialog.dart';
+import 'package:Care_AI/config/api_config.dart';
 
 class HistoryTab extends StatefulWidget {
   final String userId;
@@ -17,7 +17,7 @@ class HistoryTab extends StatefulWidget {
 
 class _HistoryTabState extends State<HistoryTab> {
   static const Color primary = Color(0xFF1F41BB);
-  static const Color bgItem = Color(0xFFF3F3F3);
+  static const Color bgItem = Color.fromARGB(255, 255, 255, 255);
 
   List<Map<String, dynamic>> histories = [];
   bool loading = true;
@@ -58,10 +58,7 @@ class _HistoryTabState extends State<HistoryTab> {
       children: [
         _title(),
         Expanded(
-          child: RefreshIndicator(
-            onRefresh: loadHistory,
-            child: _content(),
-          ),
+          child: RefreshIndicator(onRefresh: loadHistory, child: _content()),
         ),
       ],
     );
@@ -120,14 +117,7 @@ class _HistoryTabState extends State<HistoryTab> {
         final image = normalizeImage(item["imageurl"]?.toString());
         final time = formatTime(item["lancuoituongtac"]);
 
-        return _historyItem(
-          hoiThoaiId,
-          digitalId,
-          name,
-          job,
-          image,
-          time,
-        );
+        return _historyItem(hoiThoaiId, digitalId, name, job, image, time);
       },
     );
   }
@@ -142,106 +132,121 @@ class _HistoryTabState extends State<HistoryTab> {
     String image,
     String time,
   ) {
-    return Slidable(
-      key: ValueKey(hoiThoaiId),
-      endActionPane: ActionPane(
-        motion: const DrawerMotion(),
-        extentRatio: 0.25,
-        children: [
-          CustomSlidableAction(
-            onPressed: (_) async {
-              final ok = await showConfirmDialog(
-                context,
-                title: context.tr.deleteConversation,
-                message: context.tr.confirmDeleteConversation,
-                confirmText: context.tr.delete,
-                cancelText: context.tr.cancel,
-              );
-              if (ok == true) {
-                try {
-                  await ChatApi.deleteConversation(hoiThoaiId);
-                  loadHistory();
-                } catch (e) {
-                  if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(e.toString())),
-                  );
-                }
-              }
-            },
-            backgroundColor: Colors.red,
-            borderRadius: BorderRadius.circular(20),
-            child: Container(
-              height: double.infinity,
-              alignment: Alignment.center,
-              child: const Icon(Icons.delete, color: Colors.white, size: 28),
-            ),
-          ),
-        ],
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onTap: () async {
-          await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => ChatDetailScreen(
-                hoiThoaiId: hoiThoaiId,
-                digitalId: digitalId,
-                userId: widget.userId,
-                title: name,
-                image: image,
-              ),
-            ),
-          );
+    const radius = 16.0;
 
-          loadHistory();
-        },
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 14),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            color: bgItem,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Row(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(radius),
+        child: Slidable(
+          key: ValueKey(hoiThoaiId),
+          endActionPane: ActionPane(
+            motion: const DrawerMotion(),
+            extentRatio: 0.25,
             children: [
-              CircleAvatar(
-                radius: 22,
-                backgroundColor: Colors.grey[200],
-                backgroundImage: image.isNotEmpty ? NetworkImage(image) : null,
-                child: image.isEmpty ? const Icon(Icons.smart_toy) : null,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      name,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
+              CustomSlidableAction(
+                onPressed: (_) async {
+                  final ok = await showConfirmDialog(
+                    context,
+                    title: context.tr.deleteConversation,
+                    message: context.tr.confirmDeleteConversation,
+                    confirmText: context.tr.delete,
+                    cancelText: context.tr.cancel,
+                  );
+
+                  if (ok == true) {
+                    try {
+                      await ChatApi.deleteConversation(hoiThoaiId);
+                      loadHistory();
+                    } catch (e) {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(e.toString())));
+                    }
+                  }
+                },
+                padding: EdgeInsets.zero,
+                backgroundColor: Colors.transparent,
+                child: Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(radius),
+                      bottomRight: Radius.circular(radius),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "$job • $time",
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
+                  ),
+                  child: const Center(
+                    child: Icon(Icons.delete, color: Colors.white, size: 28),
+                  ),
                 ),
               ),
             ],
+          ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(radius),
+            onTap: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ChatDetailScreen(
+                    hoiThoaiId: hoiThoaiId,
+                    digitalId: digitalId,
+                    userId: widget.userId,
+                    title: name,
+                    image: image,
+                  ),
+                ),
+              );
+
+              loadHistory();
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: bgItem,
+                borderRadius: BorderRadius.circular(radius),
+              ),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 22,
+                    backgroundColor: Colors.grey[200],
+                    backgroundImage:
+                        image.isNotEmpty ? NetworkImage(image) : null,
+                    child: image.isEmpty ? const Icon(Icons.smart_toy) : null,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          name,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          "$job • $time",
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
     );
   }
-
   /* ================= FORMAT TIME ================= */
 
   String formatTime(dynamic isoTime) {

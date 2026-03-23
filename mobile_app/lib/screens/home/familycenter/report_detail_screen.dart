@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:demo_app/api/family_api.dart';
-import 'package:demo_app/models/tr.dart';
-import 'package:demo_app/widgets/app_header.dart';
+import 'package:Care_AI/api/family_api.dart';
+import 'package:Care_AI/models/tr.dart';
+import 'package:Care_AI/widgets/app_header.dart';
 
 class ReportDetailScreen extends StatefulWidget {
   final String type;
@@ -61,9 +61,7 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            AppHeader(
-              title: title(context),
-            ),
+            AppHeader(title: title(context)),
             Expanded(
               child: loading
                   ? const Center(child: CircularProgressIndicator())
@@ -132,7 +130,7 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
                 style: const TextStyle(color: Colors.red),
               ),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -175,10 +173,7 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
         children: [
           Text(label, style: const TextStyle(color: Colors.grey)),
           const SizedBox(height: 6),
-          Text(
-            value,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -198,10 +193,7 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
         children: [
           Text(label, style: const TextStyle(color: Colors.red)),
           const Spacer(),
-          Text(
-            value,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
         ],
       ),
     );

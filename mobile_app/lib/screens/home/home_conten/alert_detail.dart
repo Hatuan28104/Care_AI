@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:demo_app/widgets/app_header.dart';
-import 'package:demo_app/models/tr.dart';
+import 'package:Care_AI/widgets/app_header.dart';
+import 'package:Care_AI/models/tr.dart';
 
 class AlertMessageDetail extends StatelessWidget {
   const AlertMessageDetail({
@@ -47,10 +47,7 @@ class AlertMessageDetail extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          Text(
-            label,
-            style: const TextStyle(fontWeight: FontWeight.w500),
-          ),
+          Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
           const SizedBox(width: 4),
           Expanded(child: content),
         ],
@@ -77,10 +74,7 @@ class AlertMessageDetail extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            AppHeader(
-              title: context.tr.alert,
-              showBack: true,
-            ),
+            AppHeader(title: context.tr.alert, showBack: true),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
@@ -91,10 +85,7 @@ class AlertMessageDetail extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: borderColor,
-                        width: 1.5,
-                      ),
+                      border: Border.all(color: borderColor, width: 1.5),
                       boxShadow: [
                         BoxShadow(
                           blurRadius: 12,

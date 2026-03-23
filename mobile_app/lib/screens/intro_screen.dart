@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'welcome_screen.dart';
-import 'package:demo_app/models/tr.dart';
+import 'package:Care_AI/models/tr.dart';
 
 class SplashIntroScreen extends StatefulWidget {
   const SplashIntroScreen({super.key});
@@ -112,10 +112,7 @@ class _SplashIntroScreenState extends State<SplashIntroScreen>
                 opacity: _logoOpacity,
                 child: Hero(
                   tag: 'care-logo',
-                  child: Image.asset(
-                    'assets/images/Logo.png',
-                    width: 180,
-                  ),
+                  child: Image.asset('assets/images/Logo.png', width: 180),
                 ),
               ),
             ),
@@ -124,35 +121,36 @@ class _SplashIntroScreenState extends State<SplashIntroScreen>
               left: 0,
               right: 0,
               child: FadeTransition(
-                  opacity: _textOpacity,
-                  child: Hero(
-                    tag: 'care-text',
-                    flightShuttleBuilder: (
-                      flightContext,
-                      animation,
-                      direction,
-                      fromHeroContext,
-                      toHeroContext,
-                    ) {
-                      return FadeTransition(
-                        opacity: animation,
-                        child: fromHeroContext.widget,
-                      );
-                    },
-                    child: Material(
-                      color: Colors.transparent,
-                      child: Text(
-                        context.tr.welcomeTitle,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 35,
-                          fontWeight: FontWeight.w600,
-                          height: 2,
-                          color: Color(0xFF1F41BB),
-                        ),
+                opacity: _textOpacity,
+                child: Hero(
+                  tag: 'care-text',
+                  flightShuttleBuilder: (
+                    flightContext,
+                    animation,
+                    direction,
+                    fromHeroContext,
+                    toHeroContext,
+                  ) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: fromHeroContext.widget,
+                    );
+                  },
+                  child: Material(
+                    color: Colors.transparent,
+                    child: Text(
+                      context.tr.welcomeTitle,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 35,
+                        fontWeight: FontWeight.w600,
+                        height: 2,
+                        color: Color(0xFF1F41BB),
                       ),
                     ),
-                  )),
+                  ),
+                ),
+              ),
             ),
           ],
         ),

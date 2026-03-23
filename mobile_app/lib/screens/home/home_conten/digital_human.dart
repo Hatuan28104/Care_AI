@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:demo_app/api/digital_api.dart';
-import 'package:demo_app/config/api_config.dart';
+import 'package:Care_AI/api/digital_api.dart';
+import 'package:Care_AI/config/api_config.dart';
 import 'chat.dart';
-import 'package:demo_app/models/tr.dart';
+import 'package:Care_AI/models/tr.dart';
 
 class DigitalHumanAllScreen extends StatefulWidget {
   final String userId;
 
-  const DigitalHumanAllScreen({
-    super.key,
-    required this.userId,
-  });
+  const DigitalHumanAllScreen({super.key, required this.userId});
 
   @override
   State<DigitalHumanAllScreen> createState() => _DigitalHumanAllScreenState();
@@ -43,8 +40,11 @@ class _DigitalHumanAllScreenState extends State<DigitalHumanAllScreen> {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded,
-              size: 20, color: Colors.black),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: 20,
+            color: Colors.black,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -63,9 +63,7 @@ class _DigitalHumanAllScreenState extends State<DigitalHumanAllScreen> {
           }
 
           if (snapshot.hasError) {
-            return Center(
-              child: Text(context.tr.loadDataError),
-            );
+            return Center(child: Text(context.tr.loadDataError));
           }
 
           final humans = snapshot.data ?? [];
@@ -110,15 +108,16 @@ class _DigitalHumanAllScreenState extends State<DigitalHumanAllScreen> {
                     child: Stack(
                       children: [
                         Positioned.fill(
-                            child: Image.network(
-                          _imageUrlFrom(human['imageurl']),
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => const Icon(
-                            Icons.person,
-                            size: 60,
-                            color: Colors.white,
+                          child: Image.network(
+                            _imageUrlFrom(human['imageurl']),
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => const Icon(
+                              Icons.person,
+                              size: 60,
+                              color: Colors.white,
+                            ),
                           ),
-                        )),
+                        ),
                         Positioned(
                           left: 12,
                           right: 12,

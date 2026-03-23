@@ -6,8 +6,7 @@ class AppSettings {
   static final ValueNotifier<double> textScale = ValueNotifier<double>(1.1);
   static VoidCallback? reloadAlert;
   static ValueNotifier<int> alertVersion = ValueNotifier(0);
-  static final ValueNotifier<Locale> locale =
-      ValueNotifier(WidgetsBinding.instance.platformDispatcher.locale);
+  static final ValueNotifier<Locale> locale = ValueNotifier(const Locale('vi'));
   static final ValueNotifier<bool> notificationOn = ValueNotifier<bool>(true);
 
   static final ValueNotifier<bool> healthAlertOn = ValueNotifier<bool>(true);

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'device_connect.dart';
-import 'package:demo_app/models/tr.dart';
+import 'package:Care_AI/models/tr.dart';
 
 class AddDeviceScreen extends StatefulWidget {
   const AddDeviceScreen({super.key});
@@ -14,7 +14,6 @@ class AddDeviceScreen extends StatefulWidget {
 
 class _AddDeviceScreenState extends State<AddDeviceScreen> {
   static const Color blue = Color(0xFF1877F2);
-  static const Color background = Color(0xFFF6F6F6);
 
   List<ScanResult> scanResults = [];
   bool isScanning = false;
@@ -66,9 +65,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
 
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => const ConnectDeviceScreen(),
-      ),
+      MaterialPageRoute(builder: (_) => const ConnectDeviceScreen()),
     );
   }
 
@@ -82,7 +79,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: background,
+      backgroundColor: Color(0xFFF6F6F6),
       body: SafeArea(
         child: Column(
           children: [
@@ -133,10 +130,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
                   const SizedBox(height: 8),
                   Text(
                     context.tr.keepDeviceNear,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.black54,
-                    ),
+                    style: TextStyle(fontSize: 14, color: Colors.black54),
                     textAlign: TextAlign.center,
                   ),
                   Text(
@@ -224,11 +218,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
         ),
         child: Row(
           children: [
-            const Icon(
-              Icons.watch,
-              size: 32,
-              color: Colors.black54,
-            ),
+            const Icon(Icons.watch, size: 32, color: Colors.black54),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
@@ -245,10 +235,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
                   const SizedBox(height: 4),
                   Text(
                     mac,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
-                    ),
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                 ],
               ),

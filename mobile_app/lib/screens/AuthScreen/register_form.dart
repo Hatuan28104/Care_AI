@@ -2,17 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:intl_phone_field/phone_number.dart' as ipn;
-import 'package:demo_app/screens/settings/privacy_security/terms_of_service.dart';
-import 'package:demo_app/screens/settings/privacy_security/privacy_policy.dart';
-import 'package:demo_app/api/auth_api.dart';
-import 'package:demo_app/models/tr.dart';
+import 'package:Care_AI/screens/settings/privacy_security/terms_of_service.dart';
+import 'package:Care_AI/screens/settings/privacy_security/privacy_policy.dart';
+import 'package:Care_AI/api/auth_api.dart';
+import 'package:Care_AI/models/tr.dart';
+
 class RegisterForm extends StatefulWidget {
   final void Function(String phoneE164, String displayPhone) onOtp;
 
-  const RegisterForm({
-    super.key,
-    required this.onOtp,
-  });
+  const RegisterForm({super.key, required this.onOtp});
 
   @override
   State<RegisterForm> createState() => _RegisterFormState();
@@ -26,10 +24,7 @@ class _RegisterFormState extends State<RegisterForm> {
   String get _errorMsg => context.tr.invalidPhone;
   String? _serverError;
 
-  static const _borderSide = BorderSide(
-    color: Color(0xFFCFCECE),
-    width: 1,
-  );
+  static const _borderSide = BorderSide(color: Color(0xFFCFCECE), width: 1);
 
   static const _hintStyle = TextStyle(
     fontSize: 16,
@@ -97,10 +92,7 @@ class _RegisterFormState extends State<RegisterForm> {
         const SizedBox(height: 12),
         Text(
           context.tr.createAccount,
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         Text(
@@ -221,9 +213,7 @@ class _RegisterFormState extends State<RegisterForm> {
             height: 1.4,
           ),
           children: [
-            TextSpan(
-              text: '${context.tr.registerAgree}\n',
-            ),
+            TextSpan(text: '${context.tr.registerAgree}\n'),
             TextSpan(
               text: context.tr.terms,
               style: const TextStyle(color: Color(0xFF1877F2)),
@@ -237,9 +227,7 @@ class _RegisterFormState extends State<RegisterForm> {
                   );
                 },
             ),
-            TextSpan(
-              text: ' ${context.tr.and} ',
-            ),
+            TextSpan(text: ' ${context.tr.and} '),
             TextSpan(
               text: context.tr.privacy_Policy,
               style: const TextStyle(color: Color(0xFF1877F2)),
@@ -253,9 +241,7 @@ class _RegisterFormState extends State<RegisterForm> {
                   );
                 },
             ),
-            TextSpan(
-              text: ' ${context.tr.ofCareAI}',
-            ),
+            TextSpan(text: ' ${context.tr.ofCareAI}'),
           ],
         ),
       ),

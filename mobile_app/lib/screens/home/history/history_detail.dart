@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:demo_app/api/chat_api.dart';
-import 'package:demo_app/models/tr.dart';
+import 'package:Care_AI/api/chat_api.dart';
+import 'package:Care_AI/models/tr.dart';
 
 class ChatDetailScreen extends StatefulWidget {
   final String? hoiThoaiId;
@@ -88,9 +88,9 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() => loading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     }
   }
 
@@ -152,10 +152,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
       setState(() {
         messages.removeWhere((m) => m["isTyping"] == true);
 
-        messages.add({
-          "text": "${context.tr.error}: $e",
-          "isUser": false,
-        });
+        messages.add({"text": "${context.tr.error}: $e", "isUser": false});
       });
     }
 
@@ -232,8 +229,11 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         children: [
           if (_isFocused)
             IconButton(
-              icon: const Icon(Icons.keyboard_arrow_right,
-                  color: Colors.blue, size: 28),
+              icon: const Icon(
+                Icons.keyboard_arrow_right,
+                color: Colors.blue,
+                size: 28,
+              ),
               onPressed: () => FocusScope.of(context).unfocus(),
             ),
           if (!_isFocused) ...[
@@ -263,8 +263,10 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                   borderRadius: BorderRadius.circular(25),
                   borderSide: BorderSide.none,
                 ),
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
               ),
               onSubmitted: (_) => sendMessage(),
             ),

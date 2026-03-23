@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:demo_app/models/tr.dart';
-import 'package:demo_app/widgets/app_header.dart';
+import 'package:Care_AI/models/tr.dart';
+import 'package:Care_AI/widgets/app_header.dart';
 
 class PrivacyPolicyScreen extends StatelessWidget {
   const PrivacyPolicyScreen({super.key});
@@ -22,30 +22,31 @@ class PrivacyPolicyScreen extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(32, 0, 32, 24),
                       child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 18),
-                            _Title(context.tr.privacyPolicy),
-                            SizedBox(height: 8),
-                            _Paragraph(context.tr.privacyIntro1),
-                            _Paragraph(context.tr.privacyIntro2),
-                            SizedBox(height: 20),
-                            _Bullet(context.tr.infoCollected),
-                            _Bullet(context.tr.infoUsage),
-                            _Bullet(context.tr.infoSharing),
-                            _Bullet(context.tr.dataSecurity),
-                            _Bullet(context.tr.userRights),
-                            SizedBox(height: 20),
-                            _Title(context.tr.infoUsedFor),
-                            _Bullet(context.tr.serviceTracking),
-                            _Bullet(context.tr.alertGuardian),
-                            _Bullet(context.tr.improveSystem),
-                            _Bullet(context.tr.ensureSafety),
-                            const SizedBox(height: 16),
-                            _Title(context.tr.infoSharedCases),
-                            _Bullet(context.tr.shareWithGuardian),
-                            _Bullet(context.tr.shareWithMedical),
-                          ]),
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 18),
+                          _Title(context.tr.privacyPolicy),
+                          SizedBox(height: 8),
+                          _Paragraph(context.tr.privacyIntro1),
+                          _Paragraph(context.tr.privacyIntro2),
+                          SizedBox(height: 20),
+                          _Bullet(context.tr.infoCollected),
+                          _Bullet(context.tr.infoUsage),
+                          _Bullet(context.tr.infoSharing),
+                          _Bullet(context.tr.dataSecurity),
+                          _Bullet(context.tr.userRights),
+                          SizedBox(height: 20),
+                          _Title(context.tr.infoUsedFor),
+                          _Bullet(context.tr.serviceTracking),
+                          _Bullet(context.tr.alertGuardian),
+                          _Bullet(context.tr.improveSystem),
+                          _Bullet(context.tr.ensureSafety),
+                          const SizedBox(height: 16),
+                          _Title(context.tr.infoSharedCases),
+                          _Bullet(context.tr.shareWithGuardian),
+                          _Bullet(context.tr.shareWithMedical),
+                        ],
+                      ),
                     ),
                   ),
                 ),

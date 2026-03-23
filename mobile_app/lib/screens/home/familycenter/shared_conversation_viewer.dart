@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:demo_app/api/chat_api.dart';
-import 'package:demo_app/config/api_config.dart';
+import 'package:Care_AI/api/chat_api.dart';
+import 'package:Care_AI/config/api_config.dart';
 
 class SharedConversationViewer extends StatefulWidget {
   final String chatId;
@@ -64,9 +64,7 @@ class _SharedConversationViewerState extends State<SharedConversationViewer> {
         ),
         child: Text(
           content,
-          style: TextStyle(
-            color: isUser ? Colors.white : Colors.black87,
-          ),
+          style: TextStyle(color: isUser ? Colors.white : Colors.black87),
         ),
       ),
     );

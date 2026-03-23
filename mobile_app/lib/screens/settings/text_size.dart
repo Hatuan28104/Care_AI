@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:demo_app/app_settings.dart';
-import 'package:demo_app/models/tr.dart';
-import 'package:demo_app/widgets/app_header.dart';
+import 'package:Care_AI/app_settings.dart';
+import 'package:Care_AI/models/tr.dart';
+import 'package:Care_AI/widgets/app_header.dart';
 
 class TextSizeScreen extends StatefulWidget {
   const TextSizeScreen({super.key});
@@ -27,21 +27,19 @@ class _TextSizeScreenState extends State<TextSizeScreen> {
     return Scaffold(
       backgroundColor: Color(0xFFF6F6F6),
       body: SafeArea(
-        child: Column(children: [
-          AppHeader(title: context.tr.textSize),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(18, 24, 18, 24),
-              child: Column(
-                children: [
-                  _previewText(),
-                  const Spacer(),
-                  _slider(),
-                ],
+        child: Column(
+          children: [
+            AppHeader(title: context.tr.textSize),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(18, 24, 18, 24),
+                child: Column(
+                  children: [_previewText(), const Spacer(), _slider()],
+                ),
               ),
             ),
-          ),
-        ]),
+          ],
+        ),
       ),
     );
   }
@@ -50,10 +48,7 @@ class _TextSizeScreenState extends State<TextSizeScreen> {
     return Text(
       context.tr.textSizePreview,
       textAlign: TextAlign.justify,
-      style: TextStyle(
-        fontSize: 14 * _scale,
-        height: 1.5,
-      ),
+      style: TextStyle(fontSize: 14 * _scale, height: 1.5),
     );
   }
 

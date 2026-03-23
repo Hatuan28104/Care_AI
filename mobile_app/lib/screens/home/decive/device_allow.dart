@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:demo_app/screens/home/decive/device_syncing.dart';
-import 'package:demo_app/models/tr.dart';
+import 'package:Care_AI/screens/home/decive/device_syncing.dart';
+import 'package:Care_AI/models/tr.dart';
 
 class AllowDeviceScreen extends StatelessWidget {
   const AllowDeviceScreen({super.key});
 
   static const Color blue = Color(0xFF1877F2);
-  static const Color background = Color(0xFFF6F6F6);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: background,
+      backgroundColor: Color(0xFFF6F6F6),
       body: SafeArea(
         child: Column(
           children: [
@@ -171,9 +170,7 @@ class AllowDeviceScreen extends StatelessWidget {
                           ),
                           child: Text(
                             context.tr.later,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                            ),
+                            style: TextStyle(fontWeight: FontWeight.w700),
                           ),
                         ),
                       ),
@@ -201,9 +198,7 @@ class AllowDeviceScreen extends StatelessWidget {
                           ),
                           child: Text(
                             context.tr.allow,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w800,
-                            ),
+                            style: TextStyle(fontWeight: FontWeight.w800),
                           ),
                         ),
                       ),

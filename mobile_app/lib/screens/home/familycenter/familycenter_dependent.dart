@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:demo_app/api/family_api.dart';
+import 'package:Care_AI/api/family_api.dart';
 import 'familycenter_dependent_proflie.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:demo_app/models/tr.dart';
-import 'package:demo_app/widgets/common_confirm_dialog.dart';
+import 'package:Care_AI/models/tr.dart';
+import 'package:Care_AI/widgets/common_confirm_dialog.dart';
 
 class MyDependentsScreen extends StatefulWidget {
   const MyDependentsScreen({super.key});
@@ -173,9 +173,8 @@ class _MyDependentsScreenState extends State<MyDependentsScreen>
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => DependentProfileScreen(
-                quanHeId: dep['quanhegiamho_id'],
-              ),
+              builder: (_) =>
+                  DependentProfileScreen(quanHeId: dep['quanhegiamho_id']),
             ),
           );
         },
@@ -202,10 +201,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen>
                     const SizedBox(height: 6),
                     Text(
                       '${context.tr.joinDate}: ${_formatDate(dep['ngaybatdau'])}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ],
                 ),
@@ -272,11 +268,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen>
       color: Colors.white,
       borderRadius: BorderRadius.circular(20),
       boxShadow: const [
-        BoxShadow(
-          blurRadius: 14,
-          color: Colors.black12,
-          offset: Offset(0, 6),
-        ),
+        BoxShadow(blurRadius: 14, color: Colors.black12, offset: Offset(0, 6)),
       ],
     );
   }
@@ -291,10 +283,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen>
         borderRadius: BorderRadius.circular(12),
         color: avatar == null ? _blue.withValues(alpha: 0.1) : null,
         image: avatar != null
-            ? DecorationImage(
-                image: NetworkImage(avatar),
-                fit: BoxFit.cover,
-              )
+            ? DecorationImage(image: NetworkImage(avatar), fit: BoxFit.cover)
             : null,
       ),
       child: avatar == null

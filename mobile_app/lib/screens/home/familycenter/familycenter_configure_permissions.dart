@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'familycenter_health_data.dart';
 import 'familycenter_conversation.dart';
-import 'package:demo_app/models/tr.dart';
-import 'package:demo_app/widgets/app_header.dart';
+import 'package:Care_AI/models/tr.dart';
+import 'package:Care_AI/widgets/app_header.dart';
 
 class ConfigurePermissionsScreen extends StatelessWidget {
   final String userId;
@@ -15,19 +15,16 @@ class ConfigurePermissionsScreen extends StatelessWidget {
   });
 
   static const Color _blue = Color(0xFF1877F2);
-  static const Color _bg = Color(0xFFF6F6F6);
 
   @override
   Widget build(BuildContext context) {
     print("ConfigurePermissionsScreen userId = $userId");
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: Color(0xFFF6F6F6),
       body: SafeArea(
         child: Column(
           children: [
-            AppHeader(
-              title: context.tr.configurePermissions,
-            ),
+            AppHeader(title: context.tr.configurePermissions),
             Expanded(child: _content(context)),
           ],
         ),
@@ -50,9 +47,7 @@ class ConfigurePermissionsScreen extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => HealthDataScreen(
-                  quanHeId: quanHeId,
-                ),
+                builder: (_) => HealthDataScreen(quanHeId: quanHeId),
               ),
             );
           },
@@ -67,10 +62,8 @@ class ConfigurePermissionsScreen extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ConversationScreen(
-                  userId: userId,
-                  quanHeId: quanHeId,
-                ),
+                builder: (context) =>
+                    ConversationScreen(userId: userId, quanHeId: quanHeId),
               ),
             );
           },
@@ -127,10 +120,7 @@ class ConfigurePermissionsScreen extends StatelessWidget {
                 Text(
                   desc,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    color: Colors.black87,
-                  ),
+                  style: const TextStyle(fontSize: 20, color: Colors.black87),
                 ),
                 const SizedBox(height: 12),
                 OutlinedButton(

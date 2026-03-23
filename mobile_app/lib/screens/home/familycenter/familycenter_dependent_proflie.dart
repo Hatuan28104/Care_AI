@@ -1,24 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:demo_app/api/family_api.dart';
-import 'package:demo_app/config/api_config.dart';
+import 'package:Care_AI/api/family_api.dart';
+import 'package:Care_AI/config/api_config.dart';
 import 'report_detail_screen.dart';
-import 'package:demo_app/models/tr.dart';
+import 'package:Care_AI/models/tr.dart';
 import 'shared_conversation_viewer.dart';
 
 class DependentProfileScreen extends StatefulWidget {
   final String quanHeId;
 
-  const DependentProfileScreen({
-    super.key,
-    required this.quanHeId,
-  });
+  const DependentProfileScreen({super.key, required this.quanHeId});
 
   @override
   State<DependentProfileScreen> createState() => _DependentProfileScreenState();
 }
 
 class _DependentProfileScreenState extends State<DependentProfileScreen> {
-  static const Color _bg = Color(0xFFF6F6F6);
   static const Color blue = Color(0xFF1877F2);
 
   Map<String, dynamic>? data;
@@ -107,7 +103,7 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: Color(0xFFF6F6F6),
       body: SafeArea(
         child: loading
             ? const Center(child: CircularProgressIndicator())
@@ -140,18 +136,11 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
-                    Icons.arrow_back_ios_new,
-                    size: 18,
-                    color: blue,
-                  ),
+                  const Icon(Icons.arrow_back_ios_new, size: 18, color: blue),
                   const SizedBox(width: 4),
                   Text(
                     context.tr.back,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      color: blue,
-                    ),
+                    style: const TextStyle(fontSize: 15, color: blue),
                   ),
                 ],
               ),
@@ -192,10 +181,7 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
       children: [
         Text(
           context.tr.basicInfo,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 12),
         _infoItem(context.tr.fullName, data?['tennd'] ?? ""),
@@ -205,10 +191,7 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
         const SizedBox(height: 8),
         Text(
           context.tr.report,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 12),
         Row(
@@ -252,10 +235,7 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
       children: [
         Text(
           context.tr.sharedConversations,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-          ),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 12),
         if (loadingConversation)
@@ -307,7 +287,7 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
               blurRadius: 10,
               color: Colors.black12,
               offset: Offset(0, 4),
-            )
+            ),
           ],
         ),
         child: Row(
@@ -318,10 +298,7 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
               child: image.isNotEmpty
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        imageUrl,
-                        fit: BoxFit.cover,
-                      ),
+                      child: Image.network(imageUrl, fit: BoxFit.cover),
                     )
                   : Container(
                       color: Colors.blue.withOpacity(.1),
@@ -343,10 +320,7 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
                   const SizedBox(height: 3),
                   Text(
                     formatTime(item["lancuoituongtac"]),
-                    style: const TextStyle(
-                      color: Colors.grey,
-                      fontSize: 13,
-                    ),
+                    style: const TextStyle(color: Colors.grey, fontSize: 13),
                   ),
                 ],
               ),
@@ -367,9 +341,7 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: const Color(0xFF1F41BB).withOpacity(0.5),
-        ),
+        border: Border.all(color: const Color(0xFF1F41BB).withOpacity(0.5)),
       ),
       child: Row(
         children: [
@@ -384,10 +356,7 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
           const Spacer(),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ],
       ),
@@ -415,10 +384,7 @@ class _ReportItem extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => ReportDetailScreen(
-              type: type,
-              quanHeId: quanHeId,
-            ),
+            builder: (_) => ReportDetailScreen(type: type, quanHeId: quanHeId),
           ),
         );
       },
@@ -427,9 +393,7 @@ class _ReportItem extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: const Color(0xFF1F41BB).withOpacity(0.5),
-          ),
+          border: Border.all(color: const Color(0xFF1F41BB).withOpacity(0.5)),
           boxShadow: [
             BoxShadow(
               color: const Color(0xFF1F41BB).withOpacity(0.25),

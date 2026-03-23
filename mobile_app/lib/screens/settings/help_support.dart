@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:demo_app/models/tr.dart';
-import 'package:demo_app/widgets/app_header.dart';
+import 'package:Care_AI/models/tr.dart';
+import 'package:Care_AI/widgets/app_header.dart';
 
 class HelpSupportScreen extends StatefulWidget {
   const HelpSupportScreen({super.key});
@@ -100,16 +100,13 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
             color: _blue.withOpacity(0.15),
             blurRadius: 10,
             offset: const Offset(0, 8),
-          )
+          ),
         ],
       ),
       alignment: Alignment.center,
       child: Text(
         text,
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-        ),
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
       ),
     );
   }
@@ -125,7 +122,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
             color: Colors.black.withOpacity(0.1),
             blurRadius: 12,
             offset: const Offset(0, 8),
-          )
+          ),
         ],
       ),
       child: Column(
@@ -141,8 +138,11 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
           const SizedBox(height: 6),
           _label(context.tr.email),
           const SizedBox(height: 6),
-          _input(_emailCtrl, context.tr.enterEmail,
-              type: TextInputType.emailAddress),
+          _input(
+            _emailCtrl,
+            context.tr.enterEmail,
+            type: TextInputType.emailAddress,
+          ),
           const SizedBox(height: 6),
           _label(context.tr.subject),
           const SizedBox(height: 6),
@@ -161,10 +161,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
   Widget _label(String text) {
     return Text(
       text,
-      style: TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.w500,
-      ),
+      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
     );
   }
 
@@ -178,16 +175,15 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
       controller: ctrl,
       keyboardType: type,
       maxLines: lines,
-      style: const TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.w500,
-      ),
+      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
       decoration: InputDecoration(
         hintText: hint,
         filled: true,
         fillColor: _fieldBg,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 12,
+        ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: _blue, width: 1.5),
@@ -218,11 +214,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
           value: e['label'] as String,
           child: Row(
             children: [
-              Icon(
-                e['icon'] as IconData,
-                size: 20,
-                color: _blue,
-              ),
+              Icon(e['icon'] as IconData, size: 20, color: _blue),
               const SizedBox(width: 10),
               Text(
                 e['label'] as String,
@@ -239,8 +231,10 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
         hintText: context.tr.chooseSubject,
         filled: true,
         fillColor: _fieldBg,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 12,
+        ),
         suffixIcon: const Icon(
           Icons.keyboard_arrow_down,
           color: _blue,
@@ -425,7 +419,10 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                 _faqItem(faqs[i]),
                 if (i != faqs.length - 1)
                   const Divider(
-                      height: 1, thickness: 1, color: Color(0x11000000)),
+                    height: 1,
+                    thickness: 1,
+                    color: Color(0x11000000),
+                  ),
               ],
             ],
           ),

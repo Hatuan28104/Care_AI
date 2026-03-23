@@ -1,25 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:demo_app/models/health_icon_mapper.dart';
-import 'package:demo_app/api/health_api.dart';
-import 'package:demo_app/api/family_api.dart';
-import 'package:demo_app/models/tr.dart';
-import 'package:demo_app/widgets/app_header.dart';
+import 'package:Care_AI/models/health_icon_mapper.dart';
+import 'package:Care_AI/api/health_api.dart';
+import 'package:Care_AI/api/family_api.dart';
+import 'package:Care_AI/models/tr.dart';
+import 'package:Care_AI/widgets/app_header.dart';
 
 class HealthDataScreen extends StatefulWidget {
   final String quanHeId;
 
-  const HealthDataScreen({
-    super.key,
-    required this.quanHeId,
-  });
+  const HealthDataScreen({super.key, required this.quanHeId});
 
   @override
   State<HealthDataScreen> createState() => _HealthDataScreenState();
 }
 
 class _HealthDataScreenState extends State<HealthDataScreen> {
-  static const Color _bg = Color(0xFFF6F6F6);
-
   List<Map<String, dynamic>> _metrics = [];
   bool _loading = true;
 
@@ -39,7 +34,7 @@ class _HealthDataScreenState extends State<HealthDataScreen> {
 
       final permissionMap = {
         for (var p in permissions)
-          p["quyen_id"].toString().trim(): p["dakichhoat"]
+          p["quyen_id"].toString().trim(): p["dakichhoat"],
       };
 
       print("PERMISSION MAP:");
@@ -87,13 +82,11 @@ class _HealthDataScreenState extends State<HealthDataScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: Color(0xFFF6F6F6),
       body: SafeArea(
         child: Column(
           children: [
-            AppHeader(
-              title: context.tr.healthData,
-            ),
+            AppHeader(title: context.tr.healthData),
             Expanded(child: _content()),
           ],
         ),
@@ -142,10 +135,7 @@ class _HealthDataScreenState extends State<HealthDataScreen> {
           Expanded(
             child: Text(
               m["name"],
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w400,
-              ),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
             ),
           ),
 
@@ -176,7 +166,7 @@ class _HealthDataScreenState extends State<HealthDataScreen> {
             activeTrackColor: const Color.fromARGB(255, 19, 114, 255),
             inactiveTrackColor: const Color.fromARGB(255, 218, 217, 217),
             inactiveThumbColor: Colors.white,
-          )
+          ),
         ],
       ),
     );

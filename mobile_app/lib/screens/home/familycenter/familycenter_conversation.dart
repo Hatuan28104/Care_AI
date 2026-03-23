@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:demo_app/models/tr.dart';
-import 'package:demo_app/api/chat_api.dart';
-import 'package:demo_app/api/family_api.dart';
-import 'package:demo_app/config/api_config.dart';
-import 'package:demo_app/widgets/app_header.dart';
+import 'package:Care_AI/models/tr.dart';
+import 'package:Care_AI/api/chat_api.dart';
+import 'package:Care_AI/api/family_api.dart';
+import 'package:Care_AI/config/api_config.dart';
+import 'package:Care_AI/widgets/app_header.dart';
 
 class ConversationScreen extends StatefulWidget {
   final String userId;
@@ -21,7 +21,6 @@ class ConversationScreen extends StatefulWidget {
 
 class _ConversationSharingScreenState extends State<ConversationScreen> {
   static const Color _blue = Color(0xFF1877F2);
-  static const Color _bg = Color(0xFFF6F6F6);
 
   final List<Map<String, dynamic>> _users = [];
   bool _loading = true;
@@ -38,7 +37,7 @@ class _ConversationSharingScreenState extends State<ConversationScreen> {
       final permissions = await FamilyApi.getPermissionConfigs(widget.quanHeId);
 
       final permissionMap = {
-        for (var p in permissions) p["quyen_id"]: p["dakichhoat"]
+        for (var p in permissions) p["quyen_id"]: p["dakichhoat"],
       };
 
       if (!mounted) return;
@@ -62,22 +61,20 @@ class _ConversationSharingScreenState extends State<ConversationScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _loading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: Color(0xFFF6F6F6),
       body: SafeArea(
         child: Column(
           children: [
-            AppHeader(
-              title: context.tr.conversationHistory,
-            ),
+            AppHeader(title: context.tr.conversationHistory),
             Expanded(child: _content()),
           ],
         ),
@@ -105,10 +102,7 @@ class _ConversationSharingScreenState extends State<ConversationScreen> {
           ),
         ),
         const SizedBox(height: 10),
-        ...List.generate(
-          _users.length,
-          (index) => _userCard(index),
-        ),
+        ...List.generate(_users.length, (index) => _userCard(index)),
       ],
     );
   }
@@ -136,9 +130,7 @@ class _ConversationSharingScreenState extends State<ConversationScreen> {
           Container(
             width: 60,
             height: 60,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-            ),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
             child: image.isNotEmpty
                 ? ClipRRect(
                     borderRadius: BorderRadius.circular(10),
@@ -169,10 +161,7 @@ class _ConversationSharingScreenState extends State<ConversationScreen> {
                 const SizedBox(height: 1),
                 Text(
                   '${context.tr.lastMessage}: ${formatTime(user['date'])}',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey,
-                  ),
+                  style: const TextStyle(fontSize: 14, color: Colors.grey),
                 ),
               ],
             ),
@@ -207,7 +196,7 @@ class _ConversationSharingScreenState extends State<ConversationScreen> {
             activeTrackColor: const Color.fromARGB(255, 19, 114, 255),
             inactiveTrackColor: const Color.fromARGB(255, 218, 217, 217),
             inactiveThumbColor: Colors.white,
-          )
+          ),
         ],
       ),
     );

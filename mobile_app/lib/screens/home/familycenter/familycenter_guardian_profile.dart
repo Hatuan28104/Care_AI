@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:demo_app/api/family_api.dart';
+import 'package:Care_AI/api/family_api.dart';
 import 'familycenter_configure_permissions.dart';
-import 'package:demo_app/models/tr.dart';
+import 'package:Care_AI/models/tr.dart';
 
 class GuardianProfile extends StatefulWidget {
   final String quanHeId;
 
-  const GuardianProfile({
-    super.key,
-    required this.quanHeId,
-  });
+  const GuardianProfile({super.key, required this.quanHeId});
 
   @override
   State<GuardianProfile> createState() => _GuardianProfileState();
@@ -63,7 +60,7 @@ class _GuardianProfileState extends State<GuardianProfile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: Color(0xFFF6F6F6),
       body: SafeArea(
         child: loading
             ? const Center(child: CircularProgressIndicator())
@@ -95,18 +92,11 @@ class _GuardianProfileState extends State<GuardianProfile> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
-                  Icons.arrow_back_ios_new,
-                  size: 18,
-                  color: blue,
-                ),
+                const Icon(Icons.arrow_back_ios_new, size: 18, color: blue),
                 const SizedBox(width: 4),
                 Text(
                   context.tr.back,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    color: blue,
-                  ),
+                  style: const TextStyle(fontSize: 15, color: blue),
                 ),
               ],
             ),
@@ -184,10 +174,7 @@ class _GuardianProfileState extends State<GuardianProfile> {
           const Spacer(),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ],
       ),

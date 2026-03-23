@@ -1,19 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:demo_app/api/digital_api.dart';
-import 'package:demo_app/config/api_config.dart';
+import 'package:Care_AI/api/digital_api.dart';
+import 'package:Care_AI/config/api_config.dart';
 import 'digital_human.dart';
 import 'chat.dart';
 import 'data/basic_health_data.dart';
 import 'data/activity_data.dart';
-import 'package:demo_app/models/tr.dart';
+import 'package:Care_AI/models/tr.dart';
 
 class HomeTab extends StatefulWidget {
   final String userId;
 
-  const HomeTab({
-    super.key,
-    required this.userId,
-  });
+  const HomeTab({super.key, required this.userId});
 
   @override
   State<HomeTab> createState() => _HomeTabState();
@@ -58,10 +55,8 @@ class _HomeTabState extends State<HomeTab> {
           _sectionHeader(
             context: context,
             title: context.tr.digitalHumanSection,
-            action: () => _go(
-              context,
-              DigitalHumanAllScreen(userId: widget.userId),
-            ),
+            action: () =>
+                _go(context, DigitalHumanAllScreen(userId: widget.userId)),
           ),
           const SizedBox(height: 12),
           _digitalHumanList(),
@@ -120,10 +115,7 @@ class _HomeTabState extends State<HomeTab> {
                 SizedBox(height: 2),
                 Text(
                   context.tr.whatSupportToday,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: Colors.white, fontSize: 14),
                 ),
               ],
             ),
@@ -137,10 +129,7 @@ class _HomeTabState extends State<HomeTab> {
               ),
             ),
             onPressed: () {
-              _go(
-                context,
-                DigitalHumanAllScreen(userId: widget.userId),
-              );
+              _go(context, DigitalHumanAllScreen(userId: widget.userId));
             },
             child: Text(
               context.tr.start,
@@ -256,10 +245,7 @@ class _HomeTabState extends State<HomeTab> {
   }
 
   static void _go(BuildContext context, Widget page) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => page),
-    );
+    Navigator.push(context, MaterialPageRoute(builder: (_) => page));
   }
 }
 
@@ -272,10 +258,7 @@ Widget _sectionHeader({
     children: [
       Text(
         title,
-        style: const TextStyle(
-          fontSize: 22,
-          fontWeight: FontWeight.w600,
-        ),
+        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
       ),
       const Spacer(),
       if (action != null)

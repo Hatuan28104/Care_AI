@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'AuthScreen/auth.dart';
-import '../models/tr.dart';
+import 'package:Care_AI/models/tr.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -36,10 +36,7 @@ class WelcomeScreen extends StatelessWidget {
   Widget _logo() {
     return Hero(
       tag: 'care-logo',
-      child: Image.asset(
-        'assets/images/Logo.png',
-        height: 260,
-      ),
+      child: Image.asset('assets/images/Logo.png', height: 260),
     );
   }
 
@@ -66,9 +63,7 @@ class WelcomeScreen extends StatelessWidget {
     return Text(
       context.tr.welcomeSubtitle,
       textAlign: TextAlign.center,
-      style: const TextStyle(
-        fontSize: 13.5,
-      ),
+      style: const TextStyle(fontSize: 13.5),
     );
   }
 
@@ -98,9 +93,7 @@ class WelcomeScreen extends StatelessWidget {
   static void _go(BuildContext context, AuthTab tab) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => AuthScreen(initialTab: tab),
-      ),
+      MaterialPageRoute(builder: (_) => AuthScreen(initialTab: tab)),
     );
   }
 
@@ -143,11 +136,7 @@ class WelcomeScreen extends StatelessWidget {
   static Widget _buttonText(String text, [Color? color]) {
     return Text(
       text,
-      style: TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.w600,
-        color: color,
-      ),
+      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: color),
     );
   }
 }

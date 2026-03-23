@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:demo_app/screens/home/decive/device_detail.dart';
-import 'package:demo_app/models/tr.dart';
+import 'package:Care_AI/screens/home/decive/device_detail.dart';
+import 'package:Care_AI/models/tr.dart';
 
 class DeviceCompleteScreen extends StatelessWidget {
   const DeviceCompleteScreen({super.key});
 
   static const blue = Color(0xFF1877F2);
   static const green = Color(0xFF45C46D);
-  static const bg = Color(0xFFF6F6F6);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: Color(0xFFF6F6F6),
       body: SafeArea(
         child: Column(
           children: [

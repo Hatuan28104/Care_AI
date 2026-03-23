@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:demo_app/models/tr.dart';
+import 'package:Care_AI/models/tr.dart';
 import 'login_form.dart';
 import 'register_form.dart';
 import 'login_otp.dart';
 import 'register_otp.dart';
+
 enum AuthTab { login, register }
 
 enum AuthStep { form, otp }
@@ -11,10 +12,7 @@ enum AuthStep { form, otp }
 class AuthScreen extends StatefulWidget {
   final AuthTab initialTab;
 
-  const AuthScreen({
-    super.key,
-    this.initialTab = AuthTab.login,
-  });
+  const AuthScreen({super.key, this.initialTab = AuthTab.login});
 
   @override
   State<AuthScreen> createState() => _AuthScreenState();
@@ -136,14 +134,8 @@ class _AuthScreenState extends State<AuthScreen> {
       return AnimatedSwitcher(
         duration: const Duration(milliseconds: 200),
         child: _tab == AuthTab.login
-            ? LoginForm(
-                key: const ValueKey('login-form'),
-                onOtp: _goOtp,
-              )
-            : RegisterForm(
-                key: const ValueKey('register-form'),
-                onOtp: _goOtp,
-              ),
+            ? LoginForm(key: const ValueKey('login-form'), onOtp: _goOtp)
+            : RegisterForm(key: const ValueKey('register-form'), onOtp: _goOtp),
       );
     }
 

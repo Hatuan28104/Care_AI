@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:demo_app/models/tr.dart';
-import 'package:demo_app/api/settings_api.dart';
-import 'package:demo_app/widgets/app_header.dart';
+import 'package:Care_AI/models/tr.dart';
+import 'package:Care_AI/api/settings_api.dart';
+import 'package:Care_AI/widgets/app_header.dart';
 
 class SoundVibrationScreen extends StatefulWidget {
   const SoundVibrationScreen({super.key});
@@ -46,14 +46,10 @@ class _SoundVibrationScreenState extends State<SoundVibrationScreen> {
     }
   }
 
-  /// UPDATE SOUND
-
   void _updateSound(bool value) {
     setState(() => _soundOn = value);
     SettingsApi.updateSetting("SoundOn", value);
   }
-
-  /// UPDATE VIBRATION
 
   void _updateVibration(bool value) {
     setState(() => _vibrationOn = value);
@@ -69,9 +65,7 @@ class _SoundVibrationScreenState extends State<SoundVibrationScreen> {
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return Scaffold(
@@ -120,8 +114,11 @@ class _SoundVibrationScreenState extends State<SoundVibrationScreen> {
             const SizedBox(height: 6),
             Row(
               children: [
-                const Icon(Icons.volume_off_outlined,
-                    color: _primary, size: 20),
+                const Icon(
+                  Icons.volume_off_outlined,
+                  color: _primary,
+                  size: 20,
+                ),
                 Expanded(
                   child: SliderTheme(
                     data: SliderTheme.of(context).copyWith(
@@ -130,8 +127,9 @@ class _SoundVibrationScreenState extends State<SoundVibrationScreen> {
                       inactiveTrackColor: Colors.grey.shade400,
                       thumbColor: Colors.white,
                       overlayColor: _primary.withOpacity(.1),
-                      thumbShape:
-                          const RoundSliderThumbShape(enabledThumbRadius: 10),
+                      thumbShape: const RoundSliderThumbShape(
+                        enabledThumbRadius: 10,
+                      ),
                     ),
                     child: Slider(
                       value: _volume,

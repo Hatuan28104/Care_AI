@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:intl_phone_field/phone_number.dart' as ipn;
-import 'package:demo_app/api/auth_api.dart';
-import 'package:demo_app/models/tr.dart';
+import 'package:Care_AI/api/auth_api.dart';
+import 'package:Care_AI/models/tr.dart';
 
 class LoginForm extends StatefulWidget {
   final void Function(String phoneE164, String displayPhone) onOtp;
 
-  const LoginForm({
-    super.key,
-    required this.onOtp,
-  });
+  const LoginForm({super.key, required this.onOtp});
 
   @override
   State<LoginForm> createState() => _LoginFormState();
@@ -24,10 +21,7 @@ class _LoginFormState extends State<LoginForm> {
   String get _errorMsg => context.tr.invalidPhone;
   String? _serverError;
 
-  static const _borderSide = BorderSide(
-    color: Color(0xFFCFCECE),
-    width: 1,
-  );
+  static const _borderSide = BorderSide(color: Color(0xFFCFCECE), width: 1);
 
   // ===== FORM =====
   final _formKey = GlobalKey<FormState>();
@@ -89,10 +83,7 @@ class _LoginFormState extends State<LoginForm> {
         const SizedBox(height: 17),
         Text(
           context.tr.welcomeBack,
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 30),
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'device_scan.dart';
 import 'device_add.dart';
-import 'package:demo_app/models/tr.dart';
+import 'package:Care_AI/models/tr.dart';
 
 class DeviceTab extends StatelessWidget {
   const DeviceTab({super.key});
@@ -42,10 +42,7 @@ class DeviceTab extends StatelessWidget {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(30),
-          child: Image.asset(
-            'assets/images/decive.jpg',
-            fit: BoxFit.cover,
-          ),
+          child: Image.asset('assets/images/decive.jpg', fit: BoxFit.cover),
         ),
       ),
     );
@@ -75,10 +72,7 @@ class DeviceTab extends StatelessWidget {
               ),
               child: Text(
                 context.tr.scan,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
             ),
           ),
@@ -88,9 +82,7 @@ class DeviceTab extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (_) => const AddDeviceScreen(),
-                  ),
+                  MaterialPageRoute(builder: (_) => const AddDeviceScreen()),
                 );
               },
               style: ElevatedButton.styleFrom(
@@ -103,10 +95,7 @@ class DeviceTab extends StatelessWidget {
               ),
               child: Text(
                 context.tr.addNew,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
             ),
           ),

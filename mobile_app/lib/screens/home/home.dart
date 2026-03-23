@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:demo_app/app_settings.dart';
-import 'package:demo_app/screens/settings/settings.dart';
-import 'package:demo_app/api/profile_api.dart' as profile_api;
-import 'package:demo_app/screens/settings/profile/create_profile.dart';
-import 'package:demo_app/models/tr.dart';
+import 'package:Care_AI/app_settings.dart';
+import 'package:Care_AI/screens/settings/settings.dart';
+import 'package:Care_AI/api/profile_api.dart' as profile_api;
+import 'package:Care_AI/screens/settings/profile/create_profile.dart';
+import 'package:Care_AI/models/tr.dart';
 import 'home_conten/home_tab.dart';
 import 'familycenter/family_tab.dart';
 import 'decive/device_tab.dart';
@@ -13,10 +13,7 @@ import 'home_conten/alert.dart';
 class HomeScreen extends StatefulWidget {
   final String userId;
 
-  const HomeScreen({
-    super.key,
-    required this.userId,
-  });
+  const HomeScreen({super.key, required this.userId});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -41,10 +38,8 @@ class _HomeScreenState extends State<HomeScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => CreateProfileScreen(
-              nguoiDungId: widget.userId,
-              phone: phone,
-            ),
+            builder: (_) =>
+                CreateProfileScreen(nguoiDungId: widget.userId, phone: phone),
           ),
         );
         return;
@@ -54,10 +49,8 @@ class _HomeScreenState extends State<HomeScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => CreateProfileScreen(
-            nguoiDungId: widget.userId,
-            phone: '',
-          ),
+          builder: (_) =>
+              CreateProfileScreen(nguoiDungId: widget.userId, phone: ''),
         ),
       );
       return;
@@ -96,9 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     if (_checkingProfile) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return Scaffold(
@@ -113,10 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
               color: Colors.black.withValues(alpha: 0.08),
             ),
             Expanded(
-              child: IndexedStack(
-                index: _currentIndex,
-                children: _tabs,
-              ),
+              child: IndexedStack(index: _currentIndex, children: _tabs),
             ),
           ],
         ),
@@ -226,9 +214,6 @@ class _HomeScreenState extends State<HomeScreen> {
   // ================= NAVIGATION =================
 
   static void _go(BuildContext context, Widget page) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => page),
-    );
+    Navigator.push(context, MaterialPageRoute(builder: (_) => page));
   }
 }

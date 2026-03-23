@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:demo_app/api/family_api.dart';
+import 'package:Care_AI/api/family_api.dart';
 import 'familycenter_guardian_add.dart';
 import 'familycenter_guardian_profile.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:demo_app/models/tr.dart';
-import 'package:demo_app/widgets/common_confirm_dialog.dart';
+import 'package:Care_AI/models/tr.dart';
+import 'package:Care_AI/widgets/common_confirm_dialog.dart';
 
 class MyGuardiansScreen extends StatefulWidget {
   const MyGuardiansScreen({super.key});
@@ -61,9 +61,9 @@ class _MyGuardiansScreenState extends State<MyGuardiansScreen>
         loading = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     }
   }
 
@@ -114,9 +114,7 @@ class _MyGuardiansScreenState extends State<MyGuardiansScreen>
     }
 
     if (guardians.isEmpty) {
-      return Center(
-        child: Text(context.tr.noGuardians),
-      );
+      return Center(child: Text(context.tr.noGuardians));
     }
 
     return ListView.separated(
@@ -163,9 +161,8 @@ class _MyGuardiansScreenState extends State<MyGuardiansScreen>
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => GuardianProfile(
-                    quanHeId: g['quanhegiamho_id'],
-                  ),
+                  builder: (_) =>
+                      GuardianProfile(quanHeId: g['quanhegiamho_id']),
                 ),
               );
             },
@@ -221,10 +218,7 @@ class GuardianCard extends StatelessWidget {
               child: avatar != null
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        avatar!,
-                        fit: BoxFit.cover,
-                      ),
+                      child: Image.network(avatar!, fit: BoxFit.cover),
                     )
                   : const Icon(
                       Icons.person,
@@ -250,10 +244,7 @@ class GuardianCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     '${context.tr.joinDate}: $date',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
-                    ),
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                 ],
               ),

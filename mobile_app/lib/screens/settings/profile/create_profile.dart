@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:demo_app/screens/home/home.dart';
+import 'package:Care_AI/screens/home/home.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'dart:convert';
-import 'package:demo_app/api/profile_api.dart' as ProfileApi;
-import 'package:demo_app/models/tr.dart';
+import 'package:Care_AI/api/profile_api.dart' as ProfileApi;
+import 'package:Care_AI/models/tr.dart';
 
 class CreateProfileScreen extends StatefulWidget {
   final String nguoiDungId;
@@ -22,7 +22,6 @@ class CreateProfileScreen extends StatefulWidget {
 
 class _CreateProfileScreenState extends State<CreateProfileScreen> {
   static const _blue = Color(0xFF1877F2);
-  static const _bg = Color(0xFFF6F6F6);
   static const _borderBlue = Color(0xFF1F41BB);
 
   // ===== UI CONSTANTS =====
@@ -44,8 +43,10 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
     fontWeight: FontWeight.w400,
   );
 
-  static const _fieldPadding =
-      EdgeInsets.symmetric(horizontal: 12, vertical: 10);
+  static const _fieldPadding = EdgeInsets.symmetric(
+    horizontal: 12,
+    vertical: 10,
+  );
 
   // ===== FORM =====
   final _formKey = GlobalKey<FormState>();
@@ -93,11 +94,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
 
   void _pickDob() {
     final now = DateTime.now();
-    final minAgeDate = DateTime(
-      now.year - 16,
-      now.month,
-      now.day,
-    );
+    final minAgeDate = DateTime(now.year - 16, now.month, now.day);
 
     DatePicker.showDatePicker(
       context,
@@ -136,15 +133,16 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
 
     try {
       await ProfileApi.ProfileApi.updateProfile(
-          nguoiDungId: widget.nguoiDungId,
-          tenND: _nameCtrl.text.trim(),
-          ngaySinh: toIso(_dobCtrl.text),
-          gioiTinh: _gender == context.tr.male ? 1 : 0,
-          chieuCao: double.parse(_heightCtrl.text),
-          canNang: double.parse(_weightCtrl.text),
-          email: _emailCtrl.text.trim(),
-          diaChi: _addressCtrl.text.trim(),
-          avatarFile: _avatarFile);
+        nguoiDungId: widget.nguoiDungId,
+        tenND: _nameCtrl.text.trim(),
+        ngaySinh: toIso(_dobCtrl.text),
+        gioiTinh: _gender == context.tr.male ? 1 : 0,
+        chieuCao: double.parse(_heightCtrl.text),
+        canNang: double.parse(_weightCtrl.text),
+        email: _emailCtrl.text.trim(),
+        diaChi: _addressCtrl.text.trim(),
+        avatarFile: _avatarFile,
+      );
 
       if (!mounted) return;
       Navigator.pushReplacement(
@@ -191,7 +189,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: Color(0xFFF6F6F6),
       appBar: _appBar(context),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -328,8 +326,9 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
                         validator: (v) {
                           final s = (v ?? '').trim();
                           if (s.isEmpty) return null;
-                          if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
-                              .hasMatch(s)) {
+                          if (!RegExp(
+                            r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
+                          ).hasMatch(s)) {
                             return context.tr.invalidEmail;
                           }
                           return null;
@@ -361,8 +360,11 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
       centerTitle: true,
       leading: IconButton(
         onPressed: () => Navigator.pop(context),
-        icon: const Icon(Icons.arrow_back_ios_new_rounded,
-            color: Colors.black, size: 20),
+        icon: const Icon(
+          Icons.arrow_back_ios_new_rounded,
+          color: Colors.black,
+          size: 20,
+        ),
       ),
       title: Text(
         context.tr.profile,
@@ -397,22 +399,12 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
                 height: 90,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Colors.black,
-                    width: 2,
-                  ),
+                  border: Border.all(color: Colors.black, width: 2),
                 ),
                 child: ClipOval(
                   child: _avatarFile == null
-                      ? const Icon(
-                          Icons.person,
-                          size: 60,
-                          color: Colors.black,
-                        )
-                      : Image.file(
-                          _avatarFile!,
-                          fit: BoxFit.cover,
-                        ),
+                      ? const Icon(Icons.person, size: 60, color: Colors.black)
+                      : Image.file(_avatarFile!, fit: BoxFit.cover),
                 ),
               ),
             ),
@@ -420,10 +412,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
           const SizedBox(height: 10),
           Text(
             _nameCtrl.text.isEmpty ? context.tr.fullName : _nameCtrl.text,
-            style: const TextStyle(
-              fontWeight: FontWeight.w700,
-              fontSize: 17,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 17),
           ),
           const SizedBox(height: 8),
           SizedBox(
@@ -433,20 +422,14 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
               style: OutlinedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: const Color(0xFF626262),
-                side: const BorderSide(
-                  color: Color(0xFF1F41BB),
-                  width: 1,
-                ),
+                side: const BorderSide(color: Color(0xFF1F41BB), width: 1),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
               child: Text(
                 context.tr.addPhoto,
-                style: TextStyle(
-                  fontWeight: FontWeight.w400,
-                  fontSize: 13,
-                ),
+                style: TextStyle(fontWeight: FontWeight.w400, fontSize: 13),
               ),
             ),
           ),
@@ -539,8 +522,10 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
                           ),
                         ),
                       )),
-            suffixIconConstraints:
-                const BoxConstraints(minWidth: 0, minHeight: 0),
+            suffixIconConstraints: const BoxConstraints(
+              minWidth: 0,
+              minHeight: 0,
+            ),
             enabledBorder: _outline(_borderBlue, 1.2),
             focusedBorder: _outline(_borderBlue, 1.6),
             errorBorder: _outline(Colors.red, 1.2),
@@ -595,13 +580,12 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
                 contentPadding: _fieldPadding,
                 suffixIcon: Padding(
                   padding: const EdgeInsets.only(right: 8),
-                  child: Icon(
-                    Icons.arrow_drop_down,
-                    color: _blue,
-                  ),
+                  child: Icon(Icons.arrow_drop_down, color: _blue),
                 ),
-                suffixIconConstraints:
-                    const BoxConstraints(minWidth: 0, minHeight: 0),
+                suffixIconConstraints: const BoxConstraints(
+                  minWidth: 0,
+                  minHeight: 0,
+                ),
                 enabledBorder: _outline(_borderBlue, 1.2),
                 focusedBorder: _outline(_borderBlue, 1.6),
                 errorBorder: _outline(Colors.red, 1.2),
@@ -631,13 +615,20 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
       ),
       items: [
         PopupMenuItem(
-            value: context.tr.male, height: 32, child: Text(context.tr.male)),
+          value: context.tr.male,
+          height: 32,
+          child: Text(context.tr.male),
+        ),
         PopupMenuItem(
-            value: context.tr.female,
-            height: 32,
-            child: Text(context.tr.female)),
+          value: context.tr.female,
+          height: 32,
+          child: Text(context.tr.female),
+        ),
         PopupMenuItem(
-            value: context.tr.other, height: 32, child: Text(context.tr.other)),
+          value: context.tr.other,
+          height: 32,
+          child: Text(context.tr.other),
+        ),
       ],
     );
 
@@ -660,8 +651,9 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
           backgroundColor: _blue,
           foregroundColor: Colors.white,
           elevation: 0,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
         ),
         child: Text(
           context.tr.continueButton,

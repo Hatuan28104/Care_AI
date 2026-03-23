@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:demo_app/api/chat_api.dart';
-import 'package:demo_app/models/tr.dart';
+import 'package:Care_AI/api/chat_api.dart';
+import 'package:Care_AI/models/tr.dart';
 
 class ChatScreen extends StatefulWidget {
   final String name;
@@ -35,10 +35,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
 
-    messages.add({
-      "text": widget.intro,
-      "isUser": false,
-    });
+    messages.add({"text": widget.intro, "isUser": false});
 
     _focusNode.addListener(() {
       setState(() {
@@ -131,10 +128,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
       setState(() {
         messages.removeWhere((m) => m["isTyping"] == true);
-        messages.add({
-          "text": "${context.tr.error}: $e",
-          "isUser": false,
-        });
+        messages.add({"text": "${context.tr.error}: $e", "isUser": false});
       });
     }
 
@@ -153,12 +147,13 @@ class _ChatScreenState extends State<ChatScreen> {
       children: [
         if (!isUser)
           Padding(
-              padding: const EdgeInsets.only(left: 8),
-              child: CircleAvatar(
-                radius: 18,
-                backgroundImage: NetworkImage(widget.image),
-                onBackgroundImageError: (_, __) {},
-              )),
+            padding: const EdgeInsets.only(left: 8),
+            child: CircleAvatar(
+              radius: 18,
+              backgroundImage: NetworkImage(widget.image),
+              onBackgroundImageError: (_, __) {},
+            ),
+          ),
         Flexible(
           child: Container(
             margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
@@ -174,7 +169,9 @@ class _ChatScreenState extends State<ChatScreen> {
                 ? Text(
                     context.tr.typing,
                     style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 18),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
                   )
                 : Text(
                     msg["text"] ?? "",
@@ -201,8 +198,11 @@ class _ChatScreenState extends State<ChatScreen> {
         children: [
           if (_isFocused)
             IconButton(
-              icon: const Icon(Icons.keyboard_arrow_right,
-                  color: Colors.blue, size: 28),
+              icon: const Icon(
+                Icons.keyboard_arrow_right,
+                color: Colors.blue,
+                size: 28,
+              ),
               onPressed: () {
                 FocusScope.of(context).unfocus();
               },
@@ -236,8 +236,10 @@ class _ChatScreenState extends State<ChatScreen> {
                 hintText: _isFocused ? null : context.tr.enterMessage,
                 filled: true,
                 fillColor: const Color(0xFFF6F6F6),
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(25),
                   borderSide: BorderSide.none,
@@ -270,8 +272,11 @@ class _ChatScreenState extends State<ChatScreen> {
         elevation: 1,
         titleSpacing: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded,
-              size: 20, color: Colors.black),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: 20,
+            color: Colors.black,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         title: Row(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:demo_app/app_settings.dart';
-import 'package:demo_app/l10n/app_localizations.dart';
+import 'package:Care_AI/app_settings.dart';
+import 'package:Care_AI/l10n/app_localizations.dart';
 
 class LanguageScreen extends StatefulWidget {
   const LanguageScreen({super.key});
@@ -158,8 +158,10 @@ class _LanguageScreenState extends State<LanguageScreen> {
             Expanded(
               child: Text(
                 name,
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
             Icon(

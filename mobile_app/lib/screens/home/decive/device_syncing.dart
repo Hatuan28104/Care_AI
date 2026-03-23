@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:demo_app/screens/home/decive/device_complete.dart';
-import 'package:demo_app/models/tr.dart';
+import 'package:Care_AI/screens/home/decive/device_complete.dart';
+import 'package:Care_AI/models/tr.dart';
 
 class DeviceSyncingScreen extends StatelessWidget {
   const DeviceSyncingScreen({super.key});
 
   static const blue = Color(0xFF1877F2);
-  static const bg = Color(0xFFF6F6F6);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: Color(0xFFF6F6F6),
       body: SafeArea(
         child: Column(
           children: [
@@ -76,11 +75,7 @@ class DeviceSyncingScreen extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(width: 10),
-                      const Icon(
-                        Icons.watch,
-                        size: 132,
-                        color: Colors.black38,
-                      ),
+                      const Icon(Icons.watch, size: 132, color: Colors.black38),
                     ],
                   ),
                 ),

@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:demo_app/screens/settings/profile/my_profile.dart';
-import 'package:demo_app/screens/welcome_screen.dart';
-import 'package:demo_app/app_settings.dart';
-import 'package:demo_app/widgets/app_header.dart';
+import 'package:Care_AI/screens/settings/profile/my_profile.dart';
+import 'package:Care_AI/screens/welcome_screen.dart';
+import 'package:Care_AI/app_settings.dart';
+import 'package:Care_AI/widgets/app_header.dart';
 import 'privacy_security/privacy_security.dart';
 import 'text_size.dart';
 import 'language.dart';
 import 'sound_vibration.dart';
 import 'help_support.dart';
-import 'package:demo_app/api/settings_api.dart';
-import 'package:demo_app/api/auth_storage.dart';
-import 'package:demo_app/models/tr.dart';
+import 'package:Care_AI/api/settings_api.dart';
+import 'package:Care_AI/api/auth_storage.dart';
+import 'package:Care_AI/models/tr.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -54,18 +54,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   static void _go(BuildContext context, Widget page) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => page),
-    );
+    Navigator.push(context, MaterialPageRoute(builder: (_) => page));
   }
 
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return Scaffold(
@@ -73,10 +68,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            AppHeader(
-              title: context.tr.settings,
-              showBack: true,
-            ),
+            AppHeader(title: context.tr.settings, showBack: true),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
@@ -127,28 +119,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         settingKey: "notificationOn",
                       ),
                     ]),
-                    _card([
-                      _item(
-                        icon: Icons.volume_up_outlined,
-                        text: context.tr.soundVibration,
-                        onTap: () => _go(context, const SoundVibrationScreen()),
-                      ),
-                    ]),
                     _section(context.tr.device),
-                    _card([
-                      _switchItem(
-                        icon: Icons.health_and_safety_outlined,
-                        text: context.tr.healthAlert,
-                        notifier: AppSettings.healthAlertOn,
-                        settingKey: "healthAlertOn",
-                      ),
-                    ]),
                     _card([
                       _switchItem(
                         icon: Icons.sync,
                         text: context.tr.syncData,
                         notifier: AppSettings.syncDataOn,
                         settingKey: "syncDataOn",
+                      ),
+                    ]),
+                    _card([
+                      _item(
+                        icon: Icons.volume_up_outlined,
+                        text: context.tr.soundVibration,
+                        onTap: () => _go(context, const SoundVibrationScreen()),
                       ),
                     ]),
                     _section(context.tr.support),
@@ -159,7 +143,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         onTap: () => _go(context, const HelpSupportScreen()),
                       ),
                     ]),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 30),
                     _logoutButton(context),
                   ],
                 ),
@@ -171,15 +155,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _section(String text, {double fontSize = 16}) {
+  Widget _section(String text, {double fontSize = 18}) {
     return Padding(
       padding: const EdgeInsets.only(top: 2, bottom: 6),
       child: Text(
         text,
-        style: TextStyle(
-          fontSize: fontSize,
-          fontWeight: FontWeight.w700,
-        ),
+        style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.w600),
       ),
     );
   }
@@ -213,34 +194,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
       borderRadius: BorderRadius.circular(14),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        child: Row(
-          children: [
-            Icon(icon, color: _blue, size: 22),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    text,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15,
-                    ),
+        child: SizedBox(
+          height: 30,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(width: 24, child: Icon(icon, color: _blue, size: 22)),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  text,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
                   ),
-                  if (subtitle != null)
-                    Text(
-                      subtitle,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
-                    ),
-                ],
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-            ),
-            const Icon(Icons.chevron_right, color: Colors.grey),
-          ],
+              if (subtitle != null) ...[
+                Text(
+                  subtitle,
+                  style: const TextStyle(fontSize: 14, color: Colors.grey),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(width: 6),
+              ],
+              const Icon(Icons.chevron_right, color: Colors.grey),
+            ],
+          ),
         ),
       ),
     );
@@ -256,38 +237,42 @@ class _SettingsScreenState extends State<SettingsScreen> {
       valueListenable: notifier,
       builder: (_, value, __) {
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-          child: Row(
-            children: [
-              Icon(icon, color: _blue, size: 22),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  text,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          child: SizedBox(
+            height: 30,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(width: 24, child: Icon(icon, color: _blue, size: 22)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    text,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 16,
+                    ),
                   ),
                 ),
-              ),
-              Transform.scale(
-                scale: 0.8,
-                child: Switch(
-                  value: value,
-                  onChanged: (v) async {
-                    notifier.value = v;
-                    try {
-                      await SettingsApi.updateSetting(settingKey, v);
-                    } catch (e) {
-                      notifier.value = !v;
-                    }
-                  },
-                  activeColor: Colors.white,
-                  activeTrackColor: _blue,
-                  inactiveTrackColor: Colors.grey.shade300,
+                Transform.scale(
+                  scale: 0.8,
+                  child: Switch(
+                    value: value,
+                    onChanged: (v) async {
+                      notifier.value = v;
+                      try {
+                        await SettingsApi.updateSetting(settingKey, v);
+                      } catch (e) {
+                        notifier.value = !v;
+                      }
+                    },
+                    activeColor: Colors.white,
+                    activeTrackColor: _blue,
+                    inactiveTrackColor: Colors.grey.shade300,
+                  ),
                 ),
-              )
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -313,8 +298,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           backgroundColor: _blue,
           foregroundColor: Colors.white,
           elevation: 0,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
         ),
         child: Text(
           context.tr.logout,

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:demo_app/app_settings.dart';
+import 'package:Care_AI/app_settings.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:demo_app/models/tr.dart';
-import 'package:demo_app/widgets/common_confirm_dialog.dart';
-import 'package:demo_app/api/alert_api.dart';
-import 'package:demo_app/widgets/app_header.dart';
+import 'package:Care_AI/models/tr.dart';
+import 'package:Care_AI/widgets/common_confirm_dialog.dart';
+import 'package:Care_AI/api/alert_api.dart';
+import 'package:Care_AI/widgets/app_header.dart';
 import 'alert_detail.dart';
 
 class AlertScreen extends StatefulWidget {
@@ -16,7 +16,6 @@ class AlertScreen extends StatefulWidget {
 }
 
 class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
-  static const _bg = Color(0xFFF6F6F6);
   static const _blue = Color(0xFF1877F2);
 
   final List<_AlertItem> _alerts = [];
@@ -66,7 +65,9 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
 
       setState(() {
         _alerts.clear();
-        _alerts.addAll(data.map((e) => _AlertItem(
+        _alerts.addAll(
+          data.map(
+            (e) => _AlertItem(
               id: e["notification_id"].toString(),
               icon: Icons.warning_amber_rounded,
               iconColor: Colors.red,
@@ -75,14 +76,16 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
               detail: (e["noidung"] ?? "").toString(),
               level: e["level"] ?? 1,
               isRead: e["dadoc"] == true,
-            )));
+            ),
+          ),
+        );
       });
       _syncBadge();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     }
   }
 
@@ -121,14 +124,11 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: Color(0xFFF6F6F6),
       body: SafeArea(
         child: Column(
           children: [
-            AppHeader(
-              title: context.tr.notifications,
-              showBack: true,
-            ),
+            AppHeader(title: context.tr.notifications, showBack: true),
             Expanded(child: _list()),
           ],
         ),
@@ -222,9 +222,9 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
                   _syncBadge();
                 } catch (e) {
                   if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(e.toString())),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(e.toString())));
                 }
               }
             },
@@ -255,9 +255,9 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
               _syncBadge();
             } catch (e) {
               if (!context.mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(e.toString())),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(e.toString())));
             }
           }
         },
@@ -296,10 +296,7 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
                     const SizedBox(height: 2),
                     Text(
                       item.time.split("•").first,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ],
                 ),

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:demo_app/models/health_icon_mapper.dart';
-import 'package:demo_app/models/tr.dart';
-import 'package:demo_app/widgets/app_header.dart';
-import 'package:demo_app/api/health_api.dart';
+import 'package:Care_AI/models/health_icon_mapper.dart';
+import 'package:Care_AI/models/tr.dart';
+import 'package:Care_AI/widgets/app_header.dart';
+import 'package:Care_AI/api/health_api.dart';
 import 'metric_item.dart';
 import 'metric_detail.dart';
 
@@ -14,7 +14,6 @@ class ActivityDataScreen extends StatefulWidget {
 }
 
 class _ActivityDataScreenState extends State<ActivityDataScreen> {
-  static const Color _bg = Color(0xFFF6F6F6);
   static const EdgeInsets _listPadding = EdgeInsets.fromLTRB(18, 2, 18, 18);
   static const BorderRadius _cardRadius = BorderRadius.all(Radius.circular(10));
 
@@ -58,8 +57,9 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
     try {
       final data = await HealthApi.getMetrics();
 
-      final items =
-          data.where((e) => e['loai'] == 'activity').map<MetricItem>((e) {
+      final items = data.where((e) => e['loai'] == 'activity').map<MetricItem>((
+        e,
+      ) {
         final iconData = getHealthIcon(e['tenchiso']);
 
         return MetricItem(
@@ -112,13 +112,11 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
     }).toList();
 
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: Color(0xFFF6F6F6),
       body: SafeArea(
         child: Column(
           children: [
-            AppHeader(
-              title: context.tr.activityData,
-            ),
+            AppHeader(title: context.tr.activityData),
             _searchBox(),
             Expanded(
               child: filteredItems.isEmpty
@@ -218,10 +216,7 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
         children: [
           Text(
             m.title,
-            style: const TextStyle(
-              fontWeight: FontWeight.w700,
-              fontSize: 15,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
           ),
           Row(
             children: [

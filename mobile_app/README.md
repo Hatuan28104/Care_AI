@@ -1,4 +1,4 @@
-# demo_app
+# Care AI
 
 A new Flutter project.
 

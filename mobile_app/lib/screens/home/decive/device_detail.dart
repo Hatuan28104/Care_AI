@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:demo_app/models/tr.dart';
+import 'package:Care_AI/models/tr.dart';
 
 class DeviceDetailScreen extends StatelessWidget {
   const DeviceDetailScreen({super.key});
 
   static const _blue = Color(0xFF1877F2);
-  static const _bg = Color(0xFFF6F6F6);
 
   void _showDisconnectDialog(BuildContext context) {
     showDialog(
@@ -122,7 +121,7 @@ class DeviceDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: Color(0xFFF6F6F6),
       body: SafeArea(
         child: Column(
           children: [
@@ -138,8 +137,10 @@ class DeviceDetailScreen extends StatelessWidget {
                     const SizedBox(height: 16),
                     Text(
                       context.tr.todayHealthData,
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                     const SizedBox(height: 10),
                     _gridTopStats(context),
@@ -205,10 +206,7 @@ class DeviceDetailScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             padding: const EdgeInsets.all(6),
-            child: Image.asset(
-              'assets/images/watch.jpg',
-              fit: BoxFit.contain,
-            ),
+            child: Image.asset('assets/images/watch.jpg', fit: BoxFit.contain),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -225,8 +223,11 @@ class DeviceDetailScreen extends StatelessWidget {
                 const SizedBox(height: 6),
                 Row(
                   children: [
-                    const Icon(Icons.bluetooth,
-                        size: 16, color: Colors.black54),
+                    const Icon(
+                      Icons.bluetooth,
+                      size: 16,
+                      color: Colors.black54,
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       context.tr.connected,
@@ -236,7 +237,7 @@ class DeviceDetailScreen extends StatelessWidget {
                       ),
                     ),
                   ],
-                )
+                ),
               ],
             ),
           ),

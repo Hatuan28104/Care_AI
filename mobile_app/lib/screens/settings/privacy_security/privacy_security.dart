@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:demo_app/models/tr.dart';
-import 'package:demo_app/app_settings.dart';
+import 'package:Care_AI/models/tr.dart';
+import 'package:Care_AI/app_settings.dart';
 import 'privacy_policy.dart';
 import 'terms_of_service.dart';
-import 'package:demo_app/api/auth_api.dart';
-import 'package:demo_app/models/login_history_item.dart';
-import 'package:demo_app/widgets/app_header.dart';
+import 'package:Care_AI/api/auth_api.dart';
+import 'package:Care_AI/models/login_history_item.dart';
+import 'package:Care_AI/widgets/app_header.dart';
 
 class PrivacySecurityScreen extends StatefulWidget {
   const PrivacySecurityScreen({super.key});
@@ -133,10 +133,7 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
               ),
               child: Text(
                 context.tr.change,
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w400,
-                ),
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
               ),
             ),
           ),
@@ -158,9 +155,7 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
           content: TextField(
             controller: ctrl,
             keyboardType: TextInputType.phone,
-            decoration: InputDecoration(
-              hintText: context.tr.phoneExample,
-            ),
+            decoration: InputDecoration(hintText: context.tr.phoneExample),
           ),
           actions: [
             TextButton(
@@ -181,9 +176,9 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
     final cleaned = result.trim();
     if (cleaned.isNotEmpty && !_looksLikePhone(cleaned)) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.tr.invalidPhone)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.tr.invalidPhone)));
       return;
     }
 
@@ -194,14 +189,14 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
       AppSettings.phoneNumber.value = cleaned;
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.tr.phoneUpdated)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.tr.phoneUpdated)));
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     }
   }
 
