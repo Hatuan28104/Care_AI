@@ -1940,6 +1940,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Basic Information'**
   String get basicInfo;
+
+  /// No description provided for @messageInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Message details:'**
+  String get messageInfo;
+
+  /// No description provided for @relative.
+  ///
+  /// In en, this message translates to:
+  /// **'Relative:'**
+  String get relative;
+
+  /// No description provided for @time.
+  ///
+  /// In en, this message translates to:
+  /// **'Time:'**
+  String get time;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

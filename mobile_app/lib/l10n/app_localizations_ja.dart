@@ -930,4 +930,13 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get basicInfo => '基本情報';
+
+  @override
+  String get messageInfo => 'メッセージ情報:';
+
+  @override
+  String get relative => '家族:';
+
+  @override
+  String get time => '時間:';
 }

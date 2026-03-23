@@ -341,5 +341,8 @@
   },
     "deleteConversation": "会話を削除",
   "confirmDeleteConversation": "この会話を削除してもよろしいですか？",
-  "basicInfo": "基本情報"
+  "basicInfo": "基本情報",
+    "messageInfo": "メッセージ情報:",
+  "relative": "家族:",
+  "time": "時間:"
 }

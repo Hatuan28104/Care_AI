@@ -6,6 +6,7 @@ import 'package:demo_app/models/tr.dart';
 import 'package:demo_app/widgets/common_confirm_dialog.dart';
 import 'package:demo_app/api/alert_api.dart';
 import 'package:demo_app/widgets/app_header.dart';
+import 'alert_detail.dart';
 
 class AlertScreen extends StatefulWidget {
   const AlertScreen({super.key});
@@ -104,15 +105,16 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
     });
   }
 
-  Color _getBorderColorByLevel(int level) {
-    switch (level) {
-      case 3:
-        return Colors.red;
-      case 2:
-        return Colors.orange;
-      default:
-        return Colors.green;
-    }
+  Color _getBorderColor(String title) {
+    final t = title.toLowerCase();
+
+    if (t.contains("nguy hiểm")) return Colors.red;
+
+    if (t.contains("áp lực")) return const Color(0xFFE6EA00);
+
+    if (t.contains("buồn")) return const Color(0xFF139D4A);
+
+    return Colors.grey.shade300;
   }
   /* ================= BUILD ================= */
 
@@ -194,7 +196,7 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
   /* ================= ITEM ================= */
 
   Widget _tile(BuildContext context, _AlertItem item) {
-    final borderColor = _getBorderColorByLevel(item.level);
+    final borderColor = _getBorderColor(item.title);
 
     return Slidable(
       key: ValueKey(item.id),
@@ -238,7 +240,11 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
           await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => _AlertDetail(item: item),
+              builder: (_) => AlertMessageDetail(
+                title: item.title,
+                detail: item.detail,
+                time: item.time,
+              ),
             ),
           );
 
@@ -301,108 +307,6 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
               if (!item.isRead) const Icon(Icons.circle, size: 8, color: _blue),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/* ================= DETAIL ================= */
-
-class _AlertDetail extends StatelessWidget {
-  const _AlertDetail({required this.item});
-  final _AlertItem item;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF6F6F6),
-      body: SafeArea(
-        child: Column(
-          children: [
-            AppHeader(
-              title: context.tr.alert,
-              showBack: true,
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 500),
-                    child: Container(
-                      padding: const EdgeInsets.all(18),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                            color: const Color.fromARGB(255, 254, 136, 136)),
-                        boxShadow: const [
-                          BoxShadow(
-                            blurRadius: 12,
-                            color: Color(0x11000000),
-                            offset: Offset(0, 6),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                item.icon,
-                                color: item.iconColor,
-                                size: 24,
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  item.title,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 17,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          Row(
-                            children: [
-                              const Icon(Icons.access_time,
-                                  size: 14, color: Colors.grey),
-                              const SizedBox(width: 6),
-                              Text(
-                                item.time,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          Container(
-                            height: 1,
-                            color: Colors.grey.shade200,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            item.detail,
-                            style: const TextStyle(
-                              fontSize: 15,
-                              height: 1.5,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
         ),
       ),
     );

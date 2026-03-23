@@ -340,5 +340,8 @@
   },
     "deleteConversation": "Xóa cuộc trò chuyện",
   "confirmDeleteConversation": "Bạn có chắc muốn xóa cuộc trò chuyện này không?",
-  "basicInfo": "Thông tin cơ bản"
+  "basicInfo": "Thông tin cơ bản",
+    "messageInfo": "Thông tin tin nhắn:",
+  "relative": "Người thân:",
+  "time": "Thời gian:"
 }

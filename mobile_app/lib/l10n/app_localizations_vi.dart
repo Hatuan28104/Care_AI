@@ -930,4 +930,13 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get basicInfo => 'Thông tin cơ bản';
+
+  @override
+  String get messageInfo => 'Thông tin tin nhắn:';
+
+  @override
+  String get relative => 'Người thân:';
+
+  @override
+  String get time => 'Thời gian:';
 }

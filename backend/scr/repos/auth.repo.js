@@ -94,11 +94,20 @@ export async function requestLoginOtp(phone) {
 export async function verifyOtp(phone, otp, req) {
   const data = otpStore.get(phone);
 
-  if (!data) throw new Error("OTP không tồn tại");
-  if (Date.now() > data.expires) throw new Error("OTP hết hạn");
-  if (data.otp !== otp) throw new Error("OTP không đúng");
+  const isDevBypass =
+    process.env.DEV_MODE === "true" && otp === "123456";
 
-  otpStore.delete(phone);
+  if (!isDevBypass) {
+    if (!data) throw new Error("OTP không tồn tại");
+    if (Date.now() > data.expires) throw new Error("OTP hết hạn");
+    if (data.otp !== otp) throw new Error("OTP không đúng");
+
+    otpStore.delete(phone);
+  } else {
+    console.log("🔥 DEV MODE OTP BYPASS:", phone);
+
+    otpStore.delete(phone);
+  }
 
   const db = getDB();
   const localPhone = normalizeVnPhone(phone);

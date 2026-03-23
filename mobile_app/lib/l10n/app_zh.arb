@@ -340,6 +340,9 @@
   "noAlerts": "没有通知",
   "alert": "警报",
   "notifications": "通知",
-  "basicInfo": "基本信息"
+  "basicInfo": "基本信息",
+    "messageInfo": "消息信息:",
+  "relative": "亲属:",
+  "time": "时间:"
 
 }

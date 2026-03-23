@@ -3,7 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:demo_app/screens/settings/profile/my_profile.dart';
 import 'package:demo_app/screens/welcome_screen.dart';
 import '../../app_settings.dart';
-
+import 'package:demo_app/widgets/app_header.dart';
 import 'privacy_security/privacy_security.dart';
 import 'text_size.dart';
 import 'language.dart';
@@ -36,12 +36,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     'ja': '日本語',
     'zh': '中文',
     'ko': '한국어',
-    'fr': 'Français',
-    'de': 'Deutsch',
-    'es': 'Español',
-    'it': 'Italiano',
-    'pt': 'Português',
-    'ru': 'Русский',
   };
   Future<void> _loadSettings() async {
     try {
@@ -76,105 +70,102 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF6F6F6),
-      appBar: _appBar(context),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _section(context.tr.account, fontSize: 18),
-              _card([
-                _item(
-                  icon: Icons.person_outline,
-                  text: context.tr.myProfile,
-                  onTap: () => _go(context, const MyProfileScreen()),
+        child: Column(
+          children: [
+            AppHeader(
+              title: context.tr.settings,
+              showBack: true,
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _section(context.tr.account),
+                    _card([
+                      _item(
+                        icon: Icons.person_outline,
+                        text: context.tr.myProfile,
+                        onTap: () => _go(context, const MyProfileScreen()),
+                      ),
+                    ]),
+                    _card([
+                      _item(
+                        icon: Icons.lock_outline,
+                        text: context.tr.privacySecurity,
+                        onTap: () =>
+                            _go(context, const PrivacySecurityScreen()),
+                      ),
+                    ]),
+                    _section(context.tr.display),
+                    _card([
+                      _item(
+                        icon: Icons.text_fields,
+                        text: context.tr.textSize,
+                        subtitle: _textSizeLabel(AppSettings.textScale.value),
+                        onTap: () => _go(context, const TextSizeScreen()),
+                      ),
+                    ]),
+                    _card([
+                      _item(
+                        icon: Icons.language,
+                        text: context.tr.language,
+                        subtitle: _languageNames[
+                                AppSettings.locale.value.languageCode] ??
+                            'English',
+                        onTap: () => _go(context, const LanguageScreen()),
+                      ),
+                    ]),
+                    _section(context.tr.notifications),
+                    _card([
+                      _switchItem(
+                        icon: Icons.notifications_none,
+                        text: context.tr.notifications,
+                        notifier: AppSettings.notificationOn,
+                        settingKey: "notificationOn",
+                      ),
+                    ]),
+                    _card([
+                      _item(
+                        icon: Icons.volume_up_outlined,
+                        text: context.tr.soundVibration,
+                        onTap: () => _go(context, const SoundVibrationScreen()),
+                      ),
+                    ]),
+                    _section(context.tr.device),
+                    _card([
+                      _switchItem(
+                        icon: Icons.health_and_safety_outlined,
+                        text: context.tr.healthAlert,
+                        notifier: AppSettings.healthAlertOn,
+                        settingKey: "healthAlertOn",
+                      ),
+                    ]),
+                    _card([
+                      _switchItem(
+                        icon: Icons.sync,
+                        text: context.tr.syncData,
+                        notifier: AppSettings.syncDataOn,
+                        settingKey: "syncDataOn",
+                      ),
+                    ]),
+                    _section(context.tr.support),
+                    _card([
+                      _item(
+                        icon: Icons.help_outline,
+                        text: context.tr.helpSupport,
+                        onTap: () => _go(context, const HelpSupportScreen()),
+                      ),
+                    ]),
+                    const SizedBox(height: 20),
+                    _logoutButton(context),
+                  ],
                 ),
-                _item(
-                  icon: Icons.lock_outline,
-                  text: context.tr.privacySecurity,
-                  onTap: () => _go(context, const PrivacySecurityScreen()),
-                ),
-              ]),
-              _section(context.tr.display),
-              _card([
-                _item(
-                  icon: Icons.text_fields,
-                  text: context.tr.textSize,
-                  subtitle: _textSizeLabel(AppSettings.textScale.value),
-                  onTap: () => _go(context, const TextSizeScreen()),
-                ),
-                _item(
-                  icon: Icons.language,
-                  text: context.tr.language,
-                  subtitle:
-                      _languageNames[AppSettings.locale.value.languageCode] ??
-                          'English',
-                  onTap: () => _go(context, const LanguageScreen()),
-                ),
-              ]),
-              _section(context.tr.notifications),
-              _card([
-                _switchItem(
-                  icon: Icons.notifications_none,
-                  text: context.tr.notifications,
-                  notifier: AppSettings.notificationOn,
-                  settingKey: "notificationOn",
-                ),
-                _item(
-                  icon: Icons.volume_up_outlined,
-                  text: context.tr.soundVibration,
-                  onTap: () => _go(context, const SoundVibrationScreen()),
-                ),
-              ]),
-              _section(context.tr.device),
-              _card([
-                _switchItem(
-                  icon: Icons.health_and_safety_outlined,
-                  text: context.tr.healthAlert,
-                  notifier: AppSettings.healthAlertOn,
-                  settingKey: "healthAlertOn",
-                ),
-                _switchItem(
-                  icon: Icons.sync,
-                  text: context.tr.syncData,
-                  notifier: AppSettings.syncDataOn,
-                  settingKey: "syncDataOn",
-                ),
-              ]),
-              _section(context.tr.support),
-              _card([
-                _item(
-                  icon: Icons.help_outline,
-                  text: context.tr.helpSupport,
-                  onTap: () => _go(context, const HelpSupportScreen()),
-                ),
-              ]),
-              const SizedBox(height: 20),
-              _logoutButton(context),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  PreferredSizeWidget _appBar(BuildContext context) {
-    return AppBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      centerTitle: true,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new_rounded,
-            color: Colors.black, size: 20),
-        onPressed: () => Navigator.pop(context),
-      ),
-      title: Text(
-        context.tr.settings,
-        style: const TextStyle(
-          fontWeight: FontWeight.w700,
-          fontSize: 24,
-          color: Colors.black,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -182,13 +173,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _section(String text, {double fontSize = 16}) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8, top: 16),
+      padding: const EdgeInsets.only(top: 2, bottom: 6),
       child: Text(
         text,
         style: TextStyle(
           fontSize: fontSize,
-          fontWeight: FontWeight.w800,
-          color: Colors.black,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );
@@ -196,9 +186,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _card(List<Widget> children) {
     return Container(
+      margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
-        color: const Color(0xF9F0F0F0),
-        borderRadius: BorderRadius.circular(5),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 8,
+            color: Colors.black.withOpacity(0.06),
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Column(children: children),
     );
@@ -210,16 +208,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
     String? subtitle,
     required VoidCallback onTap,
   }) {
-    return ListTile(
-      leading: Icon(icon, color: _blue),
-      title: Text(text, style: const TextStyle(fontWeight: FontWeight.w600)),
-      subtitle: subtitle != null
-          ? Text(subtitle,
-              style: const TextStyle(
-                  fontSize: 12, color: Color.fromARGB(200, 0, 0, 0)))
-          : null,
-      trailing: const Icon(Icons.chevron_right),
+    return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Row(
+          children: [
+            Icon(icon, color: _blue, size: 22),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    text,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                    ),
+                  ),
+                  if (subtitle != null)
+                    Text(
+                      subtitle,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right, color: Colors.grey),
+          ],
+        ),
+      ),
     );
   }
 
@@ -232,30 +255,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return ValueListenableBuilder<bool>(
       valueListenable: notifier,
       builder: (_, value, __) {
-        return ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-          leading: Icon(icon, color: _blue),
-          title: Text(
-            text,
-            style: const TextStyle(fontWeight: FontWeight.w600),
-          ),
-          trailing: Transform.scale(
-            scale: 0.8,
-            child: Switch(
-              value: value,
-              onChanged: (v) async {
-                notifier.value = v;
-
-                try {
-                  await SettingsApi.updateSetting(settingKey, v);
-                } catch (e) {
-                  notifier.value = !v;
-                }
-              },
-              activeTrackColor: const Color.fromARGB(255, 19, 114, 255),
-              inactiveTrackColor: const Color.fromARGB(255, 218, 217, 217),
-              inactiveThumbColor: Colors.white,
-            ),
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          child: Row(
+            children: [
+              Icon(icon, color: _blue, size: 22),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  text,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+              Transform.scale(
+                scale: 0.8,
+                child: Switch(
+                  value: value,
+                  onChanged: (v) async {
+                    notifier.value = v;
+                    try {
+                      await SettingsApi.updateSetting(settingKey, v);
+                    } catch (e) {
+                      notifier.value = !v;
+                    }
+                  },
+                  activeColor: Colors.white,
+                  activeTrackColor: _blue,
+                  inactiveTrackColor: Colors.grey.shade300,
+                ),
+              )
+            ],
           ),
         );
       },

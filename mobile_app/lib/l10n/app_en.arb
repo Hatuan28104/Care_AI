@@ -340,5 +340,8 @@
   "noAlerts": "No alerts",
   "alert": "Alert",
   "notifications": "Notifications",
-  "basicInfo": "Basic Information"
+  "basicInfo": "Basic Information",
+   "messageInfo": "Message details:",
+  "relative": "Relative:",
+  "time": "Time:"
 }

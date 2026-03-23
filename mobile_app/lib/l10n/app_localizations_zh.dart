@@ -930,4 +930,13 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get basicInfo => '基本信息';
+
+  @override
+  String get messageInfo => '消息信息:';
+
+  @override
+  String get relative => '亲属:';
+
+  @override
+  String get time => '时间:';
 }

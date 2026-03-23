@@ -930,4 +930,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get basicInfo => 'Basic Information';
+
+  @override
+  String get messageInfo => 'Message details:';
+
+  @override
+  String get relative => 'Relative:';
+
+  @override
+  String get time => 'Time:';
 }
