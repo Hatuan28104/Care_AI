@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'welcome_screen.dart';
 import 'package:Care_AI/models/tr.dart';
+import 'package:Care_AI/api/auth_storage.dart';
+import 'home/home.dart';
+import 'package:Care_AI/api/auth_api.dart';
 
 class SplashIntroScreen extends StatefulWidget {
   const SplashIntroScreen({super.key});
@@ -57,7 +60,35 @@ class _SplashIntroScreenState extends State<SplashIntroScreen>
     });
   }
 
-  void _navigateToWelcome() {
+  void _navigateToWelcome() async {
+    final token = AuthStorage.getToken();
+    final userId = AuthStorage.getUserId();
+    final storedDeviceId = AuthStorage.getDeviceId();
+
+    if (token != null && userId != null && storedDeviceId != null) {
+      // Check if device matches
+      final currentDeviceId = await AuthApi.getDeviceId();
+      if (currentDeviceId == storedDeviceId) {
+        // Same device, go to home
+        Navigator.pushReplacement(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, anim, secondAnim) =>
+                HomeScreen(userId: userId),
+            transitionDuration: const Duration(milliseconds: 800),
+            transitionsBuilder: (context, anim, secondAnim, child) {
+              return FadeTransition(opacity: anim, child: child);
+            },
+          ),
+        );
+        return;
+      } else {
+        // Different device, clear stored data and go to welcome
+        await AuthStorage.clear();
+      }
+    }
+
+    // Not logged in or different device, go to welcome
     Navigator.pushReplacement(
       context,
       PageRouteBuilder(

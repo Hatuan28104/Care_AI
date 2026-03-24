@@ -510,7 +510,7 @@ abstract class AppLocalizations {
   /// No description provided for @confirmDelete.
   ///
   /// In en, this message translates to:
-  /// **'Confirm Delete'**
+  /// **'Confirmation'**
   String get confirmDelete;
 
   /// No description provided for @confirmDeleteDependent.
@@ -648,7 +648,7 @@ abstract class AppLocalizations {
   /// No description provided for @noData.
   ///
   /// In en, this message translates to:
-  /// **'No data available'**
+  /// **'No data'**
   String get noData;
 
   /// Distance travelled
@@ -876,13 +876,13 @@ abstract class AppLocalizations {
   /// No description provided for @setupComplete.
   ///
   /// In en, this message translates to:
-  /// **'Setup Complete!'**
+  /// **'Setup Complete'**
   String get setupComplete;
 
   /// No description provided for @deviceReady.
   ///
   /// In en, this message translates to:
-  /// **'Your device is ready to use'**
+  /// **'Your device is ready to sync health data.'**
   String get deviceReady;
 
   /// No description provided for @done.
@@ -1068,7 +1068,7 @@ abstract class AppLocalizations {
   /// No description provided for @deleteDevice.
   ///
   /// In en, this message translates to:
-  /// **'Delete Device'**
+  /// **'Disconnect'**
   String get deleteDevice;
 
   /// No description provided for @confirmDeleteDevice.
@@ -1770,7 +1770,7 @@ abstract class AppLocalizations {
   /// No description provided for @deleteDeviceConfirm.
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to delete this device?'**
+  /// **'Are you sure you want to disconnect this device?'**
   String get deleteDeviceConfirm;
 
   /// No description provided for @deleteGuardianConfirm.
@@ -1958,6 +1958,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Time:'**
   String get time;
+
+  /// No description provided for @allowAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow data access'**
+  String get allowAccess;
+
+  /// No description provided for @useDataFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'The app will use data from {appName}'**
+  String useDataFrom(Object appName);
+
+  /// No description provided for @syncFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync failed'**
+  String get syncFailed;
+
+  /// No description provided for @tryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Please try again'**
+  String get tryAgain;
+
+  /// No description provided for @connectData.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect data'**
+  String get connectData;
+
+  /// No description provided for @syncingData.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing data'**
+  String get syncingData;
+
+  /// No description provided for @fetchingFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching data from {appName}'**
+  String fetchingFrom(Object appName);
+
+  /// No description provided for @syncingPleaseWait.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing, please wait...'**
+  String get syncingPleaseWait;
+
+  /// No description provided for @dataSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Data source'**
+  String get dataSource;
+
+  /// No description provided for @selectHealthApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Select an app to sync health data'**
+  String get selectHealthApp;
+
+  /// No description provided for @noHealthApp.
+  ///
+  /// In en, this message translates to:
+  /// **'No health apps found on this device'**
+  String get noHealthApp;
+
+  /// No description provided for @readyToConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to connect'**
+  String get readyToConnect;
+
+  /// No description provided for @installedNotSupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Installed - not supported'**
+  String get installedNotSupported;
+
+  /// No description provided for @notSupported.
+  ///
+  /// In en, this message translates to:
+  /// **'{appName} is not supported for connection'**
+  String notSupported(Object appName);
+
+  /// No description provided for @loadHealthError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load health data'**
+  String get loadHealthError;
+
+  /// No description provided for @syncedToServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced {count} metrics to server'**
+  String syncedToServer(Object count);
+
+  /// No description provided for @syncError.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync failed: {error}'**
+  String syncError(Object error);
+
+  /// No description provided for @connectedHealthConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Health Connect connected'**
+  String get connectedHealthConnect;
+
+  /// No description provided for @healthNote.
+  ///
+  /// In en, this message translates to:
+  /// **'All available metrics are displayed. Missing data will show \"--\".'**
+  String get healthNote;
+
+  /// No description provided for @category.
+  ///
+  /// In en, this message translates to:
+  /// **'Category: {category}'**
+  String category(Object category);
+
+  /// No description provided for @allMetrics.
+  ///
+  /// In en, this message translates to:
+  /// **'All metrics from Health Connect'**
+  String get allMetrics;
+
+  /// No description provided for @noMetrics.
+  ///
+  /// In en, this message translates to:
+  /// **'No metrics available'**
+  String get noMetrics;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

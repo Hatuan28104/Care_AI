@@ -343,5 +343,74 @@
   "basicInfo": "Basic Information",
    "messageInfo": "Message details:",
   "relative": "Relative:",
-  "time": "Time:"
+  "time": "Time:",
+    "setupComplete": "Setup Complete",
+  "deviceReady": "Your device is ready to sync health data.",
+  "done": "Done",
+
+  "confirmDelete": "Confirmation",
+  "deleteDeviceConfirm": "Are you sure you want to disconnect this device?",
+  "deleteDevice": "Disconnect",
+  "cancel": "Cancel",
+
+  "disconnectDevice": "Disconnect Device","allowAccess": "Allow data access",
+  "useDataFrom": "The app will use data from {appName}",
+  "@useDataFrom": {
+    "placeholders": {
+      "appName": {}
+    }
+  },
+  "later": "Later",
+  "allow": "Allow",
+  "syncFailed": "Sync failed",
+  "tryAgain": "Please try again",
+
+  "connectData": "Connect data",
+  "syncingData": "Syncing data",
+  "fetchingFrom": "Fetching data from {appName}",
+  "@fetchingFrom": {
+    "placeholders": {
+      "appName": {}
+    }
+  },
+  "syncingPleaseWait": "Syncing, please wait...",
+
+  "dataSource": "Data source",
+  "selectHealthApp": "Select an app to sync health data",
+  "noHealthApp": "No health apps found on this device",
+  "readyToConnect": "Ready to connect",
+  "installedNotSupported": "Installed - not supported",
+  "notSupported": "{appName} is not supported for connection",
+  "@notSupported": {
+    "placeholders": {
+      "appName": {}
+    }
+  },
+
+  "loadHealthError": "Failed to load health data",
+  "syncedToServer": "Synced {count} metrics to server",
+  "@syncedToServer": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "syncError": "Sync failed: {error}",
+  "@syncError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+
+  "connected": "Connected",
+  "connectedHealthConnect": "Health Connect connected",
+  "healthNote": "All available metrics are displayed. Missing data will show \"--\".",
+  "noData": "No data",
+  "category": "Category: {category}",
+  "@category": {
+    "placeholders": {
+      "category": {}
+    }
+  },
+  "allMetrics": "All metrics from Health Connect",
+  "noMetrics": "No metrics available"
 }

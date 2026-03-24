@@ -7,12 +7,28 @@ import '../app_settings.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:Care_AI/config/api_config.dart';
 import 'api_exception.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'dart:io';
 
 class AuthApi {
   static String get baseUrl => ApiConfig.baseUrl;
 
-  /* =========================
-     REGISTER – GỬI OTP
+  /* =========================     GET DEVICE ID
+  ========================= */
+  static Future<String> getDeviceId() async {
+    final deviceInfo = DeviceInfoPlugin();
+    if (Platform.isAndroid) {
+      final androidInfo = await deviceInfo.androidInfo;
+      return androidInfo.id;
+    } else if (Platform.isIOS) {
+      final iosInfo = await deviceInfo.iosInfo;
+      return iosInfo.identifierForVendor ?? 'unknown';
+    } else {
+      return 'web-device';
+    }
+  }
+
+  /* =========================     REGISTER – GỬI OTP
   ========================= */
   static Future<void> requestRegisterOtp(String phone) async {
     final res = await http
@@ -61,6 +77,9 @@ class AuthApi {
      VERIFY OTP (CHUNG)
   ========================= */
   static Future<User> verifyOtp(String phone, String otp) async {
+    final deviceId = await getDeviceId();
+    final fcmToken = await FirebaseMessaging.instance.getToken();
+
     final res = await http
         .post(
           Uri.parse('$baseUrl/auth/verify-otp'),
@@ -68,6 +87,8 @@ class AuthApi {
           body: jsonEncode({
             'phone': phone,
             'otp': otp,
+            'deviceId': deviceId,
+            'fcmToken': fcmToken,
           }),
         )
         .timeout(const Duration(seconds: 5));
@@ -98,6 +119,7 @@ class AuthApi {
         throw ApiException('Không nhận được nguoiDungId');
       }
       await AuthStorage.saveUserId(user.nguoiDungId);
+      await AuthStorage.saveDeviceId(deviceId);
       AppSettings.phoneNumber.value = userRaw['sodienthoai']?.toString() ??
           userRaw['SoDienThoai']?.toString() ??
           '';

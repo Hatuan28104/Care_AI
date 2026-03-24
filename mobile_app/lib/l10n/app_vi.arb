@@ -343,5 +343,75 @@
   "basicInfo": "Thông tin cơ bản",
     "messageInfo": "Thông tin tin nhắn:",
   "relative": "Người thân:",
-  "time": "Thời gian:"
+  "time": "Thời gian:",  "setupComplete": "Thiết lập hoàn tất",
+  "deviceReady": "Thiết bị của bạn đã sẵn sàng để đồng bộ dữ liệu sức khỏe.",
+  "done": "Hoàn tất",
+
+  "confirmDelete": "Xác nhận",
+  "deleteDeviceConfirm": "Bạn có chắc muốn ngắt kết nối thiết bị này không?",
+  "deleteDevice": "Ngắt kết nối",
+  "cancel": "Hủy",
+
+  "disconnectDevice": "Ngắt kết nối thiết bị",
+
+  "allowAccess": "Cho phép truy cập dữ liệu",
+  "useDataFrom": "Ứng dụng sẽ sử dụng dữ liệu từ {appName}",
+  "@useDataFrom": {
+    "placeholders": {
+      "appName": {}
+    }
+  },
+  "later": "Để sau",
+  "allow": "Cho phép",
+  "syncFailed": "Không thể đồng bộ",
+  "tryAgain": "Vui lòng thử lại",
+
+  "connectData": "Kết nối dữ liệu",
+  "syncingData": "Đang đồng bộ dữ liệu",
+  "fetchingFrom": "Đang lấy dữ liệu từ {appName}",
+  "@fetchingFrom": {
+    "placeholders": {
+      "appName": {}
+    }
+  },
+  "syncingPleaseWait": "Đang đồng bộ, vui lòng chờ...",
+
+  "dataSource": "Nguồn dữ liệu",
+  "selectHealthApp": "Chọn ứng dụng để đồng bộ dữ liệu sức khỏe",
+  "noHealthApp": "Không tìm thấy ứng dụng sức khỏe nào trên thiết bị",
+  "readyToConnect": "Sẵn sàng kết nối",
+  "installedNotSupported": "Đã cài - chưa hỗ trợ kết nối",
+  "notSupported": "{appName} chưa được hỗ trợ kết nối",
+  "@notSupported": {
+    "placeholders": {
+      "appName": {}
+    }
+  },
+
+  "loadHealthError": "Không tải được dữ liệu sức khỏe",
+  "syncedToServer": "Đã đồng bộ {count} chỉ số lên server",
+  "@syncedToServer": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "syncError": "Không đồng bộ được: {error}",
+  "@syncError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+
+  "connected": "Đã kết nối",
+  "connectedHealthConnect": "Đã kết nối Health Connect",
+  "healthNote": "Hiển thị toàn bộ chỉ số được cung cấp. Chỉ số chưa có dữ liệu sẽ hiện \"--\".",
+  "noData": "Chưa có dữ liệu",
+  "category": "Danh mục: {category}",
+  "@category": {
+    "placeholders": {
+      "category": {}
+    }
+  },
+  "allMetrics": "Toàn bộ chỉ số từ Health Connect",
+  "noMetrics": "Chưa có danh sách chỉ số." 
 }

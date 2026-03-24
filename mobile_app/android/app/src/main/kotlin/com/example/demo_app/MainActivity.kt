@@ -6,11 +6,13 @@ import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.util.Base64
 import android.util.Log
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.permission.HealthPermission
+import androidx.health.connect.client.PermissionController
 import androidx.health.connect.client.aggregate.AggregationResult
 import androidx.health.connect.client.request.AggregateRequest
 import androidx.health.connect.client.request.ReadRecordsRequest
@@ -30,7 +32,6 @@ import androidx.health.connect.client.records.WeightRecord
 import androidx.health.connect.client.records.metadata.DataOrigin
 import androidx.health.connect.client.response.ReadRecordsResponse
 import androidx.health.connect.client.time.TimeRangeFilter
-import androidx.core.app.ActivityCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
@@ -506,57 +507,35 @@ class MainActivity : FlutterActivity() {
         }
 
         pendingPermissionResult = result
-        // Trên Android 14+ (SDK 34+), HealthPermissionsRequestContract của thư viện dùng runtime permission.
-        // Nên ta request trực tiếp toàn bộ permission Health Connect cần đọc dữ liệu.
-        val allPermissions = requestedPermissions.toTypedArray()
-        val allGranted = requestedPermissions.all {
-            checkSelfPermission(it) == PackageManager.PERMISSION_GRANTED
-        }
-        Log.d(TAG, "allGrantedBeforeRequest=$allGranted")
-        Log.d(TAG, "requestedPermissions=${requestedPermissions.joinToString()}")
 
-        if (allGranted) {
-            Log.d(TAG, "All permissions already granted")
-            pendingPermissionResult?.success(true)
-            pendingPermissionResult = null
-            return
-        }
+        lifecycleScope.launch {
+            try {
+                val client = HealthConnectClient.getOrCreate(this@MainActivity)
+                val granted = client.permissionController.getGrantedPermissions()
+                val allGranted = requestedPermissions.all { granted.contains(it) }
+                Log.d(TAG, "allGrantedBeforeRequest=$allGranted")
+                Log.d(TAG, "requestedPermissions=${requestedPermissions.joinToString()}")
 
-        ActivityCompat.requestPermissions(
-            this,
-            allPermissions,
-            HEALTH_PERMISSION_REQUEST_CODE
-        )
+                if (allGranted) {
+                    Log.d(TAG, "All permissions already granted")
+                    pendingPermissionResult?.success(true)
+                    pendingPermissionResult = null
+                    return@launch
+                }
+
+                val contract = PermissionController.createRequestPermissionResultContract()
+                val intent = contract.createIntent(this@MainActivity, requestedPermissions)
+                startActivityForResult(intent, HEALTH_PERMISSION_REQUEST_CODE)
+
+            } catch (e: Exception) {
+                Log.e(TAG, "requestHealthPermission error", e)
+                pendingPermissionResult?.error("ERROR", e.message, null)
+                pendingPermissionResult = null
+            }
+        }
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
-        if (requestCode != HEALTH_PERMISSION_REQUEST_CODE) return
-        Log.d(TAG, "onRequestPermissionsResult called code=$requestCode")
-        Log.d(TAG, "permissions=${permissions.joinToString()}")
-        Log.d(TAG, "grantResults=${grantResults.joinToString()}")
-
-        val grantedFromResult = grantResults.isNotEmpty() &&
-            grantResults.any { it == PackageManager.PERMISSION_GRANTED }
-
-        val grantedFromCurrentState = requestedPermissions.any { permission ->
-            checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
-        }
-
-        val granted = grantedFromResult || grantedFromCurrentState
-        Log.d(
-            TAG,
-            "grantedFromResult=$grantedFromResult grantedFromCurrentState=$grantedFromCurrentState finalGranted=$granted"
-        )
-
-        pendingPermissionResult?.success(granted)
-        pendingPermissionResult = null
-    }
 
     // 🔥 CHECK PERMISSION
     private fun checkPermission(result: MethodChannel.Result) {
@@ -762,6 +741,34 @@ class MainActivity : FlutterActivity() {
                 )
             } catch (e: Exception) {
                 result.error("ERROR", e.toString(), null)
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode != HEALTH_PERMISSION_REQUEST_CODE) return
+        Log.d(TAG, "onActivityResult called code=$requestCode resultCode=$resultCode")
+
+        val contract = PermissionController.createRequestPermissionResultContract()
+        val granted = contract.parseResult(resultCode, data)
+        Log.d(TAG, "Granted permissions: $granted")
+
+        lifecycleScope.launch {
+            try {
+                val client = HealthConnectClient.getOrCreate(this@MainActivity)
+                val currentGranted = client.permissionController.getGrantedPermissions()
+                val finalGranted = requestedPermissions.any { currentGranted.contains(it) }
+                Log.d(TAG, "finalGranted=$finalGranted")
+
+                pendingPermissionResult?.success(finalGranted)
+                pendingPermissionResult = null
+
+            } catch (e: Exception) {
+                Log.e(TAG, "onActivityResult error", e)
+                pendingPermissionResult?.error("ERROR", e.message, null)
+                pendingPermissionResult = null
             }
         }
     }

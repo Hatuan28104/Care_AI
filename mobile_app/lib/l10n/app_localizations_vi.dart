@@ -213,7 +213,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get delete => 'Xóa';
 
   @override
-  String get confirmDelete => 'Xác nhận xóa';
+  String get confirmDelete => 'Xác nhận';
 
   @override
   String get confirmDeleteDependent => 'Bạn có chắc chắn muốn xóa người phụ thuộc này khỏi gia đình không?';
@@ -396,10 +396,10 @@ class AppLocalizationsVi extends AppLocalizations {
   String get continueButton => 'Tiếp tục';
 
   @override
-  String get setupComplete => 'Thiết lập hoàn tất!';
+  String get setupComplete => 'Thiết lập hoàn tất';
 
   @override
-  String get deviceReady => 'Thiết bị của bạn đã sẵn sàng sử dụng';
+  String get deviceReady => 'Thiết bị của bạn đã sẵn sàng để đồng bộ dữ liệu sức khỏe.';
 
   @override
   String get done => 'Hoàn tất';
@@ -494,7 +494,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get ofCareAI => 'của Care AI.';
 
   @override
-  String get deleteDevice => 'Xóa thiết bị';
+  String get deleteDevice => 'Ngắt kết nối';
 
   @override
   String get confirmDeleteDevice => 'Bạn có chắc chắn muốn xóa thiết bị này không?';
@@ -845,7 +845,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get stressLevel => 'Mức độ căng thẳng';
 
   @override
-  String get deleteDeviceConfirm => 'Bạn có chắc chắn muốn xóa thiết bị này không?';
+  String get deleteDeviceConfirm => 'Bạn có chắc muốn ngắt kết nối thiết bị này không?';
 
   @override
   String get deleteGuardianConfirm => 'Bạn có chắc chắn muốn xóa người giám hộ này khỏi gia đình không?';
@@ -939,4 +939,82 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get time => 'Thời gian:';
+
+  @override
+  String get allowAccess => 'Cho phép truy cập dữ liệu';
+
+  @override
+  String useDataFrom(Object appName) {
+    return 'Ứng dụng sẽ sử dụng dữ liệu từ $appName';
+  }
+
+  @override
+  String get syncFailed => 'Không thể đồng bộ';
+
+  @override
+  String get tryAgain => 'Vui lòng thử lại';
+
+  @override
+  String get connectData => 'Kết nối dữ liệu';
+
+  @override
+  String get syncingData => 'Đang đồng bộ dữ liệu';
+
+  @override
+  String fetchingFrom(Object appName) {
+    return 'Đang lấy dữ liệu từ $appName';
+  }
+
+  @override
+  String get syncingPleaseWait => 'Đang đồng bộ, vui lòng chờ...';
+
+  @override
+  String get dataSource => 'Nguồn dữ liệu';
+
+  @override
+  String get selectHealthApp => 'Chọn ứng dụng để đồng bộ dữ liệu sức khỏe';
+
+  @override
+  String get noHealthApp => 'Không tìm thấy ứng dụng sức khỏe nào trên thiết bị';
+
+  @override
+  String get readyToConnect => 'Sẵn sàng kết nối';
+
+  @override
+  String get installedNotSupported => 'Đã cài - chưa hỗ trợ kết nối';
+
+  @override
+  String notSupported(Object appName) {
+    return '$appName chưa được hỗ trợ kết nối';
+  }
+
+  @override
+  String get loadHealthError => 'Không tải được dữ liệu sức khỏe';
+
+  @override
+  String syncedToServer(Object count) {
+    return 'Đã đồng bộ $count chỉ số lên server';
+  }
+
+  @override
+  String syncError(Object error) {
+    return 'Không đồng bộ được: $error';
+  }
+
+  @override
+  String get connectedHealthConnect => 'Đã kết nối Health Connect';
+
+  @override
+  String get healthNote => 'Hiển thị toàn bộ chỉ số được cung cấp. Chỉ số chưa có dữ liệu sẽ hiện \"--\".';
+
+  @override
+  String category(Object category) {
+    return 'Danh mục: $category';
+  }
+
+  @override
+  String get allMetrics => 'Toàn bộ chỉ số từ Health Connect';
+
+  @override
+  String get noMetrics => 'Chưa có danh sách chỉ số.';
 }

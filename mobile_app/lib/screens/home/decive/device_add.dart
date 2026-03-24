@@ -1,9 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:Care_AI/api/auth_storage.dart';
 import 'package:Care_AI/api/health_service.dart';
-import 'package:Care_AI/screens/home/home.dart';
 import 'package:Care_AI/screens/home/decive/device_sync.dart';
+import 'package:Care_AI/models/tr.dart';
 
 class AddDeviceScreen extends StatefulWidget {
   const AddDeviceScreen({super.key});
@@ -31,7 +30,9 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
       final supported = e['supported'] == true;
       return _HealthSource(
         name: (e['name'] ?? '').toString(),
-        status: supported ? "Sẵn sàng kết nối" : "Đã cài - chưa hỗ trợ kết nối",
+        status: supported
+            ? context.tr.readyToConnect
+            : context.tr.installedNotSupported,
         supported: supported,
         iconBase64: (e['iconBase64'] as String?),
       );
@@ -60,8 +61,8 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
           onPressed: () => Navigator.pop(context),
         ),
 
-        title: const Text(
-          "Nguồn dữ liệu",
+        title: Text(
+          context.tr.dataSource,
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.w700,
@@ -80,10 +81,10 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
           const SizedBox(height: 10),
 
           // SUBTITLE
-          const Padding(
+          Padding(
             padding: EdgeInsets.symmetric(horizontal: 20),
             child: Text(
-              "Chọn ứng dụng để đồng bộ dữ liệu sức khỏe",
+              context.tr.selectHealthApp,
               style: TextStyle(
                 fontSize: 13,
                 color: Colors.grey,
@@ -98,9 +99,9 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
                 : apps.isEmpty
-                    ? const Center(
+                    ? Center(
                         child: Text(
-                          "Không tìm thấy ứng dụng sức khỏe nào trên thiết bị",
+                          context.tr.noHealthApp,
                           style: TextStyle(color: Colors.black54),
                           textAlign: TextAlign.center,
                         ),
@@ -131,7 +132,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text(
-                                      '${source.name} chưa được hỗ trợ kết nối',
+                                      context.tr.notSupported(source.name),
                                     ),
                                     backgroundColor: Colors.orange,
                                   ),

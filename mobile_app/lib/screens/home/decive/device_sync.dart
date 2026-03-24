@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:Care_AI/screens/home/decive/decive_allow.dart';
 import 'package:Care_AI/screens/home/decive/device_complete.dart';
+import 'package:Care_AI/models/tr.dart';
 
 class AllowDeviceScreen extends StatelessWidget {
   final String appName;
@@ -17,8 +18,8 @@ class AllowDeviceScreen extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: 40),
-            const Text(
-              "Cho phép truy cập dữ liệu",
+            Text(
+              context.tr.allowAccess,
               style: TextStyle(
                 fontSize: 26,
                 fontWeight: FontWeight.w800,
@@ -29,7 +30,7 @@ class AllowDeviceScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30),
               child: Text(
-                "Ứng dụng sẽ sử dụng dữ liệu từ $appName",
+                context.tr.useDataFrom(appName),
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: Colors.grey),
               ),
@@ -42,7 +43,7 @@ class AllowDeviceScreen extends StatelessWidget {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text("Để sau"),
+                      child: Text(context.tr.later),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -76,9 +77,9 @@ class AllowDeviceScreen extends StatelessWidget {
                           showDialog(
                             context: context,
                             builder: (_) => AlertDialog(
-                              title: const Text("Không thể đồng bộ"),
-                              content: const Text(
-                                "Vui lòng thử lại.",
+                              title: Text(context.tr.syncFailed),
+                              content: Text(
+                                context.tr.tryAgain,
                               ),
                               actions: [
                                 TextButton(
@@ -94,7 +95,7 @@ class AllowDeviceScreen extends StatelessWidget {
                         backgroundColor: blue,
                         foregroundColor: Colors.white,
                       ),
-                      child: const Text("Cho phép"),
+                      child: Text(context.tr.allow),
                     ),
                   ),
                 ],

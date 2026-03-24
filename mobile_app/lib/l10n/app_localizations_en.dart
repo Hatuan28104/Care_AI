@@ -213,7 +213,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get delete => 'Delete';
 
   @override
-  String get confirmDelete => 'Confirm Delete';
+  String get confirmDelete => 'Confirmation';
 
   @override
   String get confirmDeleteDependent => 'Are you sure you want to remove this dependent from the family?';
@@ -282,7 +282,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get view => 'View';
 
   @override
-  String get noData => 'No data available';
+  String get noData => 'No data';
 
   @override
   String get distance => 'Distance';
@@ -396,10 +396,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get continueButton => 'Continue';
 
   @override
-  String get setupComplete => 'Setup Complete!';
+  String get setupComplete => 'Setup Complete';
 
   @override
-  String get deviceReady => 'Your device is ready to use';
+  String get deviceReady => 'Your device is ready to sync health data.';
 
   @override
   String get done => 'Done';
@@ -494,7 +494,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ofCareAI => 'of Care AI.';
 
   @override
-  String get deleteDevice => 'Delete Device';
+  String get deleteDevice => 'Disconnect';
 
   @override
   String get confirmDeleteDevice => 'Are you sure you want to delete this device?';
@@ -845,7 +845,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stressLevel => 'Stress level';
 
   @override
-  String get deleteDeviceConfirm => 'Are you sure you want to delete this device?';
+  String get deleteDeviceConfirm => 'Are you sure you want to disconnect this device?';
 
   @override
   String get deleteGuardianConfirm => 'Are you sure you want to remove this guardian from the family?';
@@ -939,4 +939,82 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get time => 'Time:';
+
+  @override
+  String get allowAccess => 'Allow data access';
+
+  @override
+  String useDataFrom(Object appName) {
+    return 'The app will use data from $appName';
+  }
+
+  @override
+  String get syncFailed => 'Sync failed';
+
+  @override
+  String get tryAgain => 'Please try again';
+
+  @override
+  String get connectData => 'Connect data';
+
+  @override
+  String get syncingData => 'Syncing data';
+
+  @override
+  String fetchingFrom(Object appName) {
+    return 'Fetching data from $appName';
+  }
+
+  @override
+  String get syncingPleaseWait => 'Syncing, please wait...';
+
+  @override
+  String get dataSource => 'Data source';
+
+  @override
+  String get selectHealthApp => 'Select an app to sync health data';
+
+  @override
+  String get noHealthApp => 'No health apps found on this device';
+
+  @override
+  String get readyToConnect => 'Ready to connect';
+
+  @override
+  String get installedNotSupported => 'Installed - not supported';
+
+  @override
+  String notSupported(Object appName) {
+    return '$appName is not supported for connection';
+  }
+
+  @override
+  String get loadHealthError => 'Failed to load health data';
+
+  @override
+  String syncedToServer(Object count) {
+    return 'Synced $count metrics to server';
+  }
+
+  @override
+  String syncError(Object error) {
+    return 'Sync failed: $error';
+  }
+
+  @override
+  String get connectedHealthConnect => 'Health Connect connected';
+
+  @override
+  String get healthNote => 'All available metrics are displayed. Missing data will show \"--\".';
+
+  @override
+  String category(Object category) {
+    return 'Category: $category';
+  }
+
+  @override
+  String get allMetrics => 'All metrics from Health Connect';
+
+  @override
+  String get noMetrics => 'No metrics available';
 }

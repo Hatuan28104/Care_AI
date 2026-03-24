@@ -3,6 +3,7 @@ import 'package:Care_AI/api/health_service.dart';
 import 'package:Care_AI/screens/home/decive/device_add.dart';
 import 'package:Care_AI/screens/home/decive/device_detail.dart';
 import 'package:Care_AI/services/health_connect_prefs.dart';
+import 'package:Care_AI/models/tr.dart';
 
 /// Tab Thiết bị trong [HomeScreen]: đã đồng bộ + còn quyền HC → hiện [DeviceDetailScreen] luôn;
 /// chưa thì hiện màn kết nối (card + nút).
@@ -133,8 +134,8 @@ class DeviceConnectPlaceholder extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
             ),
           ),
-          child: const Text(
-            'Kết nối dữ liệu',
+          child: Text(
+            context.tr.connectData,
             style: TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w700,

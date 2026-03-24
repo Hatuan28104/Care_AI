@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:Care_AI/api/health_service.dart';
 import 'package:Care_AI/services/health_backend_sync.dart';
+import 'package:Care_AI/models/tr.dart';
 
 class DeviceSyncScreen extends StatefulWidget {
   final String appName;
@@ -93,8 +94,8 @@ class _DeviceSyncScreenState extends State<DeviceSyncScreen>
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 40),
-              const Text(
-                "Đang đồng bộ dữ liệu",
+              Text(
+                context.tr.syncingData,
                 style: TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.w800,
@@ -104,7 +105,7 @@ class _DeviceSyncScreenState extends State<DeviceSyncScreen>
               ),
               const SizedBox(height: 8),
               Text(
-                "Đang lấy dữ liệu từ ${widget.appName}",
+                context.tr.fetchingFrom(widget.appName),
                 style: const TextStyle(color: Colors.grey),
                 textAlign: TextAlign.center,
               ),
@@ -114,8 +115,8 @@ class _DeviceSyncScreenState extends State<DeviceSyncScreen>
                 child: const Icon(Icons.sync, size: 60, color: blue),
               ),
               const SizedBox(height: 30),
-              const Text(
-                "Đang đồng bộ, vui lòng chờ...",
+              Text(
+                context.tr.syncingPleaseWait,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,

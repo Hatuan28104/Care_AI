@@ -213,7 +213,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get delete => '削除';
 
   @override
-  String get confirmDelete => '削除の確認';
+  String get confirmDelete => '確認';
 
   @override
   String get confirmDeleteDependent => 'この被扶養者を家族から削除してもよろしいですか？';
@@ -384,7 +384,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get setupContinue => '初期設定を続行できます。';
 
   @override
-  String get disconnectDevice => 'デバイスを切断';
+  String get disconnectDevice => 'デバイスの接続を解除';
 
   @override
   String get syncingDevice => 'デバイス同期中';
@@ -396,10 +396,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get continueButton => '続行';
 
   @override
-  String get setupComplete => '設定完了！';
+  String get setupComplete => '設定が完了しました';
 
   @override
-  String get deviceReady => 'デバイスの準備ができました';
+  String get deviceReady => 'デバイスは健康データの同期準備ができています。';
 
   @override
   String get done => '完了';
@@ -494,7 +494,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ofCareAI => 'Care AIの';
 
   @override
-  String get deleteDevice => 'デバイスを削除';
+  String get deleteDevice => '接続を解除';
 
   @override
   String get confirmDeleteDevice => 'このデバイスを削除してもよろしいですか？';
@@ -845,7 +845,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get stressLevel => 'ストレスレベル';
 
   @override
-  String get deleteDeviceConfirm => 'このデバイスを削除しますか？';
+  String get deleteDeviceConfirm => 'このデバイスの接続を解除してもよろしいですか？';
 
   @override
   String get deleteGuardianConfirm => '家族からこの保護者を削除しますか？';
@@ -939,4 +939,82 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get time => '時間:';
+
+  @override
+  String get allowAccess => 'Allow data access';
+
+  @override
+  String useDataFrom(Object appName) {
+    return 'The app will use data from $appName';
+  }
+
+  @override
+  String get syncFailed => 'Sync failed';
+
+  @override
+  String get tryAgain => 'Please try again';
+
+  @override
+  String get connectData => 'Connect data';
+
+  @override
+  String get syncingData => 'Syncing data';
+
+  @override
+  String fetchingFrom(Object appName) {
+    return 'Fetching data from $appName';
+  }
+
+  @override
+  String get syncingPleaseWait => 'Syncing, please wait...';
+
+  @override
+  String get dataSource => 'Data source';
+
+  @override
+  String get selectHealthApp => 'Select an app to sync health data';
+
+  @override
+  String get noHealthApp => 'No health apps found on this device';
+
+  @override
+  String get readyToConnect => 'Ready to connect';
+
+  @override
+  String get installedNotSupported => 'Installed - not supported';
+
+  @override
+  String notSupported(Object appName) {
+    return '$appName is not supported for connection';
+  }
+
+  @override
+  String get loadHealthError => 'Failed to load health data';
+
+  @override
+  String syncedToServer(Object count) {
+    return 'Synced $count metrics to server';
+  }
+
+  @override
+  String syncError(Object error) {
+    return 'Sync failed: $error';
+  }
+
+  @override
+  String get connectedHealthConnect => 'Health Connect connected';
+
+  @override
+  String get healthNote => 'All available metrics are displayed. Missing data will show \"--\".';
+
+  @override
+  String category(Object category) {
+    return 'Category: $category';
+  }
+
+  @override
+  String get allMetrics => 'All metrics from Health Connect';
+
+  @override
+  String get noMetrics => 'No metrics available';
 }

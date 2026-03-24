@@ -3,7 +3,7 @@ import 'package:Care_AI/api/auth_storage.dart';
 import 'package:Care_AI/screens/home/home.dart';
 import 'package:Care_AI/services/health_connect_prefs.dart';
 import 'package:Care_AI/services/background_sync.dart';
-import '../../../models/tr.dart';
+import 'package:Care_AI/models/tr.dart';
 
 class DeviceCompleteScreen extends StatelessWidget {
   final String appName;

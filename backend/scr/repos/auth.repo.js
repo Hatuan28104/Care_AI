@@ -91,7 +91,7 @@ export async function requestLoginOtp(phone) {
 /* =========================
    VERIFY OTP
 ========================= */
-export async function verifyOtp(phone, otp, req) {
+export async function verifyOtp(phone, otp, req, deviceId) {
   const data = otpStore.get(phone);
 
   const isDevBypass =
@@ -178,6 +178,7 @@ export async function verifyOtp(phone, otp, req) {
     nguoidung_id: user.nguoidung.nguoidung_id,
     thietbi: userAgent,
     ip,
+    device_id: deviceId,
     thoigian: new Date().toISOString(),
   }); 
 

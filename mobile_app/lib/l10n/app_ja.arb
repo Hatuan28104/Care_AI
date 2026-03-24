@@ -344,5 +344,15 @@
   "basicInfo": "基本情報",
     "messageInfo": "メッセージ情報:",
   "relative": "家族:",
-  "time": "時間:"
+  "time": "時間:",
+    "setupComplete": "設定が完了しました",
+  "deviceReady": "デバイスは健康データの同期準備ができています。",
+  "done": "完了",
+
+  "confirmDelete": "確認",
+  "deleteDeviceConfirm": "このデバイスの接続を解除してもよろしいですか？",
+  "deleteDevice": "接続を解除",
+  "cancel": "キャンセル",
+
+  "disconnectDevice": "デバイスの接続を解除"
 }

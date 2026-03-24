@@ -5,7 +5,8 @@ import 'package:Care_AI/api/health_service.dart';
 import 'package:Care_AI/models/health_icon_mapper.dart';
 import 'package:Care_AI/services/health_backend_sync.dart';
 import 'package:Care_AI/services/health_connect_prefs.dart';
-import '../../../models/tr.dart';
+import 'package:Care_AI/models/tr.dart';
+import 'package:Care_AI/widgets/common_confirm_dialog.dart';
 
 class DeviceDetailScreen extends StatefulWidget {
   final String appName;
@@ -157,7 +158,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen>
       if (!mounted) return;
       if (_metrics.isEmpty && _loading) {
         setState(() {
-          _error = 'Không tải được dữ liệu sức khỏe';
+          _error = context.tr.loadHealthError;
           _loading = false;
         });
       }
@@ -297,7 +298,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen>
       if (!mounted) return;
       if (saved > 0 && showSuccessSnackBar) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Đã đồng bộ $saved chỉ số lên server')),
+          SnackBar(content: Text(context.tr.syncedToServer(saved))),
         );
       }
     }).catchError((e) {
@@ -307,7 +308,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-              'Không đồng bộ được: ${e.toString().replaceFirst('Exception: ', '')}'),
+              '${context.tr.syncError}: ${e.toString().replaceFirst('Exception: ', '')}'),
           backgroundColor: Colors.red.shade700,
         ),
       );
@@ -362,117 +363,46 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen>
     }
   }
 
-  void _showDisconnectDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (ctx) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(22, 18, 22, 18),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(22),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 54,
-                  height: 54,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: const Color(0xFFFF4D4D),
-                      width: 2,
-                    ),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      '!',
-                      style: TextStyle(
-                        color: Color(0xFFFF4D4D),
-                        fontSize: 36,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 14),
-                Text(
-                  context.tr.confirmDelete,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  context.tr.deleteDeviceConfirm,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Colors.black54,
-                    height: 1.25,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  height: 44,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      Navigator.pop(ctx);
-                      await HealthConnectPrefs.clearLinked();
-                      if (!context.mounted) return;
-                      if (widget.embeddedInTab) {
-                        widget.onDisconnected?.call();
-                      } else {
-                        Navigator.pop(context);
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFFC1C1),
-                      foregroundColor: const Color(0xFFB00000),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    child: Text(
-                      context.tr.deleteDevice,
-                      style: const TextStyle(fontWeight: FontWeight.w800),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  width: double.infinity,
-                  height: 44,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pop(ctx),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFE9EAEE),
-                      foregroundColor: Colors.black54,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    child: Text(
-                      context.tr.cancel,
-                      style: const TextStyle(fontWeight: FontWeight.w800),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+  Future<void> _showDisconnectDialog(BuildContext context) async {
+    final ok = await showConfirmDialog(
+      context,
+      title: context.tr.confirmDelete,
+      message: context.tr.deleteDeviceConfirm,
+      confirmText: context.tr.deleteDevice,
+      cancelText: context.tr.cancel,
+    );
+
+    if (ok == true) {
+      await HealthConnectPrefs.clearLinked();
+      if (!context.mounted) return;
+
+      if (widget.embeddedInTab) {
+        widget.onDisconnected?.call();
+      } else {
+        Navigator.pop(context);
+      }
+    }
+  }
+
+  Widget _disconnectButton(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 48,
+      child: ElevatedButton(
+        onPressed: () => _showDisconnectDialog(context),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFFFF4D4D),
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
           ),
-        );
-      },
+        ),
+        child: Text(
+          context.tr.deleteDevice,
+          style:
+              const TextStyle(fontWeight: FontWeight.w700, color: Colors.white),
+        ),
+      ),
     );
   }
 
@@ -511,12 +441,12 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen>
                   ),
                 ),
                 const SizedBox(height: 6),
-                const Row(
+                Row(
                   children: [
                     Icon(Icons.bluetooth, size: 16, color: Colors.black54),
                     SizedBox(width: 6),
                     Text(
-                      'Connected',
+                      context.tr.connected,
                       style: TextStyle(
                         color: Colors.black54,
                         fontSize: 13,
@@ -540,7 +470,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen>
         color: const Color(0xFFEFFAF0),
         borderRadius: BorderRadius.circular(14),
       ),
-      child: const Row(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(Icons.check_circle, color: Colors.green, size: 26),
@@ -550,7 +480,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Đã kết nối Health Connect',
+                  context.tr.connectedHealthConnect,
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
                     color: Colors.green,
@@ -559,8 +489,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen>
                 ),
                 SizedBox(height: 6),
                 Text(
-                  'Hiển thị toàn bộ chỉ số được cung cấp. '
-                  'Chỉ số chưa có dữ liệu sẽ hiện "--".',
+                  context.tr.healthNote,
                   style: TextStyle(
                     color: Colors.black54,
                     height: 1.3,
@@ -610,7 +539,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen>
                     ),
                     Text(
                       item.value == '--'
-                          ? 'Chưa có dữ liệu'
+                          ? context.tr.noData
                           : '${item.value} ${item.unit}'.trim(),
                       style: const TextStyle(
                         fontWeight: FontWeight.w800,
@@ -621,7 +550,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Danh mục: ${item.category}',
+                  context.tr.category(item.category),
                   style: const TextStyle(
                     color: Colors.black54,
                     fontSize: 12,
@@ -631,29 +560,6 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen>
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _disconnectButton(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: 56,
-      decoration: BoxDecoration(
-        color: const Color(0xFFD00000),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: TextButton.icon(
-        onPressed: () => _showDisconnectDialog(context),
-        icon: const Icon(Icons.logout, color: Colors.white),
-        label: Text(
-          context.tr.disconnectDevice,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w800,
-            fontSize: 16,
-          ),
-        ),
       ),
     );
   }
@@ -687,8 +593,8 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen>
                                 const SizedBox(height: 14),
                                 _goodHealthCard(),
                                 const SizedBox(height: 16),
-                                const Text(
-                                  'Toàn bộ chỉ số từ Health Connect',
+                                Text(
+                                  context.tr.allMetrics,
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w800,
@@ -696,8 +602,8 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen>
                                 ),
                                 const SizedBox(height: 10),
                                 if (_metrics.isEmpty)
-                                  const Text(
-                                    'Chưa có danh sách chỉ số.',
+                                  Text(
+                                    context.tr.noMetrics,
                                     style: TextStyle(color: Colors.black54),
                                   )
                                 else

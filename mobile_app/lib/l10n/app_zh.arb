@@ -343,6 +343,15 @@
   "basicInfo": "基本信息",
     "messageInfo": "消息信息:",
   "relative": "亲属:",
-  "time": "时间:"
+  "time": "时间:",  "setupComplete": "设置完成",
+  "deviceReady": "您的设备已准备好同步健康数据。",
+  "done": "完成",
+
+  "confirmDelete": "确认",
+  "deleteDeviceConfirm": "您确定要断开此设备连接吗？",
+  "deleteDevice": "断开连接",
+  "cancel": "取消",
+
+  "disconnectDevice": "断开设备连接"
 
 }

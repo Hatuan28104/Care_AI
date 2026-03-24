@@ -62,12 +62,12 @@ router.post("/login/request-otp", async (req, res) => {
 ========================= */
 router.post("/verify-otp", async (req, res) => {
   try {
-    const { phone, otp, fcmToken } = req.body;
+    const { phone, otp, fcmToken, deviceId } = req.body;
     if (!phone || !otp) {
       throw new Error("Thiếu số điện thoại hoặc OTP");
     }
 
-    const result = await verifyOtp(phone, otp, req);
+    const result = await verifyOtp(phone, otp, req, deviceId);
     if (fcmToken) {
       saveFcmToken(result.user.nguoidung.nguoidung_id, fcmToken);
     }
