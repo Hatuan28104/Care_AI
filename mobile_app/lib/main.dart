@@ -12,6 +12,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'firebase_options.dart';
 import 'config/api_config.dart';
 import 'services/background_sync.dart';
+import 'models/current_user.dart';
+import 'api/profile_api.dart' as profile_api;
+import 'models/user.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   try {
@@ -85,10 +88,38 @@ void main() async {
       )
           .catchError((e) {
         print("Lỗi gửi token mới: $e");
+        return http.Response("", 500);
       });
     }
   });
   await AppSettings.init();
+
+  // Load CurrentUser if logged in
+  final token = AuthStorage.getToken();
+  final userId = AuthStorage.getUserId();
+  if (token != null && userId != null) {
+    try {
+      final profile = await profile_api.ProfileApi.getProfile(userId);
+      if (profile != null) {
+        CurrentUser.user = User(
+          taiKhoanId: '', // Không cần
+          soDienThoai: profile['soDienThoai'] ?? profile['sodienthoai'] ?? '',
+          laAdmin: false, // Không cần
+          token: token,
+          nguoiDungId: userId,
+          tenND: profile['tenND'] ?? profile['tennd'],
+          profileCompleted: true,
+        );
+        // Update AppSettings.phoneNumber
+        final phone = profile['soDienThoai'] ?? profile['sodienthoai'] ?? '';
+        if (phone.isNotEmpty) {
+          AppSettings.phoneNumber.value = phone;
+        }
+      }
+    } catch (e) {
+      print('Failed to load user profile on app start: $e');
+    }
+  }
 
   runApp(const MyApp());
 }
@@ -107,23 +138,12 @@ class MyApp extends StatelessWidget {
             return MaterialApp(
               debugShowCheckedModeBanner: false,
               theme: ThemeData(
-                textTheme:
-                    GoogleFonts.poppinsTextTheme(ThemeData.light().textTheme),
-                primaryTextTheme: GoogleFonts.poppinsTextTheme(
-                    ThemeData.light().primaryTextTheme),
-                appBarTheme: AppBarTheme(
-                  titleTextStyle: GoogleFonts.poppins(
-                    textStyle: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
-                    ),
-                  ),
-                  toolbarTextStyle: GoogleFonts.poppins(
-                    textStyle: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.black,
-                    ),
+                fontFamily: GoogleFonts.poppins().fontFamily,
+                appBarTheme: const AppBarTheme(
+                  titleTextStyle: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
                   ),
                 ),
               ),

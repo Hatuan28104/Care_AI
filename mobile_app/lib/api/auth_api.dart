@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../models/user.dart';
+import 'package:Care_AI/models/user.dart';
 import 'auth_storage.dart';
-import '../models/login_history_item.dart';
-import '../app_settings.dart';
+import 'package:Care_AI/models/login_history_item.dart';
+import 'package:Care_AI/app_settings.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:Care_AI/config/api_config.dart';
 import 'api_exception.dart';

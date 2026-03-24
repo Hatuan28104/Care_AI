@@ -179,6 +179,7 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
         )
             .catchError((e) {
           print(" Lỗi gửi FCM token: $e");
+          return http.Response("", 500);
         });
 
         print(" FCM token gửi ngầm");

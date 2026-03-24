@@ -33,6 +33,8 @@ class AppSettings {
 
     syncDataOn.value = _prefs?.getBool('syncDataOn') ?? true;
 
+    phoneNumber.value = _prefs?.getString('phoneNumber') ?? '';
+
     final savedLang = _prefs?.getString('locale');
     if (savedLang != null) {
       locale.value = Locale(savedLang);
@@ -56,6 +58,10 @@ class AppSettings {
 
     syncDataOn.addListener(() {
       _prefs?.setBool('syncDataOn', syncDataOn.value);
+    });
+
+    phoneNumber.addListener(() {
+      _prefs?.setString('phoneNumber', phoneNumber.value);
     });
   }
 }

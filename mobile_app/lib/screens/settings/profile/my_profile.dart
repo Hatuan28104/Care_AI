@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'package:Care_AI/api/profile_api.dart' as profile_api;
+import 'package:Care_AI/api/auth_storage.dart';
 import 'package:Care_AI/models/current_user.dart';
 import 'package:Care_AI/config/api_config.dart';
 
@@ -81,10 +82,11 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
 
   Future<void> _fetchProfileFromBE() async {
     try {
-      final user = CurrentUser.user;
-      if (user == null) return;
+      final currentUser = CurrentUser.user;
+      final userId = currentUser?.nguoiDungId ?? AuthStorage.getUserId();
+      if (userId == null || userId.isEmpty) return;
 
-      final data = await profile_api.ProfileApi.getProfile(user.nguoiDungId);
+      final data = await profile_api.ProfileApi.getProfile(userId);
 
       if (data == null) return;
 
@@ -108,7 +110,10 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
       _emailCtrl.text = data['email'] ?? '';
       _addressCtrl.text = data['diaChi'] ?? '';
 
-      _phoneCtrl.text = user.soDienThoai ?? '';
+      _phoneCtrl.text = data['soDienThoai'] ??
+          data['sodienthoai'] ??
+          currentUser?.soDienThoai ??
+          '';
 
       final avatar = data['avatarUrl'];
 
@@ -182,8 +187,8 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
 
   Future<void> _save() async {
     try {
-      final user = CurrentUser.user;
-      if (user == null) return;
+      final userId = CurrentUser.user?.nguoiDungId ?? AuthStorage.getUserId();
+      if (userId == null || userId.isEmpty) return;
 
       final height = double.tryParse(_heightCtrl.text);
       final weight = double.tryParse(_weightCtrl.text);
@@ -209,7 +214,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
       }
 
       await profile_api.ProfileApi.updateProfile(
-        nguoiDungId: user.nguoiDungId,
+        nguoiDungId: userId,
         tenND: _nameCtrl.text.trim(),
         ngaySinh: _dobCtrl.text.trim(),
         gioiTinh: gioiTinh,

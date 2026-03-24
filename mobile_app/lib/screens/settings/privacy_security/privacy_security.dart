@@ -231,7 +231,7 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
             value: _twoFA,
             onChanged: (v) => setState(() => _twoFA = v),
           ),
-          const Divider(height: 18, thickness: 1, color: Color(0x11000000)),
+          const Divider(height: 16, thickness: 1, color: Color(0x11000000)),
           _switchTile(
             icon: Icons.fingerprint,
             title: context.tr.biometrics,
@@ -317,8 +317,6 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
                     color: Color(0x11000000),
                   ),
               ],
-
-              // 👇 XEM THÊM
               if (!_showAllHistory && rawList.length > list.length)
                 TextButton(
                   onPressed: () {
@@ -458,7 +456,6 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
   }
 
   List<LoginHistoryItem> _buildDisplayHistory(List<LoginHistoryItem> raw) {
-    // 1. Gom theo device, chỉ lấy bản ghi mới nhất
     final Map<String, LoginHistoryItem> latestByDevice = {};
 
     for (final item in raw) {
@@ -469,10 +466,8 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
 
     final list = latestByDevice.values.toList();
 
-    // 2. Sắp xếp theo thời gian giảm dần (mới nhất trước)
     list.sort((a, b) => b.time.compareTo(a.time));
 
-    // 3. Nếu chưa xem all → chỉ lấy 2 cái
     if (!_showAllHistory && list.length > 2) {
       return list.take(2).toList();
     }
