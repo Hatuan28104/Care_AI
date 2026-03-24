@@ -108,7 +108,7 @@ class _LanguageScreenState extends State<LanguageScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(color: Colors.black26),
       ),
       child: TextField(
@@ -148,7 +148,7 @@ class _LanguageScreenState extends State<LanguageScreen> {
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(10),
           border: Border.all(color: _border, width: 1.4),
         ),
         child: Row(

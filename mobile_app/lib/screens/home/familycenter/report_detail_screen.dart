@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:Care_AI/api/family_api.dart';
 import 'package:Care_AI/models/tr.dart';
-import 'package:Care_AI/widgets/app_header.dart';
+import 'package:Care_AI/widgets/app_components.dart';
 
 class ReportDetailScreen extends StatefulWidget {
   final String type;
@@ -108,7 +108,7 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.lightBlue.shade200,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         children: [
@@ -167,7 +167,7 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
         children: [
@@ -187,7 +187,7 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         children: [

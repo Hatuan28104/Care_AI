@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'screens/intro_screen.dart';
 import 'app_settings.dart';
@@ -103,7 +104,25 @@ class MyApp extends StatelessWidget {
             return MaterialApp(
               debugShowCheckedModeBanner: false,
               theme: ThemeData(
-                scaffoldBackgroundColor: const Color(0xFFF6F6F6),
+                textTheme:
+                    GoogleFonts.poppinsTextTheme(ThemeData.light().textTheme),
+                primaryTextTheme: GoogleFonts.poppinsTextTheme(
+                    ThemeData.light().primaryTextTheme),
+                appBarTheme: AppBarTheme(
+                  titleTextStyle: GoogleFonts.poppins(
+                    textStyle: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
+                    ),
+                  ),
+                  toolbarTextStyle: GoogleFonts.poppins(
+                    textStyle: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
               ),
               locale: locale,
               supportedLocales: AppLocalizations.supportedLocales,

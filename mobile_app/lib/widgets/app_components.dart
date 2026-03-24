@@ -22,7 +22,6 @@ class AppHeader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ===== BACK =====
           if (showBack)
             GestureDetector(
               onTap: onBack ?? () => Navigator.pop(context),
@@ -35,10 +34,7 @@ class AppHeader extends StatelessWidget {
                 ],
               ),
             ),
-
           if (showBack) const SizedBox(height: 12),
-
-          // ===== TITLE =====
           Center(
             child: Text(
               title,
@@ -59,6 +55,34 @@ class _BackText extends StatelessWidget {
     return Text(
       context.tr.back,
       style: const TextStyle(fontSize: 15, color: AppHeader._blue),
+    );
+  }
+}
+
+class AppSwitch extends StatelessWidget {
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  const AppSwitch({
+    super.key,
+    required this.value,
+    required this.onChanged,
+  });
+
+  static const Color _blue = Color(0xFF1877F2);
+
+  @override
+  Widget build(BuildContext context) {
+    return Transform.scale(
+      scale: 0.85,
+      child: Switch(
+        value: value,
+        onChanged: onChanged,
+        activeColor: Colors.white,
+        activeTrackColor: _blue,
+        inactiveTrackColor: Colors.grey.shade300,
+        inactiveThumbColor: Colors.white,
+      ),
     );
   }
 }

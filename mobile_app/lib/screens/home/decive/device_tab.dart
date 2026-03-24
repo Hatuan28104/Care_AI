@@ -7,7 +7,6 @@ class DeviceTab extends StatelessWidget {
   const DeviceTab({super.key});
 
   // ===== COLORS (theo Home) =====
-  static const Color primary = Color(0xFF1F41BB);
   static const Color accent = Color(0xFF1877F2);
 
   @override
@@ -67,7 +66,7 @@ class DeviceTab extends StatelessWidget {
                 backgroundColor: Colors.grey.shade300,
                 foregroundColor: Colors.black,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(10),
                 ),
               ),
               child: Text(
@@ -90,7 +89,7 @@ class DeviceTab extends StatelessWidget {
                 backgroundColor: accent,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(10),
                 ),
               ),
               child: Text(

@@ -281,7 +281,7 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(10),
           boxShadow: const [
             BoxShadow(
               blurRadius: 10,
@@ -297,7 +297,7 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
               height: 50,
               child: image.isNotEmpty
                   ? ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(10),
                       child: Image.network(imageUrl, fit: BoxFit.cover),
                     )
                   : Container(

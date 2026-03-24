@@ -216,8 +216,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get confirmDelete => 'Xác nhận xóa';
 
   @override
-  String get confirmDeleteDependent =>
-      'Bạn có chắc chắn muốn xóa người phụ thuộc này khỏi gia đình không?';
+  String get confirmDeleteDependent => 'Bạn có chắc chắn muốn xóa người phụ thuộc này khỏi gia đình không?';
 
   @override
   String get confirmInvite => 'Xác nhận lời mời';
@@ -229,8 +228,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get confirmRejectInvite => 'Xác nhận từ chối lời mời';
 
   @override
-  String get rejectInviteQuestion =>
-      'Bạn có chắc chắn muốn từ chối lời mời này không?';
+  String get rejectInviteQuestion => 'Bạn có chắc chắn muốn từ chối lời mời này không?';
 
   @override
   String get fullName => 'Họ và tên';
@@ -326,16 +324,13 @@ class AppLocalizationsVi extends AppLocalizations {
   String get setup => 'Thiết lập';
 
   @override
-  String get allowHealthNotificationTitle =>
-      'Nhận thông báo\nvề sức khỏe của bạn';
+  String get allowHealthNotificationTitle => 'Nhận thông báo\nvề sức khỏe của bạn';
 
   @override
-  String get allowHealthNotificationDesc =>
-      'Nhận thông báo khi có điều quan trọng cần biết.';
+  String get allowHealthNotificationDesc => 'Nhận thông báo khi có điều quan trọng cần biết.';
 
   @override
-  String get healthAlertDesc =>
-      'Đồng hồ thông minh có thể cảnh báo khi phát hiện các dấu hiệu bất thường về nhịp tim, huyết áp hoặc các chỉ số quan trọng khác.\n\nNhững thông báo này giúp bạn kịp thời xử lý hoặc thông báo cho người thân khi cần thiết.';
+  String get healthAlertDesc => 'Đồng hồ thông minh có thể cảnh báo khi phát hiện các dấu hiệu bất thường về nhịp tim, huyết áp hoặc các chỉ số quan trọng khác.\n\nNhững thông báo này giúp bạn kịp thời xử lý hoặc thông báo cho người thân khi cần thiết.';
 
   @override
   String get back => 'Quay lại';
@@ -347,8 +342,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get later => 'Để sau';
 
   @override
-  String get bluetoothPairDesc =>
-      '“Apple Watch Series Demo” muốn ghép đôi với iPhone của bạn. Vui lòng xác nhận mã này cũng hiển thị trên “Apple Watch Series Demo”. Không nhập mã này trên bất kỳ phụ kiện nào khác.';
+  String get bluetoothPairDesc => '“Apple Watch Series Demo” muốn ghép đôi với iPhone của bạn. Vui lòng xác nhận mã này cũng hiển thị trên “Apple Watch Series Demo”. Không nhập mã này trên bất kỳ phụ kiện nào khác.';
 
   @override
   String get todayHealthData => 'Dữ liệu sức khỏe hôm nay';
@@ -360,16 +354,13 @@ class AppLocalizationsVi extends AppLocalizations {
   String get connected => 'Đã kết nối';
 
   @override
-  String get preparingHealthData =>
-      'Chúng tôi đang chuẩn bị dữ liệu sức khỏe để mang lại trải nghiệm tốt nhất cho bạn. Quá trình này có thể mất một chút thời gian.\n\nHãy giữ đồng hồ ở gần điện thoại để đảm bảo việc đồng bộ diễn ra suôn sẻ. Bạn sẽ nhận được thông báo khi quá trình hoàn tất.';
+  String get preparingHealthData => 'Chúng tôi đang chuẩn bị dữ liệu sức khỏe để mang lại trải nghiệm tốt nhất cho bạn. Quá trình này có thể mất một chút thời gian.\n\nHãy giữ đồng hồ ở gần điện thoại để đảm bảo việc đồng bộ diễn ra suôn sẻ. Bạn sẽ nhận được thông báo khi quá trình hoàn tất.';
 
   @override
-  String get chooseConversationsToShare =>
-      'Chọn những cuộc trò chuyện bạn muốn chia sẻ';
+  String get chooseConversationsToShare => 'Chọn những cuộc trò chuyện bạn muốn chia sẻ';
 
   @override
-  String get shareImportantHealthData =>
-      'Chia sẻ các thông tin sức khỏe quan trọng với người chăm sóc';
+  String get shareImportantHealthData => 'Chia sẻ các thông tin sức khỏe quan trọng với người chăm sóc';
 
   @override
   String get holdSmartwatch => 'Giữ đồng hồ thông minh';
@@ -384,15 +375,13 @@ class AppLocalizationsVi extends AppLocalizations {
   String get scanFrameAbove => 'ở phía trên.';
 
   @override
-  String get qrNotFoundBluetooth =>
-      'Không tìm thấy mã QR? Hãy thử kết nối bằng Bluetooth';
+  String get qrNotFoundBluetooth => 'Không tìm thấy mã QR? Hãy thử kết nối bằng Bluetooth';
 
   @override
   String get devicePaired => 'Thiết bị đã ghép đôi';
 
   @override
-  String get setupContinue =>
-      'Bạn có thể tiếp tục quá trình thiết lập ban đầu.';
+  String get setupContinue => 'Bạn có thể tiếp tục quá trình thiết lập ban đầu.';
 
   @override
   String get disconnectDevice => 'Ngắt kết nối thiết bị';
@@ -425,8 +414,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get welcomeTitle => 'Xin chào, Care AI';
 
   @override
-  String get welcomeSubtitle =>
-      'Người bạn số của bạn, sự an tâm cho cả gia đình.';
+  String get welcomeSubtitle => 'Người bạn số của bạn, sự an tâm cho cả gia đình.';
 
   @override
   String get welcomeBack => 'Chào mừng bạn quay trở lại!';
@@ -497,7 +485,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get subject => 'Chủ đề';
 
   @override
-  String get content => 'Nội dung';
+  String get content => 'Nội dung: ';
 
   @override
   String get describeProblem => 'Mô tả vấn đề của bạn...';
@@ -509,8 +497,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get deleteDevice => 'Xóa thiết bị';
 
   @override
-  String get confirmDeleteDevice =>
-      'Bạn có chắc chắn muốn xóa thiết bị này không?';
+  String get confirmDeleteDevice => 'Bạn có chắc chắn muốn xóa thiết bị này không?';
 
   @override
   String get scan => 'Quét';
@@ -594,8 +581,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get other => 'Khác';
 
   @override
-  String get textSizePreview =>
-      'Các ứng dụng hỗ trợ cỡ chữ động sẽ tự điều chỉnh theo kích thước chữ bạn chọn bên dưới';
+  String get textSizePreview => 'Các ứng dụng hỗ trợ cỡ chữ động sẽ tự điều chỉnh theo kích thước chữ bạn chọn bên dưới';
 
   @override
   String get infoCollected => 'Thông tin chúng tôi thu thập';
@@ -616,40 +602,31 @@ class AppLocalizationsVi extends AppLocalizations {
   String get infoUsedFor => 'Thông tin của bạn được sử dụng để:';
 
   @override
-  String get infoSharedCases =>
-      'Chúng tôi chỉ chia sẻ thông tin của bạn trong các trường hợp sau:';
+  String get infoSharedCases => 'Chúng tôi chỉ chia sẻ thông tin của bạn trong các trường hợp sau:';
 
   @override
-  String get serviceTracking =>
-      'Cung cấp các dịch vụ theo dõi sức khỏe, nhắc nhở và hỗ trợ chăm sóc.';
+  String get serviceTracking => 'Cung cấp các dịch vụ theo dõi sức khỏe, nhắc nhở và hỗ trợ chăm sóc.';
 
   @override
-  String get alertGuardian =>
-      'Gửi cảnh báo cho người giám hộ hoặc nhân viên y tế khi cần thiết.';
+  String get alertGuardian => 'Gửi cảnh báo cho người giám hộ hoặc nhân viên y tế khi cần thiết.';
 
   @override
-  String get improveSystem =>
-      'Cải thiện độ ổn định của hệ thống và cá nhân hóa trải nghiệm người dùng.';
+  String get improveSystem => 'Cải thiện độ ổn định của hệ thống và cá nhân hóa trải nghiệm người dùng.';
 
   @override
-  String get ensureSafety =>
-      'Đảm bảo an toàn, tuân thủ quy định pháp luật và sử dụng đúng mục đích.';
+  String get ensureSafety => 'Đảm bảo an toàn, tuân thủ quy định pháp luật và sử dụng đúng mục đích.';
 
   @override
-  String get shareWithGuardian =>
-      'Với người giám hộ hoặc thành viên gia đình khi có sự cho phép của bạn.';
+  String get shareWithGuardian => 'Với người giám hộ hoặc thành viên gia đình khi có sự cho phép của bạn.';
 
   @override
-  String get shareWithMedical =>
-      'Với các cơ sở y tế khi được ủy quyền hoặc trong trường hợp khẩn cấp.';
+  String get shareWithMedical => 'Với các cơ sở y tế khi được ủy quyền hoặc trong trường hợp khẩn cấp.';
 
   @override
-  String get privacyIntro1 =>
-      'Chào mừng bạn đến với Hệ thống hỗ trợ theo dõi sức khỏe. Chính sách quyền riêng tư này áp dụng cho tất cả các dịch vụ của hệ thống, bao gồm ứng dụng, website, phần mềm và các nền tảng liên quan.';
+  String get privacyIntro1 => 'Chào mừng bạn đến với Hệ thống hỗ trợ theo dõi sức khỏe. Chính sách quyền riêng tư này áp dụng cho tất cả các dịch vụ của hệ thống, bao gồm ứng dụng, website, phần mềm và các nền tảng liên quan.';
 
   @override
-  String get privacyIntro2 =>
-      'Chúng tôi cam kết bảo vệ quyền riêng tư của bạn. Chính sách này giải thích cách chúng tôi thu thập, sử dụng, chia sẻ và bảo vệ thông tin cá nhân của bạn. Khi sử dụng nền tảng, bạn đồng ý với các nội dung được mô tả dưới đây. Nếu bạn không đồng ý, vui lòng ngừng sử dụng dịch vụ.';
+  String get privacyIntro2 => 'Chúng tôi cam kết bảo vệ quyền riêng tư của bạn. Chính sách này giải thích cách chúng tôi thu thập, sử dụng, chia sẻ và bảo vệ thông tin cá nhân của bạn. Khi sử dụng nền tảng, bạn đồng ý với các nội dung được mô tả dưới đây. Nếu bạn không đồng ý, vui lòng ngừng sử dụng dịch vụ.';
 
   @override
   String get verification => 'Xác minh';
@@ -712,20 +689,16 @@ class AppLocalizationsVi extends AppLocalizations {
   String get confirmDeleteInvite => 'Xác nhận xóa lời mời';
 
   @override
-  String get userResponsibilityDesc =>
-      'Bạn phải cung cấp thông tin chính xác và được cập nhật. Bạn chịu trách nhiệm bảo mật thông tin tài khoản của mình và mọi hoạt động diễn ra dưới tài khoản đó. Nghiêm cấm việc sử dụng nền tảng cho các mục đích trái pháp luật, gây hại hoặc gian lận.';
+  String get userResponsibilityDesc => 'Bạn phải cung cấp thông tin chính xác và được cập nhật. Bạn chịu trách nhiệm bảo mật thông tin tài khoản của mình và mọi hoạt động diễn ra dưới tài khoản đó. Nghiêm cấm việc sử dụng nền tảng cho các mục đích trái pháp luật, gây hại hoặc gian lận.';
 
   @override
-  String get serviceLimitationsDesc =>
-      'Hệ thống Nhân sự số Chăm sóc Người cao tuổi là công cụ hỗ trợ và không thay thế cho tư vấn, chẩn đoán hoặc điều trị y tế chuyên nghiệp.';
+  String get serviceLimitationsDesc => 'Hệ thống Nhân sự số Chăm sóc Người cao tuổi là công cụ hỗ trợ và không thay thế cho tư vấn, chẩn đoán hoặc điều trị y tế chuyên nghiệp.';
 
   @override
-  String get accountManagementDesc =>
-      'Bạn có thể tạm ngưng hoặc xóa vĩnh viễn tài khoản của mình bất kỳ lúc nào thông qua cài đặt ứng dụng hoặc bằng cách liên hệ với bộ phận hỗ trợ.';
+  String get accountManagementDesc => 'Bạn có thể tạm ngưng hoặc xóa vĩnh viễn tài khoản của mình bất kỳ lúc nào thông qua cài đặt ứng dụng hoặc bằng cách liên hệ với bộ phận hỗ trợ.';
 
   @override
-  String get termsUpdatesDesc =>
-      'Các Điều khoản sử dụng này có thể được cập nhật theo thời gian nhằm tuân thủ các quy định pháp luật mới hoặc cải thiện chất lượng dịch vụ.';
+  String get termsUpdatesDesc => 'Các Điều khoản sử dụng này có thể được cập nhật theo thời gian nhằm tuân thủ các quy định pháp luật mới hoặc cải thiện chất lượng dịch vụ.';
 
   @override
   String get profile => 'Hồ sơ cá nhân';
@@ -764,8 +737,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get deleteAlertTitle => 'Xóa cảnh báo';
 
   @override
-  String get deleteAlertWarning =>
-      'Bạn có chắc chắn muốn xóa cảnh báo này không?';
+  String get deleteAlertWarning => 'Bạn có chắc chắn muốn xóa cảnh báo này không?';
 
   @override
   String get deletedSuccessfully => 'Xóa thành công';
@@ -792,8 +764,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get voiceMessage => '🎤 Tin nhắn thoại';
 
   @override
-  String get careAIIntro =>
-      'Chào bạn, mình là Care AI 💙\nRất vui được gặp bạn hôm nay. Bạn có muốn chia sẻ gần đây bạn cảm thấy thế nào không?';
+  String get careAIIntro => 'Chào bạn, mình là Care AI 💙\nRất vui được gặp bạn hôm nay. Bạn có muốn chia sẻ gần đây bạn cảm thấy thế nào không?';
 
   @override
   String get chooseGender => 'Chọn giới tính';
@@ -844,15 +815,13 @@ class AppLocalizationsVi extends AppLocalizations {
   String get spo2 => 'Nồng độ oxy trong máu – SpO₂';
 
   @override
-  String get goodHealthDesc =>
-      'Các chỉ số của bạn đều nằm trong ngưỡng bình thường. Hãy tiếp tục duy trì lối sống lành mạnh!';
+  String get goodHealthDesc => 'Các chỉ số của bạn đều nằm trong ngưỡng bình thường. Hãy tiếp tục duy trì lối sống lành mạnh!';
 
   @override
   String get enterGuardianPhone => 'Nhập số điện thoại của người giám hộ';
 
   @override
-  String get termsIntro =>
-      'Bằng việc tạo tài khoản hoặc truy cập Hệ thống hỗ trợ theo dõi sức khỏe...';
+  String get termsIntro => 'Bằng việc tạo tài khoản hoặc truy cập Hệ thống hỗ trợ theo dõi sức khỏe...';
 
   @override
   String get askAnything => 'Hỏi bất cứ điều gì...';
@@ -867,8 +836,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get healthNotificationTitle => 'Nhận thông báo\nvề sức khỏe của bạn';
 
   @override
-  String get healthNotificationDesc =>
-      'Nhận thông báo khi có điều quan trọng\nmà bạn cần biết.';
+  String get healthNotificationDesc => 'Nhận thông báo khi có điều quan trọng\nmà bạn cần biết.';
 
   @override
   String get goodHealth => 'Sức khỏe tốt';
@@ -877,12 +845,10 @@ class AppLocalizationsVi extends AppLocalizations {
   String get stressLevel => 'Mức độ căng thẳng';
 
   @override
-  String get deleteDeviceConfirm =>
-      'Bạn có chắc chắn muốn xóa thiết bị này không?';
+  String get deleteDeviceConfirm => 'Bạn có chắc chắn muốn xóa thiết bị này không?';
 
   @override
-  String get deleteGuardianConfirm =>
-      'Bạn có chắc chắn muốn xóa người giám hộ này khỏi gia đình không?';
+  String get deleteGuardianConfirm => 'Bạn có chắc chắn muốn xóa người giám hộ này khỏi gia đình không?';
 
   @override
   String get enterPhoneNumber => 'Nhập số điện thoại';
@@ -954,8 +920,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get deleteConversation => 'Xóa cuộc trò chuyện';
 
   @override
-  String get confirmDeleteConversation =>
-      'Bạn có chắc muốn xóa cuộc trò chuyện này không?';
+  String get confirmDeleteConversation => 'Bạn có chắc muốn xóa cuộc trò chuyện này không?';
 
   @override
   String get dangerDetected => 'Phát hiện nguy hiểm';

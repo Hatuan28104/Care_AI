@@ -3,7 +3,7 @@ import 'package:Care_AI/models/health_icon_mapper.dart';
 import 'package:Care_AI/api/health_api.dart';
 import 'package:Care_AI/api/family_api.dart';
 import 'package:Care_AI/models/tr.dart';
-import 'package:Care_AI/widgets/app_header.dart';
+import 'package:Care_AI/widgets/app_components.dart';
 
 class HealthDataScreen extends StatefulWidget {
   final String quanHeId;
@@ -118,7 +118,7 @@ class _HealthDataScreenState extends State<HealthDataScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(10),
         boxShadow: const [
           BoxShadow(
             blurRadius: 14,
@@ -140,7 +140,7 @@ class _HealthDataScreenState extends State<HealthDataScreen> {
           ),
 
           /// SWITCH
-          Switch(
+          AppSwitch(
             value: m["enabled"],
             onChanged: (v) async {
               final oldValue = m["enabled"];
@@ -159,13 +159,8 @@ class _HealthDataScreenState extends State<HealthDataScreen> {
                 setState(() {
                   m["enabled"] = oldValue;
                 });
-
-                print("SAVE PERMISSION ERROR: $e");
               }
             },
-            activeTrackColor: const Color.fromARGB(255, 19, 114, 255),
-            inactiveTrackColor: const Color.fromARGB(255, 218, 217, 217),
-            inactiveThumbColor: Colors.white,
           ),
         ],
       ),

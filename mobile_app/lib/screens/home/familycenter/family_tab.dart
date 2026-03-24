@@ -69,7 +69,7 @@ class _FamilyTabState extends State<FamilyTab> {
       padding: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
         color: active ? Colors.white : Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         border: active ? null : Border.all(color: Colors.black12),
       ),
       child: Row(

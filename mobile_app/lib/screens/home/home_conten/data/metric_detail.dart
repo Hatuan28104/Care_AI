@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:Care_AI/api/health_api.dart';
 import 'package:Care_AI/models/metric_config.dart';
-import 'package:Care_AI/widgets/app_header.dart';
+import 'package:Care_AI/widgets/app_components.dart';
 import 'package:Care_AI/models/tr.dart';
 
 const TextStyle _axisTextStyle = TextStyle(

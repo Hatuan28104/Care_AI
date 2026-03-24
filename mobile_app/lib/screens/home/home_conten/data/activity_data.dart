@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:Care_AI/models/health_icon_mapper.dart';
 import 'package:Care_AI/models/tr.dart';
-import 'package:Care_AI/widgets/app_header.dart';
+import 'package:Care_AI/widgets/app_components.dart';
 import 'package:Care_AI/api/health_api.dart';
 import 'metric_item.dart';
 import 'metric_detail.dart';
@@ -150,7 +150,7 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
           fillColor: Colors.white,
           contentPadding: const EdgeInsets.symmetric(vertical: 12),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(10),
             borderSide: BorderSide.none,
           ),
         ),

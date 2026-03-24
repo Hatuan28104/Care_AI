@@ -3,7 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:Care_AI/screens/settings/profile/my_profile.dart';
 import 'package:Care_AI/screens/welcome_screen.dart';
 import 'package:Care_AI/app_settings.dart';
-import 'package:Care_AI/widgets/app_header.dart';
+import 'package:Care_AI/widgets/app_components.dart';
 import 'privacy_security/privacy_security.dart';
 import 'text_size.dart';
 import 'language.dart';
@@ -191,7 +191,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(10),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         child: SizedBox(
@@ -254,22 +254,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                   ),
                 ),
-                Transform.scale(
-                  scale: 0.8,
-                  child: Switch(
-                    value: value,
-                    onChanged: (v) async {
-                      notifier.value = v;
-                      try {
-                        await SettingsApi.updateSetting(settingKey, v);
-                      } catch (e) {
-                        notifier.value = !v;
-                      }
-                    },
-                    activeColor: Colors.white,
-                    activeTrackColor: _blue,
-                    inactiveTrackColor: Colors.grey.shade300,
-                  ),
+                AppSwitch(
+                  value: value,
+                  onChanged: (v) async {
+                    notifier.value = v;
+                    try {
+                      await SettingsApi.updateSetting(settingKey, v);
+                    } catch (e) {
+                      notifier.value = !v;
+                    }
+                  },
                 ),
               ],
             ),

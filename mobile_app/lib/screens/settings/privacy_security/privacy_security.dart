@@ -5,7 +5,7 @@ import 'privacy_policy.dart';
 import 'terms_of_service.dart';
 import 'package:Care_AI/api/auth_api.dart';
 import 'package:Care_AI/models/login_history_item.dart';
-import 'package:Care_AI/widgets/app_header.dart';
+import 'package:Care_AI/widgets/app_components.dart';
 
 class PrivacySecurityScreen extends StatefulWidget {
   const PrivacySecurityScreen({super.key});
@@ -127,7 +127,7 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
                 side: BorderSide(color: const Color(0xFF1877F2)),
                 foregroundColor: const Color.fromARGB(255, 0, 0, 0),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 14),
               ),
@@ -185,7 +185,6 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
     try {
       await AuthApi.changePhone(cleaned);
 
-      // cập nhật local sau khi BE OK
       AppSettings.phoneNumber.value = cleaned;
 
       if (!mounted) return;
@@ -211,15 +210,12 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
 
     String digits = s.replaceAll(RegExp(r'\D'), '');
 
-    // +84xxxxxxx → 0xxxxxxxx
     if (digits.startsWith('84')) {
       digits = '0' + digits.substring(2);
     }
 
-    // Không đủ 10 số thì trả thô
     if (digits.length != 10) return s;
 
-    // 0912345678 → 091 234 5678
     return '${digits.substring(0, 3)} '
         '${digits.substring(3, 6)} '
         '${digits.substring(6, 10)}';
@@ -254,7 +250,6 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
     String? subtitle,
     required bool value,
     required ValueChanged<bool> onChanged,
-    double scale = 0.8,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
@@ -288,15 +283,9 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
               ],
             ),
           ),
-          Transform.scale(
-            scale: scale,
-            child: Switch(
-              value: value,
-              onChanged: onChanged,
-              activeTrackColor: const Color.fromARGB(255, 19, 114, 255),
-              inactiveTrackColor: const Color.fromARGB(255, 218, 217, 217),
-              inactiveThumbColor: Colors.white,
-            ),
+          AppSwitch(
+            value: value,
+            onChanged: onChanged,
           ),
         ],
       ),
@@ -424,7 +413,7 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
     required VoidCallback onTap,
   }) {
     return InkWell(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(10),
       onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 6),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:Care_AI/models/tr.dart';
 import 'package:Care_AI/api/settings_api.dart';
-import 'package:Care_AI/widgets/app_header.dart';
+import 'package:Care_AI/widgets/app_components.dart';
 
 class SoundVibrationScreen extends StatefulWidget {
   const SoundVibrationScreen({super.key});

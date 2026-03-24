@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:Care_AI/widgets/success_dialog.dart';
+import 'package:Care_AI/widgets/common_confirm_dialog.dart';
 import 'package:Care_AI/screens/welcome_screen.dart';
 import 'package:Care_AI/api/auth_api.dart';
 import 'package:Care_AI/models/tr.dart';

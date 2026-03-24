@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:Care_AI/api/family_api.dart';
 import 'dart:async';
 import 'package:Care_AI/models/tr.dart';
-import 'package:Care_AI/widgets/app_header.dart';
+import 'package:Care_AI/widgets/app_components.dart';
 
 class AddGuardians extends StatefulWidget {
   const AddGuardians({super.key});
@@ -95,11 +95,11 @@ class _AddGuardiansState extends State<AddGuardians> {
             vertical: 14,
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(10),
             borderSide: const BorderSide(color: blue),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(10),
             borderSide: const BorderSide(color: blue, width: 1.5),
           ),
         ),
@@ -117,7 +117,7 @@ class _AddGuardiansState extends State<AddGuardians> {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(10),
         boxShadow: const [
           BoxShadow(
             blurRadius: 10,
@@ -132,7 +132,7 @@ class _AddGuardiansState extends State<AddGuardians> {
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(10),
               color: avatar == null ? Colors.grey.shade300 : null,
               image: avatar != null && avatar.toString().isNotEmpty
                   ? DecorationImage(
@@ -199,7 +199,7 @@ class _AddGuardiansState extends State<AddGuardians> {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
         decoration: BoxDecoration(
           color: color,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(10),
         ),
         child: Text(
           text,
@@ -218,7 +218,7 @@ class _AddGuardiansState extends State<AddGuardians> {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: const Color(0xFFE9ECEF),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
         text,

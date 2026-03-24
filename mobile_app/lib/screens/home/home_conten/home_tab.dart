@@ -91,7 +91,7 @@ class _HomeTabState extends State<HomeTab> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(10),
         gradient: const LinearGradient(
           colors: [Color(0xFF1F41BB), Color(0xFF1877F2)],
           begin: Alignment.topLeft,

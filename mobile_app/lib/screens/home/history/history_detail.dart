@@ -170,26 +170,16 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
       mainAxisAlignment:
           isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: [
-        if (!isUser)
-          Padding(
-            padding: const EdgeInsets.only(left: 8),
-            child: CircleAvatar(
-              radius: 18,
-              backgroundImage:
-                  widget.image.isNotEmpty ? NetworkImage(widget.image) : null,
-              child: widget.image.isEmpty ? const Icon(Icons.smart_toy) : null,
-            ),
-          ),
         Flexible(
           child: Container(
-            margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+            margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
             padding: const EdgeInsets.all(12),
             constraints: BoxConstraints(
               maxWidth: MediaQuery.of(context).size.width * 0.7,
             ),
             decoration: BoxDecoration(
               color: isUser ? Colors.blue : Colors.grey[300],
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(10),
             ),
             child: msg["isTyping"] == true
                 ? Row(

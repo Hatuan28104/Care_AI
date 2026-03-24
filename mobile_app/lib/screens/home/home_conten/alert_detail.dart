@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:Care_AI/widgets/app_header.dart';
+import 'package:Care_AI/widgets/app_components.dart';
 import 'package:Care_AI/models/tr.dart';
 
 class AlertMessageDetail extends StatelessWidget {
@@ -84,7 +84,7 @@ class AlertMessageDetail extends StatelessWidget {
                     padding: const EdgeInsets.all(18),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: borderColor, width: 1.5),
                       boxShadow: [
                         BoxShadow(
@@ -104,7 +104,7 @@ class AlertMessageDetail extends StatelessWidget {
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
                                 color: borderColor.withOpacity(0.12),
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(10),
                               ),
                               child: Icon(
                                 Icons.chat_bubble_outline,

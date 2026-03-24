@@ -60,7 +60,7 @@ class _SharedConversationViewerState extends State<SharedConversationViewer> {
         constraints: const BoxConstraints(maxWidth: 260),
         decoration: BoxDecoration(
           color: isUser ? const Color(0xFF1877F2) : Colors.grey.shade200,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(10),
         ),
         child: Text(
           content,

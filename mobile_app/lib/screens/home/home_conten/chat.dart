@@ -145,25 +145,16 @@ class _ChatScreenState extends State<ChatScreen> {
       mainAxisAlignment:
           isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: [
-        if (!isUser)
-          Padding(
-            padding: const EdgeInsets.only(left: 8),
-            child: CircleAvatar(
-              radius: 18,
-              backgroundImage: NetworkImage(widget.image),
-              onBackgroundImageError: (_, __) {},
-            ),
-          ),
         Flexible(
           child: Container(
-            margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+            margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
             padding: const EdgeInsets.all(12),
             constraints: BoxConstraints(
               maxWidth: MediaQuery.of(context).size.width * 0.70,
             ),
             decoration: BoxDecoration(
               color: isUser ? Colors.blue : Colors.grey[300],
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(10),
             ),
             child: msg["isTyping"] == true
                 ? Text(

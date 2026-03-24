@@ -5,7 +5,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:Care_AI/models/tr.dart';
 import 'package:Care_AI/widgets/common_confirm_dialog.dart';
 import 'package:Care_AI/api/alert_api.dart';
-import 'package:Care_AI/widgets/app_header.dart';
+import 'package:Care_AI/widgets/app_components.dart';
 import 'alert_detail.dart';
 
 class AlertScreen extends StatefulWidget {
@@ -144,7 +144,7 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
         onRefresh: loadAlerts,
         child: ListView(
           children: [
-            const SizedBox(height: 20),
+            const SizedBox(height: 12),
             Center(
               child: Text(
                 context.tr.noAlerts,
@@ -181,7 +181,7 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
                     date,
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
-                      color: Colors.grey,
+                      color: Color(0xFF7A7A7A),
                     ),
                   ),
                 ),
@@ -235,7 +235,7 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
         ],
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         onTap: () async {
           await Navigator.push(
             context,
@@ -265,7 +265,7 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(10),
             border: Border.all(
               color: item.isRead ? Colors.transparent : borderColor,
               width: item.isRead ? 0 : 1.5,
@@ -280,7 +280,7 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
           ),
           child: Row(
             children: [
-              Icon(item.icon, color: Colors.red, size: 18),
+              Icon(item.icon, color: Colors.red, size: 20),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -289,8 +289,8 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
                     Text(
                       item.title,
                       style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 16,
                       ),
                     ),
                     const SizedBox(height: 2),

@@ -83,7 +83,7 @@ class AllowDeviceScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(10),
                     border: Border.all(color: Colors.black12),
                     boxShadow: [
                       BoxShadow(
@@ -165,7 +165,7 @@ class AllowDeviceScreen extends StatelessWidget {
                             foregroundColor: Colors.black87,
                             elevation: 0,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
+                              borderRadius: BorderRadius.circular(10),
                             ),
                           ),
                           child: Text(
@@ -193,7 +193,7 @@ class AllowDeviceScreen extends StatelessWidget {
                             foregroundColor: Colors.white,
                             elevation: 2,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
+                              borderRadius: BorderRadius.circular(10),
                             ),
                           ),
                           child: Text(

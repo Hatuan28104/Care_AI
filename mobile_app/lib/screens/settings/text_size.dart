@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:Care_AI/app_settings.dart';
 import 'package:Care_AI/models/tr.dart';
-import 'package:Care_AI/widgets/app_header.dart';
+import 'package:Care_AI/widgets/app_components.dart';
 
 class TextSizeScreen extends StatefulWidget {
   const TextSizeScreen({super.key});

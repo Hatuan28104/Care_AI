@@ -330,8 +330,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get allowHealthNotificationDesc => '重要な情報がある場合に通知を受け取ります。';
 
   @override
-  String get healthAlertDesc =>
-      'スマートウォッチは、心拍数や血圧などの重要な数値に異常を検知した際にアラートを出します。\n\nこれにより、迅速な対応や家族への連絡が可能になります。';
+  String get healthAlertDesc => 'スマートウォッチは、心拍数や血圧などの重要な数値に異常を検知した際にアラートを出します。\n\nこれにより、迅速な対応や家族への連絡が可能になります。';
 
   @override
   String get back => '戻る';
@@ -343,8 +342,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get later => '後で';
 
   @override
-  String get bluetoothPairDesc =>
-      '「Apple Watch Series Demo」がiPhoneとのペアリングを求めています。このコードがApple Watch上でも表示されていることを確認してください。他のアクセサリには入力しないでください。';
+  String get bluetoothPairDesc => '「Apple Watch Series Demo」がiPhoneとのペアリングを求めています。このコードがApple Watch上でも表示されていることを確認してください。他のアクセサリには入力しないでください。';
 
   @override
   String get todayHealthData => '今日の健康データ';
@@ -356,8 +354,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get connected => '接続済み';
 
   @override
-  String get preparingHealthData =>
-      '最適な体験を提供するため、健康データを準備しています。これには少し時間がかかる場合があります。\n\n同期をスムーズに行うため、ウォッチをスマホの近くに置いてください。完了時に通知されます。';
+  String get preparingHealthData => '最適な体験を提供するため、健康データを準備しています。これには少し時間がかかる場合があります。\n\n同期をスムーズに行うため、ウォッチをスマホの近くに置いてください。完了時に通知されます。';
 
   @override
   String get chooseConversationsToShare => '共有する会話を選択してください';
@@ -626,12 +623,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get shareWithMedical => '緊急時または許可を得た場合、医療機関と共有。';
 
   @override
-  String get privacyIntro1 =>
-      '健康モニタリングシステムへようこそ。このポリシーはアプリ、ウェブ、ソフト、関連プラットフォームに適用されます。';
+  String get privacyIntro1 => '健康モニタリングシステムへようこそ。このポリシーはアプリ、ウェブ、ソフト、関連プラットフォームに適用されます。';
 
   @override
-  String get privacyIntro2 =>
-      'プライバシー保護に努めます。この内容は、情報の収集・保護方法を説明するものです。同意されない場合は利用をお控えください。';
+  String get privacyIntro2 => 'プライバシー保護に努めます。この内容は、情報の収集・保護方法を説明するものです。同意されない場合は利用をお控えください。';
 
   @override
   String get verification => '認証';
@@ -694,12 +689,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get confirmDeleteInvite => '招待削除の確認';
 
   @override
-  String get userResponsibilityDesc =>
-      '正確な情報を入力してください。アカウントの安全管理はユーザーの責任です。違法・有害な目的での利用を禁止します。';
+  String get userResponsibilityDesc => '正確な情報を入力してください。アカウントの安全管理はユーザーの責任です。違法・有害な目的での利用を禁止します。';
 
   @override
-  String get serviceLimitationsDesc =>
-      '高齢者ケア・デジタルヒューマンシステムは補助ツールであり、専門的な診断や治療に代わるものではありません。';
+  String get serviceLimitationsDesc => '高齢者ケア・デジタルヒューマンシステムは補助ツールであり、専門的な診断や治療に代わるものではありません。';
 
   @override
   String get accountManagementDesc => 'アプリ設定やサポートへの連絡により、いつでもアカウントの停止・削除が可能です。';

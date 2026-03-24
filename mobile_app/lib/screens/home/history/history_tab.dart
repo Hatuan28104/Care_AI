@@ -16,7 +16,6 @@ class HistoryTab extends StatefulWidget {
 }
 
 class _HistoryTabState extends State<HistoryTab> {
-  static const Color primary = Color(0xFF1F41BB);
   static const Color bgItem = Color.fromARGB(255, 255, 255, 255);
 
   List<Map<String, dynamic>> histories = [];
@@ -54,7 +53,7 @@ class _HistoryTabState extends State<HistoryTab> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         _title(),
         Expanded(
@@ -68,16 +67,14 @@ class _HistoryTabState extends State<HistoryTab> {
 
   Widget _title() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(18, 10, 18, 12),
-      child: Text(
-        context.tr.history,
-        style: const TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.w700,
-          color: primary,
-        ),
-      ),
-    );
+        padding: const EdgeInsets.fromLTRB(18, 10, 18, 12),
+        child: Text(
+          context.tr.conversationHistory,
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w600,
+          ),
+        ));
   }
 
   /* ================= CONTENT ================= */
@@ -132,7 +129,7 @@ class _HistoryTabState extends State<HistoryTab> {
     String image,
     String time,
   ) {
-    const radius = 16.0;
+    const radius = 10.0;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -230,7 +227,7 @@ class _HistoryTabState extends State<HistoryTab> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          "$job • $time",
+                          "$job  $time",
                           style: const TextStyle(
                             fontSize: 13,
                             color: Colors.grey,

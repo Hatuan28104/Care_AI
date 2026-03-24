@@ -3,7 +3,7 @@ import 'package:Care_AI/models/tr.dart';
 import 'package:Care_AI/api/chat_api.dart';
 import 'package:Care_AI/api/family_api.dart';
 import 'package:Care_AI/config/api_config.dart';
-import 'package:Care_AI/widgets/app_header.dart';
+import 'package:Care_AI/widgets/app_components.dart';
 
 class ConversationScreen extends StatefulWidget {
   final String userId;
@@ -116,7 +116,7 @@ class _ConversationSharingScreenState extends State<ConversationScreen> {
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(10),
         boxShadow: const [
           BoxShadow(
             blurRadius: 14,
@@ -166,7 +166,7 @@ class _ConversationSharingScreenState extends State<ConversationScreen> {
               ],
             ),
           ),
-          Switch(
+          AppSwitch(
             value: user['enabled'],
             onChanged: (v) async {
               final oldValue = user['enabled'];
@@ -175,27 +175,18 @@ class _ConversationSharingScreenState extends State<ConversationScreen> {
                 _users[index]['enabled'] = v;
               });
 
-              print("CALL API -> hoiThoaiId: ${user["hoiThoaiId"]} active: $v");
-
               try {
                 await FamilyApi.savePermission(
                   quanHeId: widget.quanHeId,
                   quyenId: user["hoiThoaiId"],
                   active: v,
                 );
-
-                print("SAVE SUCCESS");
               } catch (e) {
-                print("SAVE ERROR: $e");
-
                 setState(() {
                   _users[index]['enabled'] = oldValue;
                 });
               }
             },
-            activeTrackColor: const Color.fromARGB(255, 19, 114, 255),
-            inactiveTrackColor: const Color.fromARGB(255, 218, 217, 217),
-            inactiveThumbColor: Colors.white,
           ),
         ],
       ),

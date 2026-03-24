@@ -194,7 +194,7 @@ class DeviceDetailScreen extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: const Color(0xFFE9F1FF),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         children: [
@@ -203,7 +203,7 @@ class DeviceDetailScreen extends StatelessWidget {
             height: 64,
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(10),
             ),
             padding: const EdgeInsets.all(6),
             child: Image.asset('assets/images/watch.jpg', fit: BoxFit.contain),
@@ -263,7 +263,7 @@ class DeviceDetailScreen extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: const Color(0xFFEFFAF0),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -358,7 +358,7 @@ class DeviceDetailScreen extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.06),
@@ -420,7 +420,7 @@ class DeviceDetailScreen extends StatelessWidget {
       height: 56,
       decoration: BoxDecoration(
         color: const Color(0xFFD00000),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: TextButton.icon(
         onPressed: () => _showDisconnectDialog(context),
@@ -458,7 +458,7 @@ class _MiniStatCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.06),

@@ -146,7 +146,7 @@ class _MyGuardiansScreenState extends State<MyGuardiansScreen>
                   }
                 },
                 backgroundColor: const Color(0xFFFE4343),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(10),
                 child: const Center(
                   child: Icon(Icons.delete, color: Colors.white, size: 28),
                 ),
@@ -197,7 +197,7 @@ class GuardianCard extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(10),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.06),
@@ -213,11 +213,11 @@ class GuardianCard extends StatelessWidget {
               height: 72,
               decoration: BoxDecoration(
                 color: const Color(0xFF1877F2).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(10),
               ),
               child: avatar != null
                   ? ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(10),
                       child: Image.network(avatar!, fit: BoxFit.cover),
                     )
                   : const Icon(

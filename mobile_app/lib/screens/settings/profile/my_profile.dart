@@ -138,7 +138,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   }
 
   OutlineInputBorder _outline(Color c, double w) => OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(10),
         borderSide: BorderSide(color: c, width: w),
       );
   String _mapLabelToKey(String label) {
@@ -367,7 +367,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     InkWell(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(10),
                       onTap: _cancelEdit,
                       child: const Padding(
                         padding: EdgeInsets.all(6),
@@ -376,7 +376,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                     ),
                     const SizedBox(width: 4),
                     InkWell(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(10),
                       onTap: _save,
                       child: const Padding(
                         padding: EdgeInsets.all(6),
@@ -386,7 +386,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                   ],
                 )
               : InkWell(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(10),
                   onTap: () {
                     setState(() => _isEditing = true);
                   },

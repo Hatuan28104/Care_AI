@@ -88,7 +88,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
   }
 
   OutlineInputBorder _outline(Color c, double w) => OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(10),
         borderSide: BorderSide(color: c, width: w),
       );
 

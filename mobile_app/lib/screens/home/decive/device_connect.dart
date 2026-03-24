@@ -40,7 +40,7 @@ class _ConnectDeviceScreenState extends State<ConnectDeviceScreen> {
           child: Container(
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(10),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,

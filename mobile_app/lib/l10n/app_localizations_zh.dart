@@ -330,8 +330,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get allowHealthNotificationDesc => '当有重要事项需要您了解时接收通知。';
 
   @override
-  String get healthAlertDesc =>
-      '智能手表可以在检测到心率、血压或其他重要指标异常时发出警报。\n\n这些通知有助于您及时处理或在需要时通知亲友。';
+  String get healthAlertDesc => '智能手表可以在检测到心率、血压或其他重要指标异常时发出警报。\n\n这些通知有助于您及时处理或在需要时通知亲友。';
 
   @override
   String get back => '返回';
@@ -343,8 +342,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get later => '稍后';
 
   @override
-  String get bluetoothPairDesc =>
-      '“Apple Watch Series Demo”想要与您的iPhone配对。请确认此代码也显示在“Apple Watch Series Demo”上。请勿在任何其他配件上输入此代码。';
+  String get bluetoothPairDesc => '“Apple Watch Series Demo”想要与您的iPhone配对。请确认此代码也显示在“Apple Watch Series Demo”上。请勿在任何其他配件上输入此代码。';
 
   @override
   String get todayHealthData => '今日健康数据';
@@ -356,8 +354,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get connected => '已连接';
 
   @override
-  String get preparingHealthData =>
-      '我们正在准备健康数据以提供最佳体验。此过程可能需要一点时间。\n\n请将手表靠近手机以确保同步顺利进行。完成后您将收到通知。';
+  String get preparingHealthData => '我们正在准备健康数据以提供最佳体验。此过程可能需要一点时间。\n\n请将手表靠近手机以确保同步顺利进行。完成后您将收到通知。';
 
   @override
   String get chooseConversationsToShare => '选择您想要分享的对话';
@@ -629,8 +626,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get privacyIntro1 => '欢迎使用健康监测支持系统。本隐私政策适用于系统所有服务，包括应用、网站、软件及相关平台。';
 
   @override
-  String get privacyIntro2 =>
-      '我们致力于保护您的隐私。本政策解释了我们如何收集、使用、共享和保护您的个人信息。使用本平台即代表您同意以下内容。如不同意，请停止使用服务。';
+  String get privacyIntro2 => '我们致力于保护您的隐私。本政策解释了我们如何收集、使用、共享和保护您的个人信息。使用本平台即代表您同意以下内容。如不同意，请停止使用服务。';
 
   @override
   String get verification => '验证';
@@ -693,8 +689,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get confirmDeleteInvite => '确认删除邀请';
 
   @override
-  String get userResponsibilityDesc =>
-      '您必须提供准确且更新的信息。您负责维护账户信息的安全性以及在该账户下进行的所有活动。严禁将平台用于非法、有害或欺诈目的。';
+  String get userResponsibilityDesc => '您必须提供准确且更新的信息。您负责维护账户信息的安全性以及在该账户下进行的所有活动。严禁将平台用于非法、有害或欺诈目的。';
 
   @override
   String get serviceLimitationsDesc => '老年人护理数字人系统是一项辅助工具，不能替代专业的医疗咨询、诊断或治疗。';

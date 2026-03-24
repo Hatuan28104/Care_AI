@@ -216,8 +216,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmDelete => 'Confirm Delete';
 
   @override
-  String get confirmDeleteDependent =>
-      'Are you sure you want to remove this dependent from the family?';
+  String get confirmDeleteDependent => 'Are you sure you want to remove this dependent from the family?';
 
   @override
   String get confirmInvite => 'Confirm Invite';
@@ -229,8 +228,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmRejectInvite => 'Confirm Reject Invite';
 
   @override
-  String get rejectInviteQuestion =>
-      'Are you sure you want to reject this invitation?';
+  String get rejectInviteQuestion => 'Are you sure you want to reject this invitation?';
 
   @override
   String get fullName => 'Full Name';
@@ -329,12 +327,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get allowHealthNotificationTitle => 'Receive Health Notifications';
 
   @override
-  String get allowHealthNotificationDesc =>
-      'Get notified when there is important information you need to know.';
+  String get allowHealthNotificationDesc => 'Get notified when there is important information you need to know.';
 
   @override
-  String get healthAlertDesc =>
-      'Smartwatches can alert you when abnormal signs are detected in heart rate, blood pressure, or other vital metrics.\n\nThese notifications help you take timely action or notify relatives when necessary.';
+  String get healthAlertDesc => 'Smartwatches can alert you when abnormal signs are detected in heart rate, blood pressure, or other vital metrics.\n\nThese notifications help you take timely action or notify relatives when necessary.';
 
   @override
   String get back => 'Back';
@@ -346,8 +342,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get later => 'Later';
 
   @override
-  String get bluetoothPairDesc =>
-      '“Apple Watch Series Demo” wants to pair with your iPhone. Please confirm this code also displays on “Apple Watch Series Demo”. Do not enter this code on any other accessory.';
+  String get bluetoothPairDesc => '“Apple Watch Series Demo” wants to pair with your iPhone. Please confirm this code also displays on “Apple Watch Series Demo”. Do not enter this code on any other accessory.';
 
   @override
   String get todayHealthData => 'Today\'s Health Data';
@@ -359,16 +354,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get connected => 'Connected';
 
   @override
-  String get preparingHealthData =>
-      'We are preparing health data to provide the best experience for you. This process may take a moment.\n\nPlease keep the watch near the phone to ensure smooth synchronization. You will receive a notification when the process is complete.';
+  String get preparingHealthData => 'We are preparing health data to provide the best experience for you. This process may take a moment.\n\nPlease keep the watch near the phone to ensure smooth synchronization. You will receive a notification when the process is complete.';
 
   @override
-  String get chooseConversationsToShare =>
-      'Choose the conversations you want to share';
+  String get chooseConversationsToShare => 'Choose the conversations you want to share';
 
   @override
-  String get shareImportantHealthData =>
-      'Share important health information with caregivers';
+  String get shareImportantHealthData => 'Share important health information with caregivers';
 
   @override
   String get holdSmartwatch => 'Hold the smartwatch';
@@ -383,8 +375,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scanFrameAbove => 'above.';
 
   @override
-  String get qrNotFoundBluetooth =>
-      'QR code not found? Try connecting via Bluetooth';
+  String get qrNotFoundBluetooth => 'QR code not found? Try connecting via Bluetooth';
 
   @override
   String get devicePaired => 'Device Paired';
@@ -423,8 +414,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get welcomeTitle => 'Hello, Care AI';
 
   @override
-  String get welcomeSubtitle =>
-      'Your digital companion, peace of mind for the whole family.';
+  String get welcomeSubtitle => 'Your digital companion, peace of mind for the whole family.';
 
   @override
   String get welcomeBack => 'Welcome back!';
@@ -450,8 +440,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createAccount => 'Create Care AI Account';
 
   @override
-  String get startHealthJourney =>
-      'Start your health journey with an AI assistant';
+  String get startHealthJourney => 'Start your health journey with an AI assistant';
 
   @override
   String get registerSuccess => 'Registration Successful';
@@ -463,8 +452,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get invalidPhone => 'Please check and enter the correct phone number!';
 
   @override
-  String get registerAgree =>
-      'By registering, you confirm that you agree to the';
+  String get registerAgree => 'By registering, you confirm that you agree to the';
 
   @override
   String get register => 'Register';
@@ -509,8 +497,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteDevice => 'Delete Device';
 
   @override
-  String get confirmDeleteDevice =>
-      'Are you sure you want to delete this device?';
+  String get confirmDeleteDevice => 'Are you sure you want to delete this device?';
 
   @override
   String get scan => 'Scan';
@@ -594,8 +581,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get other => 'Other';
 
   @override
-  String get textSizePreview =>
-      'Apps that support Dynamic Type will adjust to your preferred reading size below.';
+  String get textSizePreview => 'Apps that support Dynamic Type will adjust to your preferred reading size below.';
 
   @override
   String get infoCollected => 'Information We Collect';
@@ -616,40 +602,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get infoUsedFor => 'Your information is used to:';
 
   @override
-  String get infoSharedCases =>
-      'We only share your information in the following cases:';
+  String get infoSharedCases => 'We only share your information in the following cases:';
 
   @override
-  String get serviceTracking =>
-      'Provide health tracking, reminder services, and care support.';
+  String get serviceTracking => 'Provide health tracking, reminder services, and care support.';
 
   @override
-  String get alertGuardian =>
-      'Send alerts to guardians or medical staff when necessary.';
+  String get alertGuardian => 'Send alerts to guardians or medical staff when necessary.';
 
   @override
-  String get improveSystem =>
-      'Improve system stability and personalize the user experience.';
+  String get improveSystem => 'Improve system stability and personalize the user experience.';
 
   @override
-  String get ensureSafety =>
-      'Ensure safety, comply with legal regulations, and use for correct purposes.';
+  String get ensureSafety => 'Ensure safety, comply with legal regulations, and use for correct purposes.';
 
   @override
-  String get shareWithGuardian =>
-      'With guardians or family members with your permission.';
+  String get shareWithGuardian => 'With guardians or family members with your permission.';
 
   @override
-  String get shareWithMedical =>
-      'With medical facilities when authorized or in emergencies.';
+  String get shareWithMedical => 'With medical facilities when authorized or in emergencies.';
 
   @override
-  String get privacyIntro1 =>
-      'Welcome to the Health Monitoring Support System. This Privacy Policy applies to all system services, including apps, websites, software, and related platforms.';
+  String get privacyIntro1 => 'Welcome to the Health Monitoring Support System. This Privacy Policy applies to all system services, including apps, websites, software, and related platforms.';
 
   @override
-  String get privacyIntro2 =>
-      'We are committed to protecting your privacy. This policy explains how we collect, use, share, and protect your personal information. By using the platform, you agree to the contents described below.';
+  String get privacyIntro2 => 'We are committed to protecting your privacy. This policy explains how we collect, use, share, and protect your personal information. By using the platform, you agree to the contents described below.';
 
   @override
   String get verification => 'Verification';
@@ -712,20 +689,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmDeleteInvite => 'Confirm delete invitation';
 
   @override
-  String get userResponsibilityDesc =>
-      'You must provide accurate and updated information. You are responsible for the security of your account and all activities that occur under it. Use of the platform for illegal, harmful, or fraudulent purposes is strictly prohibited.';
+  String get userResponsibilityDesc => 'You must provide accurate and updated information. You are responsible for the security of your account and all activities that occur under it. Use of the platform for illegal, harmful, or fraudulent purposes is strictly prohibited.';
 
   @override
-  String get serviceLimitationsDesc =>
-      'The Elderly Care Digital Human System is a support tool and does not replace professional medical advice, diagnosis, or treatment.';
+  String get serviceLimitationsDesc => 'The Elderly Care Digital Human System is a support tool and does not replace professional medical advice, diagnosis, or treatment.';
 
   @override
-  String get accountManagementDesc =>
-      'You can suspend or permanently delete your account at any time through app settings or by contacting support.';
+  String get accountManagementDesc => 'You can suspend or permanently delete your account at any time through app settings or by contacting support.';
 
   @override
-  String get termsUpdatesDesc =>
-      'These Terms of Use may be updated over time to comply with new legal regulations or to improve service quality.';
+  String get termsUpdatesDesc => 'These Terms of Use may be updated over time to comply with new legal regulations or to improve service quality.';
 
   @override
   String get profile => 'Personal Profile';
@@ -764,8 +737,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteAlertTitle => 'Delete Alert';
 
   @override
-  String get deleteAlertWarning =>
-      'This action can lead to serious consequences.';
+  String get deleteAlertWarning => 'This action can lead to serious consequences.';
 
   @override
   String get deletedSuccessfully => 'Deleted successfully';
@@ -792,8 +764,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get voiceMessage => '🎤 Voice message';
 
   @override
-  String get careAIIntro =>
-      'Hi, I\'m Care AI 💙\nIt\'s great to see you today. Would you like to share how you\'ve been feeling lately?';
+  String get careAIIntro => 'Hi, I\'m Care AI 💙\nIt\'s great to see you today. Would you like to share how you\'ve been feeling lately?';
 
   @override
   String get chooseGender => 'Choose Gender';
@@ -844,15 +815,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get spo2 => 'Blood Oxygen Level – SpO₂';
 
   @override
-  String get goodHealthDesc =>
-      'Your metrics are all within the normal range. Keep maintaining a healthy lifestyle!';
+  String get goodHealthDesc => 'Your metrics are all within the normal range. Keep maintaining a healthy lifestyle!';
 
   @override
   String get enterGuardianPhone => 'Enter your guardian\'s phone number';
 
   @override
-  String get termsIntro =>
-      'By creating an account or accessing the Health Monitoring Support System, you agree to comply with these Terms of Use...';
+  String get termsIntro => 'By creating an account or accessing the Health Monitoring Support System, you agree to comply with these Terms of Use...';
 
   @override
   String get askAnything => 'Ask anything...';
@@ -867,8 +836,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get healthNotificationTitle => 'Receive Health\nNotifications';
 
   @override
-  String get healthNotificationDesc =>
-      'Get notified when there is important information you need to know.';
+  String get healthNotificationDesc => 'Get notified when there is important information you need to know.';
 
   @override
   String get goodHealth => 'Good health';
@@ -877,12 +845,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stressLevel => 'Stress level';
 
   @override
-  String get deleteDeviceConfirm =>
-      'Are you sure you want to delete this device?';
+  String get deleteDeviceConfirm => 'Are you sure you want to delete this device?';
 
   @override
-  String get deleteGuardianConfirm =>
-      'Are you sure you want to remove this guardian from the family?';
+  String get deleteGuardianConfirm => 'Are you sure you want to remove this guardian from the family?';
 
   @override
   String get enterPhoneNumber => 'Enter phone number';
@@ -954,8 +920,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteConversation => 'Delete conversation';
 
   @override
-  String get confirmDeleteConversation =>
-      'Are you sure you want to delete this conversation?';
+  String get confirmDeleteConversation => 'Are you sure you want to delete this conversation?';
 
   @override
   String get dangerDetected => 'Danger detected';

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'familycenter_health_data.dart';
 import 'familycenter_conversation.dart';
 import 'package:Care_AI/models/tr.dart';
-import 'package:Care_AI/widgets/app_header.dart';
+import 'package:Care_AI/widgets/app_components.dart';
 
 class ConfigurePermissionsScreen extends StatelessWidget {
   final String userId;
@@ -85,7 +85,7 @@ class ConfigurePermissionsScreen extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(10),
         boxShadow: const [
           BoxShadow(
             blurRadius: 16,

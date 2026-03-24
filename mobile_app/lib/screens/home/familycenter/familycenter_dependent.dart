@@ -161,7 +161,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen>
               }
             },
             backgroundColor: const Color(0xFFFE4343),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(10),
             child: const Center(
               child: Icon(Icons.delete, color: Colors.white, size: 28),
             ),
@@ -266,7 +266,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen>
   BoxDecoration _cardDecoration() {
     return BoxDecoration(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(10),
       boxShadow: const [
         BoxShadow(blurRadius: 14, color: Colors.black12, offset: Offset(0, 6)),
       ],
@@ -280,7 +280,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen>
       width: 72,
       height: 72,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         color: avatar == null ? _blue.withValues(alpha: 0.1) : null,
         image: avatar != null
             ? DecorationImage(image: NetworkImage(avatar), fit: BoxFit.cover)
@@ -299,7 +299,7 @@ class _MyDependentsScreenState extends State<MyDependentsScreen>
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: color,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
         text,
