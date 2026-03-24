@@ -1,4 +1,5 @@
 import express from "express";
+import { auth } from "../middlewares/auth.middleware.js";
 
 import {
   getAllHealthMetrics,
@@ -6,50 +7,59 @@ import {
   saveHealthData,
   getLatestHealthData,
   getHealthHistory,
-    getHealthReport
+  getHealthReport,
+  ensureDeviceForUser,
 } from "../repos/healthMetric.repo.js";
 
 const router = express.Router();
 
+/* =========================
+   PING - Test API
+========================= */
+router.get("/ping", (req, res) => {
+  res.json({
+    success: true,
+    message: "Health API OK",
+    time: new Date().toISOString(),
+  });
+});
 
 /* =========================
    LẤY DANH SÁCH CHỈ SỐ
 ========================= */
-router.get("/metrics", async (req, res) => {
+router.get("/metrics", auth, async (req, res) => {
   try {
-
     const data = await getAllHealthMetrics();
 
-    res.json({
-      success: true,
-      data
-    });
-
+    res.json({ success: true, data });
   } catch (err) {
     console.error(err);
-
     res.status(500).json({
       success: false,
-      message: "Không lấy được danh sách chỉ số"
+      message: "Không lấy được danh sách chỉ số",
     });
   }
 });
 
-
 /* =========================
    THÊM CHỈ SỐ MỚI
 ========================= */
-router.post("/metrics", async (req, res) => {
+router.post("/metrics", auth, async (req, res) => {
   try {
-    const loaichiso_id = req.body.loaichiso_id ?? req.body.LoaiChiSo_ID;
-    const tenchiso = req.body.tenchiso ?? req.body.TenChiSo;
-    const donvido = req.body.donvido ?? req.body.DonViDo;
-    const category = req.body.category ?? req.body.Category;
+    // hỗ trợ cả camelCase + PascalCase
+    const loaichiso_id =
+      req.body.loaichiso_id ?? req.body.LoaiChiSo_ID;
+    const tenchiso =
+      req.body.tenchiso ?? req.body.TenChiSo;
+    const donvido =
+      req.body.donvido ?? req.body.DonViDo;
+    const category =
+      req.body.category ?? req.body.Category;
 
     if (!loaichiso_id || !tenchiso || !donvido) {
       return res.status(400).json({
         success: false,
-        message: "Thiếu dữ liệu"
+        message: "Thiếu dữ liệu",
       });
     }
 
@@ -57,134 +67,175 @@ router.post("/metrics", async (req, res) => {
       loaichiso_id,
       tenchiso,
       donvido,
-      category
+      category,
     });
 
     res.json({
       success: true,
-      message: "Đã thêm chỉ số"
+      message: "Đã thêm chỉ số",
     });
-
   } catch (err) {
     console.error(err);
-
     res.status(500).json({
       success: false,
-      message: "Không thêm được chỉ số"
+      message: "Không thêm được chỉ số",
     });
   }
 });
 
+/* =========================
+   LẤY/TẠO THIẾT BỊ USER
+========================= */
+router.post("/device/ensure", auth, async (req, res) => {
+  try {
+    const nguoiDungId = req.user.NguoiDung_ID;
+
+    if (!nguoiDungId) {
+      return res.status(400).json({
+        success: false,
+        message: "Thiếu NguoiDung_ID",
+      });
+    }
+
+    const thietBiId = await ensureDeviceForUser(nguoiDungId);
+
+    res.json({
+      success: true,
+      data: { ThietBi_ID: thietBiId },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: "Không tạo được thiết bị",
+    });
+  }
+});
 
 /* =========================
    LƯU DỮ LIỆU SỨC KHỎE
 ========================= */
-router.post("/data", async (req, res) => {
+router.post("/data", auth, async (req, res) => {
   try {
-    const giatri = req.body.giatri ?? req.body.GiaTri;
-    const thietbi_id = req.body.thietbi_id ?? req.body.ThietBi_ID;
-    const loaichiso_id = req.body.loaichiso_id ?? req.body.LoaiChiSo_ID;
+    let giatri = req.body.giatri ?? req.body.GiaTri;
+    let thietbi_id = req.body.thietbi_id ?? req.body.ThietBi_ID;
+    let loaichiso_id =
+      req.body.loaichiso_id ?? req.body.LoaiChiSo_ID;
+    let thoigian =
+      req.body.thoigian ?? req.body.ThoiGianCapNhat;
 
-    if (!giatri || !thietbi_id || !loaichiso_id) {
+    const nguoiDungId = req.user.NguoiDung_ID;
+
+    // ⚠️ fix 0 vẫn hợp lệ
+    if (giatri === undefined || giatri === null || giatri === "") {
       return res.status(400).json({
         success: false,
-        message: "Thiếu dữ liệu"
+        message: "Thiếu GiaTri",
       });
     }
 
+    if (!loaichiso_id) {
+      return res.status(400).json({
+        success: false,
+        message: "Thiếu LoaiChiSo_ID",
+      });
+    }
+
+    // auto tạo device nếu chưa có
+    if (!thietbi_id && nguoiDungId) {
+      thietbi_id = await ensureDeviceForUser(nguoiDungId);
+    }
+
+    if (!thietbi_id) {
+      return res.status(400).json({
+        success: false,
+        message: "Thiếu ThietBi_ID",
+      });
+    }
+
+    // 🔥 FIX GIỜ VN
+    if (!thoigian) {
+      thoigian = new Date();
+    } else {
+      thoigian = new Date(thoigian);
+    }
+
     await saveHealthData({
-      giatri,
-      thietbi_id,
-      loaichiso_id
+      GiaTri: giatri,
+      ThietBi_ID: thietbi_id,
+      LoaiChiSo_ID: loaichiso_id,
+      ThoiGianCapNhat: thoigian,
     });
 
     res.json({
       success: true,
-      message: "Đã lưu dữ liệu sức khỏe"
+      message: "Đã lưu dữ liệu sức khỏe",
     });
-
   } catch (err) {
     console.error(err);
-
     res.status(500).json({
       success: false,
-      message: "Không lưu được dữ liệu"
+      message: "Không lưu được dữ liệu",
     });
   }
 });
-/* =========================
-   LẤY DỮ LIỆU MỚI NHẤT
-========================= */
-router.get("/data/latest/:deviceId", async (req, res) => {
-  try {
 
+/* =========================
+   DATA MỚI NHẤT
+========================= */
+router.get("/data/latest/:deviceId", auth, async (req, res) => {
+  try {
     const { deviceId } = req.params;
 
     const data = await getLatestHealthData(deviceId);
 
-    res.json({
-      success: true,
-      data
-    });
-
+    res.json({ success: true, data });
   } catch (err) {
     console.error(err);
-
     res.status(500).json({
       success: false,
-      message: "Không lấy được dữ liệu mới nhất"
+      message: "Không lấy được dữ liệu mới nhất",
     });
   }
 });
 
-
 /* =========================
-   LỊCH SỬ CHỈ SỐ
+   HISTORY
 ========================= */
-router.get("/history/:deviceId/:metricId", async (req, res) => {
+router.get("/history/:deviceId/:metricId", auth, async (req, res) => {
   try {
-
     const { deviceId, metricId } = req.params;
 
     const data = await getHealthHistory(deviceId, metricId);
 
-    res.json({
-      success: true,
-      data
-    });
-
+    res.json({ success: true, data });
   } catch (err) {
     console.error(err);
-
     res.status(500).json({
       success: false,
-      message: "Không lấy được lịch sử"
+      message: "Không lấy được lịch sử",
     });
   }
 });
-/* =========================
-   HEALTH REPORT
-========================= */
-router.get("/report/:deviceId", async (req, res) => {
-  try {
 
+/* =========================
+   REPORT
+========================= */
+router.get("/report/:deviceId", auth, async (req, res) => {
+  try {
     const { deviceId } = req.params;
-    const { type } = req.query; // day | week | month
+    const { type } = req.query; 
 
     const data = await getHealthReport(deviceId, type);
 
-    res.json({
-      success: true,
-      data
-    });
-
+    res.json({ success: true, data });
   } catch (err) {
     console.error(err);
-
     res.status(500).json({
       success: false,
-      message: "Không lấy được báo cáo sức khỏe"
+      message: "Không lấy được báo cáo sức khỏe",
     });
   }
 });
+
 export default router;

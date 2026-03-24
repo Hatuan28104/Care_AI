@@ -1,17 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:Care_AI/screens/home/decive/device_detail.dart';
-import 'package:Care_AI/models/tr.dart';
+import 'package:Care_AI/api/auth_storage.dart';
+import 'package:Care_AI/screens/home/home.dart';
+import 'package:Care_AI/services/health_connect_prefs.dart';
+import 'package:Care_AI/services/background_sync.dart';
+import '../../../models/tr.dart';
 
 class DeviceCompleteScreen extends StatelessWidget {
-  const DeviceCompleteScreen({super.key});
+  final String appName;
+
+  const DeviceCompleteScreen({
+    super.key,
+    required this.appName,
+  });
 
   static const blue = Color(0xFF1877F2);
   static const green = Color(0xFF45C46D);
+  static const bg = Color(0xFFF6F6F6);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF6F6F6),
+      backgroundColor: bg,
       body: SafeArea(
         child: Column(
           children: [
@@ -72,11 +81,23 @@ class DeviceCompleteScreen extends StatelessWidget {
                   width: double.infinity,
                   height: 52,
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
+                      await HealthConnectPrefs.setLinked(appName);
+                      if (!context.mounted) return;
+                      final userId = await AuthStorage.getUserId();
+                      if (userId == null || userId.isEmpty) {
+                        Navigator.pop(context);
+                        return;
+                      }
+                      // Schedule background sync mỗi 15p
+                      await BackgroundSync.scheduleSync();
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => const DeviceDetailScreen(),
+                          builder: (_) => HomeScreen(
+                            userId: userId,
+                            initialIndex: 2,
+                          ),
                         ),
                       );
                     },

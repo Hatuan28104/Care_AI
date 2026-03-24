@@ -1,104 +1,146 @@
 import 'package:flutter/material.dart';
-import 'device_scan.dart';
-import 'device_add.dart';
-import 'package:Care_AI/models/tr.dart';
+import 'package:Care_AI/api/health_service.dart';
+import 'package:Care_AI/screens/home/decive/device_add.dart';
+import 'package:Care_AI/screens/home/decive/device_detail.dart';
+import 'package:Care_AI/services/health_connect_prefs.dart';
 
-class DeviceTab extends StatelessWidget {
-  const DeviceTab({super.key});
+/// Tab Thiết bị trong [HomeScreen]: đã đồng bộ + còn quyền HC → hiện [DeviceDetailScreen] luôn;
+/// chưa thì hiện màn kết nối (card + nút).
+class DeviceTabRouter extends StatefulWidget {
+  const DeviceTabRouter({super.key});
 
-  // ===== COLORS (theo Home) =====
+  @override
+  State<DeviceTabRouter> createState() => _DeviceTabRouterState();
+}
+
+class _DeviceTabRouterState extends State<DeviceTabRouter> {
+  late Future<_DeviceEntry> _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = _loadEntry();
+  }
+
+  Future<_DeviceEntry> _loadEntry() async {
+    final linked = await HealthConnectPrefs.isLinked();
+    final perm = await HealthService.checkPermission();
+    final name = await HealthConnectPrefs.getLinkedAppName();
+    final appName = (name != null && name.isNotEmpty) ? name : 'Huawei Health';
+    return _DeviceEntry(showDetail: linked && perm, appName: appName);
+  }
+
+  void _reloadAfterDisconnect() {
+    setState(() {
+      _future = _loadEntry();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<_DeviceEntry>(
+      future: _future,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        final e = snapshot.data!;
+        if (e.showDetail) {
+          return DeviceDetailScreen(
+            appName: e.appName,
+            embeddedInTab: true,
+            onDisconnected: _reloadAfterDisconnect,
+          );
+        }
+        return const DeviceConnectPlaceholder();
+      },
+    );
+  }
+}
+
+class _DeviceEntry {
+  final bool showDetail;
+  final String appName;
+
+  _DeviceEntry({required this.showDetail, required this.appName});
+}
+
+/// Chưa kết nối: card + nút vào luồng chọn app / cấp quyền.
+class DeviceConnectPlaceholder extends StatelessWidget {
+  const DeviceConnectPlaceholder({super.key});
+
   static const Color accent = Color(0xFF1877F2);
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const SizedBox(height: 20),
-        _deviceImage(),
+        const SizedBox(height: 30),
+        _deviceCard(),
         const Spacer(),
-        _actions(context),
+        const SizedBox(height: 10),
+        _button(context),
         const SizedBox(height: 40),
       ],
     );
   }
 
-  // ===== DEVICE IMAGE =====
-  Widget _deviceImage() {
-    return Center(
-      child: Container(
-        width: 300,
-        height: 300,
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(30),
-          boxShadow: const [
-            BoxShadow(
-              blurRadius: 20,
-              color: Colors.black12,
-              offset: Offset(0, 10),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(30),
-          child: Image.asset('assets/images/decive.jpg', fit: BoxFit.cover),
+  Widget _deviceCard() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(26),
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 25,
+            color: Colors.black.withOpacity(0.08),
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: Center(
+        child: Image.asset(
+          'assets/images/decive.jpg',
+          width: 200,
         ),
       ),
     );
   }
 
-  // ===== ACTION BUTTONS =====
-  Widget _actions(BuildContext context) {
+  Widget _button(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 18),
-      child: Row(
-        children: [
-          Expanded(
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const ScanScreen()),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size.fromHeight(54),
-                backgroundColor: Colors.grey.shade300,
-                foregroundColor: Colors.black,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const AddDeviceScreen(),
               ),
-              child: Text(
-                context.tr.scan,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-              ),
+            );
+          },
+          style: ElevatedButton.styleFrom(
+            minimumSize: const Size.fromHeight(56),
+            backgroundColor: accent,
+            foregroundColor: Colors.white,
+            elevation: 4,
+            shadowColor: accent.withOpacity(0.4),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
             ),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const AddDeviceScreen()),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size.fromHeight(54),
-                backgroundColor: accent,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: Text(
-                context.tr.addNew,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-              ),
+          child: const Text(
+            'Kết nối dữ liệu',
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
             ),
           ),
-        ],
+        ),
       ),
     );
   }

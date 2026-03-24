@@ -5,7 +5,7 @@ import 'auth_storage.dart';
 import '../models/login_history_item.dart';
 import '../app_settings.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import '../config/api_config.dart';
+import 'package:Care_AI/config/api_config.dart';
 import 'api_exception.dart';
 
 class AuthApi {

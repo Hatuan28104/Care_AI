@@ -1,32 +1,31 @@
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
-        id("com.google.gms.google-services")
-
+    id("com.google.gms.google-services")
 }
 
 android {
-    namespace = "com.demo_app"
-    compileSdk = flutter.compileSdkVersion
+    namespace = "com.example.demo_app"
 
+    compileSdk = 36
     ndkVersion = "28.2.13676358"
 
- compileOptions {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-    isCoreLibraryDesugaringEnabled = true
-}
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = true
+    }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+        jvmTarget = "17"
     }
 
     defaultConfig {
-        applicationId = "com.demo_app"
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        applicationId = "com.example.demo_app"
+        minSdk = 26
+        targetSdk = 36
+
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
@@ -41,6 +40,13 @@ android {
 flutter {
     source = "../.."
 }
+
 dependencies {
+    implementation("androidx.health.connect:connect-client:1.1.0-alpha06")
+
+    implementation("androidx.activity:activity-ktx:1.9.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
+
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }

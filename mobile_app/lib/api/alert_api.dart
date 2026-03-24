@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../config/api_config.dart';
+import 'package:Care_AI/config/api_config.dart';
 import 'auth_storage.dart';
 import 'api_exception.dart';
 

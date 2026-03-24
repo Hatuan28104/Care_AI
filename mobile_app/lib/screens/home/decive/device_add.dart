@@ -1,9 +1,9 @@
-import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'device_connect.dart';
-import 'package:Care_AI/models/tr.dart';
+import 'package:Care_AI/api/auth_storage.dart';
+import 'package:Care_AI/api/health_service.dart';
+import 'package:Care_AI/screens/home/home.dart';
+import 'package:Care_AI/screens/home/decive/device_sync.dart';
 
 class AddDeviceScreen extends StatefulWidget {
   const AddDeviceScreen({super.key});
@@ -14,192 +14,165 @@ class AddDeviceScreen extends StatefulWidget {
 
 class _AddDeviceScreenState extends State<AddDeviceScreen> {
   static const Color blue = Color(0xFF1877F2);
+  static const Color background = Color(0xFFF6F6F6);
 
-  List<ScanResult> scanResults = [];
-  bool isScanning = false;
-  StreamSubscription? scanSubscription;
+  List<_HealthSource> apps = [];
+  bool _loading = true;
 
   @override
   void initState() {
     super.initState();
-    requestPermission();
+    _loadInstalledApps();
   }
 
-  Future<void> requestPermission() async {
-    await [
-      Permission.bluetooth,
-      Permission.bluetoothScan,
-      Permission.bluetoothConnect,
-      Permission.location,
-    ].request();
+  Future<void> _loadInstalledApps() async {
+    final installed = await HealthService.getInstalledHealthApps();
+    final mapped = installed.map((e) {
+      final supported = e['supported'] == true;
+      return _HealthSource(
+        name: (e['name'] ?? '').toString(),
+        status: supported ? "Sẵn sàng kết nối" : "Đã cài - chưa hỗ trợ kết nối",
+        supported: supported,
+        iconBase64: (e['iconBase64'] as String?),
+      );
+    }).toList();
 
-    startScan();
-  }
-
-  void startScan() async {
-    setState(() => isScanning = true);
-
-    FlutterBluePlus.startScan(timeout: const Duration(seconds: 5));
-
-    scanSubscription = FlutterBluePlus.scanResults.listen((results) {
-      if (!mounted) return;
-      setState(() {
-        scanResults = results;
-      });
+    if (!mounted) return;
+    setState(() {
+      apps = mapped;
+      _loading = false;
     });
-
-    await Future.delayed(const Duration(seconds: 5));
-
-    await FlutterBluePlus.stopScan();
-
-    if (!mounted) return;
-    setState(() => isScanning = false);
-  }
-
-  Future<void> connectDevice(BluetoothDevice device) async {
-    try {
-      await device.connect();
-    } catch (_) {}
-
-    if (!mounted) return;
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const ConnectDeviceScreen()),
-    );
-  }
-
-  @override
-  void dispose() {
-    scanSubscription?.cancel();
-    FlutterBluePlus.stopScan();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF6F6F6),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // ===== TITLE BAR =====
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 16, 12, 12),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back_ios,
-                        size: 20,
-                        color: Colors.black87,
-                      ),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ),
-                  Text(
-                    context.tr.device,
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black87,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+      backgroundColor: background,
 
-            Expanded(
-              child: Column(
-                children: [
-                  const SizedBox(height: 20),
+      // 🔥 HEADER CHUẨN APP
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
 
-                  // ===== TITLE =====
-                  Text(
-                    context.tr.scanningBluetooth,
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w800,
-                      color: blue,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    context.tr.keepDeviceNear,
-                    style: TextStyle(fontSize: 14, color: Colors.black54),
-                    textAlign: TextAlign.center,
-                  ),
-                  Text(
-                    context.tr.enableVisibility,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: blue,
-                      decoration: TextDecoration.underline,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-
-                  const SizedBox(height: 28),
-
-                  // ===== LOADING (chỉ hiện khi quét) =====
-                  if (isScanning)
-                    const CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.grey,
-                    ),
-
-                  const SizedBox(height: 32),
-
-                  // ===== DEVICE LIST =====
-                  Expanded(
-                    child: ListView.separated(
-                      padding: const EdgeInsets.symmetric(horizontal: 18),
-                      itemCount: scanResults.isEmpty ? 1 : scanResults.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
-                      itemBuilder: (context, index) {
-                        if (scanResults.isEmpty) {
-                          return _deviceCard(
-                            name: context.tr.noDeviceFound,
-                            mac: '',
-                            battery: 0,
-                          );
-                        }
-
-                        final result = scanResults[index];
-                        final device = result.device;
-
-                        return _deviceCard(
-                          name: device.name.isNotEmpty
-                              ? device.name
-                              : context.tr.unnamedDevice,
-                          mac: device.id.id,
-                          battery: 100,
-                          onTap: () => connectDevice(device),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+        // 👈 back button
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, size: 20),
+          onPressed: () => Navigator.pop(context),
         ),
+
+        title: const Text(
+          "Nguồn dữ liệu",
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+
+        centerTitle: true,
+
+        // 👈 giữ style giống header Care AI
+        foregroundColor: Colors.black,
+      ),
+
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 10),
+
+          // SUBTITLE
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            child: Text(
+              "Chọn ứng dụng để đồng bộ dữ liệu sức khỏe",
+              style: TextStyle(
+                fontSize: 13,
+                color: Colors.grey,
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          // LIST
+          Expanded(
+            child: _loading
+                ? const Center(child: CircularProgressIndicator())
+                : apps.isEmpty
+                    ? const Center(
+                        child: Text(
+                          "Không tìm thấy ứng dụng sức khỏe nào trên thiết bị",
+                          style: TextStyle(color: Colors.black54),
+                          textAlign: TextAlign.center,
+                        ),
+                      )
+                    : ListView.separated(
+                        padding: const EdgeInsets.symmetric(horizontal: 18),
+                        itemCount: apps.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 14),
+                        itemBuilder: (context, index) {
+                          final source = apps[index];
+
+                          return _deviceCard(
+                            name: source.name,
+                            status: source.status,
+                            supported: source.supported,
+                            iconBase64: source.iconBase64,
+                            onTap: () {
+                              if (source.supported) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => AllowDeviceScreen(
+                                      appName: source.name,
+                                    ),
+                                  ),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      '${source.name} chưa được hỗ trợ kết nối',
+                                    ),
+                                    backgroundColor: Colors.orange,
+                                  ),
+                                );
+                              }
+                            },
+                          );
+                        },
+                      ),
+          ),
+        ],
       ),
     );
   }
 
-  // ===== DEVICE CARD (GIỮ NGUYÊN UI) =====
   static Widget _deviceCard({
     required String name,
-    required String mac,
-    required int battery,
+    required String status,
+    required bool supported,
+    String? iconBase64,
     VoidCallback? onTap,
   }) {
-    final bool batteryOk = battery > 20;
+    Widget iconWidget;
+    if (iconBase64 != null && iconBase64.isNotEmpty) {
+      try {
+        final bytes = base64Decode(iconBase64);
+        iconWidget = ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Image.memory(
+            bytes,
+            width: 44,
+            height: 44,
+            fit: BoxFit.cover,
+          ),
+        );
+      } catch (_) {
+        iconWidget = _fallbackIcon(supported);
+      }
+    } else {
+      iconWidget = _fallbackIcon(supported);
+    }
 
     return GestureDetector(
       onTap: onTap,
@@ -207,19 +180,30 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 6,
-              offset: const Offset(0, 3),
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 10,
+              offset: const Offset(0, 6),
             ),
           ],
         ),
         child: Row(
           children: [
-            const Icon(Icons.watch, size: 32, color: Colors.black54),
-            const SizedBox(width: 16),
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: supported
+                    ? blue.withOpacity(0.05)
+                    : Colors.grey.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: iconWidget,
+            ),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -229,37 +213,49 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: Colors.black87,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    mac,
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    status,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
+                    ),
                   ),
                 ],
               ),
             ),
-            Container(
-              width: 10,
-              height: 10,
-              decoration: BoxDecoration(
-                color: batteryOk ? Colors.green : Colors.red,
-                shape: BoxShape.circle,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              '$battery%',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: batteryOk ? Colors.green : Colors.red,
-              ),
+            Icon(
+              supported ? Icons.arrow_forward_ios : Icons.block,
+              size: 14,
+              color: supported ? Colors.black54 : Colors.grey,
             ),
           ],
         ),
       ),
     );
   }
+
+  static Widget _fallbackIcon(bool supported) {
+    return Icon(
+      Icons.favorite,
+      color: supported ? blue : Colors.grey,
+      size: 24,
+    );
+  }
+}
+
+class _HealthSource {
+  final String name;
+  final String status;
+  final bool supported;
+  final String? iconBase64;
+
+  const _HealthSource({
+    required this.name,
+    required this.status,
+    required this.supported,
+    this.iconBase64,
+  });
 }

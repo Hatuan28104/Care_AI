@@ -1,11 +1,54 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../config/api_config.dart';
+import 'auth_storage.dart';
+import 'package:Care_AI/config/api_config.dart';
 import 'api_exception.dart';
 
 class HealthApi {
   static String get _baseUrl => ApiConfig.baseUrl;
 
+  /* =========================
+     AUTH HEADER
+  ========================= */
+  static Future<Map<String, String>> _authHeaders() async {
+    final token = await AuthStorage.getToken();
+    if (token == null || token.isEmpty) {
+      throw ApiException("Chưa đăng nhập");
+    }
+
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+  }
+
+  /* =========================
+     PARSE RESPONSE (ANTI HTML + SAFE JSON)
+  ========================= */
+  static Map<String, dynamic> _decodeBody(String body) {
+    final text = body.trim();
+
+    if (text.isEmpty) {
+      throw ApiException("Server không phản hồi");
+    }
+
+    if (text.startsWith('<')) {
+      throw ApiException("Server trả về HTML (sai URL hoặc backend lỗi)");
+    }
+
+    try {
+      final decoded = jsonDecode(text);
+      return decoded is Map<String, dynamic>
+          ? decoded
+          : {"success": false, "message": "Dữ liệu không hợp lệ"};
+    } catch (_) {
+      throw ApiException("Response không phải JSON");
+    }
+  }
+
+  /* =========================
+     NORMALIZE
+  ========================= */
   static Map<String, dynamic> _normalizeMetric(Map<String, dynamic> raw) {
     return {
       "loaichiso_id": (raw["loaichiso_id"] ?? "").toString(),
@@ -17,9 +60,11 @@ class HealthApi {
 
   static Map<String, dynamic> _normalizeHealthData(Map<String, dynamic> raw) {
     final metricRaw = raw["loaichisosuckhoe"];
+
     final metric = metricRaw is Map<String, dynamic>
         ? metricRaw
         : (metricRaw is Map ? Map<String, dynamic>.from(metricRaw) : {});
+
     return {
       "giatri": raw["giatri"],
       "thoigiancapnhat": (raw["thoigiancapnhat"] ?? "").toString(),
@@ -31,82 +76,88 @@ class HealthApi {
   }
 
   /* =========================
-     DANH SÁCH CHỈ SỐ SỨC KHỎE
+     METRICS
   ========================= */
   static Future<List<dynamic>> getMetrics() async {
-    final url = Uri.parse('$_baseUrl/health/metrics');
+    final res = await http
+        .get(Uri.parse('$_baseUrl/health/metrics'),
+            headers: await _authHeaders())
+        .timeout(const Duration(seconds: 8));
 
-    final response = await http.get(url).timeout(const Duration(seconds: 8));
+    final data = _decodeBody(res.body);
 
-    final data = _decodeBody(response.body);
-
-    if (response.statusCode != 200 || data['success'] != true) {
-      throw ApiException(
-        (data['message'] ?? 'Không lấy được danh sách chỉ số').toString(),
-        statusCode: response.statusCode,
-      );
+    if (res.statusCode != 200 || data['success'] != true) {
+      throw ApiException(data['message'] ?? "Lỗi lấy metrics",
+          statusCode: res.statusCode);
     }
 
-    final list = data['data'] is List ? data['data'] as List : <dynamic>[];
+    final list = data['data'] as List? ?? [];
+
     return list.map((e) {
       if (e is Map<String, dynamic>) return _normalizeMetric(e);
       if (e is Map) return _normalizeMetric(Map<String, dynamic>.from(e));
-      return <String, dynamic>{};
+      return {};
     }).toList();
   }
 
-  /* =========================
-     THÊM CHỈ SỐ SỨC KHỎE
-  ========================= */
   static Future<void> createMetric({
     required String loaiChiSoId,
     required String tenChiSo,
     required String donViDo,
     required String category,
   }) async {
-    final url = Uri.parse('$_baseUrl/health/metrics');
-
-    final response = await http
+    final res = await http
         .post(
-          url,
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          Uri.parse('$_baseUrl/health/metrics'),
+          headers: await _authHeaders(),
           body: jsonEncode({
             'loaichiso_id': loaiChiSoId,
             'tenchiso': tenChiSo,
             'donvido': donViDo,
-            'loai': category,
+            'category': category,
           }),
         )
         .timeout(const Duration(seconds: 8));
 
-    final data = _decodeBody(response.body);
+    final data = _decodeBody(res.body);
 
-    if (response.statusCode != 200 || data['success'] != true) {
-      throw ApiException(
-        (data['message'] ?? 'Không thêm được chỉ số').toString(),
-        statusCode: response.statusCode,
-      );
+    if (res.statusCode != 200 || data['success'] != true) {
+      throw ApiException(data['message'] ?? "Lỗi tạo metric",
+          statusCode: res.statusCode);
     }
   }
 
   /* =========================
-     LƯU DỮ LIỆU SỨC KHỎE
+     DEVICE
+  ========================= */
+  static Future<String> getOrCreateDevice() async {
+    final res = await http
+        .post(Uri.parse('$_baseUrl/health/device/ensure'),
+            headers: await _authHeaders())
+        .timeout(const Duration(seconds: 8));
+
+    final data = _decodeBody(res.body);
+
+    if (res.statusCode != 200 || data['success'] != true) {
+      throw ApiException(data['message'] ?? "Lỗi device",
+          statusCode: res.statusCode);
+    }
+
+    return data['data']['ThietBi_ID'].toString();
+  }
+
+  /* =========================
+     SAVE DATA
   ========================= */
   static Future<void> saveHealthData({
     required double giaTri,
     required String thietBiId,
     required String loaiChiSoId,
   }) async {
-    final url = Uri.parse('$_baseUrl/health/data');
-
-    final response = await http
+    final res = await http
         .post(
-          url,
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          Uri.parse('$_baseUrl/health/data'),
+          headers: await _authHeaders(),
           body: jsonEncode({
             'giatri': giaTri,
             'thietbi_id': thietBiId,
@@ -115,79 +166,68 @@ class HealthApi {
         )
         .timeout(const Duration(seconds: 8));
 
-    final data = _decodeBody(response.body);
+    final data = _decodeBody(res.body);
 
-    if (response.statusCode != 200 || data['success'] != true) {
-      throw ApiException(
-        (data['message'] ?? 'Không lưu được dữ liệu').toString(),
-        statusCode: response.statusCode,
-      );
+    if (res.statusCode != 200 || data['success'] != true) {
+      throw ApiException(data['message'] ?? "Lỗi lưu data",
+          statusCode: res.statusCode);
     }
   }
 
   /* =========================
-     DỮ LIỆU MỚI NHẤT
+     LATEST
   ========================= */
   static Future<List<dynamic>> getLatestHealthData(String deviceId) async {
-    final url = Uri.parse('$_baseUrl/health/data/latest/$deviceId');
+    final res = await http
+        .get(Uri.parse('$_baseUrl/health/data/latest/$deviceId'),
+            headers: await _authHeaders())
+        .timeout(const Duration(seconds: 8));
 
-    final response = await http.get(url).timeout(const Duration(seconds: 8));
+    final data = _decodeBody(res.body);
 
-    final data = _decodeBody(response.body);
-
-    if (response.statusCode != 200 || data['success'] != true) {
-      throw ApiException(
-        (data['message'] ?? 'Không lấy được dữ liệu mới nhất').toString(),
-        statusCode: response.statusCode,
-      );
+    if (res.statusCode != 200 || data['success'] != true) {
+      throw ApiException(data['message'] ?? "Lỗi latest",
+          statusCode: res.statusCode);
     }
 
-    final list = data['data'] is List ? data['data'] as List : <dynamic>[];
+    final list = data['data'] as List? ?? [];
+
     return list.map((e) {
       if (e is Map<String, dynamic>) return _normalizeHealthData(e);
       if (e is Map) return _normalizeHealthData(Map<String, dynamic>.from(e));
-      return <String, dynamic>{};
+      return {};
     }).toList();
   }
 
   /* =========================
-     LỊCH SỬ CHỈ SỐ
+     HISTORY
   ========================= */
   static Future<List<dynamic>> getHealthHistory(
     String deviceId,
     String metricId,
     String range,
   ) async {
-    final url = Uri.parse(
-      '$_baseUrl/health/history/$deviceId/$metricId?range=$range',
-    );
+    final res = await http
+        .get(
+          Uri.parse(
+              '$_baseUrl/health/history/$deviceId/$metricId?range=$range'),
+          headers: await _authHeaders(),
+        )
+        .timeout(const Duration(seconds: 8));
 
-    final response = await http.get(url).timeout(const Duration(seconds: 8));
-    final data = _decodeBody(response.body);
+    final data = _decodeBody(res.body);
 
-    if (response.statusCode != 200 || data['success'] != true) {
-      throw ApiException(
-        (data['message'] ?? 'Không lấy được lịch sử dữ liệu').toString(),
-        statusCode: response.statusCode,
-      );
+    if (res.statusCode != 200 || data['success'] != true) {
+      throw ApiException(data['message'] ?? "Lỗi history",
+          statusCode: res.statusCode);
     }
 
-    final list = data['data'] is List ? data['data'] as List : <dynamic>[];
+    final list = data['data'] as List? ?? [];
+
     return list.map((e) {
       if (e is Map<String, dynamic>) return _normalizeHealthData(e);
       if (e is Map) return _normalizeHealthData(Map<String, dynamic>.from(e));
-      return <String, dynamic>{};
+      return {};
     }).toList();
-  }
-
-  static Map<String, dynamic> _decodeBody(String body) {
-    try {
-      final decoded = jsonDecode(body);
-      return decoded is Map<String, dynamic>
-          ? decoded
-          : <String, dynamic>{"message": "Dữ liệu trả về không hợp lệ"};
-    } catch (_) {
-      return {"success": false, "message": "Dữ liệu trả về không hợp lệ"};
-    }
   }
 }

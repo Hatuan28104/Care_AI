@@ -43,9 +43,23 @@ app.get("/", (req, res) => {
   res.send("CareAI Backend running");
 });
 
+/* ===== ADD: DEBUG PING ===== */
+app.get("/health/ping-test", (req, res) => {
+  res.json({ success: true, message: "Ping OK" });
+});
+
+/* ===== ADD: 404 HANDLER ===== */
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: `API not found: ${req.method} ${req.originalUrl}`,
+  });
+});
+
 /* ===== PORT (QUAN TRỌNG NHẤT) ===== */
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+/* ===== ADD: 0.0.0.0 (để mobile gọi được) ===== */
+app.listen(PORT, "0.0.0.0", () => {
   console.log("🚀 Backend running on port " + PORT);
 });

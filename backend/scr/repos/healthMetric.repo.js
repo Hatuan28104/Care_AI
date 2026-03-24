@@ -1,6 +1,30 @@
 import { getDB } from "../config/db.js";
 
 /* =========================
+   HELPER: normalize
+========================= */
+function normalizeMetric(data) {
+  return {
+    loaichiso_id: data.loaichiso_id ?? data.LoaiChiSo_ID,
+    tenchiso: data.tenchiso ?? data.TenChiSo,
+    donvido: data.donvido ?? data.DonViDo,
+    category: data.category ?? data.Category,
+  };
+}
+
+function normalizeHealthData(data) {
+  return {
+    giatri: data.giatri ?? data.GiaTri,
+    thietbi_id: data.thietbi_id ?? data.ThietBi_ID,
+    loaichiso_id: data.loaichiso_id ?? data.LoaiChiSo_ID,
+    thoigiancapnhat:
+      data.thoigiancapnhat ??
+      data.ThoiGianCapNhat ??
+      new Date().toISOString(),
+  };
+}
+
+/* =========================
    LẤY DANH SÁCH CHỈ SỐ
 ========================= */
 export async function getAllHealthMetrics() {
@@ -11,48 +35,103 @@ export async function getAllHealthMetrics() {
     .select("loaichiso_id, tenchiso, donvido, mota, loai");
 
   if (error) throw error;
-
   return data;
 }
 
 /* =========================
-   TẠO CHỈ SỐ MỚI
+   TẠO CHỈ SỐ
 ========================= */
 export async function createHealthMetric(data) {
   const db = getDB();
+  const d = normalizeMetric(data);
+
+  if (!d.loaichiso_id || !d.tenchiso || !d.donvido) {
+    throw new Error("Thiếu dữ liệu chỉ số");
+  }
 
   const { error } = await db.from("loaichisosuckhoe").insert({
-    loaichiso_id: data.loaichiso_id,
-    tenchiso: data.tenchiso,
-    donvido: data.donvido,
+    loaichiso_id: d.loaichiso_id,
+    tenchiso: d.tenchiso,
+    donvido: d.donvido,
     mota: "",
-    loai: data.category,
+    loai: d.category,
   });
 
   if (error) throw error;
 }
 
 /* =========================
-   LƯU DỮ LIỆU SỨC KHỎE
+   ENSURE DEVICE
+========================= */
+export async function ensureDeviceForUser(nguoiDungId) {
+  const db = getDB();
+
+  const { data, error } = await db
+    .from("thietbisuckhoe")
+    .select("thietbi_id")
+    .eq("nguoidung_id", nguoiDungId)
+    .eq("daxoa", 0)
+    .limit(1);
+
+  if (error) throw error;
+
+  if (data.length > 0) {
+    return data[0].thietbi_id;
+  }
+
+  const thietBiId = ("HC" + String(nguoiDungId || "")
+    .replace(/\s/g, "")
+    .slice(-10))
+    .padEnd(12, "0")
+    .slice(0, 12);
+
+  const { error: insertError } = await db
+    .from("thietbisuckhoe")
+    .insert({
+      thietbi_id: thietBiId,
+      nguoidung_id: nguoiDungId,
+      daxoa: 0,
+    });
+
+  if (insertError) throw insertError;
+
+  return thietBiId;
+}
+
+/* =========================
+   LƯU DỮ LIỆU
 ========================= */
 export async function saveHealthData(data) {
   const db = getDB();
+  const d = normalizeHealthData(data);
 
-  const id = Date.now().toString().slice(0, 12);
+  // ⚠️ fix 0 vẫn hợp lệ
+  if (d.giatri === undefined || d.giatri === null || d.giatri === "") {
+    throw new Error("Thiếu GiaTri");
+  }
+
+  if (!d.thietbi_id || !d.loaichiso_id) {
+    throw new Error("Thiếu ThietBi_ID hoặc LoaiChiSo_ID");
+  }
+
+  const id = (
+    Date.now().toString() +
+    Math.floor(Math.random() * 1000).toString().padStart(3, "0")
+  ).slice(-12);
 
   const { error } = await db.from("dulieusuckhoe").insert({
     dulieusk_id: id,
-    giatri: data.giatri,
-    thoigiancapnhat: new Date().toISOString(),
-    thietbi_id: data.thietbi_id,
-    loaichiso_id: data.loaichiso_id,
+    giatri: d.giatri,
+    thoigiancapnhat: d.thoigiancapnhat,
+    thietbi_id: d.thietbi_id,
+    loaichiso_id: d.loaichiso_id,
   });
 
   if (error) throw error;
 }
 
 /* =========================
-   LẤY DỮ LIỆU MỚI NHẤT
+   LẤY DATA MỚI NHẤT
 ========================= */
 export async function getLatestHealthData(thietBiId) {
   const db = getDB();
@@ -73,7 +152,6 @@ export async function getLatestHealthData(thietBiId) {
 
   if (error) throw error;
 
-  // lấy record mới nhất mỗi loại
   const map = {};
 
   for (let item of data) {
@@ -87,7 +165,7 @@ export async function getLatestHealthData(thietBiId) {
 }
 
 /* =========================
-   LỊCH SỬ CHỈ SỐ
+   HISTORY
 ========================= */
 export async function getHealthHistory(thietBiId, loaiChiSoId) {
   const db = getDB();
@@ -106,16 +184,14 @@ export async function getHealthHistory(thietBiId, loaiChiSoId) {
 }
 
 /* =========================
-   REPORT HEALTH DATA
+   REPORT
 ========================= */
 export async function getHealthReport(thietBiId, type) {
   const db = getDB();
 
   let fromDate = new Date();
 
-  if (type === "day") {
-    fromDate.setDate(fromDate.getDate());
-  } else if (type === "week") {
+  if (type === "week") {
     fromDate.setDate(fromDate.getDate() - 7);
   } else if (type === "month") {
     fromDate.setDate(fromDate.getDate() - 30);
@@ -135,7 +211,6 @@ export async function getHealthReport(thietBiId, type) {
 
   if (error) throw error;
 
-  // group JS
   const map = {};
 
   for (let item of data) {
