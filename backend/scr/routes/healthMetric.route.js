@@ -88,8 +88,8 @@ router.post("/metrics", auth, async (req, res) => {
 ========================= */
 router.post("/device/ensure", auth, async (req, res) => {
   try {
-    const nguoiDungId = req.user.NguoiDung_ID;
-
+const nguoiDungId =
+  req.user?.NguoiDung_ID || req.user?.nguoidung_id;
     if (!nguoiDungId) {
       return res.status(400).json({
         success: false,
@@ -124,8 +124,8 @@ router.post("/data", auth, async (req, res) => {
     let thoigian =
       req.body.thoigian ?? req.body.ThoiGianCapNhat;
 
-    const nguoiDungId = req.user.NguoiDung_ID;
-
+const nguoiDungId =
+  req.user?.NguoiDung_ID || req.user?.nguoidung_id;
     // ⚠️ fix 0 vẫn hợp lệ
     if (giatri === undefined || giatri === null || giatri === "") {
       return res.status(400).json({

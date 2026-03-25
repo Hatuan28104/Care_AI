@@ -20,6 +20,7 @@ import androidx.health.connect.client.records.BloodPressureRecord
 import androidx.health.connect.client.records.BodyTemperatureRecord
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.HeartRateRecord
+import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
 import androidx.health.connect.client.records.HeightRecord
 import androidx.health.connect.client.records.HydrationRecord
 import androidx.health.connect.client.records.OxygenSaturationRecord
@@ -27,6 +28,7 @@ import androidx.health.connect.client.records.Record
 import androidx.health.connect.client.records.RespiratoryRateRecord
 import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.StepsRecord
+import androidx.health.connect.client.records.RestingHeartRateRecord
 import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
 import androidx.health.connect.client.records.WeightRecord
 import androidx.health.connect.client.records.metadata.DataOrigin
@@ -74,7 +76,9 @@ class MainActivity : FlutterActivity() {
             HealthPermission.getReadPermission(SleepSessionRecord::class),
             HealthPermission.getReadPermission(WeightRecord::class),
             HealthPermission.getReadPermission(HeightRecord::class),
-            HealthPermission.getReadPermission(HydrationRecord::class)
+            HealthPermission.getReadPermission(HydrationRecord::class),
+            HealthPermission.getReadPermission(RestingHeartRateRecord::class),
+            HealthPermission.getReadPermission(HeartRateVariabilityRmssdRecord::class)
         )
         stepsPermission = HealthPermission.getReadPermission(StepsRecord::class)
     }
@@ -362,6 +366,28 @@ class MainActivity : FlutterActivity() {
                     return best
                 }
 
+                suspend fun readLatestRestingHeartRate(): Double? {
+                    if (!granted.contains(HealthPermission.getReadPermission(RestingHeartRateRecord::class))) return null
+                    return readLatestTodayThenHistory(
+                        client,
+                        RestingHeartRateRecord::class,
+                        todayRange,
+                        allTimeRange,
+                        originFilters,
+                    ) { it.beatsPerMinute.toDouble() }
+                }
+
+                suspend fun readLatestHRV(): Double? {
+                    if (!granted.contains(HealthPermission.getReadPermission(HeartRateVariabilityRmssdRecord::class))) return null
+                    return readLatestTodayThenHistory(
+                        client,
+                        HeartRateVariabilityRmssdRecord::class,
+                        todayRange,
+                        allTimeRange,
+                        originFilters,
+                    ) { it.heartRateVariabilityMillis }
+                }
+
                 suspend fun <T> safeRead(key: String, block: suspend () -> T?): T? {
                     return try {
                         block()
@@ -383,7 +409,9 @@ class MainActivity : FlutterActivity() {
                     "sleepMinutes" to safeRead("sleepMinutes") { readTodaySleepMinutes() },
                     "heightCm" to safeRead("heightCm") { readLatestHeightCm() },
                     "weightKg" to safeRead("weightKg") { readLatestWeightKg() },
-                    "hydrationMl" to safeRead("hydrationMl") { readTodayHydrationMl() }
+                    "hydrationMl" to safeRead("hydrationMl") { readTodayHydrationMl() },
+                    "restingHeartRateBpm" to safeRead("restingHeartRateBpm") { readLatestRestingHeartRate() },
+                    "heartRateVariabilityRmssd" to safeRead("heartRateVariabilityRmssd") { readLatestHRV() }
                 )
 
                 result.success(summary)

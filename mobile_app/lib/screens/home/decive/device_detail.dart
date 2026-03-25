@@ -56,7 +56,11 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen>
     'CS021': {'name': 'Nhiệt độ cơ thể', 'unit': '°C', 'category': 'health'},
     'CS037': {'name': 'Thời gian ngủ', 'unit': 'giờ', 'category': 'activity'},
     'CS007': {'name': 'Nhịp tim nghỉ', 'unit': 'bpm', 'category': 'health'},
-    'CS020': {'name': 'Tần số tim nghỉ', 'unit': 'bpm', 'category': 'health'},
+    'CS008': {
+      'name': 'Biến thiên nhịp tim (HRV)',
+      'unit': 'ms',
+      'category': 'health'
+    },
   };
 
   @override
@@ -358,6 +362,9 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen>
         return '--';
       case 'hydrationMl':
         return asNumber(summary['hydrationMl'], fraction: 0) ?? '--';
+      case 'heartRateVariabilityRmssd':
+        return asNumber(summary['heartRateVariabilityRmssd'], fraction: 0) ??
+            '--';
       default:
         return '--';
     }

@@ -70,12 +70,12 @@ export async function ensureDeviceForUser(nguoiDungId) {
     .from("thietbisuckhoe")
     .select("thietbi_id")
     .eq("nguoidung_id", nguoiDungId)
-    .eq("daxoa", 0)
+    .eq("daxoa", false) 
     .limit(1);
 
   if (error) throw error;
 
-  if (data.length > 0) {
+  if (data && data.length > 0) {
     return data[0].thietbi_id;
   }
 
@@ -90,10 +90,13 @@ export async function ensureDeviceForUser(nguoiDungId) {
     .insert({
       thietbi_id: thietBiId,
       nguoidung_id: nguoiDungId,
-      daxoa: 0,
+      daxoa: false, 
     });
 
-  if (insertError) throw insertError;
+  if (insertError) {
+    console.error("Insert device error:", insertError); 
+    throw insertError;
+  }
 
   return thietBiId;
 }

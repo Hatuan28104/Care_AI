@@ -60,8 +60,8 @@ class AllowDeviceScreen extends StatelessWidget {
                         );
                         print("🔥 [AllowDeviceScreen] sync result=$result");
 
-                        // Có result (true/false) thì qua complete rồi detail, không đổi logic gốc
-                        if (result != null) {
+                        // Chỉ chuyển sang DeviceComplete khi người dùng đã cấp permission thành công.
+                        if (result == true) {
                           print(
                               "🔥 [AllowDeviceScreen] navigate DeviceComplete");
                           Navigator.pushReplacement(
@@ -73,7 +73,8 @@ class AllowDeviceScreen extends StatelessWidget {
                             ),
                           );
                         } else {
-                          print("🔥 [AllowDeviceScreen] show fail dialog");
+                          print(
+                              "🔥 [AllowDeviceScreen] permission denied or failed (result=$result)");
                           showDialog(
                             context: context,
                             builder: (_) => AlertDialog(
