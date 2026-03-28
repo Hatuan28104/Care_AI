@@ -108,19 +108,24 @@ export async function saveHealthData(data) {
   const db = getDB();
   const d = normalizeHealthData(data);
 
-  // ⚠️ fix 0 vẫn hợp lệ
   if (d.giatri === undefined || d.giatri === null || d.giatri === "") {
     throw new Error("Thiếu GiaTri");
+  }
+
+  if (!d.thietbi_id && data.nguoidung_id) {
+    d.thietbi_id = await ensureDeviceForUser(data.nguoidung_id);
   }
 
   if (!d.thietbi_id || !d.loaichiso_id) {
     throw new Error("Thiếu ThietBi_ID hoặc LoaiChiSo_ID");
   }
 
-  const id = (
+  const mapped = mapLoaiChiSo(d.loaichiso_id);
+  if (mapped) d.loaichiso_id = mapped;
+
+  const id =
     Date.now().toString() +
-    Math.floor(Math.random() * 1000).toString().padStart(3, "0")
-  ).slice(-12);
+    Math.random().toString(36).substring(2, 6);
 
   const { error } = await db.from("dulieusuckhoe").insert({
     dulieusk_id: id,
@@ -130,7 +135,10 @@ export async function saveHealthData(data) {
     loaichiso_id: d.loaichiso_id,
   });
 
-  if (error) throw error;
+  if (error) {
+    console.error("Insert single error:", error);
+    throw error;
+  }
 }
 
 /* =========================
@@ -237,4 +245,89 @@ export async function getHealthReport(thietBiId, type) {
     donvido: i.donvido,
     giatri: i.total / i.count,
   }));
+}
+/* =========================
+   MAP CHỈ SỐ (RAW → DB)
+========================= */
+function mapLoaiChiSo(raw) {
+  const map = {
+    HR: "CS001",       // Nhịp tim
+    STEPS: "CS004",    // Bước chân
+    DISTANCE: "CS023", // Quãng đường
+    SPO2: "CS018",     // SpO2
+    SLEEP: "CS037",    // Ngủ
+    HRV: "CS008",      // HRV
+  };
+
+  return map[raw] || null;
+}
+
+/* =========================
+   LƯU NHIỀU CHỈ SỐ (OPTIONAL)
+========================= */
+export async function saveMultipleHealthData(payload) {
+  const db = getDB();
+
+  let thietbi_id = payload.thietbi_id ?? payload.ThietBi_ID;
+
+  if (!thietbi_id && payload.nguoidung_id) {
+    // 🔥 auto tạo device nếu chưa có
+    thietbi_id = await ensureDeviceForUser(payload.nguoidung_id);
+  }
+
+  if (!thietbi_id) {
+    throw new Error("Thiếu ThietBi_ID");
+  }
+
+  const now = new Date().toISOString();
+
+  // 🔥 hỗ trợ cả lowercase + uppercase
+  const getVal = (k) => payload[k] ?? payload[k.toUpperCase()];
+
+  const fields = [
+    { key: "hr", raw: "HR" },
+    { key: "steps", raw: "STEPS" },
+    { key: "distance", raw: "DISTANCE" },
+    { key: "spo2", raw: "SPO2" },
+    { key: "sleep", raw: "SLEEP" },
+    { key: "hrv", raw: "HRV" },
+  ];
+
+  const inserts = [];
+
+  for (let f of fields) {
+    const value = getVal(f.key);
+
+    if (value === undefined || value === null || value === "") continue;
+
+    const loaichiso_id = mapLoaiChiSo(f.raw);
+    if (!loaichiso_id) continue;
+
+    // 🔥 fix trùng ID
+    const id =
+      Date.now().toString() +
+      Math.random().toString(36).substring(2, 6);
+
+    inserts.push({
+      dulieusk_id: id,
+      giatri: value,
+      thoigiancapnhat: now,
+      thietbi_id,
+      loaichiso_id,
+    });
+  }
+
+  if (inserts.length === 0) {
+    console.log("Không có dữ liệu hợp lệ để lưu");
+    return;
+  }
+
+  const { error } = await db.from("dulieusuckhoe").insert(inserts);
+
+  if (error) {
+    console.error("Insert multiple error:", error);
+    throw error;
+  }
+
+  return inserts.length;
 }

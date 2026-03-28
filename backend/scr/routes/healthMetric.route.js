@@ -124,9 +124,54 @@ router.post("/data", auth, async (req, res) => {
     let thoigian =
       req.body.thoigian ?? req.body.ThoiGianCapNhat;
 
-const nguoiDungId =
-  req.user?.NguoiDung_ID || req.user?.nguoidung_id;
-    // ⚠️ fix 0 vẫn hợp lệ
+    const nguoiDungId =
+      req.user?.NguoiDung_ID || req.user?.nguoidung_id;
+
+    // 🔥 detect multi
+    const isMulti =
+      req.body.hr !== undefined ||
+      req.body.steps !== undefined ||
+      req.body.spo2 !== undefined ||
+      req.body.sleep !== undefined ||
+      req.body.hrv !== undefined ||
+      req.body.distance !== undefined;
+
+    // 🔥 ensure device (dùng chung cho cả 2 case)
+    if (!thietbi_id && nguoiDungId) {
+      thietbi_id = await ensureDeviceForUser(nguoiDungId);
+    }
+
+    if (!thietbi_id) {
+      return res.status(400).json({
+        success: false,
+        message: "Thiếu ThietBi_ID",
+      });
+    }
+
+    // =========================
+    // 🔥 MULTI
+    // =========================
+    if (isMulti) {
+      const { saveMultipleHealthData } = await import(
+        "../repos/healthMetric.repo.js"
+      );
+
+      await saveMultipleHealthData({
+        ...req.body,
+        nguoidung_id: nguoiDungId,
+        thietbi_id,
+      });
+
+      return res.json({
+        success: true,
+        message: "Đã lưu dữ liệu (multi)",
+      });
+    }
+
+    // =========================
+    // 🔥 SINGLE (GIỮ NGUYÊN)
+    // =========================
+
     if (giatri === undefined || giatri === null || giatri === "") {
       return res.status(400).json({
         success: false,
@@ -141,23 +186,11 @@ const nguoiDungId =
       });
     }
 
-    // auto tạo device nếu chưa có
-    if (!thietbi_id && nguoiDungId) {
-      thietbi_id = await ensureDeviceForUser(nguoiDungId);
-    }
-
-    if (!thietbi_id) {
-      return res.status(400).json({
-        success: false,
-        message: "Thiếu ThietBi_ID",
-      });
-    }
-
-    // 🔥 FIX GIỜ VN
+    // 🔥 chuẩn ISO time
     if (!thoigian) {
-      thoigian = new Date();
+      thoigian = new Date().toISOString();
     } else {
-      thoigian = new Date(thoigian);
+      thoigian = new Date(thoigian).toISOString();
     }
 
     await saveHealthData({
@@ -179,7 +212,6 @@ const nguoiDungId =
     });
   }
 });
-
 /* =========================
    DATA MỚI NHẤT
 ========================= */
