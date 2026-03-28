@@ -290,12 +290,26 @@ export async function saveMultipleHealthData(payload) {
     if (!loaichiso_id) continue;
 
     // 🔥 CHECK EXISTING TRONG NGÀY
+    // 🔥 lấy đầu ngày & cuối ngày (VN timezone)
+    const start = new Date(Date.now() + 7 * 60 * 60 * 1000);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(Date.now() + 7 * 60 * 60 * 1000);
+    end.setHours(23, 59, 59, 999);
+
+    // convert về UTC
+    const startOfDay = new Date(start.getTime() - 7 * 60 * 60 * 1000).toISOString();
+    const endOfDay = new Date(end.getTime() - 7 * 60 * 60 * 1000).toISOString();
+
+    // 🔥 chỉ lấy record TRONG NGÀY
     const { data: existing } = await db
       .from("dulieusuckhoe")
       .select("dulieusk_id, giatri")
       .eq("thietbi_id", thietbi_id)
       .eq("loaichiso_id", loaichiso_id)
-      .order("thoigiancapnhat", { ascending: false }) 
+      .gte("thoigiancapnhat", startOfDay)
+      .lte("thoigiancapnhat", endOfDay)
+      .order("thoigiancapnhat", { ascending: false })
       .limit(1);
       if (existing && existing.length > 0) {
         const last = existing[0];
