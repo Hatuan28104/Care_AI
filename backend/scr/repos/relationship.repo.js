@@ -79,8 +79,8 @@ export async function getRelationshipProfile(qhId, userId) {
     .select(`
       quanhegiamho_id,
       ngaybatdau,
-      nguoigiamho_id,
-      nguoiduocgiamho_id
+      nguoigiamho:nguoigiamho_id (nguoidung_id, tennd, avatarurl, gioitinh, ngaysinh, taikhoan(sodienthoai)),
+      nguoiduocgiamho:nguoiduocgiamho_id (nguoidung_id, tennd, avatarurl, gioitinh, ngaysinh, taikhoan(sodienthoai))
     `)
     .eq("quanhegiamho_id", qhId)
     .eq("daxoa", false)

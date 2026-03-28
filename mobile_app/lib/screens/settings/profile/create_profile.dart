@@ -6,6 +6,8 @@ import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'dart:convert';
 import 'package:Care_AI/api/profile_api.dart' as ProfileApi;
 import 'package:Care_AI/models/tr.dart';
+import 'package:Care_AI/api/auth_storage.dart';
+import 'package:Care_AI/screens/AuthScreen/auth.dart';
 
 class CreateProfileScreen extends StatefulWidget {
   final String nguoiDungId;
@@ -51,6 +53,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
   // ===== FORM =====
   final _formKey = GlobalKey<FormState>();
   bool _submitted = false;
+  bool _isLoading = false;
 
   final _nameCtrl = TextEditingController();
   final _dobCtrl = TextEditingController();
@@ -127,7 +130,11 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
   }
 
   Future<void> _onContinue() async {
-    setState(() => _submitted = true);
+    if (_isLoading) return;
+    setState(() {
+      _submitted = true;
+      _isLoading = true;
+    });
 
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
@@ -172,6 +179,8 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
           ),
         );
       }
+    } finally {
+      setState(() => _isLoading = false);
     }
   }
 
@@ -359,7 +368,15 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
       elevation: 0,
       centerTitle: true,
       leading: IconButton(
-        onPressed: () => Navigator.pop(context),
+        onPressed: () async {
+          await AuthStorage.clear();
+
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => const AuthScreen()),
+            (route) => false,
+          );
+        },
         icon: const Icon(
           Icons.arrow_back_ios_new_rounded,
           color: Colors.black,

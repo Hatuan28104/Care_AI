@@ -69,9 +69,13 @@ class HealthBackendSync {
         final lastSteps = _lastSyncedValues['steps'] as int? ?? 0;
         if (steps > lastSteps) {
           await HealthApi.saveHealthData(
-              giaTri: steps.toDouble(),
-              thietBiId: deviceId,
-              loaiChiSoId: 'CS004');
+            giaTri: steps.toDouble(),
+            thietBiId: deviceId,
+            loaiChiSoId: 'CS004',
+            // Bổ sung userId để API đẩy lên Server
+            nguoiDungId: userId,
+          );
+
           _lastSyncedValues['steps'] = steps;
           saved++;
         }
@@ -92,7 +96,11 @@ class HealthBackendSync {
         if (lastVal == null || (val - lastVal).abs() > 0.01) {
           // threshold nhỏ để tránh floating point
           await HealthApi.saveHealthData(
-              giaTri: val, thietBiId: deviceId, loaiChiSoId: e.value);
+            giaTri: val,
+            thietBiId: deviceId,
+            loaiChiSoId: e.value,
+            nguoiDungId: userId, // Bổ sung userId
+          );
           _lastSyncedValues[e.key] = val;
           saved++;
         }
@@ -108,7 +116,11 @@ class HealthBackendSync {
             final sys = double.tryParse(parts[0].trim());
             if (sys != null) {
               await HealthApi.saveHealthData(
-                  giaTri: sys, thietBiId: deviceId, loaiChiSoId: 'CS003');
+                giaTri: sys,
+                thietBiId: deviceId,
+                loaiChiSoId: 'CS003',
+                nguoiDungId: userId, // Bổ sung userId
+              );
               _lastSyncedValues['bloodPressure'] = bp;
               saved++;
             }

@@ -11,11 +11,7 @@ function normalizeMetric(data) {
     category: data.category ?? data.Category,
   };
 }
-function getStartOfDay() {
-  const d = new Date(Date.now() + 7 * 60 * 60 * 1000);
-  d.setHours(0, 0, 0, 0);
-  return new Date(d.getTime() - 7 * 60 * 60 * 1000).toISOString();
-}
+
 function normalizeHealthData(data) {
   return {
     giatri: data.giatri ?? data.GiaTri,
@@ -105,72 +101,6 @@ export async function ensureDeviceForUser(nguoiDungId) {
   return thietBiId;
 }
 
-/* =========================
-   LƯU DỮ LIỆU
-========================= */
-export async function saveHealthData(data) {
-  const db = getDB();
-  const d = normalizeHealthData(data);
-
-  if (d.giatri === undefined || d.giatri === null || d.giatri === "") {
-    throw new Error("Thiếu GiaTri");
-  }
-
-  if (!d.thietbi_id && data.nguoidung_id) {
-    d.thietbi_id = await ensureDeviceForUser(data.nguoidung_id);
-  }
-
-  if (!d.thietbi_id || !d.loaichiso_id) {
-    throw new Error("Thiếu ThietBi_ID hoặc LoaiChiSo_ID");
-  }
-
-  const mapped = mapLoaiChiSo(d.loaichiso_id);
-  if (mapped) d.loaichiso_id = mapped;
-
-  const startOfDay = getStartOfDay();
-
-  // 🔥 CHECK TRÙNG TRONG NGÀY
-  const { data: existing } = await db
-    .from("dulieusuckhoe")
-    .select("dulieusk_id, giatri")
-    .eq("thietbi_id", d.thietbi_id)
-    .eq("loaichiso_id", d.loaichiso_id)
-    .gte("thoigiancapnhat", startOfDay)
-    .limit(1);
-
-  if (existing && existing.length > 0) {
-    // 🔥 UPDATE thay vì insert
-    const { error } = await db
-      .from("dulieusuckhoe")
-      .update({
-        giatri: d.giatri,
-        thoigiancapnhat: new Date().toISOString(),
-      })
-      .eq("dulieusk_id", existing[0].dulieusk_id);
-
-    if (error) throw error;
-    return;
-  }
-
-  // 🔥 INSERT như cũ
-  const id =
-    Date.now().toString() +
-    Math.random().toString(36).substring(2, 6);
-
-  const { error } = await db.from("dulieusuckhoe").insert({
-    dulieusk_id: id,
-    giatri: d.giatri,
-    thoigiancapnhat: d.thoigiancapnhat,
-    thietbi_id: d.thietbi_id,
-    loaichiso_id: d.loaichiso_id,
-    nguoidung_id: data.nguoidung_id ?? null // 🔥 FIX NULL
-  });
-
-  if (error) {
-    console.error("Insert single error:", error);
-    throw error;
-  }
-}
 /* =========================
    LẤY DATA MỚI NHẤT
 ========================= */
@@ -299,9 +229,19 @@ function mapLoaiChiSo(raw) {
 export async function saveMultipleHealthData(payload) {
   const db = getDB();
 
+  // =========================
+  // 🔥 VALIDATE USER (QUAN TRỌNG NHẤT)
+  // =========================
+  if (!payload.nguoidung_id) {
+    throw new Error("Thiếu nguoidung_id");
+  }
+
+  // =========================
+  // 🔥 DEVICE
+  // =========================
   let thietbi_id = payload.thietbi_id ?? payload.ThietBi_ID;
 
-  if (!thietbi_id && payload.nguoidung_id) {
+  if (!thietbi_id) {
     thietbi_id = await ensureDeviceForUser(payload.nguoidung_id);
   }
 
@@ -309,18 +249,23 @@ export async function saveMultipleHealthData(payload) {
     throw new Error("Thiếu ThietBi_ID");
   }
 
+  // =========================
+  // 🔥 TIME
+  // =========================
   const now = new Date(Date.now() + 7 * 60 * 60 * 1000).toISOString();
 
-  // 🔥 lấy đầu ngày (fix timezone VN)
-  const getStartOfDay = () => {
-    const d = new Date(Date.now() + 7 * 60 * 60 * 1000);
-    d.setHours(0, 0, 0, 0);
-    return new Date(d.getTime() - 7 * 60 * 60 * 1000).toISOString();
+ 
+  // =========================
+  // 🔥 NORMALIZE INPUT (FIX SINGLE + MULTI)
+  // =========================
+  const normalizedPayload = {
+    hr: payload.hr ?? payload.HR,
+    steps: payload.steps ?? payload.STEPS,
+    distance: payload.distance ?? payload.DISTANCE,
+    spo2: payload.spo2 ?? payload.SPO2,
+    sleep: payload.sleep ?? payload.SLEEP,
+    hrv: payload.hrv ?? payload.HRV,
   };
-
-  const startOfDay = getStartOfDay();
-
-  const getVal = (k) => payload[k] ?? payload[k.toUpperCase()];
 
   const fields = [
     { key: "hr", raw: "HR" },
@@ -333,41 +278,42 @@ export async function saveMultipleHealthData(payload) {
 
   const inserts = [];
 
+  // =========================
+  // 🔥 LOOP SAVE
+  // =========================
   for (let f of fields) {
-    const value = getVal(f.key);
+    const value = normalizedPayload[f.key];
 
     if (value === undefined || value === null || value === "") continue;
 
     const loaichiso_id = mapLoaiChiSo(f.raw);
     if (!loaichiso_id) continue;
 
-    // 🔥 lấy record gần nhất trong ngày
+    // 🔥 CHECK EXISTING TRONG NGÀY
     const { data: existing } = await db
       .from("dulieusuckhoe")
       .select("dulieusk_id, giatri")
       .eq("thietbi_id", thietbi_id)
       .eq("loaichiso_id", loaichiso_id)
-      .gte("thoigiancapnhat", startOfDay)
-      .order("thoigiancapnhat", { ascending: false })
+      .order("thoigiancapnhat", { ascending: false }) 
       .limit(1);
+      if (existing && existing.length > 0) {
+        const last = existing[0];
 
-    if (existing && existing.length > 0) {
-      const last = existing[0];
+        if (Number(last.giatri) === Number(value)) {
+          // 🔥 giống → update time
+          await db
+            .from("dulieusuckhoe")
+            .update({
+              thoigiancapnhat: now
+            })
+            .eq("dulieusk_id", last.dulieusk_id);
 
-      // 🔥 CASE 1: giá trị giống → UPDATE (không tạo mới)
-      if (Number(last.giatri) === Number(value)) {
-        await db
-          .from("dulieusuckhoe")
-          .update({
-            thoigiancapnhat: now
-          })
-          .eq("dulieusk_id", last.dulieusk_id);
-
-        continue;
+          continue;
+        }
       }
-    }
 
-    // 🔥 CASE 2: giá trị khác → INSERT mới
+    // 🔥 INSERT mới
     const id =
       Date.now().toString() +
       Math.random().toString(36).substring(2, 6);
@@ -378,10 +324,13 @@ export async function saveMultipleHealthData(payload) {
       thoigiancapnhat: now,
       thietbi_id,
       loaichiso_id,
-      nguoidung_id: payload.nguoidung_id ?? null
+      nguoidung_id: payload.nguoidung_id 
     });
   }
 
+  // =========================
+  // 🔥 INSERT BATCH
+  // =========================
   if (inserts.length > 0) {
     const { error } = await db.from("dulieusuckhoe").insert(inserts);
 
