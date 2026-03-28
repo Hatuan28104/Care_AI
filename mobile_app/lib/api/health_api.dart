@@ -174,6 +174,47 @@ class HealthApi {
     }
   }
 
+/* =========================
+   SAVE MULTIPLE DATA (NEW)
+========================= */
+  static Future<void> saveMultipleHealthData({
+    required String thietBiId,
+    num? hr,
+    num? steps,
+    num? spo2,
+    num? sleep,
+    num? hrv,
+    num? distance,
+  }) async {
+    final Map<String, dynamic> body = {
+      'thietbi_id': thietBiId,
+    };
+
+    if (hr != null) body['hr'] = hr;
+    if (steps != null) body['steps'] = steps;
+    if (spo2 != null) body['spo2'] = spo2;
+    if (sleep != null) body['sleep'] = sleep;
+    if (hrv != null) body['hrv'] = hrv;
+    if (distance != null) body['distance'] = distance;
+
+    if (body.length == 1) return;
+
+    final res = await http
+        .post(
+          Uri.parse('$_baseUrl/health/data'),
+          headers: await _authHeaders(),
+          body: jsonEncode(body),
+        )
+        .timeout(const Duration(seconds: 8));
+
+    final data = _decodeBody(res.body);
+
+    if (res.statusCode != 200 || data['success'] != true) {
+      throw ApiException(data['message'] ?? "Lỗi lưu multi data",
+          statusCode: res.statusCode);
+    }
+  }
+
   /* =========================
      LATEST
   ========================= */

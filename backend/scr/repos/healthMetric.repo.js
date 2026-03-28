@@ -11,7 +11,11 @@ function normalizeMetric(data) {
     category: data.category ?? data.Category,
   };
 }
-
+function getStartOfDay() {
+  const d = new Date(Date.now() + 7 * 60 * 60 * 1000);
+  d.setHours(0, 0, 0, 0);
+  return new Date(d.getTime() - 7 * 60 * 60 * 1000).toISOString();
+}
 function normalizeHealthData(data) {
   return {
     giatri: data.giatri ?? data.GiaTri,
@@ -123,6 +127,32 @@ export async function saveHealthData(data) {
   const mapped = mapLoaiChiSo(d.loaichiso_id);
   if (mapped) d.loaichiso_id = mapped;
 
+  const startOfDay = getStartOfDay();
+
+  // 🔥 CHECK TRÙNG TRONG NGÀY
+  const { data: existing } = await db
+    .from("dulieusuckhoe")
+    .select("dulieusk_id, giatri")
+    .eq("thietbi_id", d.thietbi_id)
+    .eq("loaichiso_id", d.loaichiso_id)
+    .gte("thoigiancapnhat", startOfDay)
+    .limit(1);
+
+  if (existing && existing.length > 0) {
+    // 🔥 UPDATE thay vì insert
+    const { error } = await db
+      .from("dulieusuckhoe")
+      .update({
+        giatri: d.giatri,
+        thoigiancapnhat: new Date().toISOString(),
+      })
+      .eq("dulieusk_id", existing[0].dulieusk_id);
+
+    if (error) throw error;
+    return;
+  }
+
+  // 🔥 INSERT như cũ
   const id =
     Date.now().toString() +
     Math.random().toString(36).substring(2, 6);
@@ -133,6 +163,7 @@ export async function saveHealthData(data) {
     thoigiancapnhat: d.thoigiancapnhat,
     thietbi_id: d.thietbi_id,
     loaichiso_id: d.loaichiso_id,
+    nguoidung_id: data.nguoidung_id ?? null // 🔥 FIX NULL
   });
 
   if (error) {
@@ -140,7 +171,6 @@ export async function saveHealthData(data) {
     throw error;
   }
 }
-
 /* =========================
    LẤY DATA MỚI NHẤT
 ========================= */
@@ -271,7 +301,6 @@ export async function saveMultipleHealthData(payload) {
   let thietbi_id = payload.thietbi_id ?? payload.ThietBi_ID;
 
   if (!thietbi_id && payload.nguoidung_id) {
-    // 🔥 auto tạo device nếu chưa có
     thietbi_id = await ensureDeviceForUser(payload.nguoidung_id);
   }
 
@@ -279,9 +308,17 @@ export async function saveMultipleHealthData(payload) {
     throw new Error("Thiếu ThietBi_ID");
   }
 
-  const now = new Date().toISOString();
+  const now = new Date(Date.now() + 7 * 60 * 60 * 1000).toISOString();
 
-  // 🔥 hỗ trợ cả lowercase + uppercase
+  // 🔥 lấy đầu ngày
+function getStartOfDay() {
+  const d = new Date(Date.now() + 7 * 60 * 60 * 1000);
+  d.setHours(0, 0, 0, 0);
+  return new Date(d.getTime() - 7 * 60 * 60 * 1000).toISOString();
+};
+
+  const startOfDay = getStartOfDay();
+
   const getVal = (k) => payload[k] ?? payload[k.toUpperCase()];
 
   const fields = [
@@ -303,7 +340,29 @@ export async function saveMultipleHealthData(payload) {
     const loaichiso_id = mapLoaiChiSo(f.raw);
     if (!loaichiso_id) continue;
 
-    // 🔥 fix trùng ID
+    // 🔥 CHECK TRÙNG TRONG NGÀY
+    const { data: existing } = await db
+      .from("dulieusuckhoe")
+      .select("dulieusk_id")
+      .eq("thietbi_id", thietbi_id)
+      .eq("loaichiso_id", loaichiso_id)
+      .gte("thoigiancapnhat", startOfDay)
+      .limit(1);
+
+    if (existing && existing.length > 0) {
+      // 🔥 UPDATE nếu đã có
+      await db
+        .from("dulieusuckhoe")
+        .update({
+          giatri: value,
+          thoigiancapnhat: now,
+        })
+        .eq("dulieusk_id", existing[0].dulieusk_id);
+
+      continue;
+    }
+
+    // 🔥 INSERT như cũ
     const id =
       Date.now().toString() +
       Math.random().toString(36).substring(2, 6);
@@ -314,20 +373,19 @@ export async function saveMultipleHealthData(payload) {
       thoigiancapnhat: now,
       thietbi_id,
       loaichiso_id,
+      nguoidung_id: payload.nguoidung_id ?? null // 🔥 FIX
     });
   }
 
-  if (inserts.length === 0) {
-    console.log("Không có dữ liệu hợp lệ để lưu");
-    return;
+  if (inserts.length > 0) {
+    const { error } = await db.from("dulieusuckhoe").insert(inserts);
+
+    if (error) {
+      console.error("Insert multiple error:", error);
+      throw error;
+    }
   }
 
-  const { error } = await db.from("dulieusuckhoe").insert(inserts);
+  return true;
 
-  if (error) {
-    console.error("Insert multiple error:", error);
-    throw error;
-  }
-
-  return inserts.length;
 }

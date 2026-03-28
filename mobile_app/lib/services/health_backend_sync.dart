@@ -60,7 +60,7 @@ class HealthBackendSync {
 
       final metrics = await HealthApi.getMetrics();
       final idSet = metrics
-          .map((m) => (m['LoaiChiSo_ID'] ?? '').toString().trim())
+          .map((m) => (m['loaichiso_id'] ?? '').toString().trim())
           .toSet();
       var saved = 0;
 
