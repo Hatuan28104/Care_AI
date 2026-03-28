@@ -295,6 +295,7 @@ function mapLoaiChiSo(raw) {
 /* =========================
    LƯU NHIỀU CHỈ SỐ (OPTIONAL)
 ========================= */
+
 export async function saveMultipleHealthData(payload) {
   const db = getDB();
 
@@ -310,12 +311,12 @@ export async function saveMultipleHealthData(payload) {
 
   const now = new Date(Date.now() + 7 * 60 * 60 * 1000).toISOString();
 
-  // 🔥 lấy đầu ngày
-function getStartOfDay() {
-  const d = new Date(Date.now() + 7 * 60 * 60 * 1000);
-  d.setHours(0, 0, 0, 0);
-  return new Date(d.getTime() - 7 * 60 * 60 * 1000).toISOString();
-};
+  // 🔥 lấy đầu ngày (fix timezone VN)
+  const getStartOfDay = () => {
+    const d = new Date(Date.now() + 7 * 60 * 60 * 1000);
+    d.setHours(0, 0, 0, 0);
+    return new Date(d.getTime() - 7 * 60 * 60 * 1000).toISOString();
+  };
 
   const startOfDay = getStartOfDay();
 
@@ -340,29 +341,33 @@ function getStartOfDay() {
     const loaichiso_id = mapLoaiChiSo(f.raw);
     if (!loaichiso_id) continue;
 
-    // 🔥 CHECK TRÙNG TRONG NGÀY
+    // 🔥 lấy record gần nhất trong ngày
     const { data: existing } = await db
       .from("dulieusuckhoe")
-      .select("dulieusk_id")
+      .select("dulieusk_id, giatri")
       .eq("thietbi_id", thietbi_id)
       .eq("loaichiso_id", loaichiso_id)
       .gte("thoigiancapnhat", startOfDay)
+      .order("thoigiancapnhat", { ascending: false })
       .limit(1);
 
     if (existing && existing.length > 0) {
-      // 🔥 UPDATE nếu đã có
-      await db
-        .from("dulieusuckhoe")
-        .update({
-          giatri: value,
-          thoigiancapnhat: now,
-        })
-        .eq("dulieusk_id", existing[0].dulieusk_id);
+      const last = existing[0];
 
-      continue;
+      // 🔥 CASE 1: giá trị giống → UPDATE (không tạo mới)
+      if (Number(last.giatri) === Number(value)) {
+        await db
+          .from("dulieusuckhoe")
+          .update({
+            thoigiancapnhat: now
+          })
+          .eq("dulieusk_id", last.dulieusk_id);
+
+        continue;
+      }
     }
 
-    // 🔥 INSERT như cũ
+    // 🔥 CASE 2: giá trị khác → INSERT mới
     const id =
       Date.now().toString() +
       Math.random().toString(36).substring(2, 6);
@@ -373,7 +378,7 @@ function getStartOfDay() {
       thoigiancapnhat: now,
       thietbi_id,
       loaichiso_id,
-      nguoidung_id: payload.nguoidung_id ?? null // 🔥 FIX
+      nguoidung_id: payload.nguoidung_id ?? null
     });
   }
 
@@ -387,5 +392,4 @@ function getStartOfDay() {
   }
 
   return true;
-
 }
