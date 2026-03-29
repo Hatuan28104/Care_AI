@@ -279,8 +279,12 @@ codeMap[m.code.toUpperCase()] = m.loaichiso_id;
   for (let f of fields) {
     const value = normalizedPayload[f.key];
 
-    if (value === undefined || value === null || value === "") continue;
-
+  if (
+    value === undefined ||
+    value === null ||
+    value === "" ||
+    Number(value) <= 0
+  ) continue;
     const loaichiso_id = codeMap[f.raw.toUpperCase()];
     if (!loaichiso_id) {
       console.warn("Không map được:", f.raw);

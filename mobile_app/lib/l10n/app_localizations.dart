@@ -2090,6 +2090,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No metrics available'**
   String get noMetrics;
+
+  /// No description provided for @addData.
+  ///
+  /// In en, this message translates to:
+  /// **'Add data'**
+  String get addData;
+
+  /// No description provided for @enter.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter'**
+  String get enter;
+
+  /// No description provided for @enterValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter value...'**
+  String get enterValue;
+
+  /// No description provided for @saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved successfully'**
+  String get saved;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

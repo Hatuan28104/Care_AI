@@ -352,6 +352,14 @@
   "deleteDevice": "断开连接",
   "cancel": "取消",
 
-  "disconnectDevice": "断开设备连接"
+  "disconnectDevice": "断开设备连接",
+    "value": "数值",
+  "latest": "最新",
+  "addData": "添加数据",
+  "enter": "输入",
+  "enterValue": "输入数值...",
+  "cancel": "取消",
+  "save": "保存",
+  "saved": "保存成功"
 
 }

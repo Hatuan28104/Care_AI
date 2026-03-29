@@ -1017,4 +1017,16 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get noMetrics => 'Chưa có danh sách chỉ số.';
+
+  @override
+  String get addData => 'Thêm dữ liệu';
+
+  @override
+  String get enter => 'Nhập';
+
+  @override
+  String get enterValue => 'Nhập giá trị...';
+
+  @override
+  String get saved => 'Đã lưu dữ liệu';
 }

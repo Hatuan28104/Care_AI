@@ -78,7 +78,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get healthData => '健康データ';
 
   @override
-  String get value => '数値';
+  String get value => '値';
 
   @override
   String get latest => '最新';
@@ -1017,4 +1017,16 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get noMetrics => 'No metrics available';
+
+  @override
+  String get addData => 'データ追加';
+
+  @override
+  String get enter => '入力';
+
+  @override
+  String get enterValue => '値を入力...';
+
+  @override
+  String get saved => '保存しました';
 }

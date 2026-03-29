@@ -351,7 +351,14 @@
   "deleteDeviceConfirm": "Bạn có chắc muốn ngắt kết nối thiết bị này không?",
   "deleteDevice": "Ngắt kết nối",
   "cancel": "Hủy",
-
+  "value": "Giá trị",
+  "latest": "Mới nhất",
+  "addData": "Thêm dữ liệu",
+  "enter": "Nhập",
+  "enterValue": "Nhập giá trị...",
+  "cancel": "Hủy",
+  "save": "Lưu",
+  "saved": "Đã lưu dữ liệu",
   "disconnectDevice": "Ngắt kết nối thiết bị",
 
   "allowAccess": "Cho phép truy cập dữ liệu",

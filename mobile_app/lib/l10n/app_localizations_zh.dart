@@ -1017,4 +1017,16 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get noMetrics => 'No metrics available';
+
+  @override
+  String get addData => '添加数据';
+
+  @override
+  String get enter => '输入';
+
+  @override
+  String get enterValue => '输入数值...';
+
+  @override
+  String get saved => '保存成功';
 }

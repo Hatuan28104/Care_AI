@@ -412,5 +412,13 @@
     }
   },
   "allMetrics": "All metrics from Health Connect",
-  "noMetrics": "No metrics available"
+  "noMetrics": "No metrics available",
+    "value": "Value",
+  "latest": "Latest",
+  "addData": "Add data",
+  "enter": "Enter",
+  "enterValue": "Enter value...",
+  "cancel": "Cancel",
+  "save": "Save",
+  "saved": "Saved successfully"
 }

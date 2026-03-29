@@ -354,5 +354,13 @@
   "deleteDevice": "接続を解除",
   "cancel": "キャンセル",
 
-  "disconnectDevice": "デバイスの接続を解除"
+  "disconnectDevice": "デバイスの接続を解除",
+    "value": "値",
+  "latest": "最新",
+  "addData": "データ追加",
+  "enter": "入力",
+  "enterValue": "値を入力...",
+  "cancel": "キャンセル",
+  "save": "保存",
+  "saved": "保存しました"
 }

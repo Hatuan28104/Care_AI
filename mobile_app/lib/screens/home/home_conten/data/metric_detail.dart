@@ -88,18 +88,18 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text("Nhập ${widget.title}"),
+        title: Text("${context.tr.enter} ${widget.title}"),
         content: TextField(
           controller: ctrl,
           keyboardType: TextInputType.number,
           decoration: InputDecoration(
-            hintText: "Nhập giá trị...",
+            hintText: context.tr.enterValue,
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text("Hủy"),
+            child: Text(context.tr.cancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -115,12 +115,12 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
               Navigator.pop(context);
 
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("Đã lưu dữ liệu")),
+                SnackBar(content: Text(context.tr.saved)),
               );
 
               await _loadData();
             },
-            child: Text("Lưu"),
+            child: Text(context.tr.save),
           ),
         ],
       ),
@@ -223,53 +223,67 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Align(
-        alignment: Alignment.centerLeft,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              context.tr.value,
-              style: TextStyle(
-                color: Colors.black45,
-                fontWeight: FontWeight.w600,
-                fontSize: 18,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  latest != null
-                      ? latest.toStringAsFixed(_config.decimals)
-                      : "--",
-                  style: const TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 3),
-                  child: Text(
-                    _config.unit,
-                    style: const TextStyle(
-                      color: Colors.black54,
-                      fontSize: 24,
+          alignment: Alignment.centerLeft,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 🔥 ROW 1: "Giá trị" + "Thêm dữ liệu"
+              Row(
+                children: [
+                  Text(
+                    context.tr.value,
+                    style: TextStyle(
+                      color: Colors.black45,
                       fontWeight: FontWeight.w600,
+                      fontSize: 18,
                     ),
                   ),
-                ),
-                const Spacer(),
-                IconButton(
-                  icon: Icon(Icons.edit, color: widget.accent),
-                  onPressed: _openInputDialog,
-                ),
-              ],
-            )
-          ],
-        ),
-      ),
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: _openInputDialog,
+                    child: Text(
+                      context.tr.addData,
+                      style: TextStyle(
+                        color: const Color(0xFF1877F2),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 4),
+
+              // 🔥 ROW 2: VALUE
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    latest != null
+                        ? latest.toStringAsFixed(_config.decimals)
+                        : "--",
+                    style: const TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 3),
+                    child: Text(
+                      _config.unit,
+                      style: const TextStyle(
+                        color: Colors.black54,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          )),
     );
   }
 

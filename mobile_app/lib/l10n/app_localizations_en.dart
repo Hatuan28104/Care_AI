@@ -1017,4 +1017,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noMetrics => 'No metrics available';
+
+  @override
+  String get addData => 'Add data';
+
+  @override
+  String get enter => 'Enter';
+
+  @override
+  String get enterValue => 'Enter value...';
+
+  @override
+  String get saved => 'Saved successfully';
 }
