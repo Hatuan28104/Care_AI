@@ -4,11 +4,12 @@ import { auth } from "../middlewares/auth.middleware.js";
 import {
   getAllHealthMetrics,
   createHealthMetric,
-  getLatestHealthData,
+  getLatestHealthDataByDevice,
+  getLatestHealthDataByUser,
   getHealthHistory,
   getHealthReport,
   ensureDeviceForUser,
-  saveMultipleHealthData, // 🔥 chỉ dùng cái này
+  saveMultipleHealthData, 
 } from "../repos/healthMetric.repo.js";
 
 const router = express.Router();
@@ -163,20 +164,44 @@ router.post("/data", auth, async (req, res) => {
 /* =========================
    DATA MỚI NHẤT
 ========================= */
-router.get("/data/latest/:deviceId", auth, async (req, res) => {
+router.get("/data/latest/device/:deviceId", auth, async (req, res) => {
   try {
     const { deviceId } = req.params;
-    const data = await getLatestHealthData(deviceId);
+
+    const data = await getLatestHealthDataByDevice(deviceId);
+
     res.json({ success: true, data });
   } catch (err) {
     console.error(err);
     res.status(500).json({
       success: false,
-      message: "Không lấy được dữ liệu mới nhất",
+      message: "Không lấy được dữ liệu device",
     });
   }
 });
+router.get("/data/latest/user", auth, async (req, res) => {
+  try {
+    const nguoiDungId =
+      req.user?.NguoiDung_ID || req.user?.nguoidung_id;
 
+    if (!nguoiDungId) {
+      return res.status(401).json({
+        success: false,
+        message: "Chưa đăng nhập",
+      });
+    }
+
+    const data = await getLatestHealthDataByUser(nguoiDungId);
+
+    res.json({ success: true, data });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: "Không lấy được dữ liệu user",
+    });
+  }
+});
 /* =========================
    HISTORY
 ========================= */

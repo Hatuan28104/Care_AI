@@ -40,7 +40,7 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
   /// =========================
   Future<void> _loadDevice() async {
     try {
-      _deviceId = "DEVICE001"; // test
+      // test
 
       if (_deviceId != null && _items.isNotEmpty) {
         await _loadLatestActivityData();
@@ -90,7 +90,7 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
 
       setState(() {
         for (var item in _items) {
-          final match = data.where((e) => e['tenchiso'] == item.title);
+          final match = data.where((e) => e['loaichiso_id'] == item.metricId);
 
           if (match.isNotEmpty) {
             final m = match.first;

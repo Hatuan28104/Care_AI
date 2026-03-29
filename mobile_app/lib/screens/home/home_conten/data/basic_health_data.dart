@@ -40,7 +40,7 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
   /// =========================
   Future<void> _loadDevice() async {
     try {
-      _deviceId = "DEVICE001"; // test device
+      // test device
 
       if (_deviceId != null && _items.isNotEmpty) {
         await _loadLatestHealthData();
@@ -90,7 +90,7 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
 
       setState(() {
         for (var item in _items) {
-          final match = data.where((e) => e['tenchiso'] == item.title);
+          final match = data.where((e) => e['loaichiso_id'] == item.metricId);
 
           if (match.isNotEmpty) {
             final m = match.first;

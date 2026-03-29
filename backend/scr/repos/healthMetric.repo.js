@@ -104,7 +104,7 @@ export async function ensureDeviceForUser(nguoiDungId) {
 /* =========================
    LẤY DATA MỚI NHẤT
 ========================= */
-export async function getLatestHealthData(thietBiId) {
+export async function getLatestHealthDataByDevice(thietBiId) {
   const db = getDB();
 
   const { data, error } = await db
@@ -118,8 +118,8 @@ export async function getLatestHealthData(thietBiId) {
         donvido
       )
     `)
-  .or(`thietbi_id.eq.${thietBiId},thietbi_id.is.null`)  
-  .order("thoigiancapnhat", { ascending: false });
+    .eq("thietbi_id", thietBiId)
+    .order("thoigiancapnhat", { ascending: false });
 
   if (error) throw error;
 
@@ -127,14 +127,49 @@ export async function getLatestHealthData(thietBiId) {
 
   for (let item of data) {
     const key = item.loaichisosuckhoe.loaichiso_id;
+    if (!map[key]) map[key] = item;
+  }
+
+  return Object.values(map);
+}
+export async function getLatestHealthDataByUser(nguoiDungId) {
+  const db = getDB();
+
+  const { data, error } = await db
+    .from("dulieusuckhoe")
+    .select(`
+      giatri,
+      thoigiancapnhat,
+      thietbi_id,
+      loaichisosuckhoe (
+        loaichiso_id,
+        tenchiso,
+        donvido
+      )
+    `)
+    .eq("nguoidung_id", nguoiDungId)
+    .order("thoigiancapnhat", { ascending: false });
+
+  if (error) throw error;
+
+  const map = {};
+
+  for (let item of data) {
+    const key = item.loaichisosuckhoe.loaichiso_id;
+
     if (!map[key]) {
       map[key] = item;
+    } else {
+      const current = map[key];
+
+      if (current.thietbi_id == null && item.thietbi_id != null) {
+        map[key] = item;
+      }
     }
   }
 
   return Object.values(map);
 }
-
 /* =========================
    HISTORY
 ========================= */
