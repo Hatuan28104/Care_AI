@@ -84,15 +84,10 @@ class HealthBackendSync {
       if (!hasChange) return 0;
 
 // 🔥 SAVE
-      await HealthApi.saveMultipleHealthData(
-        thietBiId: deviceId,
-        steps: payload["steps"],
-        hr: payload["hr"],
-        spo2: payload["spo2"],
-        sleep: payload["sleep"],
-        distance: payload["distance"],
-        hrv: payload["hrv"],
-      );
+      await HealthApi.saveMultipleHealthData({
+        "thietbi_id": deviceId,
+        ...payload,
+      });
 
 // 🔥 UPDATE CACHE
       _lastSyncedValues.addAll(payload);

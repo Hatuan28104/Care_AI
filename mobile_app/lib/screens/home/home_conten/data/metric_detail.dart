@@ -82,6 +82,51 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
     }
   }
 
+  void _openInputDialog() {
+    final ctrl = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text("Nhập ${widget.title}"),
+        content: TextField(
+          controller: ctrl,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            hintText: "Nhập giá trị...",
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("Hủy"),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final value = double.tryParse(ctrl.text);
+              if (value == null) return;
+
+              await HealthApi.saveMultipleHealthData({
+                "thietbi_id": widget.deviceId,
+                widget.metricId: value,
+                "type": "manual",
+              });
+
+              Navigator.pop(context);
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("Đã lưu dữ liệu")),
+              );
+
+              await _loadData();
+            },
+            child: Text("Lưu"),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final hasData = _values.isNotEmpty;
@@ -215,8 +260,13 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
                     ),
                   ),
                 ),
+                const Spacer(),
+                IconButton(
+                  icon: Icon(Icons.edit, color: widget.accent),
+                  onPressed: _openInputDialog,
+                ),
               ],
-            ),
+            )
           ],
         ),
       ),

@@ -336,7 +336,6 @@ codeMap[m.code.toUpperCase()] = m.loaichiso_id;
       thietbi_id: type === "manual" ? null : thietbi_id,
       loaichiso_id,
       nguoidung_id: payload.nguoidung_id,
-      type: type
     });
   }
 
