@@ -4,7 +4,6 @@ import 'package:Care_AI/screens/settings/settings.dart';
 import 'package:Care_AI/api/profile_api.dart' as profile_api;
 import 'package:Care_AI/screens/settings/profile/create_profile.dart';
 import 'package:Care_AI/models/tr.dart';
-
 import 'home_conten/home_tab.dart';
 import 'familycenter/family_tab.dart';
 import 'decive/device_tab.dart';

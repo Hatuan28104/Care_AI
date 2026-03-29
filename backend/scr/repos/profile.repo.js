@@ -57,19 +57,12 @@ export async function updateProfile(data) {
     diaChi,
     avatarUrl,
   } = data;
-
   const errors = {};
-
-  // ===== ID =====
   if (!nguoiDungId) {
     errors.nguoiDungId = "Thiếu NguoiDung_ID";
   }
-
-  // ===== NAME =====
   const nameErr = validateName(tenND);
   if (nameErr) errors.tenND = nameErr;
-
-  // ===== DOB =====
   let dob = null;
   if (!ngaySinh) {
     errors.ngaySinh = "Ngày sinh là bắt buộc";
@@ -79,14 +72,10 @@ export async function updateProfile(data) {
       errors.ngaySinh = "Ngày sinh không hợp lệ";
     }
   }
-
-  // ===== GENDER =====
   const gender = normalizeGender(gioiTinh);
   if (gender === null) {
     errors.gioiTinh = "Giới tính không hợp lệ";
   }
-
-  // ===== HEIGHT =====
   const height = Number(chieuCao);
   if (isNaN(height)) {
     errors.chieuCao = "Chiều cao phải là số";
@@ -120,14 +109,12 @@ export async function updateProfile(data) {
       errors.diaChi = "Địa chỉ không hợp lệ";
     }
   }
-
   // ===== CHECK ERROR =====
   if (Object.keys(errors).length > 0) {
     const err = new Error("Dữ liệu không hợp lệ");
     err.errors = errors;
     throw err;
   }
-
   // ===== UPDATE =====
 const updateData = {
   tennd: tenND.trim(),
@@ -142,7 +129,6 @@ const updateData = {
 if (avatarUrl !== undefined) {
   updateData.avatarurl = avatarUrl;
 }
-
 const { data: updated, error } = await getDB()
   .from("nguoidung")
   .update(updateData)

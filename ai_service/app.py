@@ -5,4 +5,4 @@ app = FastAPI()
 
 @app.post("/ai/self-evolution")
 def self_evolution(data: dict):
-    return {"status": predict(data)}
+    return predict(data)

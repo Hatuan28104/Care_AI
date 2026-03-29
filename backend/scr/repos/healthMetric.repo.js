@@ -118,8 +118,8 @@ export async function getLatestHealthData(thietBiId) {
         donvido
       )
     `)
-    .eq("thietbi_id", thietBiId)
-    .order("thoigiancapnhat", { ascending: false });
+  .or(`thietbi_id.eq.${thietBiId},thietbi_id.is.null`)  
+  .order("thoigiancapnhat", { ascending: false });
 
   if (error) throw error;
 
@@ -206,57 +206,52 @@ export async function getHealthReport(thietBiId, type) {
     giatri: i.total / i.count,
   }));
 }
-/* =========================
-   MAP CHỈ SỐ (RAW → DB)
-========================= */
-function mapLoaiChiSo(raw) {
-  const map = {
-    HR: "CS001",       // Nhịp tim
-    STEPS: "CS004",    // Bước chân
-    DISTANCE: "CS023", // Quãng đường
-    SPO2: "CS018",     // SpO2
-    SLEEP: "CS037",    // Ngủ
-    HRV: "CS008",      // HRV
-  };
-
-  return map[raw] || null;
-}
-
-/* =========================
-   LƯU NHIỀU CHỈ SỐ (OPTIONAL)
-========================= */
-
 export async function saveMultipleHealthData(payload) {
   const db = getDB();
 
+  // 🔥 LOAD MAP 1 LẦN (đặt ở đây)
+  const { data: allMetrics } = await db
+    .from("loaichisosuckhoe")
+    .select("loaichiso_id, code");
+
+  const codeMap = {};
+  for (let m of allMetrics) {
+codeMap[m.code.toUpperCase()] = m.loaichiso_id;
+  }
+
   // =========================
-  // 🔥 VALIDATE USER (QUAN TRỌNG NHẤT)
+  // 🔥 VALIDATE USER
   // =========================
   if (!payload.nguoidung_id) {
     throw new Error("Thiếu nguoidung_id");
   }
 
   // =========================
-  // 🔥 DEVICE
+  // 🔥 TYPE (device | manual)
+  // =========================
+  const type = payload.type || "device";
+
+  // =========================
+  // 🔥 DEVICE (chỉ cần cho device)
   // =========================
   let thietbi_id = payload.thietbi_id ?? payload.ThietBi_ID;
 
-  if (!thietbi_id) {
+  if (!thietbi_id && type !== "manual") {
     thietbi_id = await ensureDeviceForUser(payload.nguoidung_id);
   }
 
-  if (!thietbi_id) {
+  // manual cho phép null
+  if (!thietbi_id && type !== "manual") {
     throw new Error("Thiếu ThietBi_ID");
   }
 
   // =========================
   // 🔥 TIME
   // =========================
-  const now = new Date(Date.now() + 7 * 60 * 60 * 1000).toISOString();
+  const now = new Date().toISOString();
 
- 
   // =========================
-  // 🔥 NORMALIZE INPUT (FIX SINGLE + MULTI)
+  // 🔥 NORMALIZE INPUT
   // =========================
   const normalizedPayload = {
     hr: payload.hr ?? payload.HR,
@@ -286,40 +281,50 @@ export async function saveMultipleHealthData(payload) {
 
     if (value === undefined || value === null || value === "") continue;
 
-    const loaichiso_id = mapLoaiChiSo(f.raw);
-    if (!loaichiso_id) continue;
+    const loaichiso_id = codeMap[f.raw.toUpperCase()];
+    if (!loaichiso_id) {
+      console.warn("Không map được:", f.raw);
+      continue;
+    }
 
-    // 🔥 CHECK EXISTING TRONG NGÀY
-    // 🔥 lấy record mới nhất (không theo ngày)
+    // =========================
+    // 🔥 CHECK EXISTING (THEO USER + CHỈ SỐ)
+    // =========================
     const { data: existing } = await db
       .from("dulieusuckhoe")
       .select("dulieusk_id, giatri, thoigiancapnhat")
-      .eq("thietbi_id", thietbi_id)
       .eq("loaichiso_id", loaichiso_id)
+      .eq("nguoidung_id", payload.nguoidung_id)
       .order("thoigiancapnhat", { ascending: false })
       .limit(1);
-      if (existing && existing.length > 0) {
-        const last = existing[0];
 
-        const lastDate = new Date(last.thoigiancapnhat).toDateString();
-        const currentDate = new Date(now).toDateString();
+    if (existing && existing.length > 0) {
+      const last = existing[0];
 
-        const isSameDay = lastDate === currentDate;
+      const lastDate = new Date(last.thoigiancapnhat).toDateString();
+      const currentDate = new Date(now).toDateString();
 
-        if (isSameDay && Number(last.giatri) === Number(value)) {
-          // 🔥 cùng ngày + giống → update
-          await db
-            .from("dulieusuckhoe")
-            .update({
-              thoigiancapnhat: now
-            })
-            .eq("dulieusk_id", last.dulieusk_id);
+      const isSameDay = lastDate === currentDate;
+      const sameValue = Number(last.giatri) === Number(value);
 
-          continue;
-        }
+      // =========================
+      // 🔥 UPDATE (CHỈ CHO DEVICE)
+      // =========================
+      if (type !== "manual" && isSameDay && sameValue) {
+        await db
+          .from("dulieusuckhoe")
+          .update({
+            thoigiancapnhat: now
+          })
+          .eq("dulieusk_id", last.dulieusk_id);
+
+        continue;
       }
+    }
 
-    // 🔥 INSERT mới
+    // =========================
+    // 🔥 INSERT MỚI
+    // =========================
     const id =
       Date.now().toString() +
       Math.random().toString(36).substring(2, 6);
@@ -328,9 +333,10 @@ export async function saveMultipleHealthData(payload) {
       dulieusk_id: id,
       giatri: value,
       thoigiancapnhat: now,
-      thietbi_id,
+      thietbi_id: type === "manual" ? null : thietbi_id,
       loaichiso_id,
-      nguoidung_id: payload.nguoidung_id 
+      nguoidung_id: payload.nguoidung_id,
+      type: type
     });
   }
 

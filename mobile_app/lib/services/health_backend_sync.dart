@@ -58,82 +58,47 @@ class HealthBackendSync {
       final steps = await HealthService.getSteps();
       final summary = await HealthService.getHealthSummary();
 
-      final metrics = await HealthApi.getMetrics();
-      final idSet = metrics
-          .map((m) => (m['loaichiso_id'] ?? '').toString().trim())
-          .toSet();
-      var saved = 0;
+      final payload = {
+        "steps": steps,
+        "hr": summary['heartRateBpm'],
+        "spo2": summary['spo2Percent'],
+        "sleep": summary['sleepMinutes'],
+        "distance": summary['distanceKm'],
+        "hrv": summary['heartRateVariabilityRmssd'],
+      };
 
-      // Sync steps (chỉ nếu tăng so với lần cuối)
-      if (steps >= 0 && idSet.contains('CS004')) {
-        final lastSteps = _lastSyncedValues['steps'] as int? ?? 0;
-        if (steps > lastSteps) {
-          await HealthApi.saveHealthData(
-            giaTri: steps.toDouble(),
-            thietBiId: deviceId,
-            loaiChiSoId: 'CS004',
-            // Bổ sung userId để API đẩy lên Server
-            nguoiDungId: userId,
-          );
+      // ❌ nếu không có data thì bỏ
+      payload.removeWhere((key, value) => value == null);
 
-          _lastSyncedValues['steps'] = steps;
-          saved++;
+      // 🔥 CHECK DELTA (QUAN TRỌNG)
+      bool hasChange = false;
+
+      payload.forEach((key, value) {
+        final last = _lastSyncedValues[key];
+
+        if (last == null || (value is num && (value - last).abs() > 0.1)) {
+          hasChange = true;
         }
-      }
+      });
 
-      // Sync các metric khác (chỉ nếu giá trị khác lần cuối)
-      for (final e in hcToLoaiChiSo.entries) {
-        if (e.key == 'steps') continue;
-        final v = summary[e.key];
-        double? numVal;
-        if (v is num) numVal = v.toDouble();
-        if (numVal == null || numVal < 0 || !idSet.contains(e.value)) continue;
+      if (!hasChange) return 0;
 
-        double val = numVal;
-        if (e.key == 'sleepMinutes') val = numVal / 60; // CS037 đơn vị giờ
+// 🔥 SAVE
+      await HealthApi.saveMultipleHealthData(
+        thietBiId: deviceId,
+        steps: payload["steps"],
+        hr: payload["hr"],
+        spo2: payload["spo2"],
+        sleep: payload["sleep"],
+        distance: payload["distance"],
+        hrv: payload["hrv"],
+      );
 
-        final lastVal = _lastSyncedValues[e.key] as double?;
-        if (lastVal == null || (val - lastVal).abs() > 0.01) {
-          // threshold nhỏ để tránh floating point
-          await HealthApi.saveHealthData(
-            giaTri: val,
-            thietBiId: deviceId,
-            loaiChiSoId: e.value,
-            nguoiDungId: userId, // Bổ sung userId
-          );
-          _lastSyncedValues[e.key] = val;
-          saved++;
-        }
-      }
+// 🔥 UPDATE CACHE
+      _lastSyncedValues.addAll(payload);
+      await _saveLastSyncedValues();
 
-      // Sync blood pressure (chỉ nếu khác lần cuối)
-      final bp = summary['bloodPressure'];
-      if (bp is String && bp.isNotEmpty && idSet.contains('CS003')) {
-        final lastBp = _lastSyncedValues['bloodPressure'] as String?;
-        if (lastBp == null || bp != lastBp) {
-          final parts = bp.split('/');
-          if (parts.isNotEmpty) {
-            final sys = double.tryParse(parts[0].trim());
-            if (sys != null) {
-              await HealthApi.saveHealthData(
-                giaTri: sys,
-                thietBiId: deviceId,
-                loaiChiSoId: 'CS003',
-                nguoiDungId: userId, // Bổ sung userId
-              );
-              _lastSyncedValues['bloodPressure'] = bp;
-              saved++;
-            }
-          }
-        }
-      }
-
-      // Save last synced values để persist
-      if (saved > 0) {
-        await _saveLastSyncedValues();
-      }
-
-      return saved;
+      return 1;
     } catch (e) {
       print("🔥 [HealthBackendSync] error: $e");
       rethrow;

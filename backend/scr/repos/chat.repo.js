@@ -204,7 +204,6 @@ export async function handleChat(message, userId, digitalId, hoiThoaiId) {
 /* =========================
    HISTORY
 ========================= */
-
 export async function getChatHistory(userId) {
   const db = getDB();
 
