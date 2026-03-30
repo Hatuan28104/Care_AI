@@ -56,11 +56,16 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
 
   Future<void> _loadData() async {
     try {
-      final data = await HealthApi.getHealthHistory(
-        widget.deviceId,
-        widget.metricId,
-        _range.name,
-      );
+      final data = widget.deviceId.isEmpty
+          ? await HealthApi.getHealthHistoryByUser(
+              widget.metricId,
+              _range.name,
+            )
+          : await HealthApi.getHealthHistory(
+              widget.deviceId,
+              widget.metricId,
+              _range.name,
+            );
 
       final values = data
           .map<double>((e) => ((e['giatri'] ?? 0) as num).toDouble())
@@ -68,9 +73,13 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
 
       final labels = data.map<String>((e) {
         final raw = (e['thoigiancapnhat'] ?? '').toString();
-        if (raw.isEmpty) return '--:--';
-        final t = DateTime.parse(raw);
-        return "${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}";
+        if (raw.isEmpty) return '--:--:--';
+        try {
+          final t = DateTime.parse(raw);
+          return "${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}:${t.second.toString().padLeft(2, '0')}";
+        } catch (_) {
+          return '--:--:--';
+        }
       }).toList();
 
       setState(() {
@@ -106,11 +115,16 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
               final value = double.tryParse(ctrl.text);
               if (value == null) return;
 
-              await HealthApi.saveMultipleHealthData({
-                "thietbi_id": widget.deviceId,
+              final payload = {
                 widget.metricId: value,
                 "type": "manual",
-              });
+              };
+              
+              if (widget.deviceId.isNotEmpty) {
+                payload["thietbi_id"] = widget.deviceId;
+              }
+
+              await HealthApi.saveMultipleHealthData(payload);
 
               Navigator.pop(context);
 

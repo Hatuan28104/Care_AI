@@ -203,16 +203,43 @@ class HealthApi {
   /* =========================
      LATEST
   ========================= */
-  static Future<List<dynamic>> getLatestHealthData(String deviceId) async {
+  static Future<List<dynamic>> getLatestHealthDataByDevice(
+      String deviceId) async {
     final res = await http
-        .get(Uri.parse('$_baseUrl/health/data/latest/$deviceId'),
-            headers: await _authHeaders())
+        .get(
+          Uri.parse('$_baseUrl/health/data/latest/device/$deviceId'),
+          headers: await _authHeaders(),
+        )
         .timeout(const Duration(seconds: 8));
 
     final data = _decodeBody(res.body);
 
     if (res.statusCode != 200 || data['success'] != true) {
-      throw ApiException(data['message'] ?? "Lỗi latest",
+      throw ApiException(data['message'] ?? "Lỗi latest device",
+          statusCode: res.statusCode);
+    }
+
+    final list = data['data'] as List? ?? [];
+
+    return list.map((e) {
+      if (e is Map<String, dynamic>) return _normalizeHealthData(e);
+      if (e is Map) return _normalizeHealthData(Map<String, dynamic>.from(e));
+      return {};
+    }).toList();
+  }
+
+  static Future<List<dynamic>> getLatestHealthDataByUser() async {
+    final res = await http
+        .get(
+          Uri.parse('$_baseUrl/health/data/latest/user'),
+          headers: await _authHeaders(),
+        )
+        .timeout(const Duration(seconds: 8));
+
+    final data = _decodeBody(res.body);
+
+    if (res.statusCode != 200 || data['success'] != true) {
+      throw ApiException(data['message'] ?? "Lỗi latest user",
           statusCode: res.statusCode);
     }
 
@@ -245,6 +272,34 @@ class HealthApi {
 
     if (res.statusCode != 200 || data['success'] != true) {
       throw ApiException(data['message'] ?? "Lỗi history",
+          statusCode: res.statusCode);
+    }
+
+    final list = data['data'] as List? ?? [];
+
+    return list.map((e) {
+      if (e is Map<String, dynamic>) return _normalizeHealthData(e);
+      if (e is Map) return _normalizeHealthData(Map<String, dynamic>.from(e));
+      return {};
+    }).toList();
+  }
+
+  static Future<List<dynamic>> getHealthHistoryByUser(
+    String metricId,
+    String range,
+  ) async {
+    final res = await http
+        .get(
+          Uri.parse(
+              '$_baseUrl/health/history/user/$metricId?range=$range'),
+          headers: await _authHeaders(),
+        )
+        .timeout(const Duration(seconds: 8));
+
+    final data = _decodeBody(res.body);
+
+    if (res.statusCode != 200 || data['success'] != true) {
+      throw ApiException(data['message'] ?? "Lỗi history user",
           statusCode: res.statusCode);
     }
 

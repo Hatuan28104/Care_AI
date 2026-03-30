@@ -7,6 +7,7 @@ import {
   getLatestHealthDataByDevice,
   getLatestHealthDataByUser,
   getHealthHistory,
+  getHealthHistoryByUser,
   getHealthReport,
   ensureDeviceForUser,
   saveMultipleHealthData, 
@@ -215,6 +216,30 @@ router.get("/history/:deviceId/:metricId", auth, async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Không lấy được lịch sử",
+    });
+  }
+});
+
+router.get("/history/user/:metricId", auth, async (req, res) => {
+  try {
+    const { metricId } = req.params;
+    const nguoiDungId =
+      req.user?.NguoiDung_ID || req.user?.nguoidung_id;
+
+    if (!nguoiDungId) {
+      return res.status(401).json({
+        success: false,
+        message: "Chưa đăng nhập",
+      });
+    }
+
+    const data = await getHealthHistoryByUser(nguoiDungId, metricId);
+    res.json({ success: true, data });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: "Không lấy được lịch sử user",
     });
   }
 });

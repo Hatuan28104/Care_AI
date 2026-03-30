@@ -189,6 +189,22 @@ export async function getHealthHistory(thietBiId, loaiChiSoId) {
   return data;
 }
 
+export async function getHealthHistoryByUser(nguoiDungId, loaiChiSoId) {
+  const db = getDB();
+
+  const { data, error } = await db
+    .from("dulieusuckhoe")
+    .select("giatri, thoigiancapnhat")
+    .eq("nguoidung_id", nguoiDungId)
+    .eq("loaichiso_id", loaiChiSoId)
+    .order("thoigiancapnhat", { ascending: false })
+    .limit(50);
+
+  if (error) throw error;
+
+  return data;
+}
+
 /* =========================
    REPORT
 ========================= */
@@ -250,8 +266,13 @@ export async function saveMultipleHealthData(payload) {
     .select("loaichiso_id, code");
 
   const codeMap = {};
+  const metricIdSet = new Set();
+  
   for (let m of allMetrics) {
-codeMap[m.code.toUpperCase()] = m.loaichiso_id;
+    if (m.code) {
+      codeMap[m.code.toUpperCase()] = m.loaichiso_id;
+    }
+    metricIdSet.add(m.loaichiso_id);
   }
 
   // =========================
@@ -285,8 +306,10 @@ codeMap[m.code.toUpperCase()] = m.loaichiso_id;
   // =========================
   const now = new Date().toISOString();
 
+  const inserts = [];
+
   // =========================
-  // 🔥 NORMALIZE INPUT
+  // 🔥 PROCESS FIXED FIELDS (hr, steps, distance, spo2, sleep, hrv)
   // =========================
   const normalizedPayload = {
     hr: payload.hr ?? payload.HR,
@@ -306,76 +329,65 @@ codeMap[m.code.toUpperCase()] = m.loaichiso_id;
     { key: "hrv", raw: "HRV" },
   ];
 
-  const inserts = [];
-
-  // =========================
-  // 🔥 LOOP SAVE
-  // =========================
   for (let f of fields) {
     const value = normalizedPayload[f.key];
 
-  if (
-    value === undefined ||
-    value === null ||
-    value === "" ||
-    Number(value) <= 0
-  ) continue;
+    if (
+      value === undefined ||
+      value === null ||
+      value === "" ||
+      Number(value) <= 0
+    ) continue;
+
     const loaichiso_id = codeMap[f.raw.toUpperCase()];
     if (!loaichiso_id) {
       console.warn("Không map được:", f.raw);
       continue;
     }
 
-    // =========================
-    // 🔥 CHECK EXISTING (THEO USER + CHỈ SỐ)
-    // =========================
-    const { data: existing } = await db
-      .from("dulieusuckhoe")
-      .select("dulieusk_id, giatri, thoigiancapnhat")
-      .eq("loaichiso_id", loaichiso_id)
-      .eq("nguoidung_id", payload.nguoidung_id)
-      .order("thoigiancapnhat", { ascending: false })
-      .limit(1);
+    // Skip duplicate (sẽ xử lý ở phần dynamic fields)
+    if (metricIdSet.has(loaichiso_id)) {
+      const id =
+        Date.now().toString() +
+        Math.random().toString(36).substring(2, 6);
 
-    if (existing && existing.length > 0) {
-      const last = existing[0];
-
-      const lastDate = new Date(last.thoigiancapnhat).toDateString();
-      const currentDate = new Date(now).toDateString();
-
-      const isSameDay = lastDate === currentDate;
-      const sameValue = Number(last.giatri) === Number(value);
-
-      // =========================
-      // 🔥 UPDATE (CHỈ CHO DEVICE)
-      // =========================
-      if (type !== "manual" && isSameDay && sameValue) {
-        await db
-          .from("dulieusuckhoe")
-          .update({
-            thoigiancapnhat: now
-          })
-          .eq("dulieusk_id", last.dulieusk_id);
-
-        continue;
-      }
+      inserts.push({
+        dulieusk_id: id,
+        giatri: value,
+        thoigiancapnhat: now,
+        thietbi_id: type === "manual" ? null : thietbi_id,
+        loaichiso_id,
+        nguoidung_id: payload.nguoidung_id,
+      });
     }
+  }
 
-    // =========================
-    // 🔥 INSERT MỚI
-    // =========================
-    const id =
-      Date.now().toString() +
-      Math.random().toString(36).substring(2, 6);
+  // =========================
+  // 🔥 PROCESS DYNAMIC FIELDS (scan payload để tìm loaichiso_id)
+  // =========================
+  const processedMetricIds = new Set(fields.map(f => codeMap[f.raw.toUpperCase()]).filter(Boolean));
 
-    inserts.push({
-      dulieusk_id: id,
-      giatri: value,
-      thoigiancapnhat: now,
-      thietbi_id: type === "manual" ? null : thietbi_id,
-      loaichiso_id,
-      nguoidung_id: payload.nguoidung_id,
-    });
+  for (const [key, value] of Object.entries(payload)) {
+    // Skip system fields
+    if (["type", "thietbi_id", "ThietBi_ID", "nguoidung_id"].includes(key)) continue;
+
+    // Check có phải loaichiso_id không
+    if (metricIdSet.has(key) && !processedMetricIds.has(key)) {
+      if (value === undefined || value === null || value === "" || Number(value) <= 0) continue;
+
+      const id =
+        Date.now().toString() +
+        Math.random().toString(36).substring(2, 6);
+
+      inserts.push({
+        dulieusk_id: id,
+        giatri: value,
+        thoigiancapnhat: now,
+        thietbi_id: type === "manual" ? null : thietbi_id,
+        loaichiso_id: key,
+        nguoidung_id: payload.nguoidung_id,
+      });
+    }
   }
 
   // =========================

@@ -20,8 +20,6 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
   final TextEditingController _searchCtrl = TextEditingController();
   String _keyword = '';
 
-  String? _deviceId;
-
   List<MetricItem> _items = [];
 
   @override
@@ -32,22 +30,7 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
 
   Future<void> _initData() async {
     await _loadMetrics();
-    await _loadDevice();
-  }
-
-  /// =========================
-  /// LOAD DEVICE
-  /// =========================
-  Future<void> _loadDevice() async {
-    try {
-      // test device
-
-      if (_deviceId != null && _items.isNotEmpty) {
-        await _loadLatestHealthData();
-      }
-    } catch (e) {
-      debugPrint(e.toString());
-    }
+    await _loadLatestHealthData();
   }
 
   /// =========================
@@ -86,7 +69,14 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
   /// =========================
   Future<void> _loadLatestHealthData() async {
     try {
-      final data = await HealthApi.getLatestHealthData(_deviceId!);
+      final data = await HealthApi.getLatestHealthDataByUser();
+      
+      // Sort by time descending (newest first)
+      data.sort((a, b) {
+        final timeA = (a['thoigiancapnhat'] ?? '').toString();
+        final timeB = (b['thoigiancapnhat'] ?? '').toString();
+        return timeB.compareTo(timeA);
+      });
 
       setState(() {
         for (var item in _items) {
@@ -96,12 +86,23 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
             final m = match.first;
 
             item.value = (m['giatri'] ?? '--').toString();
-            item.time = (m['thoigiancapnhat'] ?? '--:--').toString();
+            
+            final timeRaw = (m['thoigiancapnhat'] ?? '').toString();
+            try {
+              if (timeRaw.isNotEmpty) {
+                final t = DateTime.parse(timeRaw);
+                item.time = "${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}";
+              } else {
+                item.time = '--:--';
+              }
+            } catch (_) {
+              item.time = '--:--';
+            }
           }
         }
       });
     } catch (e) {
-      debugPrint(e.toString());
+      debugPrint('Load metrics error: $e');
     }
   }
 
@@ -168,7 +169,7 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
           MaterialPageRoute(
             builder: (_) => MetricDetailScreen(
               title: m.title,
-              deviceId: _deviceId!,
+              deviceId: "",
               metricId: m.metricId,
               accent: m.iconColor,
             ),
