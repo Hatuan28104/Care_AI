@@ -194,20 +194,6 @@ router.get("/data/latest/user", auth, async (req, res) => {
 /* =========================
    HISTORY
 ========================= */
-router.get("/history/:deviceId/:metricId", auth, async (req, res) => {
-  try {
-    const { deviceId, metricId } = req.params;
-    const data = await getHealthHistory(deviceId, metricId);
-    res.json({ success: true, data });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      success: false,
-      message: "Không lấy được lịch sử",
-    });
-  }
-});
-
 router.get("/history/user/:metricId", auth, async (req, res) => {
   try {
     const { metricId } = req.params;
@@ -232,7 +218,19 @@ router.get("/history/user/:metricId", auth, async (req, res) => {
     });
   }
 });
-
+router.get("/history/:deviceId/:metricId", auth, async (req, res) => {
+  try {
+    const { deviceId, metricId } = req.params;
+    const data = await getHealthHistory(deviceId, metricId);
+    res.json({ success: true, data });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: "Không lấy được lịch sử",
+    });
+  }
+});
 /* =========================
    REPORT
 ========================= */
