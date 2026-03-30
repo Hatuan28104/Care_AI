@@ -195,44 +195,39 @@ export async function getHealthHistoryByUser(
 ) {
   const db = getDB();
 
+  const { data, error } = await db
+    .from("dulieusuckhoe")
+    .select("giatri, thoigiancapnhat")
+    .eq("nguoidung_id", nguoiDungId)
+    .eq("loaichiso_id", loaiChiSoId)
+    .order("thoigiancapnhat", { ascending: true })
+    .limit(200);
+
+  if (error) throw error;
+
+  // 🔥 FILTER BẰNG JS (AN TOÀN 100%)
   const now = new Date();
 
-  let fromDate;
+  let fromDate = new Date();
 
   if (range === "d") {
-    // 🔥 lấy 24h gần nhất (KHÔNG dùng setHours)
     fromDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
   } else if (range === "w") {
     fromDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
   } else if (range === "m") {
     fromDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
   } else if (range === "m6") {
-    fromDate = new Date();
     fromDate.setMonth(now.getMonth() - 6);
-  } else {
-    fromDate = new Date(0); // fallback
   }
 
-  const fromISO = fromDate.toISOString();
+  const filtered = data.filter((d) => {
+    const t = new Date(d.thoigiancapnhat);
+    return t >= fromDate;
+  });
 
-  console.log("FROM:", fromISO);
+  console.log("HISTORY LENGTH:", filtered.length);
 
-  const { data, error } = await db
-    .from("dulieusuckhoe")
-    .select("giatri, thoigiancapnhat")
-    .eq("nguoidung_id", nguoiDungId)
-    .eq("loaichiso_id", loaiChiSoId)
-    .gte("thoigiancapnhat", fromISO)
-    .order("thoigiancapnhat", { ascending: true });
-
-  if (error) {
-    console.error("History error:", error);
-    throw error;
-  }
-
-  console.log("HISTORY LENGTH:", data.length);
-
-  return data || [];
+  return filtered;
 }
 /* =========================
    REPORT
