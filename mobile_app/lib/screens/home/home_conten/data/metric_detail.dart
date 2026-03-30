@@ -31,8 +31,7 @@ class MetricDetailScreen extends StatefulWidget {
 }
 
 class _MetricDetailScreenState extends State<MetricDetailScreen> {
-  MetricRange _range = MetricRange.h;
-
+  MetricRange _range = MetricRange.d;
   List<double> _values = [];
   List<String> _labels = [];
 
@@ -67,7 +66,8 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
               _range.name,
             );
 
-      debugPrint("[MetricDetail] Range: ${_range.name}, Data length: ${data.length}");
+      debugPrint(
+          "[MetricDetail] Range: ${_range.name}, Data length: ${data.length}");
       for (var d in data) {
         debugPrint("[MetricDetail] ${d['giatri']} @ ${d['thoigiancapnhat']}");
       }
@@ -125,7 +125,7 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
                   widget.metricId: value,
                   "type": "manual",
                 };
-                
+
                 if (widget.deviceId.isNotEmpty) {
                   payload["thietbi_id"] = widget.deviceId;
                 }
@@ -227,16 +227,14 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
           color: const Color(0xFFEDEDED),
           borderRadius: BorderRadius.circular(10),
         ),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              tab('D', MetricRange.d),
-              tab('W', MetricRange.w),
-              tab('M', MetricRange.m),
-              tab('6M', MetricRange.m6),
-            ],
-          ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            tab('D', MetricRange.d),
+            tab('W', MetricRange.w),
+            tab('M', MetricRange.m),
+            tab('6M', MetricRange.m6),
+          ],
         ),
       ),
     );

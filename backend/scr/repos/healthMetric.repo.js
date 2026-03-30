@@ -260,16 +260,22 @@ export async function getHealthReport(thietBiId, type) {
 export async function saveMultipleHealthData(payload) {
   const db = getDB();
 
-  console.log("[saveMultipleHealthData] START payload:", payload);
+  if (!payload.nguoidung_id) {
+    throw new Error("Thiếu nguoidung_id");
+  }
 
-  // 🔥 LOAD MAP 1 LẦN (đặt ở đây)
+  const type = payload.type || "device";
+
+  // =========================
+  // LOAD METRIC MAP
+  // =========================
   const { data: allMetrics } = await db
     .from("loaichisosuckhoe")
     .select("loaichiso_id, code");
 
   const codeMap = {};
   const metricIdSet = new Set();
-  
+
   for (let m of allMetrics) {
     if (m.code) {
       codeMap[m.code.toUpperCase()] = m.loaichiso_id;
@@ -277,23 +283,8 @@ export async function saveMultipleHealthData(payload) {
     metricIdSet.add(m.loaichiso_id);
   }
 
-  console.log("[saveMultipleHealthData] metricIdSet:", Array.from(metricIdSet));
-
   // =========================
-  // 🔥 VALIDATE USER
-  // =========================
-  if (!payload.nguoidung_id) {
-    throw new Error("Thiếu nguoidung_id");
-  }
-
-  // =========================
-  // 🔥 TYPE (device | manual)
-  // =========================
-  const type = payload.type || "device";
-  console.log("[saveMultipleHealthData] TYPE:", type);
-
-  // =========================
-  // 🔥 DEVICE (chỉ cần cho device)
+  // DEVICE
   // =========================
   let thietbi_id = payload.thietbi_id ?? payload.ThietBi_ID;
 
@@ -301,57 +292,61 @@ export async function saveMultipleHealthData(payload) {
     thietbi_id = await ensureDeviceForUser(payload.nguoidung_id);
   }
 
-  // manual cho phép null
-  if (!thietbi_id && type !== "manual") {
-    throw new Error("Thiếu ThietBi_ID");
-  }
+  const now = new Date();
+  const nowISO = now.toISOString();
 
-  // =========================
-  // 🔥 TIME
-  // =========================
-  const now = new Date().toISOString();
+  // 🔥 LẤY NGÀY (YYYY-MM-DD)
+  const today = nowISO.split("T")[0];
 
   const inserts = [];
 
   // =========================
-  // 🔥 PROCESS FIXED FIELDS (hr, steps, distance, spo2, sleep, hrv)
+  // LOOP ALL PAYLOAD
   // =========================
-  const normalizedPayload = {
-    hr: payload.hr ?? payload.HR,
-    steps: payload.steps ?? payload.STEPS,
-    distance: payload.distance ?? payload.DISTANCE,
-    spo2: payload.spo2 ?? payload.SPO2,
-    sleep: payload.sleep ?? payload.SLEEP,
-    hrv: payload.hrv ?? payload.HRV,
-  };
+  for (const [key, value] of Object.entries(payload)) {
+    if (["type", "thietbi_id", "ThietBi_ID", "nguoidung_id"].includes(key)) continue;
 
-  const fields = [
-    { key: "hr", raw: "HR" },
-    { key: "steps", raw: "STEPS" },
-    { key: "distance", raw: "DISTANCE" },
-    { key: "spo2", raw: "SPO2" },
-    { key: "sleep", raw: "SLEEP" },
-    { key: "hrv", raw: "HRV" },
-  ];
+    if (value === undefined || value === null || value === "" || Number(value) <= 0) continue;
 
-  for (let f of fields) {
-    const value = normalizedPayload[f.key];
+    let loaichiso_id = null;
 
-    if (
-      value === undefined ||
-      value === null ||
-      value === "" ||
-      Number(value) <= 0
-    ) continue;
-
-    const loaichiso_id = codeMap[f.raw.toUpperCase()];
-    if (!loaichiso_id) {
-      console.warn("Không map được:", f.raw);
-      continue;
+    // ✔️ Nếu là CSxxx
+    if (metricIdSet.has(key)) {
+      loaichiso_id = key;
+    } 
+    // ✔️ Nếu là code (hr, steps...)
+    else {
+      loaichiso_id = codeMap[key.toUpperCase()];
     }
 
-    // Skip duplicate (sẽ xử lý ở phần dynamic fields)
-    if (metricIdSet.has(loaichiso_id)) {
+    if (!loaichiso_id) continue;
+
+    // =========================
+    // 🔥 CHECK TRÙNG THEO NGÀY
+    // =========================
+    const { data: existing } = await db
+      .from("dulieusuckhoe")
+      .select("dulieusk_id, thoigiancapnhat")
+      .eq("nguoidung_id", payload.nguoidung_id)
+      .eq("loaichiso_id", loaichiso_id)
+      .gte("thoigiancapnhat", today + "T00:00:00")
+      .lte("thoigiancapnhat", today + "T23:59:59")
+      .limit(1);
+
+    if (existing && existing.length > 0) {
+      // 🔥 UPDATE (ghi đè)
+      await db
+        .from("dulieusuckhoe")
+        .update({
+          giatri: value,
+          thoigiancapnhat: nowISO,
+          thietbi_id: type === "manual" ? null : thietbi_id,
+        })
+        .eq("dulieusk_id", existing[0].dulieusk_id);
+
+      console.log(`UPDATED ${loaichiso_id}`);
+    } else {
+      // 🔥 INSERT mới
       const id =
         Date.now().toString() +
         Math.random().toString(36).substring(2, 6);
@@ -359,7 +354,7 @@ export async function saveMultipleHealthData(payload) {
       inserts.push({
         dulieusk_id: id,
         giatri: value,
-        thoigiancapnhat: now,
+        thoigiancapnhat: nowISO,
         thietbi_id: type === "manual" ? null : thietbi_id,
         loaichiso_id,
         nguoidung_id: payload.nguoidung_id,
@@ -368,49 +363,11 @@ export async function saveMultipleHealthData(payload) {
   }
 
   // =========================
-  // 🔥 PROCESS DYNAMIC FIELDS (scan payload để tìm loaichiso_id)
-  // =========================
-  const processedMetricIds = new Set(fields.map(f => codeMap[f.raw.toUpperCase()]).filter(Boolean));
-
-  for (const [key, value] of Object.entries(payload)) {
-    // Skip system fields
-    if (["type", "thietbi_id", "ThietBi_ID", "nguoidung_id"].includes(key)) continue;
-
-    // Check có phải loaichiso_id không
-    if (metricIdSet.has(key) && !processedMetricIds.has(key)) {
-      console.log(`[saveMultipleHealthData] Found dynamic field: ${key} = ${value}`);
-      if (value === undefined || value === null || value === "" || Number(value) <= 0) continue;
-
-      const id =
-        Date.now().toString() +
-        Math.random().toString(36).substring(2, 6);
-
-      inserts.push({
-        dulieusk_id: id,
-        giatri: value,
-        thoigiancapnhat: now,
-        thietbi_id: type === "manual" ? null : thietbi_id,
-        loaichiso_id: key,
-        nguoidung_id: payload.nguoidung_id,
-      });
-    }
-  }
-
-  console.log("[saveMultipleHealthData] Inserts to save:", inserts.length);
-
-  // =========================
-  // 🔥 INSERT BATCH
+  // INSERT BATCH
   // =========================
   if (inserts.length > 0) {
     const { error } = await db.from("dulieusuckhoe").insert(inserts);
-
-    if (error) {
-      console.error("Insert multiple error:", error);
-      throw error;
-    }
-    console.log("[saveMultipleHealthData] SUCCESS - saved", inserts.length, "records");
-  } else {
-    console.log("[saveMultipleHealthData] No data to insert");
+    if (error) throw error;
   }
 
   return true;
