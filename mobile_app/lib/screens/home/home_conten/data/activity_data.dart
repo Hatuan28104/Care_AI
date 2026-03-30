@@ -47,6 +47,7 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
 
         return MetricItem(
           metricId: (e['loaichiso_id'] ?? '').toString(),
+          code: (e['code'] ?? '').toString(),
           icon: iconData.icon,
           iconColor: iconData.color,
           title: e['tenchiso'],

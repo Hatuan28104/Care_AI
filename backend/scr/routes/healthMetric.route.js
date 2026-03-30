@@ -211,6 +211,7 @@ router.get("/history/:deviceId/:metricId", auth, async (req, res) => {
 router.get("/history/user/:metricId", auth, async (req, res) => {
   try {
     const { metricId } = req.params;
+    const { range } = req.query;
     const nguoiDungId =
       req.user?.NguoiDung_ID || req.user?.nguoidung_id;
 
@@ -221,7 +222,7 @@ router.get("/history/user/:metricId", auth, async (req, res) => {
       });
     }
 
-    const data = await getHealthHistoryByUser(nguoiDungId, metricId);
+    const data = await getHealthHistoryByUser(nguoiDungId, metricId, range);
     res.json({ success: true, data });
   } catch (err) {
     console.error(err);

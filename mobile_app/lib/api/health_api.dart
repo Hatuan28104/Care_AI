@@ -287,10 +287,10 @@ class HealthApi {
     }).toList();
   }
 
-  static Future<List<dynamic>> getHealthHistoryByUser(String metricId) async {
+  static Future<List<dynamic>> getHealthHistoryByUser(String metricId, [String range = 'd']) async {
     final res = await http
         .get(
-          Uri.parse('$_baseUrl/health/history/user/$metricId'),
+          Uri.parse('$_baseUrl/health/history/user/$metricId?range=$range'),
           headers: await _authHeaders(),
         )
         .timeout(const Duration(seconds: 8));

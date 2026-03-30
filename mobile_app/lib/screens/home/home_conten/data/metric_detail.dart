@@ -54,19 +54,15 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
   ========================= */
   Future<void> _loadData() async {
     try {
-      // 🔥 đảm bảo có deviceId
-      final deviceId = widget.deviceId.isNotEmpty
-          ? widget.deviceId
-          : await HealthApi.getOrCreateDevice();
-
-      // 🔥 gọi API đúng (có range)
-      final data = await HealthApi.getHealthHistory(
-        deviceId,
+      final data = await HealthApi.getHealthHistoryByUser(
         widget.metricId,
-        _range.name, // d, w, m, m6
+        _range.name,
       );
 
-      debugPrint("DETAIL DATA LENGTH: ${data.length}");
+      debugPrint("[MetricDetail] Range: ${_range.name}, Data length: ${data.length}");
+      for (var d in data) {
+        debugPrint("[MetricDetail] ${d['giatri']} @ ${d['thoigiancapnhat']}");
+      }
 
       if (data.isEmpty) {
         setState(() {
@@ -76,7 +72,6 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
         return;
       }
 
-      // 🔥 group giống hệt code cũ (GIỮ NGUYÊN LOGIC)
       Map<String, Map<String, dynamic>> grouped = {};
 
       for (var e in data) {

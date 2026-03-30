@@ -47,6 +47,7 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
 
         return MetricItem(
           metricId: (e['loaichiso_id'] ?? '').toString(),
+          code: (e['code'] ?? '').toString(),
           icon: iconData.icon,
           iconColor: iconData.color,
           title: e['tenchiso'],

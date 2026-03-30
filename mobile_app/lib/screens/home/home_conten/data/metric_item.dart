@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 class MetricItem {
   final String metricId;
+  final String code;
+
   final IconData icon;
   final Color iconColor;
   final String title;
@@ -12,6 +14,7 @@ class MetricItem {
 
   MetricItem({
     required this.metricId,
+    required this.code,
     required this.icon,
     required this.iconColor,
     required this.title,
