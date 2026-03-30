@@ -54,15 +54,13 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
   ========================= */
   Future<void> _loadData() async {
     try {
-      final all = await HealthApi.getLatestHealthDataByUser();
+      final data = await HealthApi.getHealthHistoryByUser(
+        widget.metricId,
+        _range.name,
+      );
 
-      final data =
-          all.where((e) => e['loaichiso_id'] == widget.metricId).toList();
-      debugPrint(
-          "[MetricDetail] Range: ${_range.name}, Data length: ${data.length}");
-      for (var d in data) {
-        debugPrint("[MetricDetail] ${d['giatri']} @ ${d['thoigiancapnhat']}");
-      }
+      debugPrint("DETAIL KEY: ${widget.metricId}");
+      debugPrint("DATA LENGTH: ${data.length}");
 
       if (data.isEmpty) {
         setState(() {
@@ -72,6 +70,7 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
         return;
       }
 
+      // 🔥 GROUP + FILTER
       Map<String, Map<String, dynamic>> grouped = {};
 
       for (var e in data) {
@@ -80,9 +79,6 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
 
         final t = DateTime.tryParse(raw.toString());
         if (t == null) continue;
-
-        // ✅ FIL TER by range
-        if (!_isWithinRange(t)) continue;
 
         String key;
 
@@ -100,14 +96,30 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
         }
       }
 
-      final sorted = grouped.values.toList()
-        ..sort((a, b) => DateTime.parse(a['thoigiancapnhat'])
-            .compareTo(DateTime.parse(b['thoigiancapnhat'])));
+      if (grouped.isEmpty) {
+        setState(() {
+          _values = [];
+          _labels = [];
+        });
+        return;
+      }
 
+      // 🔥 SORT
+      final sorted = grouped.values.toList()
+        ..sort((a, b) {
+          final ta =
+              DateTime.tryParse(a['thoigiancapnhat'] ?? '') ?? DateTime(0);
+          final tb =
+              DateTime.tryParse(b['thoigiancapnhat'] ?? '') ?? DateTime(0);
+          return ta.compareTo(tb);
+        });
+
+      // 🔥 VALUES
       final values = sorted
           .map<double>((e) => ((e['giatri'] ?? 0) as num).toDouble())
           .toList();
 
+      // 🔥 LABELS
       final labels = sorted.map<String>((e) {
         final t = DateTime.parse(e['thoigiancapnhat']);
 
@@ -123,23 +135,7 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
         _labels = labels;
       });
     } catch (e) {
-      debugPrint("[MetricDetail] Error: $e");
-    }
-  }
-
-  bool _isWithinRange(DateTime date) {
-    final now = DateTime.now();
-    final difference = now.difference(date).inDays;
-
-    switch (_range) {
-      case MetricRange.d:
-        return difference == 0; // Today only
-      case MetricRange.w:
-        return difference <= 7; // Last 7 days
-      case MetricRange.m:
-        return difference <= 30; // Last 30 days
-      case MetricRange.m6:
-        return difference <= 180; // Last 6 months
+      debugPrint("DETAIL ERROR: $e");
     }
   }
 

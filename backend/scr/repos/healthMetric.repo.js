@@ -188,44 +188,49 @@ export async function getHealthHistory(thietBiId, loaiChiSoId) {
 
   return data;
 }
-export async function getHealthHistoryByUser(nguoiDungId, loaiChiSoId, range = 'd') {
+export async function getHealthHistoryByUser(
+  nguoiDungId,
+  loaiChiSoId,
+  range = "d"
+) {
   const db = getDB();
+
+  const now = new Date();
 
   let fromDate = new Date();
 
-  if (range === 'd') {
-    fromDate.setDate(fromDate.getDate() - 1);
-  } else if (range === 'w') {
-    fromDate.setDate(fromDate.getDate() - 7);
-  } else if (range === 'm') {
-    fromDate.setDate(fromDate.getDate() - 30);
-  } else if (range === 'm6') {
-    fromDate.setMonth(fromDate.getMonth() - 6);
+  if (range === "d") {
+    fromDate.setHours(0, 0, 0, 0); // 🔥 start today
+  } else if (range === "w") {
+    fromDate.setDate(now.getDate() - 7);
+  } else if (range === "m") {
+    fromDate.setDate(now.getDate() - 30);
+  } else if (range === "m6") {
+    fromDate.setMonth(now.getMonth() - 6);
   }
 
-  // 🔥 FIX FORMAT
-  const from = fromDate.toISOString().replace("T", " ").split(".")[0];
+  // 🔥 dùng ISO chuẩn
+  const fromISO = fromDate.toISOString();
 
-  console.log(`[History] user=${nguoiDungId}, metric=${loaiChiSoId}, range=${range}, from=${from}`);
+  console.log("FROM:", fromISO);
 
   const { data, error } = await db
     .from("dulieusuckhoe")
     .select("giatri, thoigiancapnhat")
     .eq("nguoidung_id", nguoiDungId)
     .eq("loaichiso_id", loaiChiSoId)
-    .gte("thoigiancapnhat", from)
-    .order("thoigiancapnhat", { ascending: false })
-    .limit(100);
+    .gte("thoigiancapnhat", fromISO)
+    .order("thoigiancapnhat", { ascending: true }); // 🔥 FIX
 
   if (error) {
-    console.error("[History] Error:", error.message);
+    console.error("History error:", error);
     throw error;
   }
 
-  console.log(`[History] Returned ${data.length} records`);
-  return data;
-}
+  console.log("HISTORY LENGTH:", data.length);
 
+  return data || [];
+}
 /* =========================
    REPORT
 ========================= */
