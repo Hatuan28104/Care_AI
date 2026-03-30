@@ -128,21 +128,9 @@ router.post("/data", auth, async (req, res) => {
       });
     }
 
-    let thietbi_id = req.body.thietbi_id ?? req.body.ThietBi_ID;
+    const thietbi_id =
+      req.body.thietbi_id ?? req.body.ThietBi_ID ?? null;
 
-    // 🔥 đảm bảo có device
-    if (!thietbi_id) {
-      thietbi_id = await ensureDeviceForUser(nguoiDungId);
-    }
-
-    if (!thietbi_id) {
-      return res.status(400).json({
-        success: false,
-        message: "Thiếu ThietBi_ID",
-      });
-    }
-
-    // 🔥 chỉ dùng 1 hàm duy nhất
     await saveMultipleHealthData({
       ...req.body,
       nguoidung_id: nguoiDungId,

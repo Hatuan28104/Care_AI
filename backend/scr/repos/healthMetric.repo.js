@@ -283,19 +283,14 @@ export async function saveMultipleHealthData(payload) {
     metricIdSet.add(m.loaichiso_id);
   }
 
-  // =========================
-  // DEVICE
-  // =========================
+
   let thietbi_id = payload.thietbi_id ?? payload.ThietBi_ID;
 
-  if (!thietbi_id && type !== "manual") {
-    thietbi_id = await ensureDeviceForUser(payload.nguoidung_id);
-  }
+  const isManual = !thietbi_id;
+
 
   const now = new Date();
   const nowISO = now.toISOString();
-
-  // 🔥 LẤY NGÀY (YYYY-MM-DD)
   const today = nowISO.split("T")[0];
 
   const inserts = [];
@@ -310,11 +305,11 @@ export async function saveMultipleHealthData(payload) {
 
     let loaichiso_id = null;
 
-    // ✔️ Nếu là CSxxx
+    // ✔️ CSxxx
     if (metricIdSet.has(key)) {
       loaichiso_id = key;
     } 
-    // ✔️ Nếu là code (hr, steps...)
+    // ✔️ code (hr, steps…)
     else {
       loaichiso_id = codeMap[key.toUpperCase()];
     }
@@ -322,31 +317,51 @@ export async function saveMultipleHealthData(payload) {
     if (!loaichiso_id) continue;
 
     // =========================
-    // 🔥 CHECK TRÙNG THEO NGÀY
+    // 🔥 LẤY RECORD TRONG NGÀY
     // =========================
     const { data: existing } = await db
       .from("dulieusuckhoe")
-      .select("dulieusk_id, thoigiancapnhat")
+      .select("dulieusk_id, giatri, thoigiancapnhat")
       .eq("nguoidung_id", payload.nguoidung_id)
       .eq("loaichiso_id", loaichiso_id)
       .gte("thoigiancapnhat", today + "T00:00:00")
       .lte("thoigiancapnhat", today + "T23:59:59")
+      .order("thoigiancapnhat", { ascending: false })
       .limit(1);
 
     if (existing && existing.length > 0) {
-      // 🔥 UPDATE (ghi đè)
-      await db
-        .from("dulieusuckhoe")
-        .update({
+      const oldValue = Number(existing[0].giatri);
+
+      if (oldValue === Number(value)) {
+        // ✅ cùng giá trị → update time
+        await db
+          .from("dulieusuckhoe")
+          .update({
+            thoigiancapnhat: nowISO,
+            thietbi_id: isManual ? null : thietbi_id,
+          })
+          .eq("dulieusk_id", existing[0].dulieusk_id);
+
+        console.log(`UPDATE TIME (same value) ${loaichiso_id}`);
+      } else {
+        // ✅ khác giá trị → insert mới
+        const id =
+          Date.now().toString() +
+          Math.random().toString(36).substring(2, 6);
+
+        inserts.push({
+          dulieusk_id: id,
           giatri: value,
           thoigiancapnhat: nowISO,
-          thietbi_id: type === "manual" ? null : thietbi_id,
-        })
-        .eq("dulieusk_id", existing[0].dulieusk_id);
+          thietbi_id: isManual ? null : thietbi_id,
+          loaichiso_id,
+          nguoidung_id: payload.nguoidung_id,
+        });
 
-      console.log(`UPDATED ${loaichiso_id}`);
+        console.log(`INSERT NEW VALUE ${loaichiso_id}`);
+      }
     } else {
-      // 🔥 INSERT mới
+      // ✅ chưa có trong ngày → insert
       const id =
         Date.now().toString() +
         Math.random().toString(36).substring(2, 6);
@@ -355,10 +370,12 @@ export async function saveMultipleHealthData(payload) {
         dulieusk_id: id,
         giatri: value,
         thoigiancapnhat: nowISO,
-        thietbi_id: type === "manual" ? null : thietbi_id,
+        thietbi_id: isManual ? null : thietbi_id,
         loaichiso_id,
         nguoidung_id: payload.nguoidung_id,
       });
+
+      console.log(`INSERT FIRST ${loaichiso_id}`);
     }
   }
 
