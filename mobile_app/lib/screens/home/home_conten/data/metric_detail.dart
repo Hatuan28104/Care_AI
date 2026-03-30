@@ -18,9 +18,10 @@ class MetricDetailScreen extends StatefulWidget {
     required this.title,
     required this.deviceId,
     required this.metricId,
+    required this.unit,
     this.accent = const Color(0xFF00BCD4),
   });
-
+  final String unit;
   final String title;
   final String deviceId;
   final String metricId;
@@ -39,8 +40,11 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
       metricConfigs[widget.metricId.trim()] ??
       const MetricConfig(min: 0, max: 100, unit: "", divisions: 4);
 
-  double get _minY => _config.min;
-  double get _maxY => _config.max;
+  double get _minY =>
+      _values.isEmpty ? 0 : _values.reduce((a, b) => a < b ? a : b);
+
+  double get _maxY =>
+      _values.isEmpty ? 100 : _values.reduce((a, b) => a > b ? a : b);
   double get _rangeY => _maxY - _minY;
 
   @override
@@ -324,7 +328,9 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
                 children: [
                   Text(
                     latest != null
-                        ? latest.toStringAsFixed(_config.decimals)
+                        ? latest % 1 == 0
+                            ? latest.toStringAsFixed(0)
+                            : latest.toStringAsFixed(1)
                         : "--",
                     style: const TextStyle(
                       fontSize: 32,
@@ -335,7 +341,7 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 3),
                     child: Text(
-                      _config.unit,
+                      widget.unit,
                       style: const TextStyle(
                         color: Colors.black54,
                         fontSize: 24,
@@ -434,7 +440,7 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
             const Spacer(),
             Text(
               latest != null
-                  ? '${latest.toStringAsFixed(_config.decimals)} ${_config.unit}'
+                  ? '${latest % 1 == 0 ? latest.toStringAsFixed(0) : latest.toStringAsFixed(1)} ${widget.unit}'
                   : "--",
               style: const TextStyle(fontWeight: FontWeight.w700),
             ),

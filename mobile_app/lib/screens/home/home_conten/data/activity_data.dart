@@ -5,6 +5,7 @@ import 'package:Care_AI/widgets/app_components.dart';
 import 'package:Care_AI/api/health_api.dart';
 import 'metric_item.dart';
 import 'metric_detail.dart';
+import 'dart:async';
 
 class ActivityDataScreen extends StatefulWidget {
   const ActivityDataScreen({super.key});
@@ -21,11 +22,22 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
   String _keyword = '';
 
   List<MetricItem> _items = [];
-
+  Timer? _timer;
   @override
   void initState() {
     super.initState();
     _initData();
+
+    _timer = Timer.periodic(const Duration(seconds: 5), (_) async {
+      if (!mounted) return;
+      await _loadLatestActivityData();
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   Future<void> _initData() async {
@@ -86,7 +98,7 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
           return 0;
         }
       });
-
+      if (!mounted) return;
       setState(() {
         for (var item in _items) {
           final match = data.where((e) => e['loaichiso_id'] == item.metricId);
@@ -184,6 +196,7 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
               deviceId: "",
               metricId: m.metricId,
               accent: m.iconColor,
+              unit: m.unit,
             ),
           ),
         );

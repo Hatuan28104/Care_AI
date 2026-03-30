@@ -21,7 +21,6 @@ class HealthBackendSync {
     'sleepMinutes': 'CS037', // Thời gian ngủ
     'restingHeartRateBpm': 'CS007', // Tần số tim nghỉ
     'heightCm': 'CS002', // Chiều cao
-    'weightKg': 'CS007', // Cân nặng
     'heartRateVariabilityRmssd': 'CS008', // Biến thiên nhịp tim (HRV)
   };
 

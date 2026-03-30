@@ -5,6 +5,7 @@ import 'package:Care_AI/models/tr.dart';
 import 'package:Care_AI/widgets/app_components.dart';
 import 'metric_item.dart';
 import 'metric_detail.dart';
+import 'dart:async';
 
 class BasicHealthDataScreen extends StatefulWidget {
   const BasicHealthDataScreen({super.key});
@@ -16,7 +17,7 @@ class BasicHealthDataScreen extends StatefulWidget {
 class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
   static const EdgeInsets _listPadding = EdgeInsets.fromLTRB(18, 2, 18, 18);
   static const BorderRadius _cardRadius = BorderRadius.all(Radius.circular(10));
-
+  Timer? _timer;
   final TextEditingController _searchCtrl = TextEditingController();
   String _keyword = '';
 
@@ -26,6 +27,17 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
   void initState() {
     super.initState();
     _initData();
+
+    _timer = Timer.periodic(const Duration(seconds: 5), (_) async {
+      if (!mounted) return;
+      await _loadLatestHealthData();
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   Future<void> _initData() async {
@@ -87,7 +99,7 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
           return 0;
         }
       });
-
+      if (!mounted) return;
       setState(() {
         for (var item in _items) {
           final match = data.where((e) => e['loaichiso_id'] == item.metricId);
@@ -185,6 +197,7 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
               deviceId: "",
               metricId: m.metricId,
               accent: m.iconColor,
+              unit: m.unit,
             ),
           ),
         );
