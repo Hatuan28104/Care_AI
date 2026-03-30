@@ -197,19 +197,22 @@ export async function getHealthHistoryByUser(
 
   const now = new Date();
 
-  let fromDate = new Date();
+  let fromDate;
 
   if (range === "d") {
-    fromDate.setHours(0, 0, 0, 0); // 🔥 start today
+    // 🔥 lấy 24h gần nhất (KHÔNG dùng setHours)
+    fromDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
   } else if (range === "w") {
-    fromDate.setDate(now.getDate() - 7);
+    fromDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
   } else if (range === "m") {
-    fromDate.setDate(now.getDate() - 30);
+    fromDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
   } else if (range === "m6") {
+    fromDate = new Date();
     fromDate.setMonth(now.getMonth() - 6);
+  } else {
+    fromDate = new Date(0); // fallback
   }
 
-  // 🔥 dùng ISO chuẩn
   const fromISO = fromDate.toISOString();
 
   console.log("FROM:", fromISO);
@@ -220,7 +223,7 @@ export async function getHealthHistoryByUser(
     .eq("nguoidung_id", nguoiDungId)
     .eq("loaichiso_id", loaiChiSoId)
     .gte("thoigiancapnhat", fromISO)
-    .order("thoigiancapnhat", { ascending: true }); // 🔥 FIX
+    .order("thoigiancapnhat", { ascending: true });
 
   if (error) {
     console.error("History error:", error);
