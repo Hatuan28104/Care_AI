@@ -189,19 +189,42 @@ export async function getHealthHistory(thietBiId, loaiChiSoId) {
   return data;
 }
 
-export async function getHealthHistoryByUser(nguoiDungId, loaiChiSoId) {
+export async function getHealthHistoryByUser(nguoiDungId, loaiChiSoId, range = 'd') {
   const db = getDB();
+
+  let fromDate = new Date();
+
+  if (range === 'd') {
+    // Today - set to start of day (24 hours ago)
+    fromDate.setDate(fromDate.getDate() - 1);
+  } else if (range === 'w') {
+    // Last 7 days
+    fromDate.setDate(fromDate.getDate() - 7);
+  } else if (range === 'm') {
+    // Last 30 days
+    fromDate.setDate(fromDate.getDate() - 30);
+  } else if (range === 'm6') {
+    // Last 6 months
+    fromDate.setMonth(fromDate.getMonth() - 6);
+  }
+
+  console.log(`[getHealthHistoryByUser] nguoiDungId=${nguoiDungId}, loaiChiSoId=${loaiChiSoId}, range=${range}, fromDate=${fromDate.toISOString()}`);
 
   const { data, error } = await db
     .from("dulieusuckhoe")
     .select("giatri, thoigiancapnhat")
     .eq("nguoidung_id", nguoiDungId)
     .eq("loaichiso_id", loaiChiSoId)
+    .gte("thoigiancapnhat", fromDate.toISOString())
     .order("thoigiancapnhat", { ascending: false })
-    .limit(50);
+    .limit(100);
 
-  if (error) throw error;
+  if (error) {
+    console.error(`[getHealthHistoryByUser] Error: ${error.message}`);
+    throw error;
+  }
 
+  console.log(`[getHealthHistoryByUser] Returned ${data.length} records`);
   return data;
 }
 
