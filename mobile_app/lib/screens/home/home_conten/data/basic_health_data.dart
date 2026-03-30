@@ -72,9 +72,10 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
       final data = await HealthApi.getLatestHealthDataByUser();
       debugPrint("[BasicHealth] Raw data length: ${data.length}");
       for (var d in data) {
-        debugPrint("[BasicHealth] Data: ${d['loaichiso_id']} = ${d['giatri']} @ ${d['thoigiancapnhat']}");
+        debugPrint(
+            "[BasicHealth] Data: ${d['loaichiso_id']} = ${d['giatri']} @ ${d['thoigiancapnhat']}");
       }
-      
+
       // Sort by time descending (newest first)
       data.sort((a, b) {
         try {
@@ -89,18 +90,20 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
       setState(() {
         for (var item in _items) {
           final match = data.where((e) => e['loaichiso_id'] == item.metricId);
-          debugPrint("[BasicHealth] Item ${item.metricId}: match count = ${match.length}");
+          debugPrint(
+              "[BasicHealth] Item ${item.metricId}: match count = ${match.length}");
 
           if (match.isNotEmpty) {
             final m = match.first;
 
             item.value = (m['giatri'] ?? '--').toString();
-            
+
             final timeRaw = (m['thoigiancapnhat'] ?? '').toString();
             try {
               if (timeRaw.isNotEmpty) {
                 final t = DateTime.parse(timeRaw);
-                item.time = "${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}";
+                item.time =
+                    "${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}";
               } else {
                 item.time = '--:--';
               }
@@ -234,7 +237,7 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
                 m.value,
                 style: const TextStyle(
                   fontWeight: FontWeight.w600,
-                  fontSize: 18,
+                  fontSize: 16,
                 ),
               ),
               const SizedBox(width: 6),

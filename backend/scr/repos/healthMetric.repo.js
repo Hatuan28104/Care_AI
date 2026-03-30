@@ -32,7 +32,7 @@ export async function getAllHealthMetrics() {
 
   const { data, error } = await db
     .from("loaichisosuckhoe")
-    .select("loaichiso_id, tenchiso, donvido, mota, loai");
+    .select("loaichiso_id, tenchiso, donvido, mota, loai, code");
 
   if (error) throw error;
   return data;

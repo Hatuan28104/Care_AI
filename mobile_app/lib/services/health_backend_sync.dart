@@ -85,7 +85,6 @@ class HealthBackendSync {
 
       await HealthApi.saveMultipleHealthData({
         "thietbi_id": deviceId,
-        "type": "device",
         ...payload,
       });
 

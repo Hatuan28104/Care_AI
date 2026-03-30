@@ -55,6 +55,7 @@ class HealthApi {
       "tenchiso": (raw["tenchiso"] ?? "").toString(),
       "donvido": (raw["donvido"] ?? "").toString(),
       "loai": (raw["loai"] ?? "").toString(),
+      "code": (raw["code"] ?? "").toString(),
     };
   }
 
@@ -152,7 +153,7 @@ class HealthApi {
   ========================= */
   static Future<void> saveHealthData({
     required double giaTri,
-    required String thietBiId,
+    String? thietBiId,
     required String loaiChiSoId,
   }) async {
     final res = await http
@@ -161,8 +162,9 @@ class HealthApi {
           headers: await _authHeaders(),
           body: jsonEncode({
             'giatri': giaTri,
-            'thietbi_id': thietBiId,
             'loaichiso_id': loaiChiSoId,
+            if (thietBiId != null && thietBiId.isNotEmpty)
+              'thietbi_id': thietBiId,
           }),
         )
         .timeout(const Duration(seconds: 8));
@@ -285,14 +287,10 @@ class HealthApi {
     }).toList();
   }
 
-  static Future<List<dynamic>> getHealthHistoryByUser(
-    String metricId,
-    String range,
-  ) async {
+  static Future<List<dynamic>> getHealthHistoryByUser(String metricId) async {
     final res = await http
         .get(
-          Uri.parse(
-              '$_baseUrl/health/history/user/$metricId?range=$range'),
+          Uri.parse('$_baseUrl/health/history/user/$metricId'),
           headers: await _authHeaders(),
         )
         .timeout(const Duration(seconds: 8));

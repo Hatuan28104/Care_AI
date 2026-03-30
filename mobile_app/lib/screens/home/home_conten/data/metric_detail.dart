@@ -52,38 +52,71 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
   /* =========================
      LOAD DATA
   ========================= */
-
   Future<void> _loadData() async {
     try {
-      final data = widget.deviceId.isEmpty
-          ? await HealthApi.getHealthHistoryByUser(
-              widget.metricId,
-              _range.name,
-            )
-          : await HealthApi.getHealthHistory(
-              widget.deviceId,
-              widget.metricId,
-              _range.name,
-            );
+      // 🔥 đảm bảo có deviceId
+      final deviceId = widget.deviceId.isNotEmpty
+          ? widget.deviceId
+          : await HealthApi.getOrCreateDevice();
 
-      debugPrint(
-          "[MetricDetail] Range: ${_range.name}, Data length: ${data.length}");
-      for (var d in data) {
-        debugPrint("[MetricDetail] ${d['giatri']} @ ${d['thoigiancapnhat']}");
+      // 🔥 gọi API đúng (có range)
+      final data = await HealthApi.getHealthHistory(
+        deviceId,
+        widget.metricId,
+        _range.name, // d, w, m, m6
+      );
+
+      debugPrint("DETAIL DATA LENGTH: ${data.length}");
+
+      if (data.isEmpty) {
+        setState(() {
+          _values = [];
+          _labels = [];
+        });
+        return;
       }
 
-      final values = data
+      // 🔥 group giống hệt code cũ (GIỮ NGUYÊN LOGIC)
+      Map<String, Map<String, dynamic>> grouped = {};
+
+      for (var e in data) {
+        final raw = e['thoigiancapnhat'];
+        if (raw == null) continue;
+
+        final t = DateTime.tryParse(raw.toString());
+        if (t == null) continue;
+
+        String key;
+
+        if (_range == MetricRange.d) {
+          key = "${t.hour}";
+        } else {
+          key = "${t.year}-${t.month}-${t.day}";
+        }
+
+        if (!grouped.containsKey(key) ||
+            DateTime.parse(e['thoigiancapnhat']).isAfter(
+              DateTime.parse(grouped[key]!['thoigiancapnhat']),
+            )) {
+          grouped[key] = e;
+        }
+      }
+
+      final sorted = grouped.values.toList()
+        ..sort((a, b) => DateTime.parse(a['thoigiancapnhat'])
+            .compareTo(DateTime.parse(b['thoigiancapnhat'])));
+
+      final values = sorted
           .map<double>((e) => ((e['giatri'] ?? 0) as num).toDouble())
           .toList();
 
-      final labels = data.map<String>((e) {
-        final raw = (e['thoigiancapnhat'] ?? '').toString();
-        if (raw.isEmpty) return '--:--:--';
-        try {
-          final t = DateTime.parse(raw);
-          return "${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}:${t.second.toString().padLeft(2, '0')}";
-        } catch (_) {
-          return '--:--:--';
+      final labels = sorted.map<String>((e) {
+        final t = DateTime.parse(e['thoigiancapnhat']);
+
+        if (_range == MetricRange.d) {
+          return "${t.hour}h";
+        } else {
+          return "${t.day}/${t.month}";
         }
       }).toList();
 
@@ -123,12 +156,7 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
               try {
                 final payload = {
                   widget.metricId: value,
-                  "type": "manual",
                 };
-
-                if (widget.deviceId.isNotEmpty) {
-                  payload["thietbi_id"] = widget.deviceId;
-                }
 
                 debugPrint("Save payload: $payload");
 

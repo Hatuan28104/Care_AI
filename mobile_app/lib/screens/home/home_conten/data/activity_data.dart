@@ -72,9 +72,10 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
       final data = await HealthApi.getLatestHealthDataByUser();
       debugPrint("[Activity] Raw data length: ${data.length}");
       for (var d in data) {
-        debugPrint("[Activity] Data: ${d['loaichiso_id']} = ${d['giatri']} @ ${d['thoigiancapnhat']}");
+        debugPrint(
+            "[Activity] Data: ${d['loaichiso_id']} = ${d['giatri']} @ ${d['thoigiancapnhat']}");
       }
-      
+
       data.sort((a, b) {
         try {
           final timeA = DateTime.parse((a['thoigiancapnhat'] ?? '').toString());
@@ -88,18 +89,20 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
       setState(() {
         for (var item in _items) {
           final match = data.where((e) => e['loaichiso_id'] == item.metricId);
-          debugPrint("[Activity] Item ${item.metricId}: match count = ${match.length}");
+          debugPrint(
+              "[Activity] Item ${item.metricId}: match count = ${match.length}");
 
           if (match.isNotEmpty) {
             final m = match.first;
 
             item.value = (m['giatri'] ?? '--').toString();
-            
+
             final timeRaw = (m['thoigiancapnhat'] ?? '').toString();
             try {
               if (timeRaw.isNotEmpty) {
                 final t = DateTime.parse(timeRaw);
-                item.time = "${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}";
+                item.time =
+                    "${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}";
               } else {
                 item.time = '--:--';
               }
@@ -233,7 +236,7 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
                 m.value,
                 style: const TextStyle(
                   fontWeight: FontWeight.w600,
-                  fontSize: 18,
+                  fontSize: 16,
                 ),
               ),
               const SizedBox(width: 6),
