@@ -260,6 +260,8 @@ export async function getHealthReport(thietBiId, type) {
 export async function saveMultipleHealthData(payload) {
   const db = getDB();
 
+  console.log("[saveMultipleHealthData] START payload:", payload);
+
   // 🔥 LOAD MAP 1 LẦN (đặt ở đây)
   const { data: allMetrics } = await db
     .from("loaichisosuckhoe")
@@ -275,6 +277,8 @@ export async function saveMultipleHealthData(payload) {
     metricIdSet.add(m.loaichiso_id);
   }
 
+  console.log("[saveMultipleHealthData] metricIdSet:", Array.from(metricIdSet));
+
   // =========================
   // 🔥 VALIDATE USER
   // =========================
@@ -286,6 +290,7 @@ export async function saveMultipleHealthData(payload) {
   // 🔥 TYPE (device | manual)
   // =========================
   const type = payload.type || "device";
+  console.log("[saveMultipleHealthData] TYPE:", type);
 
   // =========================
   // 🔥 DEVICE (chỉ cần cho device)
@@ -373,6 +378,7 @@ export async function saveMultipleHealthData(payload) {
 
     // Check có phải loaichiso_id không
     if (metricIdSet.has(key) && !processedMetricIds.has(key)) {
+      console.log(`[saveMultipleHealthData] Found dynamic field: ${key} = ${value}`);
       if (value === undefined || value === null || value === "" || Number(value) <= 0) continue;
 
       const id =
@@ -390,6 +396,8 @@ export async function saveMultipleHealthData(payload) {
     }
   }
 
+  console.log("[saveMultipleHealthData] Inserts to save:", inserts.length);
+
   // =========================
   // 🔥 INSERT BATCH
   // =========================
@@ -400,6 +408,9 @@ export async function saveMultipleHealthData(payload) {
       console.error("Insert multiple error:", error);
       throw error;
     }
+    console.log("[saveMultipleHealthData] SUCCESS - saved", inserts.length, "records");
+  } else {
+    console.log("[saveMultipleHealthData] No data to insert");
   }
 
   return true;

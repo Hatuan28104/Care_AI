@@ -72,6 +72,7 @@ class HealthApi {
       "donvido": (metric["donvido"] ?? raw["donvido"] ?? "").toString(),
       "loaichiso_id":
           (metric["loaichiso_id"] ?? raw["loaichiso_id"] ?? "").toString(),
+      "thietbi_id": (raw["thietbi_id"] ?? "").toString(),
     };
   }
 

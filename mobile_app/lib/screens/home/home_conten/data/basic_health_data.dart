@@ -70,17 +70,26 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
   Future<void> _loadLatestHealthData() async {
     try {
       final data = await HealthApi.getLatestHealthDataByUser();
+      debugPrint("[BasicHealth] Raw data length: ${data.length}");
+      for (var d in data) {
+        debugPrint("[BasicHealth] Data: ${d['loaichiso_id']} = ${d['giatri']} @ ${d['thoigiancapnhat']}");
+      }
       
       // Sort by time descending (newest first)
       data.sort((a, b) {
-        final timeA = (a['thoigiancapnhat'] ?? '').toString();
-        final timeB = (b['thoigiancapnhat'] ?? '').toString();
-        return timeB.compareTo(timeA);
+        try {
+          final timeA = DateTime.parse((a['thoigiancapnhat'] ?? '').toString());
+          final timeB = DateTime.parse((b['thoigiancapnhat'] ?? '').toString());
+          return timeB.compareTo(timeA);
+        } catch (_) {
+          return 0;
+        }
       });
 
       setState(() {
         for (var item in _items) {
           final match = data.where((e) => e['loaichiso_id'] == item.metricId);
+          debugPrint("[BasicHealth] Item ${item.metricId}: match count = ${match.length}");
 
           if (match.isNotEmpty) {
             final m = match.first;
@@ -102,7 +111,7 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
         }
       });
     } catch (e) {
-      debugPrint('Load metrics error: $e');
+      debugPrint('[BasicHealth] Error: $e');
     }
   }
 

@@ -70,17 +70,25 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
   Future<void> _loadLatestActivityData() async {
     try {
       final data = await HealthApi.getLatestHealthDataByUser();
+      debugPrint("[Activity] Raw data length: ${data.length}");
+      for (var d in data) {
+        debugPrint("[Activity] Data: ${d['loaichiso_id']} = ${d['giatri']} @ ${d['thoigiancapnhat']}");
+      }
       
-      // Sort by time descending (newest first)
       data.sort((a, b) {
-        final timeA = (a['thoigiancapnhat'] ?? '').toString();
-        final timeB = (b['thoigiancapnhat'] ?? '').toString();
-        return timeB.compareTo(timeA);
+        try {
+          final timeA = DateTime.parse((a['thoigiancapnhat'] ?? '').toString());
+          final timeB = DateTime.parse((b['thoigiancapnhat'] ?? '').toString());
+          return timeB.compareTo(timeA);
+        } catch (_) {
+          return 0;
+        }
       });
 
       setState(() {
         for (var item in _items) {
           final match = data.where((e) => e['loaichiso_id'] == item.metricId);
+          debugPrint("[Activity] Item ${item.metricId}: match count = ${match.length}");
 
           if (match.isNotEmpty) {
             final m = match.first;
@@ -102,7 +110,7 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
         }
       });
     } catch (e) {
-      debugPrint(e.toString());
+      debugPrint("[Activity] Error: $e");
     }
   }
 

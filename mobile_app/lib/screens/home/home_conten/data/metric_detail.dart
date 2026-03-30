@@ -10,7 +10,7 @@ const TextStyle _axisTextStyle = TextStyle(
   fontWeight: FontWeight.w600,
 );
 
-enum MetricRange { h, d, w, m, m6, y }
+enum MetricRange { d, w, m, m6 }
 
 class MetricDetailScreen extends StatefulWidget {
   const MetricDetailScreen({
@@ -67,6 +67,11 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
               _range.name,
             );
 
+      debugPrint("[MetricDetail] Range: ${_range.name}, Data length: ${data.length}");
+      for (var d in data) {
+        debugPrint("[MetricDetail] ${d['giatri']} @ ${d['thoigiancapnhat']}");
+      }
+
       final values = data
           .map<double>((e) => ((e['giatri'] ?? 0) as num).toDouble())
           .toList();
@@ -87,7 +92,7 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
         _labels = labels;
       });
     } catch (e) {
-      debugPrint(e.toString());
+      debugPrint("[MetricDetail] Error: $e");
     }
   }
 
@@ -115,24 +120,34 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
               final value = double.tryParse(ctrl.text);
               if (value == null) return;
 
-              final payload = {
-                widget.metricId: value,
-                "type": "manual",
-              };
-              
-              if (widget.deviceId.isNotEmpty) {
-                payload["thietbi_id"] = widget.deviceId;
+              try {
+                final payload = {
+                  widget.metricId: value,
+                  "type": "manual",
+                };
+                
+                if (widget.deviceId.isNotEmpty) {
+                  payload["thietbi_id"] = widget.deviceId;
+                }
+
+                debugPrint("Save payload: $payload");
+
+                await HealthApi.saveMultipleHealthData(payload);
+
+                Navigator.pop(context);
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(context.tr.saved)),
+                );
+
+                await _loadData();
+              } catch (e) {
+                debugPrint("Save error: $e");
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Lỗi: ${e.toString()}")),
+                );
               }
-
-              await HealthApi.saveMultipleHealthData(payload);
-
-              Navigator.pop(context);
-
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(context.tr.saved)),
-              );
-
-              await _loadData();
             },
             child: Text(context.tr.save),
           ),
@@ -216,12 +231,10 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
           scrollDirection: Axis.horizontal,
           child: Row(
             children: [
-              tab('H', MetricRange.h),
               tab('D', MetricRange.d),
               tab('W', MetricRange.w),
               tab('M', MetricRange.m),
               tab('6M', MetricRange.m6),
-              tab('Y', MetricRange.y),
             ],
           ),
         ),
