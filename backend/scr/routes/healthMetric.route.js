@@ -234,18 +234,22 @@ router.get("/history/:deviceId/:metricId", auth, async (req, res) => {
 /* =========================
    REPORT
 ========================= */
-router.get("/report/:deviceId", auth, async (req, res) => {
+router.get("/report/:quanHeId", auth, async (req, res) => {
   try {
-    const { deviceId } = req.params;
-    const { type } = req.query;
+    const { quanHeId } = req.params;
+    const { type = "day" } = req.query;
 
-    const data = await getHealthReport(deviceId, type);
+    const userId =
+      req.user?.NguoiDung_ID || req.user?.nguoidung_id;
+
+    const data = await getHealthReport(userId, quanHeId, type);
+
     res.json({ success: true, data });
   } catch (err) {
     console.error(err);
     res.status(500).json({
       success: false,
-      message: "Không lấy được báo cáo sức khỏe",
+      message: "Không lấy được báo cáo",
     });
   }
 });

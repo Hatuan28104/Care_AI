@@ -199,16 +199,14 @@ export async function findUserByPhone(phone, currentUserId) {
   if (relErr) throw relErr;
 
   return users.map(u => {
-    const related = (relations || []).some(r => {
+   const sameDirection = (relations || []).some(r => {
       return (
-        (r.nguoigiamho_id === currentUserId &&
-          r.nguoiduocgiamho_id === u.nguoidung_id) ||
-        (r.nguoiduocgiamho_id === currentUserId &&
-          r.nguoigiamho_id === u.nguoidung_id)
+        r.nguoigiamho_id === currentUserId &&
+        r.nguoiduocgiamho_id === u.nguoidung_id
       );
     });
 
-    if (related) {
+    if (sameDirection) {
       return {
         ...u,
         inviteStatus: "related",

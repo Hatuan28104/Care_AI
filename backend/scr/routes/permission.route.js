@@ -4,10 +4,10 @@ import {
   getPermissionConfigs,
   savePermissionConfig,
   getSharedConversation,
-  checkPermissionAccess
+  checkPermissionAccess,
 } from "../repos/permission.repo.js";
 import { auth } from "../middlewares/auth.middleware.js";
-
+import { getHealthReport } from "../repos/healthMetric.repo.js";
 const router = express.Router();
 
 /* =========================
@@ -123,4 +123,40 @@ router.get("/shared/:quanHeId", auth, async (req, res) => {
   }
 });
 
+/* =========================
+   LẤY HEALTH REPORT ĐƯỢC SHARE
+========================= */
+router.get("/health/:quanHeId", auth, async (req, res) => {
+  try {
+    const { quanHeId } = req.params;
+    const { type } = req.query; // day / week / month
+    const userId = req.user.nguoidung_id;
+
+    if (!quanHeId) {
+      return res.status(400).json({
+        success: false,
+        message: "Thiếu QuanHeGiamHo_ID"
+      });
+    }
+
+    // check quyền (giống m đang làm)
+    if (!(await checkPermissionAccess(userId, quanHeId))) {
+      return res.status(403).json({ success: false });
+    }
+
+    const data = await getHealthReport(userId, quanHeId, type);
+
+    res.json({
+      success: true,
+      data
+    });
+
+  } catch (e) {
+    console.error("GET shared health error:", e);
+    res.status(500).json({
+      success: false,
+      message: "Không lấy được dữ liệu sức khỏe"
+    });
+  }
+});
 export default router;

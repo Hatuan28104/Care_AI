@@ -159,3 +159,20 @@ export async function checkPermissionAccess(userId, quanHeId) {
 
   return !!data;
 }
+/* =========================
+   LẤY QUYỀN HEALTH ĐƯỢC SHARE
+========================= */
+export async function getAllowedHealthPermissions(quanHeId) {
+  const db = getDB();
+
+  const { data, error } = await db
+    .from("cauhinhdulieu")
+    .select("quyen")
+    .eq("quanhegiamho_id", quanHeId)
+    .eq("dakichhoat", true)
+    .like("quyen", "CS%"); 
+
+  if (error) throw error;
+
+  return (data || []).map(i => i.quyen);
+}

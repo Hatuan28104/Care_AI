@@ -232,42 +232,71 @@ export async function getHealthHistoryByUser(
 /* =========================
    REPORT
 ========================= */
-export async function getHealthReport(thietBiId, type) {
+export async function getHealthReport(userId, quanHeId, type) {
   const db = getDB();
 
+  // 1. check quyền quan hệ
+  const { data: rel } = await db
+    .from("quanhegiamho")
+    .select("nguoiduocgiamho_id")
+    .eq("quanhegiamho_id", quanHeId)
+    .or(`nguoigiamho_id.eq.${userId},nguoiduocgiamho_id.eq.${userId}`)
+    .eq("daxoa", false)
+    .single();
+
+  if (!rel) throw new Error("Không có quyền");
+
+  const dependentId = rel.nguoiduocgiamho_id;
+
+  // 2. lấy quyền
+  const { data: configs } = await db
+    .from("cauhinhdulieu")
+    .select("quyen")
+    .eq("quanhegiamho_id", quanHeId)
+    .eq("dakichhoat", true);
+
+  const allowed = (configs || [])
+    .map(i => i.quyen)
+    .filter(q => q.startsWith("CS"));
+  if (allowed.length === 0) return [];
+
+  // 3. time range
   let fromDate = new Date();
+  if (type === "week") fromDate.setDate(fromDate.getDate() - 7);
+  if (type === "month") fromDate.setDate(fromDate.getDate() - 30);
 
-  if (type === "week") {
-    fromDate.setDate(fromDate.getDate() - 7);
-  } else if (type === "month") {
-    fromDate.setDate(fromDate.getDate() - 30);
-  }
-
+  // 4. query data
   const { data, error } = await db
     .from("dulieusuckhoe")
     .select(`
       giatri,
+      loaichiso_id,
+      thoigiancapnhat,
       loaichisosuckhoe (
         tenchiso,
         donvido
       )
     `)
-    .eq("thietbi_id", thietBiId)
+    .eq("nguoidung_id", dependentId)
+    .in("loaichiso_id", allowed) // 🔥 SHARE CORE
     .gte("thoigiancapnhat", fromDate.toISOString());
 
   if (error) throw error;
 
+  // 5. group theo chỉ số (avg hoặc latest)
   const map = {};
 
-  for (let item of data) {
-    const key = item.loaichisosuckhoe.tenchiso;
+  for (let item of data || []) {
+    const key = item.loaichiso_id;
 
     if (!map[key]) {
       map[key] = {
-        tenchiso: key,
-        donvido: item.loaichisosuckhoe.donvido,
+        loaichiso_id: key,
+        tenchiso: item.loaichisosuckhoe?.tenchiso,
+        donvido: item.loaichisosuckhoe?.donvido,
         total: 0,
         count: 0,
+        latest: item.giatri,
       };
     }
 
@@ -275,10 +304,12 @@ export async function getHealthReport(thietBiId, type) {
     map[key].count++;
   }
 
+  // 6. return dynamic
   return Object.values(map).map(i => ({
+    loaichiso_id: i.loaichiso_id,
     tenchiso: i.tenchiso,
     donvido: i.donvido,
-    giatri: i.total / i.count,
+    giatri: i.total / i.count, 
   }));
 }
 export async function saveMultipleHealthData(payload) {
