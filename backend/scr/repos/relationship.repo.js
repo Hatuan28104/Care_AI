@@ -79,8 +79,16 @@ export async function getRelationshipProfile(qhId, userId) {
     .select(`
       quanhegiamho_id,
       ngaybatdau,
-      nguoigiamho:nguoigiamho_id (nguoidung_id, tennd, avatarurl, gioitinh, ngaysinh, taikhoan(sodienthoai)),
-      nguoiduocgiamho:nguoiduocgiamho_id (nguoidung_id, tennd, avatarurl, gioitinh, ngaysinh, taikhoan(sodienthoai))
+      nguoigiamho_id,
+      nguoiduocgiamho_id,
+      nguoigiamho:nguoigiamho_id (
+        nguoidung_id, tennd, avatarurl, gioitinh, ngaysinh,
+        taikhoan(sodienthoai)
+      ),
+      nguoiduocgiamho:nguoiduocgiamho_id (
+        nguoidung_id, tennd, avatarurl, gioitinh, ngaysinh,
+        taikhoan(sodienthoai)
+      )
     `)
     .eq("quanhegiamho_id", qhId)
     .eq("daxoa", false)
@@ -89,37 +97,21 @@ export async function getRelationshipProfile(qhId, userId) {
   if (error) throw error;
   if (!rel) throw new Error("Không tìm thấy quan hệ");
 
-  // xác định role
   let role = null;
-  let targetUserId = null;
+  let targetUser = null;
 
+  // 🔥 FIX CHÍNH Ở ĐÂY
   if (rel.nguoiduocgiamho_id === userId) {
     role = "GUARDIAN";
-    targetUserId = rel.nguoigiamho_id;
+    targetUser = rel.nguoigiamho;
   } else if (rel.nguoigiamho_id === userId) {
     role = "DEPENDENT";
-    targetUserId = rel.nguoiduocgiamho_id;
+    targetUser = rel.nguoiduocgiamho;
   } else {
     throw new Error("Không có quyền xem");
   }
 
-  // lấy user info
-  const { data: user } = await db
-    .from("nguoidung")
-    .select(`
-      nguoidung_id,
-      tennd,
-      avatarurl,
-      gioitinh,
-      ngaysinh,
-      taikhoan (
-        sodienthoai
-      )
-    `)
-    .eq("nguoidung_id", targetUserId)
-    .maybeSingle();
-
-  if (!user) throw new Error("Không tìm thấy user");
+  if (!targetUser) throw new Error("Không tìm thấy user");
 
   return {
     quanhegiamho_id: rel.quanhegiamho_id,
@@ -127,6 +119,12 @@ export async function getRelationshipProfile(qhId, userId) {
     nguoigiamho_id: rel.nguoigiamho_id,
     nguoiduocgiamho_id: rel.nguoiduocgiamho_id,
     role,
-    ...user,
+
+    nguoidung_id: targetUser.nguoidung_id,
+    tennd: targetUser.tennd,
+    avatarurl: targetUser.avatarurl,
+    gioitinh: targetUser.gioitinh,
+    ngaysinh: targetUser.ngaysinh,
+    sodienthoai: targetUser.taikhoan?.sodienthoai || "",
   };
 }
