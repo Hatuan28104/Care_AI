@@ -18,7 +18,7 @@ class ReportDetailScreen extends StatefulWidget {
 }
 
 class _ReportDetailScreenState extends State<ReportDetailScreen> {
-  Map<String, dynamic> report = {};
+  List<dynamic> report = [];
   bool loading = true;
 
   @override
@@ -34,59 +34,16 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
         widget.type,
       );
 
-      // 🔥 CONVERT LIST → FORMAT CŨ
-      final map = _convert(res);
+      print("REPORT RAW: $res");
 
       setState(() {
-        report = map;
+        report = res ?? [];
         loading = false;
       });
     } catch (e) {
       print("REPORT ERROR: $e");
       setState(() => loading = false);
     }
-  }
-
-  // 🔥 MAP CS → DATA CŨ
-  Map<String, dynamic> _convert(dynamic res) {
-    final result = {
-      "heartRate": null,
-      "steps": null,
-      "distance": null,
-      "calories": null,
-      "sleep": null,
-      "temperature": null,
-    };
-
-    if (res is List) {
-      for (var item in res) {
-        final id = item["loaichiso_id"];
-        final value = item["giatri"];
-
-        switch (id) {
-          case "CS001":
-            result["heartRate"] = value;
-            break;
-          case "CS002":
-            result["steps"] = value;
-            break;
-          case "CS003":
-            result["calories"] = value;
-            break;
-          case "CS004":
-            result["sleep"] = value;
-            break;
-          case "CS005":
-            result["temperature"] = value;
-            break;
-          case "CS006":
-            result["distance"] = value;
-            break;
-        }
-      }
-    }
-
-    return result;
   }
 
   String title(BuildContext context) {
@@ -98,6 +55,20 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
       default:
         return context.tr.day;
     }
+  }
+
+  List<dynamic> _filteredList() {
+    if (report.isEmpty) return [];
+
+    final usedIds = report.take(3).map((e) => e["loaichiso_id"]).toSet();
+
+    return report.where((e) => !usedIds.contains(e["loaichiso_id"])).toList();
+  }
+
+  String formatValue(dynamic v) {
+    if (v == null) return "--";
+    if (v is double) return v.toStringAsFixed(1);
+    return v.toString();
   }
 
   @override
@@ -114,28 +85,13 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
                   : ListView(
                       padding: const EdgeInsets.all(16),
                       children: [
-                        _heartCard(context),
+                        if (report.isNotEmpty) _mainCard(context, report[0]),
                         const SizedBox(height: 16),
                         _grid(),
                         const SizedBox(height: 16),
-                        _statItem(
-                          context.tr.steps,
-                          report["steps"] != null
-                              ? "${report["steps"]} ${context.tr.stepsUnit}"
-                              : "--",
-                        ),
-                        _statItem(
-                          context.tr.distance,
-                          report["distance"] != null
-                              ? "${report["distance"]} km"
-                              : "--",
-                        ),
-                        _statItem(
-                          context.tr.calories,
-                          report["calories"] != null
-                              ? "${report["calories"]} kcal"
-                              : "--",
-                        ),
+                        ..._filteredList()
+                            .map((e) => _statItemDynamic(e))
+                            .toList(),
                       ],
                     ),
             ),
@@ -145,14 +101,18 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
     );
   }
 
-  Widget _heartCard(BuildContext context) {
-    final bpm = report["heartRate"];
+  /* ================= MAIN CARD ================= */
+
+  Widget _mainCard(BuildContext context, dynamic item) {
+    final value = formatValue(item["giatri"]);
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.lightBlue.shade200,
-        borderRadius: BorderRadius.circular(10),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF6EC1E4), Color(0xFF4AA3D8)],
+        ),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         children: [
@@ -162,16 +122,17 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                bpm != null ? "$bpm BPM" : "-- BPM",
+                "$value ${item["donvido"] ?? ""}",
                 style: const TextStyle(
-                  fontSize: 32,
+                  fontSize: 30,
                   fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
               const SizedBox(height: 6),
               Text(
-                bpm != null ? context.tr.normal : context.tr.noData,
-                style: const TextStyle(color: Colors.red),
+                item["tenchiso"] ?? "",
+                style: const TextStyle(color: Colors.white70),
               ),
             ],
           ),
@@ -180,58 +141,61 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
     );
   }
 
+  /* ================= GRID ================= */
+
   Widget _grid() {
+    final small = report.skip(1).take(2).toList();
+
     return Row(
-      children: [
-        Expanded(
-          child: _mini(
-            context.tr.temperature,
-            report["temperature"] != null
-                ? "${report["temperature"]} °C"
-                : "--",
+      children: small.map((e) {
+        return Expanded(
+          child: Container(
+            margin: const EdgeInsets.only(right: 10),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              children: [
+                Text(
+                  e["tenchiso"] ?? "",
+                  style: const TextStyle(color: Colors.grey),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  "${formatValue(e["giatri"])} ${e["donvido"] ?? ""}",
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _mini(
-            context.tr.sleep,
-            report["sleep"] != null ? "${report["sleep"]} h" : "--",
-          ),
-        ),
-      ],
+        );
+      }).toList(),
     );
   }
 
-  Widget _mini(String label, String value) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        children: [
-          Text(label, style: const TextStyle(color: Colors.grey)),
-          const SizedBox(height: 6),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
-        ],
-      ),
-    );
-  }
+  /* ================= LIST ================= */
 
-  Widget _statItem(String label, String value) {
+  Widget _statItemDynamic(dynamic item) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-          Text(label, style: const TextStyle(color: Colors.red)),
+          Text(
+            item["tenchiso"] ?? "",
+            style: const TextStyle(color: Colors.red),
+          ),
           const Spacer(),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text(
+            "${formatValue(item["giatri"])} ${item["donvido"] ?? ""}",
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
         ],
       ),
     );

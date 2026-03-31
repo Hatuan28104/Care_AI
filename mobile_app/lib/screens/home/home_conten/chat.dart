@@ -26,7 +26,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
-
+  String? _conversationId;
   bool _isFocused = false;
 
   final List<Map<String, dynamic>> messages = [];
@@ -84,7 +84,10 @@ class _ChatScreenState extends State<ChatScreen> {
         message: text,
         userId: widget.userId,
         digitalId: widget.digitalId,
+        hoiThoaiId: _conversationId,
       );
+
+      _conversationId = response["hoi_thoai_id"];
 
       if (!mounted) return;
 
