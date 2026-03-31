@@ -209,7 +209,7 @@ export async function findUserByPhone(phone, currentUserId) {
     if (sameDirection) {
       return {
         ...u,
-        inviteStatus: "related",
+        inviteStatus: "none",
       };
     }
 

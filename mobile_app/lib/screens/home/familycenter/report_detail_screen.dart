@@ -18,7 +18,7 @@ class ReportDetailScreen extends StatefulWidget {
 }
 
 class _ReportDetailScreenState extends State<ReportDetailScreen> {
-  Map<String, dynamic>? report;
+  Map<String, dynamic> report = {};
   bool loading = true;
 
   @override
@@ -29,18 +29,64 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
 
   Future<void> _loadReport() async {
     try {
-      final res = await FamilyApi.getHealthReport(widget.quanHeId, widget.type);
+      final res = await FamilyApi.getHealthReport(
+        widget.quanHeId,
+        widget.type,
+      );
+
+      // 🔥 CONVERT LIST → FORMAT CŨ
+      final map = _convert(res);
 
       setState(() {
-        report = res;
+        report = map;
         loading = false;
       });
     } catch (e) {
       print("REPORT ERROR: $e");
-      setState(() {
-        loading = false;
-      });
+      setState(() => loading = false);
     }
+  }
+
+  // 🔥 MAP CS → DATA CŨ
+  Map<String, dynamic> _convert(dynamic res) {
+    final result = {
+      "heartRate": null,
+      "steps": null,
+      "distance": null,
+      "calories": null,
+      "sleep": null,
+      "temperature": null,
+    };
+
+    if (res is List) {
+      for (var item in res) {
+        final id = item["loaichiso_id"];
+        final value = item["giatri"];
+
+        switch (id) {
+          case "CS001":
+            result["heartRate"] = value;
+            break;
+          case "CS002":
+            result["steps"] = value;
+            break;
+          case "CS003":
+            result["calories"] = value;
+            break;
+          case "CS004":
+            result["sleep"] = value;
+            break;
+          case "CS005":
+            result["temperature"] = value;
+            break;
+          case "CS006":
+            result["distance"] = value;
+            break;
+        }
+      }
+    }
+
+    return result;
   }
 
   String title(BuildContext context) {
@@ -57,7 +103,7 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF6F6F6),
+      backgroundColor: const Color(0xFFF6F6F6),
       body: SafeArea(
         child: Column(
           children: [
@@ -74,20 +120,20 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
                         const SizedBox(height: 16),
                         _statItem(
                           context.tr.steps,
-                          report?["steps"] != null
-                              ? "${report!["steps"]} ${context.tr.stepsUnit}"
+                          report["steps"] != null
+                              ? "${report["steps"]} ${context.tr.stepsUnit}"
                               : "--",
                         ),
                         _statItem(
                           context.tr.distance,
-                          report?["distance"] != null
-                              ? "${report!["distance"]} km"
+                          report["distance"] != null
+                              ? "${report["distance"]} km"
                               : "--",
                         ),
                         _statItem(
                           context.tr.calories,
-                          report?["calories"] != null
-                              ? "${report!["calories"]} kcal"
+                          report["calories"] != null
+                              ? "${report["calories"]} kcal"
                               : "--",
                         ),
                       ],
@@ -99,10 +145,8 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
     );
   }
 
-  // ================= HEART =================
-
   Widget _heartCard(BuildContext context) {
-    final bpm = report?["heartRate"];
+    final bpm = report["heartRate"];
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -136,16 +180,14 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
     );
   }
 
-  // ================= GRID =================
-
   Widget _grid() {
     return Row(
       children: [
         Expanded(
           child: _mini(
             context.tr.temperature,
-            report?["temperature"] != null
-                ? "${report!["temperature"]} °C"
+            report["temperature"] != null
+                ? "${report["temperature"]} °C"
                 : "--",
           ),
         ),
@@ -153,14 +195,12 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
         Expanded(
           child: _mini(
             context.tr.sleep,
-            report?["sleep"] != null ? "${report!["sleep"]} h" : "--",
+            report["sleep"] != null ? "${report["sleep"]} h" : "--",
           ),
         ),
       ],
     );
   }
-
-  // ================= MINI CARD =================
 
   Widget _mini(String label, String value) {
     return Container(
@@ -178,8 +218,6 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
       ),
     );
   }
-
-  // ================= STAT ITEM =================
 
   Widget _statItem(String label, String value) {
     return Container(

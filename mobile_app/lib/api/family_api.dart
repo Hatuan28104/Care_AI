@@ -418,12 +418,12 @@ class FamilyApi {
 /* =========================
    LẤY HEALTH REPORT
 ========================= */
-  static Future<Map<String, dynamic>> getHealthReport(
-    String deviceId,
+  static Future<List<dynamic>> getHealthReport(
+    String quanHeId,
     String type,
   ) async {
     final url = Uri.parse(
-      '$_baseUrl/health/report/$deviceId?type=$type',
+      '$_baseUrl/health/report/$quanHeId?type=$type',
     );
 
     final response = await http

@@ -258,8 +258,15 @@ export async function getHealthReport(userId, quanHeId, type) {
   const allowed = (configs || [])
     .map(i => i.quyen)
     .filter(q => q.startsWith("CS"));
-  if (allowed.length === 0) return [];
+let finalAllowed = allowed;
 
+if (finalAllowed.length === 0) {
+  const { data: metrics } = await db
+    .from("loaichisosuckhoe")
+    .select("loaichiso_id");
+
+  finalAllowed = (metrics || []).map(m => m.loaichiso_id);
+}
   // 3. time range
   let fromDate = new Date();
   if (type === "week") fromDate.setDate(fromDate.getDate() - 7);
@@ -278,7 +285,7 @@ export async function getHealthReport(userId, quanHeId, type) {
       )
     `)
     .eq("nguoidung_id", dependentId)
-    .in("loaichiso_id", allowed) // 🔥 SHARE CORE
+    .in("loaichiso_id", finalAllowed) // 🔥 SHARE CORE
     .gte("thoigiancapnhat", fromDate.toISOString());
 
   if (error) throw error;
