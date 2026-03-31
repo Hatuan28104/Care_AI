@@ -205,19 +205,19 @@ export async function getHealthHistoryByUser(
 
   if (error) throw error;
 
-  // 🔥 FILTER BẰNG JS (AN TOÀN 100%)
   const now = new Date();
+  const nowVN = new Date(now.getTime() + 7 * 60 * 60 * 1000);
 
-  let fromDate = new Date();
+  let fromDate = new Date(nowVN);
 
   if (range === "d") {
-    fromDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    fromDate = new Date(nowVN.getTime() - 24 * 60 * 60 * 1000);
   } else if (range === "w") {
-    fromDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    fromDate = new Date(nowVN.getTime() - 7 * 24 * 60 * 60 * 1000);
   } else if (range === "m") {
-    fromDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    fromDate = new Date(nowVN.getTime() - 30 * 24 * 60 * 60 * 1000);
   } else if (range === "m6") {
-    fromDate.setMonth(now.getMonth() - 6);
+    fromDate.setMonth(nowVN.getMonth() - 6);
   }
 
   const filtered = data.filter((d) => {
@@ -313,9 +313,19 @@ export async function saveMultipleHealthData(payload) {
   const isManual = !thietbi_id;
 
 
+  // =========================
+  // TIME VN FIX
+  // =========================
   const now = new Date();
+
+  const nowVN = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+
+  const today = nowVN.toISOString().split("T")[0];
+
   const nowISO = now.toISOString();
-  const today = nowISO.split("T")[0];
+
+  const startOfDayVN = new Date(today + "T00:00:00+07:00").toISOString();
+  const endOfDayVN = new Date(today + "T23:59:59+07:00").toISOString();
 
   const inserts = [];
 
@@ -348,8 +358,8 @@ export async function saveMultipleHealthData(payload) {
       .select("dulieusk_id, giatri, thoigiancapnhat")
       .eq("nguoidung_id", payload.nguoidung_id)
       .eq("loaichiso_id", loaichiso_id)
-      .gte("thoigiancapnhat", today + "T00:00:00")
-      .lte("thoigiancapnhat", today + "T23:59:59")
+      .gte("thoigiancapnhat", startOfDayVN)
+      .lte("thoigiancapnhat", endOfDayVN)
       .order("thoigiancapnhat", { ascending: false })
       .limit(1);
 
@@ -357,7 +367,6 @@ export async function saveMultipleHealthData(payload) {
       const oldValue = Number(existing[0].giatri);
 
       if (oldValue === Number(value)) {
-        // ✅ cùng giá trị → update time
         await db
           .from("dulieusuckhoe")
           .update({
