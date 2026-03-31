@@ -39,7 +39,7 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
   MetricConfig get _config =>
       metricConfigs[widget.metricId.trim()] ??
       const MetricConfig(min: 0, max: 100, unit: "", divisions: 4);
-
+  double? _latestValue;
   double get _minY {
     if (_values.isEmpty) return 0;
     final valid = _values.where((e) => e >= 0);
@@ -104,7 +104,21 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
         widget.metricId,
         _range.name,
       );
+      double? latest;
 
+      data.sort((a, b) {
+        final t1 = DateTime.parse(a['thoigiancapnhat']);
+        final t2 = DateTime.parse(b['thoigiancapnhat']);
+        return t2.compareTo(t1);
+      });
+
+      for (var e in data) {
+        final v = (e['giatri'] as num?)?.toDouble();
+        if (v != null) {
+          latest = v;
+          break;
+        }
+      }
       debugPrint("DETAIL KEY: ${widget.metricId}");
       debugPrint("DATA LENGTH: ${data.length}");
 
@@ -116,36 +130,35 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
         return;
       }
 
-      Map<String, Map<String, dynamic>> grouped = {};
-
+      Map<String, List<double>> grouped = {};
       if (_range == MetricRange.d) {
-        grouped = {"0": {}, "6": {}, "12": {}, "18": {}};
+        grouped = {"0": [], "6": [], "12": [], "18": []};
       } else if (_range == MetricRange.w) {
         grouped = {
-          "1": {},
-          "2": {},
-          "3": {},
-          "4": {},
-          "5": {},
-          "6": {},
-          "7": {}
+          "1": [],
+          "2": [],
+          "3": [],
+          "4": [],
+          "5": [],
+          "6": [],
+          "7": []
         };
       } else if (_range == MetricRange.m) {
-        grouped = {"0": {}, "1": {}, "2": {}, "3": {}, "4": {}};
+        grouped = {"0": [], "1": [], "2": [], "3": [], "4": []};
       } else if (_range == MetricRange.m6) {
         grouped = {
-          "1": {},
-          "2": {},
-          "3": {},
-          "4": {},
-          "5": {},
-          "6": {},
-          "7": {},
-          "8": {},
-          "9": {},
-          "10": {},
-          "11": {},
-          "12": {}
+          "1": [],
+          "2": [],
+          "3": [],
+          "4": [],
+          "5": [],
+          "6": [],
+          "7": [],
+          "8": [],
+          "9": [],
+          "10": [],
+          "11": [],
+          "12": []
         };
       }
       for (var e in data) {
@@ -169,18 +182,11 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
           key = "${t.month}";
         }
 
-        final existing = grouped[key];
+        final value = (e['giatri'] as num?)?.toDouble();
+        if (value == null) continue;
 
-        if (existing == null || existing.isEmpty) {
-          grouped[key] = e;
-        } else {
-          final oldTime = DateTime.parse(existing['thoigiancapnhat']);
-          final newTime = DateTime.parse(e['thoigiancapnhat']);
-
-          if (newTime.isAfter(oldTime)) {
-            grouped[key] = e;
-          }
-        }
+        grouped.putIfAbsent(key, () => []);
+        grouped[key]!.add(value);
       }
 
       if (grouped.isEmpty) {
@@ -192,10 +198,14 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
       }
       final values = <double>[];
       final labels = <String>[];
+      double avg(List<double>? list) {
+        if (list == null || list.isEmpty) return -1;
+        return list.reduce((a, b) => a + b) / list.length;
+      }
 
       if (_range == MetricRange.d) {
         for (var s in ["0", "6", "12", "18"]) {
-          values.add(_v(grouped[s]));
+          values.add(avg(grouped[s]));
           labels.add("${s}h");
         }
       } else if (_range == MetricRange.w) {
@@ -222,6 +232,7 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
       setState(() {
         _values = values;
         _labels = labels;
+        _latestValue = latest;
       });
     } catch (e) {
       debugPrint("DETAIL ERROR: $e");
@@ -309,7 +320,7 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
                   const SizedBox(height: 12),
                   _chartCard(),
                   const SizedBox(height: 10),
-                  _latestRow(latest),
+                  _latestRow(_latestValue),
                   const SizedBox(height: 20),
                 ],
               ),

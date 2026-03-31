@@ -152,19 +152,13 @@ export async function getLatestHealthDataByUser(nguoiDungId) {
 
   if (error) throw error;
 
-  const map = {};
+ const map = {};
 
   for (let item of data) {
     const key = item.loaichisosuckhoe.loaichiso_id;
 
     if (!map[key]) {
-      map[key] = item;
-    } else {
-      const current = map[key];
-
-      if (current.thietbi_id == null && item.thietbi_id != null) {
-        map[key] = item;
-      }
+      map[key] = item; 
     }
   }
 

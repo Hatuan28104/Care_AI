@@ -83,12 +83,8 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
   Future<void> _loadLatestActivityData() async {
     try {
       final data = await HealthApi.getLatestHealthDataByUser();
-      debugPrint("[Activity] Raw data length: ${data.length}");
-      for (var d in data) {
-        debugPrint(
-            "[Activity] Data: ${d['loaichiso_id']} = ${d['giatri']} @ ${d['thoigiancapnhat']}");
-      }
 
+      // Sort newest first
       data.sort((a, b) {
         try {
           final timeA = DateTime.parse((a['thoigiancapnhat'] ?? '').toString());
@@ -98,30 +94,52 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
           return 0;
         }
       });
+
       if (!mounted) return;
+
       setState(() {
+        /// 🔥 Map lấy giá trị mới nhất (O(n))
+        final latestMap = <String, dynamic>{};
+
+        for (var d in data) {
+          final id = d['loaichiso_id']?.toString() ?? '';
+          if (id.isEmpty) continue;
+
+          if (!latestMap.containsKey(id)) {
+            latestMap[id] = d;
+          }
+        }
+
+        /// 🔥 Gán vào UI
         for (var item in _items) {
-          final match = data.where((e) => e['loaichiso_id'] == item.metricId);
-          debugPrint(
-              "[Activity] Item ${item.metricId}: match count = ${match.length}");
+          final m = latestMap[item.metricId];
 
-          if (match.isNotEmpty) {
-            final m = match.first;
+          if (m != null) {
+            final raw = m['giatri'];
 
-            item.value = (m['giatri'] ?? '--').toString();
+            /// 👉 FIX crash + format đẹp
+            final numValue = double.tryParse(raw.toString());
 
-            final timeRaw = (m['thoigiancapnhat'] ?? '').toString();
+            if (numValue != null) {
+              item.value = numValue
+                  .toStringAsFixed(5)
+                  .replaceAll(RegExp(r'0+$'), '')
+                  .replaceAll(RegExp(r'\.$'), '');
+            } else {
+              item.value = '--';
+            }
+
+            /// 👉 time
             try {
-              if (timeRaw.isNotEmpty) {
-                final t = DateTime.parse(timeRaw).toLocal();
-                item.time =
-                    "${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}";
-              } else {
-                item.time = '--:--';
-              }
+              final t = DateTime.parse(m['thoigiancapnhat']).toLocal();
+              item.time =
+                  "${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}";
             } catch (_) {
               item.time = '--:--';
             }
+          } else {
+            item.value = '--';
+            item.time = '--:--';
           }
         }
       });
@@ -207,7 +225,9 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
               unit: m.unit,
             ),
           ),
-        );
+        ).then((_) {
+          _loadLatestActivityData();
+        });
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
