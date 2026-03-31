@@ -269,8 +269,17 @@ if (finalAllowed.length === 0) {
 }
   // 3. time range
   let fromDate = new Date();
-  if (type === "week") fromDate.setDate(fromDate.getDate() - 7);
-  if (type === "month") fromDate.setDate(fromDate.getDate() - 30);
+  if (["day","d"].includes(type)) {
+    fromDate.setDate(fromDate.getDate() - 1);
+  }
+
+  if (["week","w"].includes(type)) {
+    fromDate.setDate(fromDate.getDate() - 7);
+  }
+
+  if (["month","m"].includes(type)) {
+    fromDate.setDate(fromDate.getDate() - 30);
+  }
 
   // 4. query data
   const { data, error } = await db
