@@ -13,7 +13,6 @@ class GuardianProfile extends StatefulWidget {
 }
 
 class _GuardianProfileState extends State<GuardianProfile> {
-  static const Color bg = Color(0xFFF6F6F6);
   static const Color blue = Color(0xFF1877F2);
 
   Map<String, dynamic>? data;

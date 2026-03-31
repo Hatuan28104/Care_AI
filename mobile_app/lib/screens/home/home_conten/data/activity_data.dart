@@ -113,7 +113,7 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
             final timeRaw = (m['thoigiancapnhat'] ?? '').toString();
             try {
               if (timeRaw.isNotEmpty) {
-                final t = DateTime.parse(timeRaw);
+                final t = DateTime.parse(timeRaw).toLocal();
                 item.time =
                     "${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}";
               } else {
@@ -134,7 +134,15 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
   Widget build(BuildContext context) {
     final filteredItems = _items.where((e) {
       return e.title.toLowerCase().contains(_keyword.toLowerCase());
-    }).toList();
+    }).toList()
+      ..sort((a, b) {
+        final aHasValue = a.value != '--';
+        final bHasValue = b.value != '--';
+
+        if (aHasValue && !bHasValue) return -1;
+        if (!aHasValue && bHasValue) return 1;
+        return 0;
+      });
 
     return Scaffold(
       backgroundColor: Color(0xFFF6F6F6),

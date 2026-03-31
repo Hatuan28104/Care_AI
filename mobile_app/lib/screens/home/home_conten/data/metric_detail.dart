@@ -40,11 +40,21 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
       metricConfigs[widget.metricId.trim()] ??
       const MetricConfig(min: 0, max: 100, unit: "", divisions: 4);
 
-  double get _minY =>
-      _values.isEmpty ? 0 : _values.reduce((a, b) => a < b ? a : b);
+  double get _minY {
+    if (_values.isEmpty) return 0;
+    final valid = _values.where((e) => e >= 0);
+    if (valid.isEmpty) return 0;
+    return (valid.reduce((a, b) => a < b ? a : b) - 2)
+        .clamp(0, double.infinity);
+  }
 
-  double get _maxY =>
-      _values.isEmpty ? 100 : _values.reduce((a, b) => a > b ? a : b);
+  double get _maxY {
+    final valid = _values.where((e) => e >= 0);
+    if (valid.isEmpty) return 100;
+    final max = valid.reduce((a, b) => a > b ? a : b);
+    return max + 2;
+  }
+
   double get _rangeY => _maxY - _minY;
 
   @override
@@ -53,6 +63,38 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
     _loadData();
   }
 
+  String _getDateLabel() {
+    final now = DateTime.now();
+
+    if (_range == MetricRange.d) {
+      return context.tr.today;
+    }
+
+    if (_range == MetricRange.w) {
+      final start = now.subtract(const Duration(days: 6));
+      return "${start.day}/${start.month}/${start.year} - ${now.day}/${now.month}/${now.year}";
+    }
+
+    if (_range == MetricRange.m) {
+      return "${context.tr.month} ${now.month}/${now.year}";
+    }
+
+    if (_range == MetricRange.m6) {
+      final start = DateTime(now.year, now.month - 5);
+      return "${start.month}/${start.year} - ${now.month}/${now.year}";
+    }
+
+    return "";
+  }
+
+  String _weekdayLabel(int weekday) {
+    const days = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
+    return days[weekday - 1];
+  }
+
+  double _v(e) => (e != null && e.isNotEmpty)
+      ? (e['giatri'] as num?)?.toDouble() ?? -1
+      : -1;
   /* =========================
      LOAD DATA
   ========================= */
@@ -74,29 +116,70 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
         return;
       }
 
-      // 🔥 GROUP + FILTER
       Map<String, Map<String, dynamic>> grouped = {};
 
+      if (_range == MetricRange.d) {
+        grouped = {"0": {}, "6": {}, "12": {}, "18": {}};
+      } else if (_range == MetricRange.w) {
+        grouped = {
+          "1": {},
+          "2": {},
+          "3": {},
+          "4": {},
+          "5": {},
+          "6": {},
+          "7": {}
+        };
+      } else if (_range == MetricRange.m) {
+        grouped = {"0": {}, "1": {}, "2": {}, "3": {}, "4": {}};
+      } else if (_range == MetricRange.m6) {
+        grouped = {
+          "1": {},
+          "2": {},
+          "3": {},
+          "4": {},
+          "5": {},
+          "6": {},
+          "7": {},
+          "8": {},
+          "9": {},
+          "10": {},
+          "11": {},
+          "12": {}
+        };
+      }
       for (var e in data) {
         final raw = e['thoigiancapnhat'];
         if (raw == null) continue;
 
-        final t = DateTime.tryParse(raw.toString());
+        final t = DateTime.tryParse(raw.toString())?.toLocal();
         if (t == null) continue;
 
         String key;
 
         if (_range == MetricRange.d) {
-          key = "${t.hour}";
+          int block = (t.hour ~/ 6) * 6;
+          key = "$block";
+        } else if (_range == MetricRange.w) {
+          key = "${t.weekday}";
+        } else if (_range == MetricRange.m) {
+          int week = ((t.day - 1) ~/ 7);
+          key = "$week";
         } else {
-          key = "${t.year}-${t.month}-${t.day}";
+          key = "${t.month}";
         }
 
-        if (!grouped.containsKey(key) ||
-            DateTime.parse(e['thoigiancapnhat']).isAfter(
-              DateTime.parse(grouped[key]!['thoigiancapnhat']),
-            )) {
+        final existing = grouped[key];
+
+        if (existing == null || existing.isEmpty) {
           grouped[key] = e;
+        } else {
+          final oldTime = DateTime.parse(existing['thoigiancapnhat']);
+          final newTime = DateTime.parse(e['thoigiancapnhat']);
+
+          if (newTime.isAfter(oldTime)) {
+            grouped[key] = e;
+          }
         }
       }
 
@@ -107,32 +190,34 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
         });
         return;
       }
+      final values = <double>[];
+      final labels = <String>[];
 
-      // 🔥 SORT
-      final sorted = grouped.values.toList()
-        ..sort((a, b) {
-          final ta =
-              DateTime.tryParse(a['thoigiancapnhat'] ?? '') ?? DateTime(0);
-          final tb =
-              DateTime.tryParse(b['thoigiancapnhat'] ?? '') ?? DateTime(0);
-          return ta.compareTo(tb);
-        });
-
-      // 🔥 VALUES
-      final values = sorted
-          .map<double>((e) => ((e['giatri'] ?? 0) as num).toDouble())
-          .toList();
-
-      // 🔥 LABELS
-      final labels = sorted.map<String>((e) {
-        final t = DateTime.parse(e['thoigiancapnhat']);
-
-        if (_range == MetricRange.d) {
-          return "${t.hour}h";
-        } else {
-          return "${t.day}/${t.month}";
+      if (_range == MetricRange.d) {
+        for (var s in ["0", "6", "12", "18"]) {
+          values.add(_v(grouped[s]));
+          labels.add("${s}h");
         }
-      }).toList();
+      } else if (_range == MetricRange.w) {
+        final now = DateTime.now();
+        for (int i = 6; i >= 0; i--) {
+          final d = now.subtract(Duration(days: i));
+          values.add(_v(grouped["${d.weekday}"]));
+          labels.add(_weekdayLabel(d.weekday));
+        }
+      } else if (_range == MetricRange.m) {
+        for (int i = 0; i < 5; i++) {
+          values.add(_v(grouped["$i"]));
+          labels.add("W${i + 1}");
+        }
+      } else {
+        final now = DateTime.now();
+        for (int i = 5; i >= 0; i--) {
+          final m = DateTime(now.year, now.month - i).month;
+          values.add(_v(grouped["$m"]));
+          labels.add("$m");
+        }
+      }
 
       setState(() {
         _values = values;
@@ -200,8 +285,14 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final hasData = _values.isNotEmpty;
-    final latest = hasData ? _values.last : null;
+    double? latest;
+
+    for (int i = _values.length - 1; i >= 0; i--) {
+      if (_values[i] >= 0) {
+        latest = _values[i];
+        break;
+      }
+    }
     return Scaffold(
       backgroundColor: Color(0xFFF6F6F6),
       body: SafeArea(
@@ -287,72 +378,84 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
   ========================= */
 
   Widget _valueSection(double? latest) {
+    final dateText = _getDateLabel();
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Align(
-          alignment: Alignment.centerLeft,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 🔥 ROW 1: "Giá trị" + "Thêm dữ liệu"
-              Row(
-                children: [
-                  Text(
-                    context.tr.value,
+        alignment: Alignment.centerLeft,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(
+                  context.tr.value,
+                  style: TextStyle(
+                    color: Colors.black45,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18,
+                  ),
+                ),
+                const Spacer(),
+                GestureDetector(
+                  onTap: _openInputDialog,
+                  child: Text(
+                    context.tr.addData,
                     style: TextStyle(
-                      color: Colors.black45,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 18,
+                      color: const Color(0xFF1877F2),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: _openInputDialog,
-                    child: Text(
-                      context.tr.addData,
-                      style: TextStyle(
-                        color: const Color(0xFF1877F2),
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 4),
-
-              // 🔥 ROW 2: VALUE
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    latest != null
-                        ? latest % 1 == 0
-                            ? latest.toStringAsFixed(0)
-                            : latest.toStringAsFixed(1)
-                        : "--",
-                    style: const TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 3),
-                    child: Text(
-                      widget.unit,
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      latest != null
+                          ? latest % 1 == 0
+                              ? latest.toStringAsFixed(0)
+                              : latest.toStringAsFixed(1)
+                          : "--",
                       style: const TextStyle(
-                        color: Colors.black54,
-                        fontSize: 24,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 32,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
+                    const SizedBox(width: 6),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 3),
+                      child: Text(
+                        widget.unit,
+                        style: const TextStyle(
+                          color: Colors.black54,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  dateText,
+                  style: const TextStyle(
+                    color: Colors.black45,
+                    fontSize: 16,
                   ),
-                ],
-              ),
-            ],
-          )),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -384,6 +487,7 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
                         minY: _minY,
                         maxY: _maxY,
                       ),
+                      child: Container(),
                     ),
                   ),
                   const SizedBox(width: 6),
@@ -402,19 +506,18 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
+            SizedBox(
+              width: double.infinity,
               child: Row(
-                children: _labels
-                    .map(
-                      (e) => Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: Text(e, style: _axisTextStyle),
-                      ),
-                    )
-                    .toList(),
+                children: List.generate(_labels.length, (i) {
+                  return Expanded(
+                    child: Center(
+                      child: Text(_labels[i], style: _axisTextStyle),
+                    ),
+                  );
+                }),
               ),
-            ),
+            )
           ],
         ),
       ),
@@ -476,19 +579,26 @@ class _MetricBarPainter extends CustomPainter {
     final paint = Paint()..color = accent;
 
     final n = values.length;
-    const gap = 8.0;
-    final barW = (size.width - gap * (n - 1)) / n;
+
+    final slotW = size.width / n;
+
+    final barW = slotW * 0.4;
+
     for (int i = 0; i < n; i++) {
-      final v = values[i].clamp(minY, maxY);
+      final v = values[i] < 0 ? minY : values[i];
 
-      final norm = (v - minY) / rangeY;
+      final norm = rangeY == 0 ? 1.0 : (v - minY) / rangeY;
       final barH = norm * size.height;
-
-      final left = i * (barW + gap);
-
+      final slotW = size.width / n;
+      final left = i * slotW + (slotW - barW) / 2;
       canvas.drawRRect(
         RRect.fromRectAndRadius(
-          Rect.fromLTWH(left, size.height - barH, barW, barH),
+          Rect.fromLTWH(
+            left,
+            (size.height - barH).clamp(0.0, size.height),
+            barW,
+            barH,
+          ),
           const Radius.circular(4),
         ),
         paint,

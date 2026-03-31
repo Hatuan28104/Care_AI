@@ -13,7 +13,6 @@ class AddGuardians extends StatefulWidget {
 
 class _AddGuardiansState extends State<AddGuardians> {
   static const Color blue = Color(0xFF1877F2);
-  static const Color bg = Color(0xFFF6F6F6);
 
   final TextEditingController _phoneCtrl = TextEditingController();
   bool _loading = false;

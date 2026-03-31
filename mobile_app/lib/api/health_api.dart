@@ -68,7 +68,12 @@ class HealthApi {
 
     return {
       "giatri": raw["giatri"],
-      "thoigiancapnhat": (raw["thoigiancapnhat"] ?? "").toString(),
+      "thoigiancapnhat": raw["thoigiancapnhat"] != null
+          ? DateTime.parse(raw["thoigiancapnhat"])
+              .toLocal()
+              .toString()
+              .substring(0, 16)
+          : "",
       "tenchiso": (metric["tenchiso"] ?? raw["tenchiso"] ?? "").toString(),
       "donvido": (metric["donvido"] ?? raw["donvido"] ?? "").toString(),
       "loaichiso_id":
@@ -287,7 +292,8 @@ class HealthApi {
     }).toList();
   }
 
-  static Future<List<dynamic>> getHealthHistoryByUser(String metricId, [String range = 'd']) async {
+  static Future<List<dynamic>> getHealthHistoryByUser(String metricId,
+      [String range = 'd']) async {
     final res = await http
         .get(
           Uri.parse('$_baseUrl/health/history/user/$metricId?range=$range'),

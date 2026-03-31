@@ -22,7 +22,7 @@ export async function sendInvite(fromId, toId) {
     .select("loimoi_id")
     .eq("nguoimoi_id", fromId)
     .eq("nguoiduocmoi_id", toId)
-    .eq("trangthailoimoi", "0")
+    .eq("trangthailoimoi_id", "0")
     .maybeSingle();
 
   if (existing) throw new Error("Lời mời đã tồn tại");
@@ -30,7 +30,7 @@ export async function sendInvite(fromId, toId) {
   const { error } = await db.from("loimoi").insert({
     loimoi_id: "LM" + Date.now().toString().slice(-10),
     ngaygui: new Date().toISOString(),
-    trangthailoimoi: "0",
+    trangthailoimoi_id: "0",
     nguoimoi_id: fromId,
     nguoiduocmoi_id: toId,
   });
@@ -48,11 +48,11 @@ export async function acceptInvite(loiMoiId) {
   const { data: updated, error: errUp } = await db
     .from("loimoi")
     .update({
-      trangthailoimoi: "1",
+      trangthailoimoi_id: "1",
       ngayphanhoi: new Date().toISOString(),
     })
     .eq("loimoi_id", loiMoiId)
-    .eq("trangthailoimoi", "0")
+    .eq("trangthailoimoi_id", "0")
     .select()
     .maybeSingle();
 
@@ -93,11 +93,11 @@ export async function rejectInvite(loiMoiId) {
   const { data } = await db
     .from("loimoi")
     .update({
-      trangthailoimoi: "2",
+      trangthailoimoi_id: "2",
       ngayphanhoi: new Date().toISOString(),
     })
     .eq("loimoi_id", loiMoiId)
-    .eq("trangthailoimoi", "0")
+    .eq("trangthailoimoi_id", "0")
     .select();
 
   if (!data || data.length === 0) {
@@ -126,7 +126,7 @@ export async function getInvites(userId) {
       )
     `)
     .eq("nguoiduocmoi_id", userId)
-    .eq("trangthailoimoi", "0")
+    .eq("trangthailoimoi_id", "0")
     .order("ngaygui", { ascending: false });
 
   if (error) throw error;
@@ -183,7 +183,7 @@ export async function findUserByPhone(phone, currentUserId) {
 
   const { data: invites, error: inviteErr } = await db
     .from("loimoi")
-    .select("loimoi_id, nguoimoi_id, nguoiduocmoi_id, trangthailoimoi")
+    .select("loimoi_id, nguoimoi_id, nguoiduocmoi_id, trangthailoimoi_id")
     .or(
       `and(nguoimoi_id.eq.${currentUserId},nguoiduocmoi_id.in.(${ids.join(",")})),and(nguoiduocmoi_id.eq.${currentUserId},nguoimoi_id.in.(${ids.join(",")}))`
     );
@@ -219,7 +219,7 @@ export async function findUserByPhone(phone, currentUserId) {
       return (
         i.nguoimoi_id === currentUserId &&
         i.nguoiduocmoi_id === u.nguoidung_id &&
-        i.trangthailoimoi === "0"
+        i.trangthailoimoi_id === "0"
       );
     });
     if (outgoingPending) {
@@ -234,7 +234,7 @@ export async function findUserByPhone(phone, currentUserId) {
       return (
         i.nguoiduocmoi_id === currentUserId &&
         i.nguoimoi_id === u.nguoidung_id &&
-        i.trangthailoimoi === "0"
+        i.trangthailoimoi_id === "0"
       );
     });
     if (incomingPending) {
@@ -256,10 +256,10 @@ export async function cancelInvite(loiMoiId, fromId) {
 
   const { data } = await db
     .from("loimoi")
-    .update({ trangthailoimoi: "3" })
+    .update({ trangthailoimoi_id: "3" })
     .eq("loimoi_id", loiMoiId)
     .eq("nguoimoi_id", fromId)
-    .eq("trangthailoimoi", "0")
+    .eq("trangthailoimoi_id", "0")
     .select();
 
   if (!data || data.length === 0) {
