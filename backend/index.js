@@ -3,20 +3,20 @@ dotenv.config();
 
 import express from "express";
 import cors from "cors";
-import { getDB } from "./scr/config/db.js";
+import { getDB } from "./src/config/db.js";
 
 getDB();
 
-import authRoute from "./scr/routes/auth.route.js";
-import profileRoute from "./scr/routes/profile.route.js";
-import inviteRoute from "./scr/routes/invite.route.js";
-import relationshipRoute from "./scr/routes/relationship.route.js";
-import permissionRoute from "./scr/routes/permission.route.js";
-import settingsRoute from "./scr/routes/settings.route.js";
-import notificationRoute from "./scr/routes/notification.route.js";
-import healthMetricRoute from "./scr/routes/healthMetric.route.js";
-import chatRoute from "./scr/routes/chat.route.js";
-import digitalHumanRoute from "./scr/routes/digitalHuman.route.js";
+import authRoute from "./src/routes/auth.route.js";
+import profileRoute from "./src/routes/profile.route.js";
+import inviteRoute from "./src/routes/invite.route.js";
+import relationshipRoute from "./src/routes/relationship.route.js";
+import permissionRoute from "./src/routes/permission.route.js";
+import settingsRoute from "./src/routes/settings.route.js";
+import notificationRoute from "./src/routes/notification.route.js";
+import healthMetricRoute from "./src/routes/healthMetric.route.js";
+import chatRoute from "./src/routes/chat.route.js";
+import digitalHumanRoute from "./src/routes/digitalHuman.route.js";
 
 const app = express();
 
