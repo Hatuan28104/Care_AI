@@ -13,6 +13,7 @@ Rules:
 
 Skills:
 - api_design
+- service_pattern
 - validation
 - auth_jwt
 - supabase_query
@@ -21,8 +22,11 @@ Skills:
 
 Yêu cầu:
 - Xác định module theo path
-- Viết API theo structure hiện tại
-- Validate input
+- Viết API theo đúng cấu trúc hiện tại
+- Phân bổ code đúng 3 layer (Route, Service, Repo)
+- Service KHÔNG được gọi Database trực tiếp (phải qua Repo)
+- Repo CHỈ đóng vai trò tương tác Database, không chứa logic validate
+- Validate input ở Service
 - Xử lý lỗi
 - Không làm vỡ API cũ
 - Không viết logic trong route

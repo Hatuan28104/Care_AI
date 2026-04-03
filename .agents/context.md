@@ -3,7 +3,7 @@
 Project: Care_AI
 
 ## Tech Stack Hiện Tại
-- **/backend (Node.js)**: Xây dựng API, tương tác Database. Kiến trúc dự kiến: Controller/Service.
+- **/backend (Node.js)**: Xây dựng API, tương tác Database. Kiến trúc: Route/Service/Repo.
 - **/web_admin (Vanilla web)**: HTML/CSS/JS thuần, không sử dụng framework (React/Vue/Angular).
 - **/mobile_app (Flutter/Dart)**: Ứng dụng điện thoại, tuân thủ UI responsive và navigation stack.
 - **/ai_service (Python)**: Xử lý logic AI, phân tích dữ liệu chuyên sâu.
@@ -16,9 +16,10 @@ Project: Care_AI
 
 ### Flow Cơ Bản
 1. Mobile/Web client gửi request lên Backend Node.js
-2. Backend (Controller -> Service) thực hiện validate logic -> Giao tiếp với Supabase/Firebase.
-3. Trả về JSON chuẩn ({ success, data/message }).
-4. Các task nặng hoặc phân tích dữ liệu sẽ giao cho AI Service.
+2. Route nhận request -> chuyển cho Service xử lý business logic & validate -> Service gọi Repo.
+3. Repo thực hiện query giao tiếp trực tiếp với Supabase/Firebase (Service KHÔNG query DB trực tiếp).
+4. Trả về JSON chuẩn ({ success, data/message }) qua Route.
+5. Các task nặng hoặc phân tích dữ liệu sẽ giao cho AI Service.
 
 ---
 
@@ -39,4 +40,4 @@ Project: Care_AI
 
 ## Ưu tiên
 - Luôn giữ logic đúng module  
-- Tuân theo structure mong muốn của project (đặc biệt: Backend theo controller/service pattern)
+- Tuân theo cấu trúc mong muốn của project (đặc biệt: Backend theo pattern Route/Service/Repo)
