@@ -24,13 +24,13 @@ function mapSelfTitle(level) {
 /* =========================
    INSERT NOTIFICATION
 ========================= */
-async function insertNoti(db, userId, title, body) {
+async function insertNoti(db, userId, title, body, type = 'ALERT') {
   const id = `NT${Date.now().toString().slice(-9)}${Math.floor(
     Math.random() * 1000
   )
     .toString()
     .padStart(3, "0")}`;
-
+  
   const { error } = await db
     .from("notifications")
     .insert({
@@ -38,6 +38,7 @@ async function insertNoti(db, userId, title, body) {
       nguoidung_id: userId,
       tieude: title,
       noidung: body,
+      type: type,
       thoigian: new Date().toISOString(),
       dadoc: false,
     });
@@ -69,7 +70,7 @@ async function sendFCM(db, token, title, body) {
 /* =========================
    SEND NOTIFICATION (USER + GUARDIAN)
 ========================= */
-export async function sendNotification(userId, title, body, level = 1) {
+export async function sendNotification(userId, title, body, level = 1, type = 'ALERT') {
   try {
     const db = getDB();
 
@@ -110,7 +111,7 @@ export async function sendNotification(userId, title, body, level = 1) {
       await sendFCM(db, t.token, selfTitle, body);
     }
 
-    await insertNoti(db, userId, selfTitle, body);
+    await insertNoti(db, userId, selfTitle, body, type);
     // ===== 4. GET GUARDIANS =====
     const { data: relations } = await db
       .from("quanhegiamho")
@@ -145,7 +146,7 @@ export async function sendNotification(userId, title, body, level = 1) {
         await sendFCM(db, t.token, gTitle, gBody);
       }
 
-      await insertNoti(db, guardianId, gTitle, gBody);
+      await insertNoti(db, guardianId, gTitle, gBody, type);
     }
 
   } catch (err) {

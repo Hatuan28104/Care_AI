@@ -67,6 +67,10 @@ export const handleSaveData = async (user, body) => {
     // Thông báo lại kết quả hiện tại
     await createAiNotification(nguoiDungId, existingInsight);
     
+    if (existingInsight.compare) {
+      await createDailyCompareNotification(nguoiDungId, existingInsight);
+    }
+    
     return { 
       success: true, 
       message: "Đã lưu dữ liệu sức khỏe",
@@ -80,8 +84,13 @@ export const handleSaveData = async (user, body) => {
 
   if (aiAnalysis && aiAnalysis.status) {
     await insertAIInsight(nguoiDungId, aiAnalysis, today);
-    // Tự động tạo thông báo kết quả AI mới
+    // 1. Thông báo Cảnh báo sức khỏe (ALERT)
     await createAiNotification(nguoiDungId, aiAnalysis);
+
+    // 2. Thông báo So sánh chỉ số (DAILY_COMPARE) nếu có dữ liệu
+    if (aiAnalysis.compare) {
+      await createDailyCompareNotification(nguoiDungId, aiAnalysis);
+    }
   }
 
   return { 
@@ -103,12 +112,45 @@ export const createAiNotification = async (userId, aiEvaluation) => {
   const body = `${message}\n\nMức độ: ${status}\nKhuyến nghị: ${advice}`;
 
   try {
-    await sendNotification(userId, title, body, 1);
+    await sendNotification(userId, title, body, 1, 'ALERT');
     console.log("[Notification] AI alert sent to user:", userId);
   } catch (err) {
     console.error("[Notification] Failed to send AI alert:", err.message);
   }
 };
+
+/**
+ * [NEW] Tạo thông báo so sánh hàng ngày
+ */
+export const createDailyCompareNotification = async (userId, aiEvaluation) => {
+  if (!aiEvaluation || !aiEvaluation.compare) return;
+
+  const title = "So sánh chỉ số hàng ngày";
+  const body = formatCompare(aiEvaluation.compare);
+
+  try {
+    await sendNotification(userId, title, body, 1, 'DAILY_COMPARE');
+    console.log("[Notification] Daily compare sent to user:", userId);
+  } catch (err) {
+    console.error("[Notification] Failed to send daily compare:", err.message);
+  }
+};
+
+/**
+ * [NEW] Format dữ liệu compare thành text
+ */
+function formatCompare(compare) {
+  if (!compare) return "Không có dữ liệu so sánh.";
+  
+  if (typeof compare === 'string') return compare;
+
+  const lines = [];
+  for (const [key, value] of Object.entries(compare)) {
+    if (value) lines.push(`${value}`);
+  }
+  
+  return lines.length > 0 ? lines.join("\n") : "Dữ liệu so sánh ổn định.";
+}
 
 export const handleGetLatestDeviceData = async (deviceId) => {
   const data = await getLatestHealthDataByDevice(deviceId);
