@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getDB } from '../config/db.js';
 
-const AI_SERVER_URL = process.env.AI_SERVER_URL || 'http://aiservice-production-d85e.up.railway.app';
+const AI_SERVER_URL = process.env.AI_SERVER_URL || 'https://aiservice-production-d85e.up.railway.app';
 
 const metricsMap = {
   "CS004": "steps",
@@ -26,7 +26,6 @@ export const fetchAIHistory = async (nguoidungId) => {
   const pivot = {};
   for (let r of data) {
     const time = r.thoigiancapnhat;
-    // Tách lấy phần ngày (YYYY-MM-DD)
     const dateStr = time ? time.split('T')[0] : new Date().toISOString().split('T')[0];
 
     if (!pivot[dateStr]) {
@@ -47,7 +46,7 @@ export const callSelfEvolutionAI = async (nguoidung_id, currentBody) => {
     const history = await fetchAIHistory(nguoidung_id);
 
     const current_metrics = {
-      date: new Date().toISOString().split('T')[0] // Gắn cứng TimeNow cho Current Data
+      date: new Date().toISOString().split('T')[0]
     };
 
     for (const [key, value] of Object.entries(currentBody)) {
@@ -61,12 +60,17 @@ export const callSelfEvolutionAI = async (nguoidung_id, currentBody) => {
       history
     };
 
-    const response = await axios.post(`${AI_SERVER_URL}/ai/self-evolution`, payload, {
-      timeout: 5000 // Handle Timeout
+    const url = `${AI_SERVER_URL}/ai/self-evolution`;
+    console.log("[AI Client] Calling:", url);
+
+    const response = await axios.post(url, payload, {
+      timeout: 10000
     });
+
+    console.log("[AI Client] Response status:", response.data?.status);
     return response.data;
   } catch (err) {
-    console.error("AI Service Error:", err.message);
+    console.error("[AI Client] FAILED:", err.message, "| code:", err.code, "| HTTP:", err.response?.status);
     return null;
   }
 };
