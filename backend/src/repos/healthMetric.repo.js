@@ -70,7 +70,7 @@ export async function ensureDeviceForUser(nguoiDungId) {
     .from("thietbisuckhoe")
     .select("thietbi_id")
     .eq("nguoidung_id", nguoiDungId)
-    .eq("daxoa", false) 
+    .eq("daxoa", false)
     .limit(1);
 
   if (error) throw error;
@@ -90,11 +90,11 @@ export async function ensureDeviceForUser(nguoiDungId) {
     .insert({
       thietbi_id: thietBiId,
       nguoidung_id: nguoiDungId,
-      daxoa: false, 
+      daxoa: false,
     });
 
   if (insertError) {
-    console.error("Insert device error:", insertError); 
+    console.error("Insert device error:", insertError);
     throw insertError;
   }
 
@@ -152,13 +152,13 @@ export async function getLatestHealthDataByUser(nguoiDungId) {
 
   if (error) throw error;
 
- const map = {};
+  const map = {};
 
   for (let item of data) {
     const key = item.loaichisosuckhoe.loaichiso_id;
 
     if (!map[key]) {
-      map[key] = item; 
+      map[key] = item;
     }
   }
 
@@ -252,26 +252,26 @@ export async function getHealthReport(userId, quanHeId, type) {
   const allowed = (configs || [])
     .map(i => i.quyen)
     .filter(q => q.startsWith("CS"));
-let finalAllowed = allowed;
+  let finalAllowed = allowed;
 
-if (finalAllowed.length === 0) {
-  const { data: metrics } = await db
-    .from("loaichisosuckhoe")
-    .select("loaichiso_id");
+  if (finalAllowed.length === 0) {
+    const { data: metrics } = await db
+      .from("loaichisosuckhoe")
+      .select("loaichiso_id");
 
-  finalAllowed = (metrics || []).map(m => m.loaichiso_id);
-}
+    finalAllowed = (metrics || []).map(m => m.loaichiso_id);
+  }
   // 3. time range
   let fromDate = new Date();
-  if (["day","d"].includes(type)) {
+  if (["day", "d"].includes(type)) {
     fromDate.setDate(fromDate.getDate() - 1);
   }
 
-  if (["week","w"].includes(type)) {
+  if (["week", "w"].includes(type)) {
     fromDate.setDate(fromDate.getDate() - 7);
   }
 
-  if (["month","m"].includes(type)) {
+  if (["month", "m"].includes(type)) {
     fromDate.setDate(fromDate.getDate() - 30);
   }
 
@@ -319,7 +319,7 @@ if (finalAllowed.length === 0) {
     loaichiso_id: i.loaichiso_id,
     tenchiso: i.tenchiso,
     donvido: i.donvido,
-    giatri: i.total / i.count, 
+    giatri: i.total / i.count,
   }));
 }
 export async function saveMultipleHealthData(payload) {
@@ -383,7 +383,7 @@ export async function saveMultipleHealthData(payload) {
     // ✔️ CSxxx
     if (metricIdSet.has(key)) {
       loaichiso_id = key;
-    } 
+    }
     // ✔️ code (hr, steps…)
     else {
       loaichiso_id = codeMap[key.toUpperCase()];
@@ -462,4 +462,70 @@ export async function saveMultipleHealthData(payload) {
   }
 
   return true;
+}
+
+/* =========================
+   AI INSIGHTS
+========================= */
+export async function insertAIInsight(nguoidung_id, insightData, dateStr) {
+  const db = getDB();
+
+  if (!nguoidung_id || !insightData) return;
+
+  console.log("[AI Insight] Inserting for user:", nguoidung_id);
+
+  const { error } = await db.from("ai_insights").insert({
+    nguoidung_id,
+    status: insightData.status,
+    message: insightData.message,
+    advice: insightData.advice,
+    compare: insightData.compare,
+    created_at: new Date().toISOString()
+  });
+
+  if (error) {
+    console.error("[AI Insight] DB INSERT ERROR:", error);
+    throw error;
+  }
+
+  console.log("[AI Insight] Insert OK for user:", nguoidung_id);
+}
+
+export async function getAIInsightByDate(nguoidung_id, dateStr) {
+  const db = getDB();
+
+  // Filter by created_at date range (table has no 'date' column)
+  const startOfDay = `${dateStr}T00:00:00+07:00`;
+  const endOfDay = `${dateStr}T23:59:59+07:00`;
+
+  const { data, error } = await db
+    .from("ai_insights")
+    .select("status, message, advice, compare, created_at")
+    .eq("nguoidung_id", nguoidung_id)
+    .gte("created_at", startOfDay)
+    .lte("created_at", endOfDay)
+    .order("created_at", { ascending: false })
+    .limit(1);
+
+  if (error) {
+    console.error("[AI Insight] GET BY DATE ERROR:", error.message);
+    return null;
+  }
+  return data && data.length > 0 ? data[0] : null;
+}
+
+export async function getLatestAIInsight(nguoidung_id) {
+  const db = getDB();
+  const { data, error } = await db
+    .from("ai_insights")
+    .select("status, message, advice, compare, created_at")
+    .eq("nguoidung_id", nguoidung_id)
+    .order("created_at", { ascending: false })
+    .limit(1);
+
+  if (error) {
+    console.error("Lỗi lấy AI Insight:", error.message);
+    return null;
+  }
+  return data && data.length > 0 ? data[0] : null;
 }

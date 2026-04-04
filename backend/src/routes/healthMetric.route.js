@@ -72,6 +72,16 @@ router.get("/data/latest/user", auth, async (req, res) => {
   }
 });
 
+router.get("/ai-insight/latest", auth, async (req, res) => {
+  try {
+    const response = await healthMetricService.handleGetLatestAIInsight(req.user);
+    res.json(response);
+  } catch (err) {
+    console.error(err);
+    res.status(err.message === "Chưa đăng nhập" ? 401 : 500).json({ success: false, message: err.message === "Chưa đăng nhập" ? err.message : "Không lấy được AI Insight" });
+  }
+});
+
 router.get("/history/user/:metricId", auth, async (req, res) => {
   try {
     const response = await healthMetricService.handleGetHistoryByUser(req.user, req.params.metricId, req.query.range);

@@ -1,4 +1,18 @@
-import { getAllHealthMetrics, createHealthMetric, getLatestHealthDataByDevice, getLatestHealthDataByUser, getHealthHistory, getHealthHistoryByUser, getHealthReport, ensureDeviceForUser, saveMultipleHealthData } from "../repos/healthMetric.repo.js";
+import { getAllHealthMetrics, createHealthMetric, getLatestHealthDataByDevice, getLatestHealthDataByUser, getHealthHistory, getHealthHistoryByUser, getHealthReport, ensureDeviceForUser, saveMultipleHealthData, insertAIInsight, getLatestAIInsight, getAIInsightByDate } from "../repos/healthMetric.repo.js";
+import { callSelfEvolutionAI } from "./aiClient.js";
+
+function getCurrentTimeInVietnam() {
+  const now = new Date();
+  const vnTimeStr = now.toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" });
+  return new Date(vnTimeStr);
+}
+
+function getVNDateString(dateObj) {
+  const y = dateObj.getFullYear();
+  const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const d = String(dateObj.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
 
 export const handleGetMetrics = async () => {
   const data = await getAllHealthMetrics();
@@ -34,7 +48,41 @@ export const handleSaveData = async (user, body) => {
     nguoidung_id: nguoiDungId,
     thietbi_id,
   });
-  return { success: true, message: "Đã lưu dữ liệu sức khỏe" };
+
+  const nowVN = getCurrentTimeInVietnam();
+  const hour = nowVN.getHours();
+  const today = getVNDateString(nowVN);
+
+  if (hour < 9) {
+    return { 
+      success: true, 
+      message: "Đã lưu dữ liệu, AI sẽ cập nhật sau 9h"
+    };
+  }
+
+  // Sau 9h
+  const existingInsight = await getAIInsightByDate(nguoiDungId, today);
+  if (existingInsight) {
+    return { 
+      success: true, 
+      message: "Đã lưu dữ liệu sức khỏe",
+      ai_evaluation: existingInsight
+    };
+  }
+
+  // Gọi AI Inference lấy dự đoán
+  const aiAnalysis = await callSelfEvolutionAI(nguoiDungId, body);
+  console.log("[handleSaveData] AI response status:", aiAnalysis?.status, "user:", nguoiDungId);
+
+  if (aiAnalysis && aiAnalysis.status) {
+    await insertAIInsight(nguoiDungId, aiAnalysis, today);
+  }
+
+  return { 
+    success: true, 
+    message: "Đã lưu dữ liệu sức khỏe",
+    ai_evaluation: aiAnalysis
+  };
 };
 
 export const handleGetLatestDeviceData = async (deviceId) => {
@@ -64,5 +112,17 @@ export const handleGetHistory = async (deviceId, metricId) => {
 export const handleGetReport = async (user, quanHeId, type) => {
   const userId = user?.NguoiDung_ID || user?.nguoidung_id;
   const data = await getHealthReport(userId, quanHeId, type);
+  return { success: true, data };
+};
+
+export const handleGetLatestAIInsight = async (user) => {
+  const nguoiDungId = user?.NguoiDung_ID || user?.nguoidung_id;
+  if (!nguoiDungId) throw new Error("Chưa đăng nhập");
+
+  const data = await getLatestAIInsight(nguoiDungId);
+  if (!data) {
+    return { success: false, message: "AI chưa cập nhật (sau 9h)" };
+  }
+
   return { success: true, data };
 };
