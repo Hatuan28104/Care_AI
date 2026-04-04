@@ -12,22 +12,22 @@ class SelfEvolutionService:
 
     def evaluate_health_rule_based(self, f: dict) -> str:
         if f["sleep_diff"] < -1 or f["hr_diff"] > 10 or f["spo2_diff"] < -2:
-            return "bad"
+            return "xấu"
         if f["steps_diff"] > 1000 and f["sleep_diff"] > 0 and f["hrv_diff"] > 5:
-            return "good"
-        return "normal"
+            return "tốt"
+        return "bình thường"
 
     def build_response_msg(self, status: str) -> dict:
         messages = {
-            "bad": {
+            "xấu": {
                 "message": "Trạng thái hôm nay có vẻ đang mệt mỏi",
                 "advice": "Hãy thư giãn sớm, cố gắng ngủ đủ giấc và theo dõi sức khỏe nhé!"
             },
-            "good": {
+            "tốt": {
                 "message": "Phong độ hôm nay vô cùng tuyệt vời",
                 "advice": "Cơ thể bạn đang rất dồi dào năng lượng. Hãy tiếp tục duy trì!"
             },
-            "normal": {
+            "bình thường": {
                 "message": "Mọi chỉ số đều đang duy trì ổn định",
                 "advice": "Nhớ đi bộ nhẹ nhàng và nạp thêm đủ nước cho ngày dài nhé."
             }
@@ -53,7 +53,7 @@ class SelfEvolutionService:
             if self.use_model:
                 X = [[f.get(col, 0) for col in self.features_cols]]
                 result = self.model.predict(X)[0]
-                status = ["bad", "normal", "good"][result]
+                status = ["xấu", "bình thường", "tốt"][result]
             else:
                 status = self.evaluate_health_rule_based(f)
 
