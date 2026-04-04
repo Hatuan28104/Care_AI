@@ -1,4 +1,5 @@
 import { getAllHealthMetrics, createHealthMetric, getLatestHealthDataByDevice, getLatestHealthDataByUser, getHealthHistory, getHealthHistoryByUser, getHealthReport, ensureDeviceForUser, saveMultipleHealthData, insertAIInsight, getLatestAIInsight, getAIInsightByDate } from "../repos/healthMetric.repo.js";
+import { sendNotification } from "../repos/notification.repo.js";
 import { callSelfEvolutionAI } from "./aiClient.js";
 
 function getCurrentTimeInVietnam() {
@@ -63,6 +64,9 @@ export const handleSaveData = async (user, body) => {
   // Sau 9h
   const existingInsight = await getAIInsightByDate(nguoiDungId, today);
   if (existingInsight) {
+    // Thông báo lại kết quả hiện tại
+    await createAiNotification(nguoiDungId, existingInsight);
+    
     return { 
       success: true, 
       message: "Đã lưu dữ liệu sức khỏe",
@@ -76,6 +80,8 @@ export const handleSaveData = async (user, body) => {
 
   if (aiAnalysis && aiAnalysis.status) {
     await insertAIInsight(nguoiDungId, aiAnalysis, today);
+    // Tự động tạo thông báo kết quả AI mới
+    await createAiNotification(nguoiDungId, aiAnalysis);
   }
 
   return { 
@@ -83,6 +89,25 @@ export const handleSaveData = async (user, body) => {
     message: "Đã lưu dữ liệu sức khỏe",
     ai_evaluation: aiAnalysis
   };
+};
+
+/**
+ * Tạo thông báo từ kết quả AI
+ */
+export const createAiNotification = async (userId, aiEvaluation) => {
+  if (!aiEvaluation) return;
+
+  const { message, status, advice } = aiEvaluation;
+
+  const title = "Kết quả phân tích sức khỏe";
+  const body = `${message}\n\nMức độ: ${status}\nKhuyến nghị: ${advice}`;
+
+  try {
+    await sendNotification(userId, title, body, 1);
+    console.log("[Notification] AI alert sent to user:", userId);
+  } catch (err) {
+    console.error("[Notification] Failed to send AI alert:", err.message);
+  }
 };
 
 export const handleGetLatestDeviceData = async (deviceId) => {

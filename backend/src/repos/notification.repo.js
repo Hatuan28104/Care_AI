@@ -104,7 +104,7 @@ export async function sendNotification(userId, title, body, level = 1) {
       .select("token")
       .eq("nguoidung_id", userId);
 
-    const selfTitle = mapSelfTitle(level);
+    const selfTitle = title || mapSelfTitle(level);
 
     for (let t of userTokens || []) {
       await sendFCM(db, t.token, selfTitle, body);
