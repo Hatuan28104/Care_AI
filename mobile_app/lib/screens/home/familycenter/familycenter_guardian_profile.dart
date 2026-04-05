@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:Care_AI/api/family_api.dart';
 import 'familycenter_configure_permissions.dart';
 import 'package:Care_AI/models/tr.dart';
+import 'package:Care_AI/services/time_service.dart';
 
 class GuardianProfile extends StatefulWidget {
   final String quanHeId;
@@ -42,14 +43,6 @@ class _GuardianProfileState extends State<GuardianProfile> {
   }
 
   // ================= FORMAT HELPERS =================
-  String _formatDate(String? iso) {
-    if (iso == null || iso.isEmpty) return '';
-    final d = DateTime.parse(iso);
-    return '${d.day.toString().padLeft(2, '0')}/'
-        '${d.month.toString().padLeft(2, '0')}/'
-        '${d.year}';
-  }
-
   String _genderText(dynamic g) {
     if (g == true) return context.tr.male;
     if (g == false) return context.tr.female;
@@ -138,9 +131,9 @@ class _GuardianProfileState extends State<GuardianProfile> {
       child: Column(
         children: [
           _infoItem(context.tr.fullName, data?['tennd']),
-          _infoItem(context.tr.birthDate, _formatDate(data?['ngaysinh'])),
+          _infoItem(context.tr.birthDate, TimeService.formatDOB(data?['ngaysinh'] ?? '')),
           _infoItem(context.tr.gender, _genderText(data?['gioitinh'])),
-          _infoItem(context.tr.joinDate, _formatDate(data?['ngaybatdau'])),
+          _infoItem(context.tr.joinDate, TimeService.formatDate(data?['ngaybatdau'] ?? '')),
           _permissionItem(context),
         ],
       ),

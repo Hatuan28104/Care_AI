@@ -3,6 +3,7 @@ import 'package:Care_AI/api/health_api.dart';
 import 'package:Care_AI/models/metric_config.dart';
 import 'package:Care_AI/widgets/app_components.dart';
 import 'package:Care_AI/models/tr.dart';
+import 'package:Care_AI/services/time_service.dart';
 
 const TextStyle _axisTextStyle = TextStyle(
   fontSize: 11,
@@ -107,8 +108,8 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
       double? latest;
 
       data.sort((a, b) {
-        final t1 = DateTime.parse(a['thoigiancapnhat']);
-        final t2 = DateTime.parse(b['thoigiancapnhat']);
+        final t1 = TimeService.toLocal(a['thoigiancapnhat']);
+        final t2 = TimeService.toLocal(b['thoigiancapnhat']);
         return t2.compareTo(t1);
       });
 
@@ -165,8 +166,7 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
         final raw = e['thoigiancapnhat'];
         if (raw == null) continue;
 
-        final t = DateTime.tryParse(raw.toString())?.toLocal();
-        if (t == null) continue;
+        final t = TimeService.toLocal(raw.toString());
 
         String key;
 

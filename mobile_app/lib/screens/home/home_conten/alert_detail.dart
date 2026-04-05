@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:Care_AI/widgets/app_components.dart';
 import 'package:Care_AI/models/tr.dart';
+import 'package:Care_AI/services/time_service.dart';
 
 class AlertMessageDetail extends StatelessWidget {
   const AlertMessageDetail({
     super.key,
     required this.title,
     required this.detail,
-    required this.time,
+    required this.thoigian,
   });
 
   final String title;
   final String detail;
-  final String time;
+  final String thoigian;
 
   Color _getBorderColor(String title, String detail) {
     final text = (title + " " + detail).toLowerCase();
@@ -154,7 +155,7 @@ class AlertMessageDetail extends StatelessWidget {
                         _buildInfoRow(
                           icon: Icons.access_time,
                           label: context.tr.time,
-                          content: Text(time),
+                          content: Text(TimeService.formatFull(thoigian)),
                         ),
 
                         _buildInfoRow(

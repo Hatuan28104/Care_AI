@@ -227,7 +227,12 @@ export async function getChatHistory(userId) {
 
   if (error) throw error;
 
-  return data;
+  return (data || []).map(item => ({
+    ...item,
+    lancuoituongtac: item.lancuoituongtac
+      ? new Date(item.lancuoituongtac).toISOString()
+      : "",
+  }));
 }
 
 /* =========================
@@ -245,7 +250,12 @@ export async function getMessages(hoiThoaiId) {
 
   if (error) throw error;
 
-  return data;
+  return (data || []).map(item => ({
+    ...item,
+    thoigiangui: item.thoigiangui
+      ? new Date(item.thoigiangui).toISOString()
+      : "",
+  }));
 }
 /* =========================
    GET CONVERSATIONS (DASHBOARD)

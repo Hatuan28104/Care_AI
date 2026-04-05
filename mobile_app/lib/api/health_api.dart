@@ -68,12 +68,7 @@ class HealthApi {
 
     return {
       "giatri": raw["giatri"],
-      "thoigiancapnhat": raw["thoigiancapnhat"] != null
-          ? DateTime.parse(raw["thoigiancapnhat"])
-              .toLocal()
-              .toString()
-              .substring(0, 16)
-          : "",
+      "thoigiancapnhat": (raw["thoigiancapnhat"] ?? "").toString(),
       "tenchiso": (metric["tenchiso"] ?? raw["tenchiso"] ?? "").toString(),
       "donvido": (metric["donvido"] ?? raw["donvido"] ?? "").toString(),
       "loaichiso_id":

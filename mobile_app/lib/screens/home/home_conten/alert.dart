@@ -7,6 +7,7 @@ import 'package:Care_AI/widgets/common_confirm_dialog.dart';
 import 'package:Care_AI/api/alert_api.dart';
 import 'package:Care_AI/widgets/app_components.dart';
 import 'alert_detail.dart';
+import 'package:Care_AI/services/time_service.dart';
 
 class AlertScreen extends StatefulWidget {
   const AlertScreen({super.key});
@@ -64,6 +65,9 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
       if (!mounted) return;
 
       setState(() {
+        // Sort Newest First (UTC ISO string comparison works fine)
+        data.sort((a, b) => b["thoigian"].toString().compareTo(a["thoigian"].toString()));
+
         _alerts.clear();
         _alerts.addAll(
           data.map(
@@ -72,7 +76,7 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
               icon: Icons.warning_amber_rounded,
               iconColor: Colors.red,
               title: (e["tieude"] ?? "Thông báo").toString(),
-              time: _formatTime(e["thoigian"]?.toString()),
+              thoigian: (e["thoigian"] ?? "").toString(),
               detail: (e["noidung"] ?? "").toString(),
               level: e["level"] ?? 1,
               isRead: e["dadoc"] == true,
@@ -89,15 +93,6 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
     }
   }
 
-  String _formatTime(String? iso) {
-    if (iso == null || iso.isEmpty) return "";
-    try {
-      final date = DateTime.parse(iso).toLocal();
-      return "${date.hour}:${date.minute.toString().padLeft(2, '0')}  •  ${date.day}/${date.month}/${date.year}";
-    } catch (_) {
-      return "";
-    }
-  }
 
   void _syncBadge() {
     final unread = _alerts.where((e) => !e.isRead).length;
@@ -172,10 +167,10 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
         separatorBuilder: (_, __) => const SizedBox(height: 8),
         itemBuilder: (_, i) {
           final item = _alerts[i];
-          final date = item.time.split("•").last.trim();
+          final dateHeader = TimeService.formatDateSmart(item.thoigian);
 
-          final showDate = date != lastDate;
-          lastDate = date;
+          final showDate = dateHeader != lastDate;
+          lastDate = dateHeader;
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -184,7 +179,7 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
                 Padding(
                   padding: const EdgeInsets.only(top: 8, bottom: 4),
                   child: Text(
-                    date,
+                    dateHeader,
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF7A7A7A),
@@ -248,7 +243,7 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
               builder: (_) => AlertMessageDetail(
                 title: item.title,
                 detail: item.detail,
-                time: item.time,
+                thoigian: item.thoigian,
               ),
             ),
           );
@@ -304,7 +299,7 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      item.time.split("•").first,
+                      TimeService.formatTime(item.thoigian),
                       style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ],
@@ -326,7 +321,7 @@ class _AlertItem {
   final IconData icon;
   final Color iconColor;
   final String title;
-  final String time;
+  final String thoigian; // raw ISO
   final String detail;
   final int level;
   bool isRead;
@@ -336,7 +331,7 @@ class _AlertItem {
     required this.icon,
     required this.iconColor,
     required this.title,
-    required this.time,
+    required this.thoigian,
     required this.detail,
     required this.level,
     this.isRead = false,

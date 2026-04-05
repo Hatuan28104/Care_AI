@@ -195,8 +195,7 @@ class AuthApi {
       String timeText = 'Không xác định';
       if (rawTime.isNotEmpty) {
         try {
-          timeText =
-              DateTime.parse(rawTime).toLocal().toString().substring(0, 16);
+          timeText = rawTime; // Trả về raw UTC, UI sẽ format
         } catch (_) {}
       }
       return LoginHistoryItem(

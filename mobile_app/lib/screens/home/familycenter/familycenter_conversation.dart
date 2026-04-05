@@ -4,6 +4,7 @@ import 'package:Care_AI/api/chat_api.dart';
 import 'package:Care_AI/api/family_api.dart';
 import 'package:Care_AI/config/api_config.dart';
 import 'package:Care_AI/widgets/app_components.dart';
+import 'package:Care_AI/services/time_service.dart';
 
 class ConversationScreen extends StatefulWidget {
   final String userId;
@@ -194,17 +195,7 @@ class _ConversationSharingScreenState extends State<ConversationScreen> {
   }
 
   String formatTime(dynamic isoTime) {
-    if (isoTime == null) return "";
-
-    final time = DateTime.parse(isoTime.toString()).toLocal();
-
-    String day = time.day.toString().padLeft(2, '0');
-    String month = time.month.toString().padLeft(2, '0');
-    String year = time.year.toString();
-
-    String hour = time.hour.toString().padLeft(2, '0');
-    String minute = time.minute.toString().padLeft(2, '0');
-
-    return "$day.$month.$year • $hour:$minute";
+    if (isoTime == null || isoTime.toString().isEmpty) return "";
+    return TimeService.formatFull(isoTime.toString());
   }
 }

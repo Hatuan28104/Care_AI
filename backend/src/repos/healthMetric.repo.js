@@ -131,7 +131,12 @@ export async function getLatestHealthDataByDevice(thietBiId) {
     if (!map[key]) map[key] = item;
   }
 
-  return Object.values(map);
+  return Object.values(map).map((item) => ({
+    ...item,
+    thoigiancapnhat: item.thoigiancapnhat
+      ? new Date(item.thoigiancapnhat).toISOString()
+      : "",
+  }));
 }
 export async function getLatestHealthDataByUser(nguoiDungId) {
   const db = getDB();
@@ -163,7 +168,12 @@ export async function getLatestHealthDataByUser(nguoiDungId) {
     }
   }
 
-  return Object.values(map);
+  return Object.values(map).map((item) => ({
+    ...item,
+    thoigiancapnhat: item.thoigiancapnhat
+      ? new Date(item.thoigiancapnhat).toISOString()
+      : "",
+  }));
 }
 /* =========================
    HISTORY
@@ -181,7 +191,12 @@ export async function getHealthHistory(thietBiId, loaiChiSoId) {
 
   if (error) throw error;
 
-  return data;
+  return (data || []).map(item => ({
+    ...item,
+    thoigiancapnhat: item.thoigiancapnhat
+      ? new Date(item.thoigiancapnhat).toISOString()
+      : "",
+  }));
 }
 export async function getHealthHistoryByUser(
   nguoiDungId,
@@ -224,7 +239,12 @@ export async function getHealthHistoryByUser(
 
   console.log("HISTORY LENGTH:", filtered.length);
 
-  return filtered;
+  return filtered.map(item => ({
+    ...item,
+    thoigiancapnhat: item.thoigiancapnhat
+      ? new Date(item.thoigiancapnhat).toISOString()
+      : "",
+  }));
 }
 /* =========================
    REPORT

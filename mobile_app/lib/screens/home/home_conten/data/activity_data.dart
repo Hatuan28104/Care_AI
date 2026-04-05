@@ -3,6 +3,7 @@ import 'package:Care_AI/models/health_icon_mapper.dart';
 import 'package:Care_AI/models/tr.dart';
 import 'package:Care_AI/widgets/app_components.dart';
 import 'package:Care_AI/api/health_api.dart';
+import 'package:Care_AI/services/time_service.dart';
 import 'metric_item.dart';
 import 'metric_detail.dart';
 import 'dart:async';
@@ -87,8 +88,8 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
       // Sort newest first
       data.sort((a, b) {
         try {
-          final timeA = DateTime.parse((a['thoigiancapnhat'] ?? '').toString());
-          final timeB = DateTime.parse((b['thoigiancapnhat'] ?? '').toString());
+          final timeA = TimeService.toLocal((a['thoigiancapnhat'] ?? '').toString());
+          final timeB = TimeService.toLocal((b['thoigiancapnhat'] ?? '').toString());
           return timeB.compareTo(timeA);
         } catch (_) {
           return 0;
@@ -129,11 +130,8 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
               item.value = '--';
             }
 
-            /// 👉 time
             try {
-              final t = DateTime.parse(m['thoigiancapnhat']).toLocal();
-              item.time =
-                  "${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}";
+              item.time = TimeService.formatTime(m['thoigiancapnhat']);
             } catch (_) {
               item.time = '--:--';
             }

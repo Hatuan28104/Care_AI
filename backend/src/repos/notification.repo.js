@@ -205,7 +205,10 @@ export async function getAlerts(userId) {
 
   if (error) throw error;
 
-  return data;
+  return (data || []).map(item => ({
+    ...item,
+    thoigian: item.thoigian ? new Date(item.thoigian).toISOString() : ""
+  }));
 }
 export async function getAdminAlerts() {
   const db = getDB();
@@ -224,6 +227,6 @@ export async function getAdminAlerts() {
 
   return (data || []).map(item => ({
     ...item,
-    thoigian: item.thoigiancanhbao
+    thoigian: item.thoigiancanhbao ? new Date(item.thoigiancanhbao).toISOString() : ""
   }));
 }

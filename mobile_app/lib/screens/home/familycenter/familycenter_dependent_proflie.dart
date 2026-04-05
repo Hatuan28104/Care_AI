@@ -4,6 +4,7 @@ import 'package:Care_AI/config/api_config.dart';
 import 'report_detail_screen.dart';
 import 'package:Care_AI/models/tr.dart';
 import 'shared_conversation_viewer.dart';
+import 'package:Care_AI/services/time_service.dart';
 
 class DependentProfileScreen extends StatefulWidget {
   final String quanHeId;
@@ -68,17 +69,6 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
     }
   }
   // ================= FORMAT =================
-
-  String _formatDate(String? iso) {
-    if (iso == null || iso.isEmpty) return '';
-
-    final d = DateTime.parse(iso);
-
-    return '${d.day.toString().padLeft(2, '0')}/'
-        '${d.month.toString().padLeft(2, '0')}/'
-        '${d.year}';
-  }
-
   String _genderText(dynamic g) {
     if (g == true) return context.tr.male;
     if (g == false) return context.tr.female;
@@ -86,18 +76,8 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
   }
 
   String formatTime(dynamic isoTime) {
-    if (isoTime == null) return "";
-
-    final time = DateTime.parse(isoTime.toString()).toLocal();
-
-    String day = time.day.toString().padLeft(2, '0');
-    String month = time.month.toString().padLeft(2, '0');
-    String year = time.year.toString();
-
-    String hour = time.hour.toString().padLeft(2, '0');
-    String minute = time.minute.toString().padLeft(2, '0');
-
-    return "$day.$month.$year • $hour:$minute";
+    if (isoTime == null || isoTime.toString().isEmpty) return "";
+    return TimeService.formatFull(isoTime.toString());
   }
 
   @override
@@ -185,9 +165,9 @@ class _DependentProfileScreenState extends State<DependentProfileScreen> {
         ),
         const SizedBox(height: 12),
         _infoItem(context.tr.fullName, data?['tennd'] ?? ""),
-        _infoItem(context.tr.birthDate, _formatDate(data?['ngaysinh'])),
+        _infoItem(context.tr.birthDate, TimeService.formatDOB(data?['ngaysinh'] ?? '')),
         _infoItem(context.tr.gender, _genderText(data?['gioitinh'])),
-        _infoItem(context.tr.joinDate, _formatDate(data?['ngaybatdau'])),
+        _infoItem(context.tr.joinDate, TimeService.formatDate(data?['ngaybatdau'] ?? '')),
         const SizedBox(height: 8),
         Text(
           context.tr.report,

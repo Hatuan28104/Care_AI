@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:Care_AI/api/health_api.dart';
 import 'package:Care_AI/models/health_icon_mapper.dart';
 import 'package:Care_AI/models/tr.dart';
+import 'package:Care_AI/services/time_service.dart';
 import 'package:Care_AI/widgets/app_components.dart';
 import 'metric_item.dart';
 import 'metric_detail.dart';
@@ -87,8 +88,8 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
       // Sort newest first
       data.sort((a, b) {
         try {
-          final timeA = DateTime.parse((a['thoigiancapnhat'] ?? '').toString());
-          final timeB = DateTime.parse((b['thoigiancapnhat'] ?? '').toString());
+          final timeA = TimeService.toLocal((a['thoigiancapnhat'] ?? '').toString());
+          final timeB = TimeService.toLocal((b['thoigiancapnhat'] ?? '').toString());
           return timeB.compareTo(timeA);
         } catch (_) {
           return 0;
@@ -129,9 +130,7 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
             }
 
             try {
-              final t = DateTime.parse(m['thoigiancapnhat']).toLocal();
-              item.time =
-                  "${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}";
+              item.time = TimeService.formatTime(m['thoigiancapnhat']);
             } catch (_) {
               item.time = '--:--';
             }

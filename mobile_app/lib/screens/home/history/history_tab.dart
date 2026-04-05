@@ -5,6 +5,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:Care_AI/models/tr.dart';
 import 'package:Care_AI/widgets/common_confirm_dialog.dart';
 import 'package:Care_AI/config/api_config.dart';
+import 'package:Care_AI/services/time_service.dart';
 
 class HistoryTab extends StatefulWidget {
   final String userId;
@@ -36,6 +37,11 @@ class _HistoryTabState extends State<HistoryTab> {
       if (!mounted) return;
 
       setState(() {
+        // Sort newest conversation first
+        data.sort((a, b) => (b["lancuoituongtac"] ?? "")
+            .toString()
+            .compareTo((a["lancuoituongtac"] ?? "").toString()));
+
         histories = List<Map<String, dynamic>>.from(data);
         loading = false;
       });
@@ -247,18 +253,8 @@ class _HistoryTabState extends State<HistoryTab> {
   /* ================= FORMAT TIME ================= */
 
   String formatTime(dynamic isoTime) {
-    if (isoTime == null) return "";
-
-    final time = DateTime.parse(isoTime.toString()).toLocal();
-
-    String day = time.day.toString().padLeft(2, '0');
-    String month = time.month.toString().padLeft(2, '0');
-    String year = time.year.toString();
-
-    String hour = time.hour.toString().padLeft(2, '0');
-    String minute = time.minute.toString().padLeft(2, '0');
-
-    return "$day.$month.$year • $hour:$minute";
+    if (isoTime == null || isoTime.toString().isEmpty) return "";
+    return TimeService.formatFull(isoTime.toString());
   }
 
   /* ================= FIX IMAGE URL ================= */
