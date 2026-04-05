@@ -110,9 +110,15 @@ export const createDailyCompareNotification = async (userId, aiEvaluation) => {
   if (!aiEvaluation || !aiEvaluation.compare) return;
 
   const status = aiEvaluation.status || "bình thường";
+  const message = aiEvaluation.message || "";
+  const advice = aiEvaluation.advice || "";
+  const compareText = formatCompare(aiEvaluation.compare);
+
   const titleSelf = mapCompareTitleUser(status);
   const titleGuardian = mapCompareTitleGuardian(status);
-  const body = formatCompare(aiEvaluation.compare);
+
+  // 🔥 NEW: Gộp message, compare và advice vào body
+  const body = `${message}\n\n${compareText}\n\n💡 Lời khuyên: ${advice}`.trim();
 
   try {
     await sendNotification(userId, titleSelf, body, 1, 'DAILY_COMPARE', titleGuardian);
@@ -143,6 +149,14 @@ export const handleGetLatestUserData = async (user) => {
   if (!nguoiDungId) throw new Error("Chưa đăng nhập");
 
   const data = await getLatestHealthDataByUser(nguoiDungId);
+  return { success: true, data };
+};
+
+export const handleGetLatestAIInsight = async (user) => {
+  const nguoiDungId = user?.NguoiDung_ID || user?.nguoidung_id;
+  if (!nguoiDungId) throw new Error("Chưa đăng nhập");
+
+  const data = await getLatestAIInsight(nguoiDungId);
   return { success: true, data };
 };
 
