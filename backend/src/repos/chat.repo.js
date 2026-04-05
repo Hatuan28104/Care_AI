@@ -148,7 +148,7 @@ export async function handleChat(message, userId, digitalId, hoiThoaiId) {
       tinnhan_id: userMsg.tinnhan_id,
     });
 
-    await sendNotification(userId, "Cảnh báo", notiBody, mucDoMax);
+    await sendNotification(userId, null, notiBody, mucDoMax);
   }
 
   /* ===== LẤY HISTORY ===== */
