@@ -30,7 +30,7 @@ async function insertNoti(db, userId, title, body, type = 'ALERT') {
   )
     .toString()
     .padStart(3, "0")}`;
-  
+
   const { error } = await db
     .from("notifications")
     .insert({
@@ -197,7 +197,8 @@ export async function getAlerts(userId) {
       tieude,
       noidung,
       thoigian,
-      dadoc
+      dadoc,
+      type 
     `)
     .eq("nguoidung_id", userId)
     .order("thoigian", { ascending: false });
