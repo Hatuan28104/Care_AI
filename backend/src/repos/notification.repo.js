@@ -70,7 +70,7 @@ async function sendFCM(db, token, title, body) {
 /* =========================
    SEND NOTIFICATION (USER + GUARDIAN)
 ========================= */
-export async function sendNotification(userId, title, body, level = 1, type = 'ALERT') {
+export async function sendNotification(userId, title, body, level = 1, type = 'ALERT', titleGuardian = null) {
   try {
     const db = getDB();
 
@@ -105,7 +105,7 @@ export async function sendNotification(userId, title, body, level = 1, type = 'A
       .select("token")
       .eq("nguoidung_id", userId);
 
-    const selfTitle = mapSelfTitle(level);
+    const selfTitle = (type === 'ALERT') ? mapSelfTitle(level) : (title || 'Thông báo');
 
     for (let t of userTokens || []) {
       await sendFCM(db, t.token, selfTitle, body);
@@ -134,7 +134,7 @@ export async function sendNotification(userId, title, body, level = 1, type = 'A
     // ===== 5. SEND TO GUARDIANS =====
     for (let guardianId of guardianIds) {
 
-      const gTitle = mapGuardianTitle(level);
+      const gTitle = (type === 'ALERT') ? mapGuardianTitle(level) : (titleGuardian || title || 'Thông báo');
       const gBody = `${userName}: "${body}"`;
 
       const { data: tokens } = await db

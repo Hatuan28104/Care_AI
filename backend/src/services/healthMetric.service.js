@@ -96,14 +96,38 @@ export const handleSaveData = async (user, body) => {
   };
 };
 
+function mapCompareTitleUser(status) {
+  switch (status) {
+    case "tốt":
+      return "Chỉ số hôm nay tốt hơn hôm qua";
+    case "xấu":
+      return "Chỉ số hôm nay giảm so với hôm qua";
+    default:
+      return "Tình trạng của bạn đang ổn định";
+  }
+}
+
+function mapCompareTitleGuardian(status) {
+  switch (status) {
+    case "tốt":
+      return "Chỉ số của người thân cải thiện";
+    case "xấu":
+      return "Chỉ số của người thân giảm";
+    default:
+      return "Tình trạng của người thân ổn định";
+  }
+}
+
 export const createDailyCompareNotification = async (userId, aiEvaluation) => {
   if (!aiEvaluation || !aiEvaluation.compare) return;
 
-  const title = "So sánh chỉ số hàng ngày";
+  const status = aiEvaluation.status || "bình thường";
+  const titleSelf = mapCompareTitleUser(status);
+  const titleGuardian = mapCompareTitleGuardian(status);
   const body = formatCompare(aiEvaluation.compare);
 
   try {
-    await sendNotification(userId, title, body, 1, 'DAILY_COMPARE');
+    await sendNotification(userId, titleSelf, body, 1, 'DAILY_COMPARE', titleGuardian);
   } catch (err) {
     console.error(err.message);
   }
