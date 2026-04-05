@@ -70,8 +70,8 @@ async function sendFCM(db, token, title, body) {
 /* =========================
    SEND NOTIFICATION (USER + GUARDIAN)
 ========================= */
-export async function sendNotification(userId, title, body, level = 1, type = 'ALERT') {
-  try {
+export async function sendNotification(userId, body, level = 1, type = 'ALERT') {
+    try {
     const db = getDB();
 
     // ===== 1. CHECK SETTING =====
@@ -105,11 +105,10 @@ export async function sendNotification(userId, title, body, level = 1, type = 'A
       .select("token")
       .eq("nguoidung_id", userId);
 
-    const selfTitle = title || mapSelfTitle(level);
-
-    for (let t of userTokens || []) {
-      await sendFCM(db, t.token, selfTitle, body);
-    }
+    const selfTitle = mapSelfTitle(level);
+      for (let t of userTokens || []) {
+        await sendFCM(db, t.token, selfTitle, body);
+      }
 
     await insertNoti(db, userId, selfTitle, body, type);
     // ===== 4. GET GUARDIANS =====

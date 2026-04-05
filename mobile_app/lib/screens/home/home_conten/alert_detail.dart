@@ -14,12 +14,20 @@ class AlertMessageDetail extends StatelessWidget {
   final String detail;
   final String time;
 
-  Color _getBorderColor(String title) {
-    final t = title.toLowerCase();
+  Color _getBorderColor(String title, String detail) {
+    final text = (title + " " + detail).toLowerCase();
 
-    if (t.contains("nguy hiểm")) return Colors.red;
-    if (t.contains("áp lực")) return const Color(0xFFE6EA00);
-    if (t.contains("buồn")) return const Color(0xFF139D4A);
+    if (text.contains("xấu") || text.contains("nguy hiểm")) {
+      return Colors.red;
+    }
+
+    if (text.contains("bình thường") || text.contains("ổn định")) {
+      return const Color(0xFFE6EA00);
+    }
+
+    if (text.contains("tốt") || text.contains("tuyệt vời")) {
+      return const Color(0xFF139D4A);
+    }
 
     return Colors.grey.shade300;
   }
@@ -57,9 +65,9 @@ class AlertMessageDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final borderColor = _getBorderColor(title);
-
+    final borderColor = _getBorderColor(title, detail);
     final parts = detail.split(":");
+    final isCompare = detail.toLowerCase().contains("so sánh");
 
     String sender = "";
     String message = detail;
@@ -107,7 +115,9 @@ class AlertMessageDetail extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Icon(
-                                Icons.chat_bubble_outline,
+                                isCompare
+                                    ? Icons.show_chart
+                                    : Icons.chat_bubble_outline,
                                 color: borderColor,
                                 size: 22,
                               ),

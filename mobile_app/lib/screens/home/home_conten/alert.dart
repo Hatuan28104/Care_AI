@@ -108,14 +108,20 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
     });
   }
 
-  Color _getBorderColor(String title) {
-    final t = title.toLowerCase();
+  Color _getBorderColor(String title, String detail) {
+    final text = (title + " " + detail).toLowerCase();
 
-    if (t.contains("nguy hiểm")) return Colors.red;
+    if (text.contains("xấu") || text.contains("nguy hiểm")) {
+      return Colors.red;
+    }
 
-    if (t.contains("áp lực")) return const Color(0xFFE6EA00);
+    if (text.contains("bình thường") || text.contains("ổn định")) {
+      return const Color(0xFFE6EA00);
+    }
 
-    if (t.contains("buồn")) return const Color(0xFF139D4A);
+    if (text.contains("tốt") || text.contains("tuyệt vời")) {
+      return const Color(0xFF139D4A);
+    }
 
     return Colors.grey.shade300;
   }
@@ -196,8 +202,7 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
   /* ================= ITEM ================= */
 
   Widget _tile(BuildContext context, _AlertItem item) {
-    final borderColor = _getBorderColor(item.title);
-
+    final borderColor = _getBorderColor(item.title, item.detail);
     return Slidable(
       key: ValueKey(item.id),
       endActionPane: ActionPane(
@@ -280,7 +285,11 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
           ),
           child: Row(
             children: [
-              Icon(item.icon, color: Colors.red, size: 20),
+              Icon(
+                item.icon,
+                color: borderColor,
+                size: 20,
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(

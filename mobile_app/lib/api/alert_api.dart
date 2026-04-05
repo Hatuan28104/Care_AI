@@ -54,6 +54,7 @@ class AlertApi {
           "noidung": row["noidung"]?.toString() ?? "",
           "thoigian": row["thoigian"]?.toString() ?? "",
           "dadoc": row["dadoc"] == true,
+          "type": row["type"]?.toString() ?? "ALERT",
         };
       }).toList();
     } catch (e) {
