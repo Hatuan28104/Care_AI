@@ -1,19 +1,8 @@
 import { getAllHealthMetrics, createHealthMetric, getLatestHealthDataByDevice, getLatestHealthDataByUser, getHealthHistory, getHealthHistoryByUser, getHealthReport, ensureDeviceForUser, saveMultipleHealthData, insertAIInsight, getLatestAIInsight, getAIInsightByDate } from "../repos/healthMetric.repo.js";
 import { sendNotification } from "../repos/notification.repo.js";
 import { callSelfEvolutionAI } from "./aiClient.js";
+import { getCurrentVNHour, getVNDateString } from "../utils/time.js";
 
-function getCurrentTimeInVietnam() {
-  const now = new Date();
-  const vnTimeStr = now.toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" });
-  return new Date(vnTimeStr);
-}
-
-function getVNDateString(dateObj) {
-  const y = dateObj.getFullYear();
-  const m = String(dateObj.getMonth() + 1).padStart(2, '0');
-  const d = String(dateObj.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
 
 export const handleGetMetrics = async () => {
   const data = await getAllHealthMetrics();
@@ -52,9 +41,8 @@ export const handleSaveData = async (user, body) => {
     thietbi_id,
   });
 
-  const nowVN = getCurrentTimeInVietnam();
-  const hour = nowVN.getHours();
-  const today = getVNDateString(nowVN);
+  const vnHour = getCurrentVNHour();
+  const today = getVNDateString();
 
   // 🔥 check đã có AI hôm nay chưa
   const existingInsight = await getAIInsightByDate(nguoiDungId, today);
@@ -62,7 +50,7 @@ export const handleSaveData = async (user, body) => {
   // =========================
   // CASE 1: trước 9h
   // =========================
-  if (hour < 9) {
+  if (vnHour < 9) {
     return {
       success: true,
       message: "Đã lưu dữ liệu, AI sẽ cập nhật sau 9h"

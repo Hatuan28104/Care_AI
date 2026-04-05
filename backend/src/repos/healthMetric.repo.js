@@ -1,4 +1,5 @@
 import { getDB } from "../config/db.js";
+import { getVNStartOfDayUTC, getVNEndOfDayUTC } from "../utils/time.js";
 
 /* =========================
    HELPER: normalize
@@ -198,21 +199,22 @@ export async function getHealthHistoryByUser(
     .limit(200);
 
   if (error) throw error;
+  if (!data) return [];
 
+  let fromDate;
   const now = new Date();
-  const nowVN = new Date(
-    new Date().toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" })
-  );
-  let fromDate = new Date(nowVN);
 
   if (range === "d") {
-    fromDate = new Date(nowVN.getTime() - 24 * 60 * 60 * 1000);
+    fromDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
   } else if (range === "w") {
-    fromDate = new Date(nowVN.getTime() - 7 * 24 * 60 * 60 * 1000);
+    fromDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
   } else if (range === "m") {
-    fromDate = new Date(nowVN.getTime() - 30 * 24 * 60 * 60 * 1000);
+    fromDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
   } else if (range === "m6") {
-    fromDate.setMonth(nowVN.getMonth() - 6);
+    fromDate = new Date(now.getTime());
+    fromDate.setUTCMonth(now.getUTCMonth() - 6);
+  } else {
+    fromDate = new Date(0); // All time
   }
 
   const filtered = data.filter((d) => {
@@ -265,15 +267,15 @@ export async function getHealthReport(userId, quanHeId, type) {
   // 3. time range
   let fromDate = new Date();
   if (["day", "d"].includes(type)) {
-    fromDate.setDate(fromDate.getDate() - 1);
+    fromDate.setUTCDate(fromDate.getUTCDate() - 1);
   }
 
   if (["week", "w"].includes(type)) {
-    fromDate.setDate(fromDate.getDate() - 7);
+    fromDate.setUTCDate(fromDate.getUTCDate() - 7);
   }
 
   if (["month", "m"].includes(type)) {
-    fromDate.setDate(fromDate.getDate() - 30);
+    fromDate.setUTCDate(fromDate.getUTCDate() - 30);
   }
 
   // 4. query data
@@ -356,19 +358,11 @@ export async function saveMultipleHealthData(payload) {
 
 
   // =========================
-  // TIME VN FIX
+  // TIME UTC BOUNDARIES (VN DAY)
   // =========================
-  const now = new Date();
-
-  const nowVN = new Date(
-    new Date().toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" })
-  );
-  const today = nowVN.toISOString().split("T")[0];
-
-  const nowISO = now.toISOString();
-
-  const startOfDayVN = new Date(today + "T00:00:00+07:00").toISOString();
-  const endOfDayVN = new Date(today + "T23:59:59+07:00").toISOString();
+  const nowISO = new Date().toISOString();
+  const startOfDayVN = getVNStartOfDayUTC();
+  const endOfDayVN = getVNEndOfDayUTC();
 
   const inserts = [];
 
@@ -497,8 +491,8 @@ export async function getAIInsightByDate(nguoidung_id, dateStr) {
   const db = getDB();
 
   // Filter by created_at date range (table has no 'date' column)
-  const startOfDay = `${dateStr}T00:00:00+07:00`;
-  const endOfDay = `${dateStr}T23:59:59+07:00`;
+  const startOfDay = getVNStartOfDayUTC(new Date(dateStr));
+  const endOfDay = getVNEndOfDayUTC(new Date(dateStr));
 
   const { data, error } = await db
     .from("ai_insights")
