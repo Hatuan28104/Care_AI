@@ -200,8 +200,9 @@ export async function getHealthHistoryByUser(
   if (error) throw error;
 
   const now = new Date();
-  const nowVN = new Date(now.getTime() + 7 * 60 * 60 * 1000);
-
+  const nowVN = new Date(
+    new Date().toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" })
+  );
   let fromDate = new Date(nowVN);
 
   if (range === "d") {
@@ -359,8 +360,9 @@ export async function saveMultipleHealthData(payload) {
   // =========================
   const now = new Date();
 
-  const nowVN = new Date(now.getTime() + 7 * 60 * 60 * 1000);
-
+  const nowVN = new Date(
+    new Date().toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" })
+  );
   const today = nowVN.toISOString().split("T")[0];
 
   const nowISO = now.toISOString();

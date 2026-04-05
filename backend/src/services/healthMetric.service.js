@@ -35,6 +35,7 @@ export const handleCreateMetric = async (body) => {
 export const handleDeviceEnsure = async (user) => {
   const nguoiDungId = user?.NguoiDung_ID || user?.nguoidung_id;
   if (!nguoiDungId) throw new Error("Chưa đăng nhập");
+
   const thietBiId = await ensureDeviceForUser(nguoiDungId);
   return { success: true, data: { ThietBi_ID: thietBiId } };
 };
@@ -42,6 +43,7 @@ export const handleDeviceEnsure = async (user) => {
 export const handleSaveData = async (user, body) => {
   const nguoiDungId = user?.NguoiDung_ID || user?.nguoidung_id;
   if (!nguoiDungId) throw new Error("Chưa đăng nhập");
+
   const thietbi_id = body.thietbi_id ?? body.ThietBi_ID ?? null;
 
   await saveMultipleHealthData({
@@ -54,74 +56,46 @@ export const handleSaveData = async (user, body) => {
   const hour = nowVN.getHours();
   const today = getVNDateString(nowVN);
 
+  // 🔥 check đã có AI hôm nay chưa
+  const existingInsight = await getAIInsightByDate(nguoiDungId, today);
+
+  // =========================
+  // CASE 1: trước 9h
+  // =========================
   if (hour < 9) {
-    return { 
-      success: true, 
+    return {
+      success: true,
       message: "Đã lưu dữ liệu, AI sẽ cập nhật sau 9h"
     };
   }
 
-  // Sau 9h
-  const existingInsight = await getAIInsightByDate(nguoiDungId, today);
+  // =========================
+  // CASE 2: sau 9h nhưng đã có rồi
+  // =========================
   if (existingInsight) {
-    // Thông báo lại kết quả hiện tại
-    await createAiNotification(nguoiDungId, existingInsight);
-    
-    if (existingInsight.compare) {
-      await createDailyCompareNotification(nguoiDungId, existingInsight);
-    }
-    
-    return { 
-      success: true, 
-      message: "Đã lưu dữ liệu sức khỏe",
-      ai_evaluation: existingInsight
+    return {
+      success: true,
+      message: "Đã có dữ liệu hôm nay"
     };
   }
 
-  // Gọi AI Inference lấy dự đoán
+  // =========================
+  // CASE 3: sau 9h và CHƯA có → chạy AI
+  // (bao gồm cả data gửi trước 9h nhưng giờ mới mở app)
+  // =========================
   const aiAnalysis = await callSelfEvolutionAI(nguoiDungId, body);
-  console.log("[handleSaveData] AI response status:", aiAnalysis?.status, "user:", nguoiDungId);
 
-  if (aiAnalysis && aiAnalysis.status) {
+  if (aiAnalysis && aiAnalysis.compare) {
     await insertAIInsight(nguoiDungId, aiAnalysis, today);
-    // 1. Thông báo Cảnh báo sức khỏe (ALERT)
-    await createAiNotification(nguoiDungId, aiAnalysis);
-
-    // 2. Thông báo So sánh chỉ số (DAILY_COMPARE) nếu có dữ liệu
-    if (aiAnalysis.compare) {
-      await createDailyCompareNotification(nguoiDungId, aiAnalysis);
-    }
+    await createDailyCompareNotification(nguoiDungId, aiAnalysis);
   }
 
-  return { 
-    success: true, 
-    message: "Đã lưu dữ liệu sức khỏe",
-    ai_evaluation: aiAnalysis
+  return {
+    success: true,
+    message: "Đã lưu dữ liệu sức khỏe"
   };
 };
 
-/**
- * Tạo thông báo từ kết quả AI
- */
-export const createAiNotification = async (userId, aiEvaluation) => {
-  if (!aiEvaluation) return;
-
-  const { message, status, advice } = aiEvaluation;
-
-  const title = "Kết quả phân tích sức khỏe";
-  const body = `${message}\n\nMức độ: ${status}\nKhuyến nghị: ${advice}`;
-
-  try {
-    await sendNotification(userId, title, body, 1, 'ALERT');
-    console.log("[Notification] AI alert sent to user:", userId);
-  } catch (err) {
-    console.error("[Notification] Failed to send AI alert:", err.message);
-  }
-};
-
-/**
- * [NEW] Tạo thông báo so sánh hàng ngày
- */
 export const createDailyCompareNotification = async (userId, aiEvaluation) => {
   if (!aiEvaluation || !aiEvaluation.compare) return;
 
@@ -130,26 +104,21 @@ export const createDailyCompareNotification = async (userId, aiEvaluation) => {
 
   try {
     await sendNotification(userId, title, body, 1, 'DAILY_COMPARE');
-    console.log("[Notification] Daily compare sent to user:", userId);
   } catch (err) {
-    console.error("[Notification] Failed to send daily compare:", err.message);
+    console.error(err.message);
   }
 };
 
-/**
- * [NEW] Format dữ liệu compare thành text
- */
 function formatCompare(compare) {
   if (!compare) return "Không có dữ liệu so sánh.";
-  
   if (typeof compare === 'string') return compare;
 
   const lines = [];
-  for (const [key, value] of Object.entries(compare)) {
-    if (value) lines.push(`${value}`);
+  for (const value of Object.values(compare)) {
+    if (value) lines.push(value);
   }
-  
-  return lines.length > 0 ? lines.join("\n") : "Dữ liệu so sánh ổn định.";
+
+  return lines.length ? lines.join("\n") : "Dữ liệu so sánh ổn định.";
 }
 
 export const handleGetLatestDeviceData = async (deviceId) => {
@@ -160,6 +129,7 @@ export const handleGetLatestDeviceData = async (deviceId) => {
 export const handleGetLatestUserData = async (user) => {
   const nguoiDungId = user?.NguoiDung_ID || user?.nguoidung_id;
   if (!nguoiDungId) throw new Error("Chưa đăng nhập");
+
   const data = await getLatestHealthDataByUser(nguoiDungId);
   return { success: true, data };
 };
@@ -167,6 +137,7 @@ export const handleGetLatestUserData = async (user) => {
 export const handleGetHistoryByUser = async (user, metricId, range) => {
   const nguoiDungId = user?.NguoiDung_ID || user?.nguoidung_id;
   if (!nguoiDungId) throw new Error("Chưa đăng nhập");
+
   const data = await getHealthHistoryByUser(nguoiDungId, metricId, range);
   return { success: true, data };
 };
@@ -179,17 +150,5 @@ export const handleGetHistory = async (deviceId, metricId) => {
 export const handleGetReport = async (user, quanHeId, type) => {
   const userId = user?.NguoiDung_ID || user?.nguoidung_id;
   const data = await getHealthReport(userId, quanHeId, type);
-  return { success: true, data };
-};
-
-export const handleGetLatestAIInsight = async (user) => {
-  const nguoiDungId = user?.NguoiDung_ID || user?.nguoidung_id;
-  if (!nguoiDungId) throw new Error("Chưa đăng nhập");
-
-  const data = await getLatestAIInsight(nguoiDungId);
-  if (!data) {
-    return { success: false, message: "AI chưa cập nhật (sau 9h)" };
-  }
-
   return { success: true, data };
 };
