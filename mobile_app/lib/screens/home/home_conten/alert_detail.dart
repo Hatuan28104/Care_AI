@@ -18,7 +18,7 @@ class AlertMessageDetail extends StatelessWidget {
   Color _getBorderColor(String title, String detail) {
     final text = (title + " " + detail).toLowerCase();
 
-    if (text.contains("xấu") || text.contains("nguy hiểm")) {
+    if (text.contains("nguy hiểm") || text.contains("giảm")) {
       return Colors.red;
     }
 
@@ -26,7 +26,9 @@ class AlertMessageDetail extends StatelessWidget {
       return const Color(0xFFE6EA00);
     }
 
-    if (text.contains("tốt") || text.contains("tuyệt vời")) {
+    if (text.contains("tốt") ||
+        text.contains("tuyệt vời") ||
+        text.contains("cải thiện")) {
       return const Color(0xFF139D4A);
     }
 
@@ -67,19 +69,27 @@ class AlertMessageDetail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final borderColor = _getBorderColor(title, detail);
-    final parts = detail.split(":");
     final isCompare = detail.toLowerCase().contains("so sánh");
 
     String sender = "";
     String message = detail;
 
-    if (parts.length > 1 && parts.first.trim().contains(" ")) {
-      sender = parts.first.trim();
-      message = parts.sublist(1).join(":").replaceAll('"', '').trim();
+    if (detail.trim().startsWith("Người thân:")) {
+      final parts = detail.split(":");
+
+      if (parts.length > 1) {
+        final possibleName = parts[1].trim().split("\n").first.trim();
+
+        if (possibleName.isNotEmpty && possibleName.split(" ").length >= 2) {
+          sender = possibleName;
+
+          message = detail.replaceFirst(RegExp(r"Người thân:.*\n?"), "").trim();
+        }
+      }
     }
 
     return Scaffold(
-      backgroundColor: Color(0xFFF6F6F6),
+      backgroundColor: const Color(0xFFF6F6F6),
       body: SafeArea(
         child: Column(
           children: [
@@ -140,11 +150,12 @@ class AlertMessageDetail extends StatelessWidget {
 
                         Text(
                           context.tr.messageInfo,
-                          style: TextStyle(fontWeight: FontWeight.w600),
+                          style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
 
                         const SizedBox(height: 12),
 
+                        /// ✅ Chỉ hiện khi có tên thật
                         if (sender.isNotEmpty)
                           _buildInfoRow(
                             icon: Icons.person,

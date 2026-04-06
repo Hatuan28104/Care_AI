@@ -1,8 +1,18 @@
 import logging
+from typing import List, Tuple
+
 from core.schema import HealthDataInput, HealthEvaluationResponse
 from core.utils import build_features, compare_daily
 
 logger = logging.getLogger(__name__)
+
+
+STATUS_MAP = {
+    "xau": "xấu",
+    "binh_thuong": "bình thường",
+    "tot": "tốt",
+}
+
 
 class SelfEvolutionService:
     def __init__(self, model_bundle: dict = None):
@@ -10,370 +20,289 @@ class SelfEvolutionService:
         self.features_cols = model_bundle.get("features") if model_bundle else None
         self.use_model = self.model is not None and self.features_cols is not None
 
-    def rule_guardrail(self, current: dict) -> dict:
-        spo2 = current.get("spo2", 100)
-        hr = current.get("heart_rate", 70)
-        sleep = current.get("sleep_hours", 8)
+        self.safe_thresholds = {
+            "spo2": 92.0,
+            "heart_rate": 120.0,
+            "sleep_hours": 4.0,
+        }
+        self.deadband_ratio = 0.03  # ±3%
 
+    # -----------------------------
+    # Utilities
+    # -----------------------------
+    def _to_vi_status(self, status: str) -> str:
+        return STATUS_MAP.get(status, "bình thường")
+
+    def _apply_ema(self, current: dict, history: List[dict], alpha: float = 0.5) -> dict:
+        ema_keys = ["heart_rate", "spo2", "sleep_hours", "hrv"]
+        smoothed = dict(current)
+
+        recent = history[-2:] if history else []
+
+        for key in ema_keys:
+            seq = []
+            for h in recent:
+                val = float(h.get(key, 0) or 0)
+                if val > 0:
+                    seq.append(val)
+
+            cur_val = float(current.get(key, 0) or 0)
+            if cur_val > 0:
+                seq.append(cur_val)
+
+            if not seq:
+                continue
+
+            ema = seq[0]
+            for v in seq[1:]:
+                ema = alpha * v + (1 - alpha) * ema
+            smoothed[key] = ema
+
+        return smoothed
+
+    def _deadband_bounds(self, threshold: float) -> Tuple[float, float]:
+        delta = threshold * self.deadband_ratio
+        return threshold - delta, threshold + delta
+
+    # -----------------------------
+    # Rule layers
+    # -----------------------------
+    def safety_rule(self, current: dict) -> dict:
         reasons = []
-        if spo2 < 92:
-            reasons.append("SpO2 thấp")
-        if hr > 110:
-            reasons.append("Nhịp tim cao")
-        if sleep < 4:
-            reasons.append("Thiếu ngủ nghiêm trọng")
 
-        if reasons:
+        spo2 = float(current.get("spo2", 0) or 0)
+        hr = float(current.get("heart_rate", 0) or 0)
+        sleep = float(current.get("sleep_hours", 0) or 0)
+
+        spo2_low, _ = self._deadband_bounds(self.safe_thresholds["spo2"])
+        _, hr_high = self._deadband_bounds(self.safe_thresholds["heart_rate"])
+        sleep_low, _ = self._deadband_bounds(self.safe_thresholds["sleep_hours"])
+
+        if spo2 > 0 and spo2 < spo2_low:
+            reasons.append(f"SpO2 thấp nguy hiểm ({spo2:.1f} < {spo2_low:.1f})")
+        if hr > hr_high:
+            reasons.append(f"Nhịp tim cao nguy hiểm ({hr:.1f} > {hr_high:.1f})")
+        if sleep > 0 and sleep < sleep_low:
+            reasons.append(f"Thiếu ngủ nghiêm trọng ({sleep:.1f}h < {sleep_low:.1f}h)")
+
+        return {"matched": len(reasons) > 0, "reason": reasons}
+
+    def good_zone_gate(self, current: dict) -> dict:
+        hr = float(current.get("heart_rate", 0) or 0)
+        spo2 = float(current.get("spo2", 0) or 0)
+        sleep = float(current.get("sleep_hours", 0) or 0)
+        hrv = float(current.get("hrv", 0) or 0)
+        steps = float(current.get("steps", 0) or 0)
+
+        conditions = [
+            60 <= hr <= 80,
+            spo2 >= 97,
+            7 <= sleep <= 8.5,
+            hrv >= 40,
+            steps >= 8000,
+        ]
+
+        if sum(conditions) >= 4:
             return {
-                "override": True,
-                "status": "xấu",
-                "reason": "; ".join(reasons),
-                "reasons": reasons
+                "matched": True,
+                "reason": ["Các chỉ số đang nằm trong vùng sức khỏe tốt"],
             }
-        return {"override": False, "reasons": []}
 
-    def evaluate_metrics(self, f: dict) -> dict:
-        return {
-            "steps": f.get("steps_diff", 0),
-            "sleep_hours": f.get("sleep_diff", 0),
-            "heart_rate": f.get("hr_diff", 0),
-            "spo2": f.get("spo2_diff", 0),
-            "hrv": f.get("hrv_diff", 0),
-            "distance": f.get("distance_diff", 0)
-        }
+        return {"matched": False, "reason": []}
 
-    def validate_input_quality(self, current: dict) -> dict:
-        flags = []
-        warnings = []
+    def baseline_normal_gate(self, current: dict) -> dict:
+        hr = float(current.get("heart_rate", 0) or 0)
+        spo2 = float(current.get("spo2", 0) or 0)
+        sleep = float(current.get("sleep_hours", 0) or 0)
+        hrv = float(current.get("hrv", 0) or 0)
 
-        spo2 = current.get("spo2", 0)
-        hr = current.get("heart_rate", 0)
+        in_hr = 60 <= hr <= 100
+        in_spo2 = 95 <= spo2 <= 100
+        in_sleep = 6 <= sleep <= 9
+        in_hrv = 25 <= hrv <= 80
 
-        if spo2 and spo2 < 70:
-            flags.append("sensor_error_or_critical")
-            warnings.append("SpO2 quá thấp bất thường, cần kiểm tra thiết bị hoặc đo lại ngay")
-
-        if hr and hr > 200:
-            flags.append("invalid_data")
-            warnings.append("Nhịp tim vượt ngưỡng dữ liệu hợp lệ, cần kiểm tra thiết bị")
-
-        return {
-            "has_anomaly": len(flags) > 0,
-            "flags": flags,
-            "warnings": warnings
-        }
-
-    def build_metric_message(self, status: str, diffs: dict, override_info: dict) -> dict:
-        PRIORITY = ["spo2", "heart_rate", "sleep_hours", "steps", "hrv", "distance"]
-
-        METRIC_MESSAGES = {
-            "steps": {
-                "good": {
-                    "mild": ["Bạn vận động khá tốt hôm nay", "Lượng bước chân tăng nhẹ", "Hoạt động thể chất ổn"],
-                    "moderate": ["Bạn vận động tốt hôm nay", "Lượng bước chân tăng đáng kể", "Hoạt động thể chất tích cực"],
-                    "strong": ["Bạn vận động rất tốt!", "Lượng bước chân tăng vượt trội", "Hoạt động thể chất xuất sắc"]
-                },
-                "bad": {
-                    "mild": ["Lượng vận động hôm nay hơi ít", "Bạn có thể đi bộ thêm chút", "Hoạt động thể chất chưa đủ"],
-                    "moderate": ["Lượng vận động hôm nay còn thấp", "Cần tăng cường đi bộ hơn", "Hoạt động thể chất cần cải thiện"],
-                    "strong": ["Lượng vận động quá thấp!", "Bạn cần đi bộ nhiều hơn ngay", "Hoạt động thể chất rất kém"]
-                }
-            },
-            "sleep_hours": {
-                "good": {
-                    "mild": ["Giấc ngủ khá hơn hôm nay", "Bạn ngủ thêm chút", "Chất lượng giấc ngủ ổn"],
-                    "moderate": ["Giấc ngủ của bạn đã cải thiện", "Bạn ngủ nhiều hơn hôm nay", "Chất lượng giấc ngủ tốt hơn"],
-                    "strong": ["Giấc ngủ tuyệt vời!", "Bạn ngủ rất nhiều hôm nay", "Chất lượng giấc ngủ xuất sắc"]
-                },
-                "bad": {
-                    "mild": ["Bạn ngủ hơi ít hôm nay", "Thời gian ngủ chưa đủ", "Giấc ngủ cần cải thiện chút"],
-                    "moderate": ["Bạn ngủ chưa đủ giấc", "Thời gian ngủ còn ít", "Giấc ngủ cần được cải thiện"],
-                    "strong": ["Bạn ngủ quá ít!", "Thời gian ngủ rất ít", "Giấc ngủ rất kém"]
-                }
-            },
-            "heart_rate": {
-                "good": {
-                    "mild": ["Nhịp tim khá hơn chút", "Nhịp tim giảm nhẹ", "Tim mạch ổn"],
-                    "moderate": ["Nhịp tim đang ổn định hơn", "Nhịp tim giảm so với trước", "Tim mạch hoạt động tốt"],
-                    "strong": ["Nhịp tim rất tốt!", "Nhịp tim giảm đáng kể", "Tim mạch hoạt động xuất sắc"]
-                },
-                "bad": {
-                    "mild": ["Nhịp tim hơi cao", "Tim đập nhanh chút", "Nhịp tim cần theo dõi"],
-                    "moderate": ["Nhịp tim có dấu hiệu cao", "Tim đập nhanh hơn bình thường", "Nhịp tim cần chú ý"],
-                    "strong": ["Nhịp tim quá cao!", "Tim đập rất nhanh", "Nhịp tim nguy hiểm"]
-                }
-            },
-            "spo2": {
-                "good": {
-                    "mild": ["Nồng độ oxy khá hơn", "Nồng độ oxy trong máu ổn định", "Chỉ số oxy máu cải thiện chút"],
-                    "moderate": ["Nồng độ oxy máu tốt", "Oxy trong máu ổn định", "Chỉ số oxy máu cải thiện"],
-                    "strong": ["Nồng độ oxy tuyệt vời!", "Oxy trong máu rất tốt", "Chỉ số oxy máu xuất sắc"]
-                },
-                "bad": {
-                    "mild": ["Nồng độ oxy hơi thấp", "Oxy trong máu giảm chút", "Cần chú ý đến nồng độ oxy"],
-                    "moderate": ["Nồng độ oxy máu thấp", "Oxy trong máu giảm", "Cần chú ý đến nồng độ oxy"],
-                    "strong": ["Nồng độ oxy quá thấp!", "Oxy trong máu rất thấp", "Nồng độ oxy nguy hiểm"]
-                }
-            },
-            "hrv": {
-                "good": {
-                    "mild": ["Khả năng phục hồi khá hơn", "Chỉ số HRV tăng nhẹ", "Sức khỏe tinh thần ổn"],
-                    "moderate": ["Khả năng phục hồi tốt", "Chỉ số HRV tăng", "Sức khỏe tinh thần ổn định"],
-                    "strong": ["Khả năng phục hồi tuyệt vời!", "Chỉ số HRV tăng mạnh", "Sức khỏe tinh thần xuất sắc"]
-                },
-                "bad": {
-                    "mild": ["Khả năng phục hồi hơi kém", "HRV giảm chút", "Cần thư giãn thêm"],
-                    "moderate": ["Khả năng phục hồi kém", "HRV giảm", "Cần thư giãn nhiều hơn"],
-                    "strong": ["Khả năng phục hồi rất kém!", "HRV giảm mạnh", "Cần thư giãn ngay"]
-                }
-            },
-            "distance": {
-                "good": {
-                    "mild": ["Quãng đường di chuyển tăng chút", "Bạn di chuyển khá hơn", "Hoạt động ngoài trời ổn"],
-                    "moderate": ["Quãng đường di chuyển tăng", "Bạn di chuyển nhiều hơn", "Hoạt động ngoài trời tốt"],
-                    "strong": ["Quãng đường di chuyển tăng nhiều!", "Bạn di chuyển rất nhiều", "Hoạt động ngoài trời xuất sắc"]
-                },
-                "bad": {
-                    "mild": ["Quãng đường di chuyển hơi ít", "Cần tăng cường vận động ngoài trời chút", "Di chuyển chưa đủ"],
-                    "moderate": ["Quãng đường di chuyển ít", "Cần tăng cường vận động ngoài trời", "Di chuyển cần cải thiện"],
-                    "strong": ["Quãng đường di chuyển quá ít!", "Cần đi ra ngoài nhiều hơn ngay", "Di chuyển rất kém"]
-                }
+        if in_hr and in_spo2 and in_sleep and in_hrv:
+            return {
+                "matched": True,
+                "reason": ["Các chỉ số nằm trong baseline người bình thường"],
             }
-        }
 
-        METRIC_ADVICE = {
-            "spo2": {
-                "bad": {
-                    "mild": "Hãy thử hít thở sâu và tránh môi trường thiếu oxy.",
-                    "moderate": "Cần chú ý đến nồng độ oxy, tránh khói bụi và tập thở sâu.",
-                    "strong": "Hãy kiểm tra sức khỏe và liên hệ bác sĩ nếu cần. Tránh môi trường thiếu oxy."
-                }
-            },
-            "heart_rate": {
-                "bad": {
-                    "mild": "Thử thư giãn chút và theo dõi nhịp tim.",
-                    "moderate": "Hạn chế stress, tập thở sâu và theo dõi nhịp tim thường xuyên.",
-                    "strong": "Nhịp tim cao nguy hiểm! Hãy nghỉ ngơi và liên hệ bác sĩ nếu cần."
-                }
-            },
-            "sleep_hours": {
-                "bad": {
-                    "mild": "Cố gắng ngủ sớm hơn chút.",
-                    "moderate": "Cố gắng ngủ sớm hơn, tránh thiết bị điện tử và duy trì lịch ngủ đều đặn.",
-                    "strong": "Thiếu ngủ nghiêm trọng! Hãy nghỉ ngơi đầy đủ và liên hệ bác sĩ nếu cần."
-                }
-            },
-            "steps": {
-                "bad": {
-                    "mild": "Thử đi bộ thêm chút mỗi ngày.",
-                    "moderate": "Hãy tăng cường đi bộ hoặc tập thể dục nhẹ nhàng mỗi ngày.",
-                    "strong": "Thiếu vận động nghiêm trọng! Cần đi bộ nhiều hơn ngay để cải thiện sức khỏe."
-                }
-            },
-            "hrv": {
-                "bad": {
-                    "mild": "Thử thư giãn thêm chút.",
-                    "moderate": "Tăng cường thư giãn, yoga hoặc thiền để cải thiện sức khỏe tinh thần.",
-                    "strong": "Sức khỏe tinh thần kém! Cần nghỉ ngơi và tìm sự hỗ trợ chuyên môn."
-                }
-            },
-            "distance": {
-                "bad": {
-                    "mild": "Thử đi dạo ngoài trời thêm chút.",
-                    "moderate": "Thử đi dạo ngoài trời hoặc tham gia hoạt động thể thao nhẹ.",
-                    "strong": "Thiếu hoạt động ngoài trời nghiêm trọng! Cần ra ngoài nhiều hơn để cải thiện sức khỏe."
-                }
-            }
-        }
+        return {"matched": False, "reason": []}
 
+    def _near_safety_deadband(self, current: dict) -> bool:
+        spo2 = float(current.get("spo2", 0) or 0)
+        hr = float(current.get("heart_rate", 0) or 0)
+        sleep = float(current.get("sleep_hours", 0) or 0)
 
-        current_metrics = override_info.get("current_metrics", {}) if isinstance(override_info, dict) else {}
+        low_spo2, high_spo2 = self._deadband_bounds(self.safe_thresholds["spo2"])
+        low_hr, high_hr = self._deadband_bounds(self.safe_thresholds["heart_rate"])
+        low_sleep, high_sleep = self._deadband_bounds(self.safe_thresholds["sleep_hours"])
 
-        def get_metric_status_and_intensity(metric: str, diff: float, current_value: float = None):
-            if metric == "steps":
-                if diff > 1000: return "good", "strong"
-                elif diff > 500: return "good", "moderate"
-                elif diff > 200: return "good", "mild"
-                elif diff < -1000: return "bad", "strong"
-                elif diff < -500: return "bad", "moderate"
-                elif diff < -200: return "bad", "mild"
-            elif metric == "sleep_hours":
-                if diff > 2: return "good", "strong"
-                elif diff > 1: return "good", "moderate"
-                elif diff > 0.5: return "good", "mild"
-                elif diff < -2: return "bad", "strong"
-                elif diff < -1: return "bad", "moderate"
-                elif diff < -0.5: return "bad", "mild"
-            elif metric == "heart_rate":
-                if diff < -10: return "good", "strong"
-                elif diff < -5: return "good", "moderate"
-                elif diff < -2: return "good", "mild"
-                elif diff > 10: return "bad", "strong"
-                elif diff > 5: return "bad", "moderate"
-                elif diff > 2: return "bad", "mild"
-            elif metric == "spo2":
-                if current_value is None:
-                    return "neutral", None
+        spo2_band = spo2 > 0 and low_spo2 <= spo2 <= high_spo2
+        hr_band = low_hr <= hr <= high_hr
+        sleep_band = sleep > 0 and low_sleep <= sleep <= high_sleep
 
-                if current_value < 90:
-                    return "bad", "strong"
-                if diff > 5: return "good", "strong"
-                elif diff > 2: return "good", "moderate"
-                elif diff > 1: return "good", "mild"
-                elif diff < -5: return "bad", "strong"
-                elif diff < -2: return "bad", "moderate"
-                elif diff < -1: return "bad", "mild"
-            elif metric == "hrv":
-                if diff > 10: return "good", "strong"
-                elif diff > 5: return "good", "moderate"
-                elif diff > 2: return "good", "mild"
-                elif diff < -10: return "bad", "strong"
-                elif diff < -5: return "bad", "moderate"
-                elif diff < -2: return "bad", "mild"
-            elif metric == "distance":
-                if diff > 1.0: return "good", "strong"
-                elif diff > 0.5: return "good", "moderate"
-                elif diff > 0.2: return "good", "mild"
-                elif diff < -1.0: return "bad", "strong"
-                elif diff < -0.5: return "bad", "moderate"
-                elif diff < -0.2: return "bad", "mild"
-            return "neutral", None
+        return spo2_band or hr_band or sleep_band
 
-        metric_data = {}
-        for metric, diff in diffs.items():
-            metric_status, intensity = get_metric_status_and_intensity(metric, diff, current_metrics.get(metric))
-            if metric_status != "neutral":
-                metric_data[metric] = {"status": metric_status, "intensity": intensity, "priority": PRIORITY.index(metric)}
+    def _near_good_deadband(self, current: dict) -> bool:
+        hr = float(current.get("heart_rate", 0) or 0)
+        spo2 = float(current.get("spo2", 0) or 0)
+        sleep = float(current.get("sleep_hours", 0) or 0)
+        hrv = float(current.get("hrv", 0) or 0)
+        steps = float(current.get("steps", 0) or 0)
 
-        good_metrics = sorted(
-            [m for m, d in metric_data.items() if d["status"] == "good"],
-            key=lambda x: metric_data[x]["priority"]
-        )
-        bad_metrics = sorted(
-            [m for m, d in metric_data.items() if d["status"] == "bad"],
-            key=lambda x: metric_data[x]["priority"]
+        def in_band(value: float, threshold: float) -> bool:
+            low, high = self._deadband_bounds(threshold)
+            return low <= value <= high
+
+        hr_band = in_band(hr, 60) or in_band(hr, 80)
+        spo2_band = in_band(spo2, 97)
+        sleep_band = in_band(sleep, 7) or in_band(sleep, 8.5)
+        hrv_band = in_band(hrv, 40)
+        steps_band = in_band(steps, 8000)
+
+        return hr_band or spo2_band or sleep_band or hrv_band or steps_band
+
+    def _classify_for_hysteresis(self, day: dict) -> str:
+        safety = self.safety_rule(day)
+        if safety["matched"]:
+            return "xau"
+
+        good_zone = self.good_zone_gate(day)
+        if good_zone["matched"]:
+            return "tot"
+
+        baseline = self.baseline_normal_gate(day)
+        if baseline["matched"]:
+            return "binh_thuong"
+
+        return "unknown"
+
+    def apply_hysteresis(self, proposed_status: str, current: dict, history: List[dict]) -> str:
+        if not history:
+            return proposed_status
+
+        prev1 = history[-1]
+        prev2 = history[-2] if len(history) >= 2 else None
+
+        prev1_status = self._classify_for_hysteresis(prev1)
+        prev2_status = self._classify_for_hysteresis(prev2) if prev2 else "unknown"
+
+        if self._near_safety_deadband(current) and prev1_status in {"binh_thuong", "xau"}:
+            return prev1_status
+
+        if self._near_good_deadband(current) and prev1_status in {"tot", "binh_thuong"}:
+            return prev1_status
+
+        # bình thường <-> xấu
+        if proposed_status == "xau" and prev1_status != "xau":
+            if prev1_status == "xau" or prev2_status == "xau":
+                return proposed_status
+            return "binh_thuong"
+
+        if proposed_status == "binh_thuong" and prev1_status == "xau":
+            if prev1_status == "binh_thuong" and prev2_status == "binh_thuong":
+                return proposed_status
+            return "xau"
+
+        # tốt <-> bình thường
+        if proposed_status == "tot" and prev1_status != "tot":
+            if prev1_status == "tot" or prev2_status == "tot":
+                return proposed_status
+            return "binh_thuong"
+
+        if proposed_status == "binh_thuong" and prev1_status == "tot":
+            if prev2_status == "tot":
+                return "tot"
+            return proposed_status
+
+        return proposed_status
+
+    # -----------------------------
+    # Messaging
+    # -----------------------------
+    def _build_output_text(self, status: str, reason: List[str]) -> Tuple[str, str]:
+        if status == "tot":
+            return (
+                "Các chỉ số sức khỏe hôm nay đang tích cực.",
+                "Tiếp tục duy trì vận động, giấc ngủ điều độ và theo dõi chỉ số hằng ngày.",
+            )
+
+        if status == "xau":
+            if reason:
+                return (
+                    f"Một số chỉ số sức khỏe đang ở mức cần chú ý: {reason[0]}.",
+                    "Nên nghỉ ngơi, theo dõi lại trong ngày và liên hệ chuyên gia y tế nếu bất thường kéo dài.",
+                )
+            return (
+                "Một số chỉ số sức khỏe đang ở mức cần chú ý.",
+                "Nên nghỉ ngơi, theo dõi lại trong ngày và liên hệ chuyên gia y tế nếu bất thường kéo dài.",
+            )
+
+        return (
+            "Tình trạng sức khỏe hiện tại ở mức bình thường.",
+            "Duy trì thói quen sinh hoạt ổn định và tiếp tục theo dõi định kỳ.",
         )
 
-        if override_info.get("override") and "spo2" in bad_metrics:
-            bad_metrics.remove("spo2")
-            bad_metrics.insert(0, "spo2")
-        if override_info.get("override"):
-            good_metrics = []
-        message_parts = []
+    def _resp(self, status: str, message: str, advice: str, compare: dict) -> HealthEvaluationResponse:
+        return HealthEvaluationResponse(
+            status=self._to_vi_status(status),
+            message=message,
+            advice=advice,
+            compare=compare,
+        )
 
-        if good_metrics:
-            metric = good_metrics[0]
-            intensity = metric_data[metric]["intensity"]
-            variants = METRIC_MESSAGES[metric]["good"][intensity]
-            message_parts.append(variants[0])
-
-        if bad_metrics:
-            metric = bad_metrics[0]
-            intensity = metric_data[metric]["intensity"]
-            variants = METRIC_MESSAGES[metric]["bad"][intensity]
-            bad_msg = variants[0]
-            if message_parts:
-                connector = "tuy nhiên"
-                message_parts.append(f"{connector} {bad_msg.lower()}")
-            else:
-                message_parts.append(bad_msg)
-
-        if not message_parts:
-            message_parts.append("Các chỉ số sức khỏe của bạn đang duy trì ổn định")
-
-        if len(message_parts) == 2:
-            message = f"{message_parts[0]}, {message_parts[1]}"
-        else:
-            message = message_parts[0]
-
-        advice_parts = []
-        if bad_metrics:
-            for metric in bad_metrics[:2]: 
-                intensity = metric_data[metric]["intensity"]
-                if metric in METRIC_ADVICE and "bad" in METRIC_ADVICE[metric]:
-                    advice_parts.append(METRIC_ADVICE[metric]["bad"][intensity])
-
-            advice = " ".join(advice_parts) if advice_parts else "Hãy chú ý đến các chỉ số sức khỏe và duy trì lối sống lành mạnh."
-        elif good_metrics:
-            good_metric = good_metrics[0]
-            advice_map = {
-                "steps": "Tiếp tục duy trì thói quen vận động tích cực.",
-                "sleep_hours": "Giữ vững thói quen ngủ chất lượng.",
-                "heart_rate": "Tiếp tục theo dõi và duy trì nhịp tim khỏe mạnh.",
-                "spo2": "Tiếp tục duy trì lối sống lành mạnh để giữ nồng độ oxy tốt.",
-                "hrv": "Tiếp tục chăm sóc sức khỏe tinh thần.",
-                "distance": "Tiếp tục duy trì hoạt động ngoài trời."
-            }
-            advice = advice_map.get(good_metric, "Tiếp tục duy trì thói quen lành mạnh.")
-        else:
-            advice = "Tiếp tục duy trì thói quen lành mạnh và theo dõi sức khỏe thường xuyên."
-
-        if override_info.get("override"):
-            readable_warning = override_info.get("reason", "một số chỉ số đang ở mức nguy hiểm")
-            message = f"{message}, cần chú ý vì {readable_warning.lower()}"
-            advice = f"{advice} Nếu cảm thấy bất thường, hãy kiểm tra sức khỏe ngay."
-
-        return {"status": status, "message": message, "advice": advice}
-
+    # -----------------------------
+    # Main pipeline
+    # -----------------------------
     def predict(self, data: HealthDataInput) -> HealthEvaluationResponse:
         try:
-            current_data = data.current_metrics.model_dump() if hasattr(data.current_metrics, "model_dump") else data.current_metrics.dict()
-            history = data.history or []
-
-            if len(history) < 1:
-                return HealthEvaluationResponse(
-                    status="error",
-                    message="Chưa có đủ dữ liệu để phân tích",
-                    advice="Hãy đeo thiết bị thêm vài ngày để hệ thống học thói quen của bạn nhé.",
-                    compare={}
-                )
-
-            f = build_features(current_data, history)
-
-            data_quality = self.validate_input_quality(current_data)
-
-            if self.use_model:
-                X = [[f.get(col, 0) for col in self.features_cols]]
-                result = self.model.predict(X)[0]
-                status = ["xấu", "bình thường", "tốt"][result]
-            else:
-                return HealthEvaluationResponse(
-                    status="không xác định",
-                    message="Không đủ dữ liệu để đánh giá chính xác",
-                    advice="Hãy kiểm tra thiết bị hoặc thử lại sau",
-                    compare=compare_daily(current_data, history),
-                )
-
-            override_info = self.rule_guardrail(current_data)
-            override_info["current_metrics"] = current_data
-            override_info["data_quality"] = data_quality
-            if override_info["override"]:
-                status = override_info["status"]
-
-            metrics_info = self.evaluate_metrics(f)
-
-            resp = self.build_metric_message(status, metrics_info, override_info)
-
-            compare = compare_daily(current_data, history)
-
-            
-
-            if data_quality["has_anomaly"]:
-                resp["message"] = f"{resp['message']}. Cảnh báo dữ liệu: {'; '.join(data_quality['warnings'])}."
-                resp["advice"] = f"{resp['advice']} Vui lòng đo lại để xác nhận chỉ số."
-
-            return HealthEvaluationResponse(
-                status=resp["status"],
-                message=resp["message"],
-                advice=resp["advice"],
-                compare=compare,
+            current_raw = (
+                data.current_metrics.model_dump()
+                if hasattr(data.current_metrics, "model_dump")
+                else data.current_metrics.dict()
             )
+            history_objs = data.history or []
+            history_raw = [h.model_dump() if hasattr(h, "model_dump") else h.dict() for h in history_objs]
+
+            current = self._apply_ema(current_raw, history_raw)
+            compare = compare_daily(current_raw, history_raw)
+
+            # 1) SAFETY RULE (HARD LOCK - RETURN IMMEDIATELY)
+            safety = self.safety_rule(current)
+            if safety["matched"]:
+                message, advice = self._build_output_text("xau", safety["reason"])
+                return self._resp("xau", message, advice, compare)
+
+            # 2) COMPUTE CANDIDATE STATUS (NO EARLY RETURN)
+            good_zone = self.good_zone_gate(current)
+            baseline = self.baseline_normal_gate(current)
+
+            if good_zone["matched"]:
+                candidate_status = "tot"
+                candidate_reason = good_zone["reason"]
+            elif baseline["matched"]:
+                candidate_status = "binh_thuong"
+                candidate_reason = baseline["reason"]
+            else:
+                # 3) MODEL PREDICTION (fallback region)
+                if self.use_model and len(history_raw) >= 1:
+                    f = build_features(current, history_raw)
+                    X = [[f.get(col, 0) for col in self.features_cols]]
+                    pred = self.model.predict(X)[0]
+                    candidate_status = {0: "xau", 1: "binh_thuong", 2: "tot"}.get(int(pred), "binh_thuong")
+                    candidate_reason = []
+                else:
+                    candidate_status = "binh_thuong"
+                    candidate_reason = []
+
+            # 4) HYSTERESIS + DEADBAND (APPLY FOR ALL NON-SAFETY)
+            final_status = self.apply_hysteresis(candidate_status, current, history_raw)
+
+            message, advice = self._build_output_text(final_status, candidate_reason)
+            return self._resp(final_status, message, advice, compare)
 
         except Exception as e:
             logger.error(f"Predict Error: {e}", exc_info=True)
-            return HealthEvaluationResponse(
-                status="error",
-                message="Oops! Có lỗi gì đó rồi",
-                advice="Hãy thử load lại để tiếp tục xem chỉ số nhé.",
-                compare={}
-            )
+            message, advice = self._build_output_text("binh_thuong", [])
+            return self._resp("binh_thuong", message, advice, {})

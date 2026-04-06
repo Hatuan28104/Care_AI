@@ -66,7 +66,8 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
 
       setState(() {
         // Sort Newest First (UTC ISO string comparison works fine)
-        data.sort((a, b) => b["thoigian"].toString().compareTo(a["thoigian"].toString()));
+        data.sort((a, b) =>
+            b["thoigian"].toString().compareTo(a["thoigian"].toString()));
 
         _alerts.clear();
         _alerts.addAll(
@@ -93,7 +94,6 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
     }
   }
 
-
   void _syncBadge() {
     final unread = _alerts.where((e) => !e.isRead).length;
 
@@ -106,7 +106,7 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
   Color _getBorderColor(String title, String detail) {
     final text = (title + " " + detail).toLowerCase();
 
-    if (text.contains("xấu") || text.contains("nguy hiểm")) {
+    if (text.contains("nguy hiểm") || text.contains("giảm")) {
       return Colors.red;
     }
 
@@ -114,7 +114,9 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
       return const Color(0xFFE6EA00);
     }
 
-    if (text.contains("tốt") || text.contains("tuyệt vời")) {
+    if (text.contains("tốt") ||
+        text.contains("tuyệt vời") ||
+        text.contains("cải thiện")) {
       return const Color(0xFF139D4A);
     }
 
