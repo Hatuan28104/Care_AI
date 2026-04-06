@@ -6,20 +6,20 @@ def preprocess(df):
     # 🔥 FIX WARNING
     df = df.ffill().bfill()
 
-    # AVG
-    df["steps_avg_3"] = df["steps"].rolling(3).mean()
-    df["sleep_avg_3"] = df["sleep_hours"].rolling(3).mean()
-    df["hr_avg_3"] = df["heart_rate"].rolling(3).mean()
-    df["spo2_avg_3"] = df["spo2"].rolling(3).mean()
-    df["hrv_avg_3"] = df["hrv"].rolling(3).mean()
-    df["distance_avg_3"] = df["distance"].rolling(3).mean()
+    # Use last record as baseline for diffs
+    df["steps_last"] = df["steps"].shift(1)
+    df["sleep_last"] = df["sleep_hours"].shift(1)
+    df["hr_last"] = df["heart_rate"].shift(1)
+    df["spo2_last"] = df["spo2"].shift(1)
+    df["hrv_last"] = df["hrv"].shift(1)
+    df["distance_last"] = df["distance"].shift(1)
 
-    # DIFF
-    df["steps_diff"] = df["steps"] - df["steps_avg_3"]
-    df["sleep_diff"] = df["sleep_hours"] - df["sleep_avg_3"]
-    df["hr_diff"] = df["heart_rate"] - df["hr_avg_3"]
-    df["spo2_diff"] = df["spo2"] - df["spo2_avg_3"]
-    df["hrv_diff"] = df["hrv"] - df["hrv_avg_3"]
-    df["distance_diff"] = df["distance"] - df["distance_avg_3"]
+    # DIFF from last record
+    df["steps_diff"] = df["steps"] - df["steps_last"]
+    df["sleep_diff"] = df["sleep_hours"] - df["sleep_last"]
+    df["hr_diff"] = df["heart_rate"] - df["hr_last"]
+    df["spo2_diff"] = df["spo2"] - df["spo2_last"]
+    df["hrv_diff"] = df["hrv"] - df["hrv_last"]
+    df["distance_diff"] = df["distance"] - df["distance_last"]
 
     return df.dropna()

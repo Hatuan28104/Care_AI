@@ -19,9 +19,9 @@ def build_features(current: dict, history: list) -> dict:
     df = process_history(history)
     
     if df.empty:
-        last3 = pd.DataFrame([current])
+        last_record = {}
     else:
-        last3 = df.tail(3)
+        last_record = df.iloc[-1].to_dict()
         
     return {
         "steps": current.get("steps", 0),
@@ -31,12 +31,12 @@ def build_features(current: dict, history: list) -> dict:
         "hrv": current.get("hrv", 0),
         "distance": current.get("distance", 0),
         
-        "steps_diff": current.get("steps", 0) - (last3["steps"].mean() if not last3.empty else 0),
-        "sleep_diff": current.get("sleep_hours", 0) - (last3["sleep_hours"].mean() if not last3.empty else 0),
-        "hr_diff": current.get("heart_rate", 0) - (last3["heart_rate"].mean() if not last3.empty else 0),
-        "spo2_diff": current.get("spo2", 0) - (last3["spo2"].mean() if not last3.empty else 0),
-        "hrv_diff": current.get("hrv", 0) - (last3["hrv"].mean() if not last3.empty else 0),
-        "distance_diff": current.get("distance", 0) - (last3["distance"].mean() if not last3.empty else 0)
+        "steps_diff": current.get("steps", 0) - last_record.get("steps", 0),
+        "sleep_diff": current.get("sleep_hours", 0) - last_record.get("sleep_hours", 0),
+        "hr_diff": current.get("heart_rate", 0) - last_record.get("heart_rate", 0),
+        "spo2_diff": current.get("spo2", 0) - last_record.get("spo2", 0),
+        "hrv_diff": current.get("hrv", 0) - last_record.get("hrv", 0),
+        "distance_diff": current.get("distance", 0) - last_record.get("distance", 0)
     }
 
 def format_number(val: float) -> str:
@@ -44,18 +44,21 @@ def format_number(val: float) -> str:
         return f"{int(val):,}".replace(",", ".")
     return f"{val:,.1f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
-def format_change(diff: float, current: float, unit: str = "", positive_good: bool = True) -> str:
+def format_change(diff: float, current: float, unit: str = "", positive_good: bool = True, threshold: float = 0.0) -> str:
     curr_str = format_number(current)
     diff_str = format_number(abs(diff))
+    
+    if abs(diff) < threshold:
+        return f"{curr_str}{unit} (duy trì ổn định)"
     
     if diff > 0:
         icon = "👍" if positive_good else "⚠️"
         action = "tăng"
-        return f"{curr_str}{unit} ({action} {diff_str} so với hôm qua {icon})"
+        return f"{curr_str}{unit} ({action} {diff_str} so với lần đo gần nhất {icon})"
     elif diff < 0:
         icon = "⚠️" if positive_good else "👍"
         action = "giảm"
-        return f"{curr_str}{unit} ({action} {diff_str} so với hôm qua {icon})"
+        return f"{curr_str}{unit} ({action} {diff_str} so với lần đo gần nhất {icon})"
     
     return f"{curr_str}{unit} (duy trì ổn định)"
 
@@ -64,38 +67,29 @@ def compare_daily(current: dict, history: list) -> dict:
     if df.empty:
         return {}
         
-    if "date" in current and current["date"]:
-        target_date = pd.to_datetime(current["date"]).date()
-    else:
-        target_date = datetime.utcnow().date()
-        
-    yesterday_date = target_date - timedelta(days=1)
-    yesterday_df = df[df['date'].dt.date == yesterday_date]
-    
-    if yesterday_df.empty:
-        yesterday = df.iloc[-1]
-    else:
-        yesterday = yesterday_df.iloc[-1]
+    # Use last record as baseline
+    last_record = df.iloc[-1]
         
     today = current
     
     compare = {}
+    # format: key -> (unit, is_good_when_up, threshold)
     metrics = {
-        "steps": (" bước", True),         
-        "sleep_hours": (" giờ", True),   
-        "heart_rate": (" bpm", False),    
-        "spo2": ("%", True),             
-        "hrv": (" ms", True),          
-        "distance": (" km", True)
+        "steps": (" bước", True, 1500),         
+        "sleep_hours": (" giờ", True, 1.0),   
+        "heart_rate": (" bpm", False, 5),    
+        "spo2": ("%", True, 2),             
+        "hrv": (" ms", True, 5),          
+        "distance": (" km", True, 0.5)
     }
     
-    for key, (unit, is_good_when_up) in metrics.items():
+    for key, (unit, is_good_when_up, threshold) in metrics.items():
         val_today = today.get(key, 0)
         if val_today > 0:
-            val_yesterday = yesterday.get(key, 0)
-            if val_yesterday > 0:
-                diff = val_today - val_yesterday
-                compare[key] = format_change(diff, val_today, unit, is_good_when_up)
+            val_last = last_record.get(key, 0)
+            if val_last > 0:
+                diff = val_today - val_last
+                compare[key] = format_change(diff, val_today, unit, is_good_when_up, threshold)
             else:
                 compare[key] = f"{format_number(val_today)}{unit}"
                 
