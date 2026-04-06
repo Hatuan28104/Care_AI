@@ -22,13 +22,13 @@ class AlertMessageDetail extends StatelessWidget {
       return Colors.red;
     }
 
-    if (text.contains("bình thường") || text.contains("ổn định")) {
+    if (text.contains("bình thường")) {
       return const Color(0xFFE6EA00);
     }
 
     if (text.contains("tốt") ||
         text.contains("tuyệt vời") ||
-        text.contains("cải thiện")) {
+        text.contains("tích cực")) {
       return const Color(0xFF139D4A);
     }
 
