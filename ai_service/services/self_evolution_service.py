@@ -1,250 +1,69 @@
 import logging
-from typing import List, Tuple
+from statistics import mean, median, pstdev
+from typing import Dict, List, Tuple, Optional
 
 from core.schema import HealthDataInput, HealthEvaluationResponse
-from core.utils import build_features, compare_daily
+from core.utils import process_history
+from services.ml_support import MLSupport
 
 logger = logging.getLogger(__name__)
 
 
-STATUS_MAP = {
-    "xau": "xấu",
-    "binh_thuong": "bình thường",
-    "tot": "tốt",
-}
-
-
 class SelfEvolutionService:
+    # ===== Safety layer (explicitly allowed hard thresholds) =====
+    SAFETY_THRESHOLDS = {
+        "spo2_critical_low": 90.0,
+        "heart_rate_critical_low": 40.0,
+        "heart_rate_critical_high": 130.0,
+        "sleep_critical_low": 3.5,
+    }
+
+    # ===== Time windows =====
+    BASELINE_WINDOW_DAYS = 7
+    TREND_WINDOW_DAYS = 3
+
+    # ===== Metric config =====
+    METRIC_CFG = {
+        "heart_rate": {"higher_is_better": False, "weight": 1.2, "label": "Nhịp tim", "unit": "bpm"},
+        "sleep_hours": {"higher_is_better": True, "weight": 1.1, "label": "Giấc ngủ", "unit": "giờ"},
+        "steps": {"higher_is_better": True, "weight": 1.0, "label": "Số bước", "unit": "bước"},
+        "distance": {"higher_is_better": True, "weight": 0.8, "label": "Quãng đường", "unit": "km"},
+        "spo2": {"higher_is_better": True, "weight": 1.4, "label": "SpO2", "unit": "%"},
+        "hrv": {"higher_is_better": True, "weight": 1.0, "label": "HRV", "unit": "ms"},
+    }
+
+    # ===== Decision constants =====
+    SCORE_GOOD_HIGH_CONF = 0.28
+    SCORE_BAD_HIGH_CONF = -0.28
+    SCORE_GOOD_LOW_CONF = 0.40
+    SCORE_BAD_LOW_CONF = -0.40
+
+    TREND_NOISE_RATIO = 0.02
+
+    # ===== Hybrid ML support =====
+    ML_NEAR_ZERO_THRESHOLD = 0.35
+    ML_ADJUST_STEP = 0.20
+    ML_SCORE_CAP = 0.20
+
     def __init__(self, model_bundle: dict = None):
-        self.model = model_bundle.get("model") if model_bundle else None
-        self.features_cols = model_bundle.get("features") if model_bundle else None
-        self.use_model = self.model is not None and self.features_cols is not None
+        self.model_bundle = model_bundle or {}
+        self.ml_support = MLSupport(self.model_bundle)
 
-        self.safe_thresholds = {
-            "spo2": 92.0,
-            "heart_rate": 120.0,
-            "sleep_hours": 4.0,
-        }
-        self.deadband_ratio = 0.03  # ±3%
+        # Shadow mode default ON: log-only, no user-facing impact
+        self.ml_shadow_mode = bool(self.model_bundle.get("ml_shadow_mode", True))
 
-    # -----------------------------
-    # Utilities
-    # -----------------------------
+    # ------------------------------------------------------------
+    # Output helpers
+    # ------------------------------------------------------------
     def _to_vi_status(self, status: str) -> str:
-        return STATUS_MAP.get(status, "bình thường")
+        mapping = {
+            "good": "tốt",
+            "normal": "bình thường",
+            "bad": "xấu",
+        }
+        return mapping.get(status, "bình thường")
 
-    def _apply_ema(self, current: dict, history: List[dict], alpha: float = 0.5) -> dict:
-        ema_keys = ["heart_rate", "spo2", "sleep_hours", "hrv"]
-        smoothed = dict(current)
-
-        recent = history[-2:] if history else []
-
-        for key in ema_keys:
-            seq = []
-            for h in recent:
-                val = float(h.get(key, 0) or 0)
-                if val > 0:
-                    seq.append(val)
-
-            cur_val = float(current.get(key, 0) or 0)
-            if cur_val > 0:
-                seq.append(cur_val)
-
-            if not seq:
-                continue
-
-            ema = seq[0]
-            for v in seq[1:]:
-                ema = alpha * v + (1 - alpha) * ema
-            smoothed[key] = ema
-
-        return smoothed
-
-    def _deadband_bounds(self, threshold: float) -> Tuple[float, float]:
-        delta = threshold * self.deadband_ratio
-        return threshold - delta, threshold + delta
-
-    # -----------------------------
-    # Rule layers
-    # -----------------------------
-    def safety_rule(self, current: dict) -> dict:
-        reasons = []
-
-        spo2 = float(current.get("spo2", 0) or 0)
-        hr = float(current.get("heart_rate", 0) or 0)
-        sleep = float(current.get("sleep_hours", 0) or 0)
-
-        spo2_low, _ = self._deadband_bounds(self.safe_thresholds["spo2"])
-        _, hr_high = self._deadband_bounds(self.safe_thresholds["heart_rate"])
-        sleep_low, _ = self._deadband_bounds(self.safe_thresholds["sleep_hours"])
-
-        if spo2 > 0 and spo2 < spo2_low:
-            reasons.append(f"SpO2 thấp nguy hiểm ({spo2:.1f} < {spo2_low:.1f})")
-        if hr > hr_high:
-            reasons.append(f"Nhịp tim cao nguy hiểm ({hr:.1f} > {hr_high:.1f})")
-        if sleep > 0 and sleep < sleep_low:
-            reasons.append(f"Thiếu ngủ nghiêm trọng ({sleep:.1f}h < {sleep_low:.1f}h)")
-
-        return {"matched": len(reasons) > 0, "reason": reasons}
-
-    def good_zone_gate(self, current: dict) -> dict:
-        hr = float(current.get("heart_rate", 0) or 0)
-        spo2 = float(current.get("spo2", 0) or 0)
-        sleep = float(current.get("sleep_hours", 0) or 0)
-        hrv = float(current.get("hrv", 0) or 0)
-        steps = float(current.get("steps", 0) or 0)
-
-        conditions = [
-            60 <= hr <= 80,
-            spo2 >= 97,
-            7 <= sleep <= 8.5,
-            hrv >= 40,
-            steps >= 8000,
-        ]
-
-        if sum(conditions) >= 4:
-            return {
-                "matched": True,
-                "reason": ["Các chỉ số đang nằm trong vùng sức khỏe tốt"],
-            }
-
-        return {"matched": False, "reason": []}
-
-    def baseline_normal_gate(self, current: dict) -> dict:
-        hr = float(current.get("heart_rate", 0) or 0)
-        spo2 = float(current.get("spo2", 0) or 0)
-        sleep = float(current.get("sleep_hours", 0) or 0)
-        hrv = float(current.get("hrv", 0) or 0)
-
-        in_hr = 60 <= hr <= 100
-        in_spo2 = 95 <= spo2 <= 100
-        in_sleep = 6 <= sleep <= 9
-        in_hrv = 25 <= hrv <= 80
-
-        if in_hr and in_spo2 and in_sleep and in_hrv:
-            return {
-                "matched": True,
-                "reason": ["Các chỉ số nằm trong baseline người bình thường"],
-            }
-
-        return {"matched": False, "reason": []}
-
-    def _near_safety_deadband(self, current: dict) -> bool:
-        spo2 = float(current.get("spo2", 0) or 0)
-        hr = float(current.get("heart_rate", 0) or 0)
-        sleep = float(current.get("sleep_hours", 0) or 0)
-
-        low_spo2, high_spo2 = self._deadband_bounds(self.safe_thresholds["spo2"])
-        low_hr, high_hr = self._deadband_bounds(self.safe_thresholds["heart_rate"])
-        low_sleep, high_sleep = self._deadband_bounds(self.safe_thresholds["sleep_hours"])
-
-        spo2_band = spo2 > 0 and low_spo2 <= spo2 <= high_spo2
-        hr_band = low_hr <= hr <= high_hr
-        sleep_band = sleep > 0 and low_sleep <= sleep <= high_sleep
-
-        return spo2_band or hr_band or sleep_band
-
-    def _near_good_deadband(self, current: dict) -> bool:
-        hr = float(current.get("heart_rate", 0) or 0)
-        spo2 = float(current.get("spo2", 0) or 0)
-        sleep = float(current.get("sleep_hours", 0) or 0)
-        hrv = float(current.get("hrv", 0) or 0)
-        steps = float(current.get("steps", 0) or 0)
-
-        def in_band(value: float, threshold: float) -> bool:
-            low, high = self._deadband_bounds(threshold)
-            return low <= value <= high
-
-        hr_band = in_band(hr, 60) or in_band(hr, 80)
-        spo2_band = in_band(spo2, 97)
-        sleep_band = in_band(sleep, 7) or in_band(sleep, 8.5)
-        hrv_band = in_band(hrv, 40)
-        steps_band = in_band(steps, 8000)
-
-        return hr_band or spo2_band or sleep_band or hrv_band or steps_band
-
-    def _classify_for_hysteresis(self, day: dict) -> str:
-        safety = self.safety_rule(day)
-        if safety["matched"]:
-            return "xau"
-
-        good_zone = self.good_zone_gate(day)
-        if good_zone["matched"]:
-            return "tot"
-
-        baseline = self.baseline_normal_gate(day)
-        if baseline["matched"]:
-            return "binh_thuong"
-
-        return "unknown"
-
-    def apply_hysteresis(self, proposed_status: str, current: dict, history: List[dict]) -> str:
-        if not history:
-            return proposed_status
-
-        prev1 = history[-1]
-        prev2 = history[-2] if len(history) >= 2 else None
-
-        prev1_status = self._classify_for_hysteresis(prev1)
-        prev2_status = self._classify_for_hysteresis(prev2) if prev2 else "unknown"
-
-        if self._near_safety_deadband(current) and prev1_status in {"binh_thuong", "xau"}:
-            return prev1_status
-
-        if self._near_good_deadband(current) and prev1_status in {"tot", "binh_thuong"}:
-            return prev1_status
-
-        # bình thường <-> xấu
-        if proposed_status == "xau" and prev1_status != "xau":
-            if prev1_status == "xau" or prev2_status == "xau":
-                return proposed_status
-            return "binh_thuong"
-
-        if proposed_status == "binh_thuong" and prev1_status == "xau":
-            if prev1_status == "binh_thuong" and prev2_status == "binh_thuong":
-                return proposed_status
-            return "xau"
-
-        # tốt <-> bình thường
-        if proposed_status == "tot" and prev1_status != "tot":
-            if prev1_status == "tot" or prev2_status == "tot":
-                return proposed_status
-            return "binh_thuong"
-
-        if proposed_status == "binh_thuong" and prev1_status == "tot":
-            if prev2_status == "tot":
-                return "tot"
-            return proposed_status
-
-        return proposed_status
-
-    # -----------------------------
-    # Messaging
-    # -----------------------------
-    def _build_output_text(self, status: str, reason: List[str]) -> Tuple[str, str]:
-        if status == "tot":
-            return (
-                "Các chỉ số sức khỏe hôm nay đang tích cực.",
-                "Tiếp tục duy trì vận động, giấc ngủ điều độ và theo dõi chỉ số hằng ngày.",
-            )
-
-        if status == "xau":
-            if reason:
-                return (
-                    f"Một số chỉ số sức khỏe đang ở mức cần chú ý: {reason[0]}.",
-                    "Nên nghỉ ngơi, theo dõi lại trong ngày và liên hệ chuyên gia y tế nếu bất thường kéo dài.",
-                )
-            return (
-                "Một số chỉ số sức khỏe đang ở mức cần chú ý.",
-                "Nên nghỉ ngơi, theo dõi lại trong ngày và liên hệ chuyên gia y tế nếu bất thường kéo dài.",
-            )
-
-        return (
-            "Tình trạng sức khỏe hiện tại ở mức bình thường.",
-            "Duy trì thói quen sinh hoạt ổn định và tiếp tục theo dõi định kỳ.",
-        )
-
-    def _resp(self, status: str, message: str, advice: str, compare: dict) -> HealthEvaluationResponse:
+    def _resp(self, status: str, message: str, advice: str, compare: Dict[str, str]) -> HealthEvaluationResponse:
         return HealthEvaluationResponse(
             status=self._to_vi_status(status),
             message=message,
@@ -252,57 +71,424 @@ class SelfEvolutionService:
             compare=compare,
         )
 
-    # -----------------------------
-    # Main pipeline
-    # -----------------------------
+    # ------------------------------------------------------------
+    # Core compute blocks (kept architecture)
+    # ------------------------------------------------------------
+    def compute_confidence(self, history_count: int) -> str:
+        if history_count <= 0:
+            return "insufficient"
+        if 1 <= history_count <= 4:
+            return "low"
+        return "high"
+
+    def _trimmed_values(self, values: List[float], ratio: float = 0.1) -> List[float]:
+        if not values:
+            return []
+        if len(values) < 5:
+            return values
+
+        s = sorted(values)
+        k = max(int(len(s) * ratio), 1)
+        if len(s) - 2 * k <= 0:
+            return s
+        return s[k:-k]
+
+    def compute_baseline(self, history: List[dict]) -> Dict[str, Dict[str, float]]:
+        if not history:
+            return {}
+
+        recent = history[-self.BASELINE_WINDOW_DAYS :]
+        baseline: Dict[str, Dict[str, float]] = {}
+
+        for metric in self.METRIC_CFG.keys():
+            values = [float(d.get(metric, 0) or 0) for d in recent if float(d.get(metric, 0) or 0) > 0]
+            if not values:
+                continue
+
+            trimmed = self._trimmed_values(values)
+            center = median(trimmed)
+            sigma = pstdev(trimmed) if len(trimmed) > 1 else 0.0
+
+            baseline[metric] = {
+                "mean": center,
+                "std": sigma,
+                "count": float(len(trimmed)),
+            }
+
+        return baseline
+
+    def _clip(self, x: float, lo: float, hi: float) -> float:
+        return max(lo, min(hi, x))
+
+    def compute_deviation(self, current: dict, baseline: Dict[str, Dict[str, float]]) -> Dict[str, Dict[str, float]]:
+        result: Dict[str, Dict[str, float]] = {}
+
+        for metric, cfg in self.METRIC_CFG.items():
+            curr = float(current.get(metric, 0) or 0)
+            b = baseline.get(metric)
+            if curr <= 0 or not b:
+                continue
+
+            mu = float(b["mean"])
+            std = float(b["std"])
+            raw_dev = curr - mu
+
+            pct_dev = (raw_dev / mu) if mu > 0 else 0.0
+            z = (raw_dev / std) if std > 1e-6 else 0.0
+
+            oriented_pct = pct_dev if cfg["higher_is_better"] else -pct_dev
+            oriented_z = z if cfg["higher_is_better"] else -z
+
+            # normalized impact range ~[-1,1]
+            if abs(oriented_z) > 1e-6:
+                normalized = self._clip(oriented_z / 3.0, -1.0, 1.0)
+            else:
+                normalized = self._clip(oriented_pct * 2.0, -1.0, 1.0)
+
+            result[metric] = {
+                "current": curr,
+                "baseline": mu,
+                "raw_dev": raw_dev,
+                "pct_dev": pct_dev,
+                "zscore": z,
+                "oriented_pct": oriented_pct,
+                "oriented_z": oriented_z,
+                "normalized": normalized,
+            }
+
+        return result
+
+    def compute_trend(self, history: List[dict], current: dict) -> Dict[str, str]:
+        trend: Dict[str, str] = {}
+
+        for metric, cfg in self.METRIC_CFG.items():
+            seq = [float(d.get(metric, 0) or 0) for d in history[-(self.TREND_WINDOW_DAYS - 1) :]]
+            seq.append(float(current.get(metric, 0) or 0))
+            seq = [v for v in seq if v > 0]
+
+            if len(seq) < self.TREND_WINDOW_DAYS:
+                trend[metric] = "stable"
+                continue
+
+            a, b, c = seq[-3], seq[-2], seq[-1]
+            avg = max((a + b + c) / 3, 1e-6)
+
+            d1 = (b - a) / avg
+            d2 = (c - b) / avg
+
+            up_cnt = int(d1 > self.TREND_NOISE_RATIO) + int(d2 > self.TREND_NOISE_RATIO)
+            down_cnt = int(d1 < -self.TREND_NOISE_RATIO) + int(d2 < -self.TREND_NOISE_RATIO)
+
+            increasing = up_cnt >= 2
+            decreasing = down_cnt >= 2
+
+            if cfg["higher_is_better"]:
+                if increasing:
+                    trend[metric] = "improving"
+                elif decreasing:
+                    trend[metric] = "worsening"
+                else:
+                    trend[metric] = "stable"
+            else:
+                if decreasing:
+                    trend[metric] = "improving"
+                elif increasing:
+                    trend[metric] = "worsening"
+                else:
+                    trend[metric] = "stable"
+
+        return trend
+
+    def safety_layer(self, current: dict) -> Tuple[bool, List[str]]:
+        reasons = []
+
+        spo2 = float(current.get("spo2", 0) or 0)
+        hr = float(current.get("heart_rate", 0) or 0)
+        sleep = float(current.get("sleep_hours", 0) or 0)
+
+        if spo2 > 0 and spo2 < self.SAFETY_THRESHOLDS["spo2_critical_low"]:
+            reasons.append("SpO2 ở mức nguy hiểm")
+
+        if hr > 0 and (
+            hr < self.SAFETY_THRESHOLDS["heart_rate_critical_low"]
+            or hr > self.SAFETY_THRESHOLDS["heart_rate_critical_high"]
+        ):
+            reasons.append("Nhịp tim ở mức bất thường nguy hiểm")
+
+        if sleep > 0 and sleep < self.SAFETY_THRESHOLDS["sleep_critical_low"]:
+            reasons.append("Thời gian ngủ quá thấp")
+
+        return (len(reasons) > 0, reasons)
+
+    def _compute_prev_status(self, history: List[dict], confidence: str, baseline: Dict[str, Dict[str, float]]) -> str:
+        if not history:
+            return "normal"
+
+        prev_current = history[-1]
+        prev_hist = history[:-1]
+
+        prev_base = self.compute_baseline(prev_hist) if prev_hist else baseline
+        prev_dev = self.compute_deviation(prev_current, prev_base)
+        prev_tr = self.compute_trend(prev_hist, prev_current)
+
+        status, _ = self._decision_core(prev_dev, prev_tr, confidence)
+        return status
+
+    def _decision_core(self, deviations: Dict[str, Dict[str, float]], trends: Dict[str, str], confidence: str) -> Tuple[str, Dict[str, float]]:
+        if not deviations:
+            return "normal", {"score": 0.0, "improving": 0.0, "worsening": 0.0}
+
+        # unbiased combine: mean of normalized metrics
+        normalized_values = [float(d.get("normalized", 0.0)) for d in deviations.values()]
+        core_score = mean(normalized_values) if normalized_values else 0.0
+
+        total = max(len(trends), 1)
+        improving_ratio = sum(1 for t in trends.values() if t == "improving") / total
+        worsening_ratio = sum(1 for t in trends.values() if t == "worsening") / total
+
+        if confidence == "high":
+            good_cut = self.SCORE_GOOD_HIGH_CONF
+            bad_cut = self.SCORE_BAD_HIGH_CONF
+        else:
+            good_cut = self.SCORE_GOOD_LOW_CONF
+            bad_cut = self.SCORE_BAD_LOW_CONF
+
+        if core_score >= good_cut and improving_ratio >= 0.45:
+            return "good", {"score": core_score, "improving": improving_ratio, "worsening": worsening_ratio}
+
+        if core_score <= bad_cut and worsening_ratio >= 0.45:
+            return "bad", {"score": core_score, "improving": improving_ratio, "worsening": worsening_ratio}
+
+        return "normal", {"score": core_score, "improving": improving_ratio, "worsening": worsening_ratio}
+
+    def _integrate_ml(
+        self,
+        core_score: float,
+        confidence: str,
+        safety_trigger: bool,
+        deviations: Dict[str, Dict[str, float]],
+        trends: Dict[str, str],
+        baseline: Dict[str, Dict[str, float]],
+    ) -> Tuple[float, Dict[str, float]]:
+        # Gating condition (required)
+        use_ml = (
+            (not safety_trigger)
+            and confidence != "insufficient"
+            and abs(core_score) < self.ML_NEAR_ZERO_THRESHOLD
+        )
+
+        ml_output = {"risk_score": 0.0, "anomaly_score": 0.0, "uncertainty": False}
+        adjusted_score = core_score
+
+        if not use_ml:
+            return adjusted_score, ml_output
+
+        ml_output = self.ml_support.infer(
+            deviations=deviations,
+            trends=trends,
+            baseline=baseline,
+            confidence=confidence,
+            core_score=core_score,
+        )
+
+        # Shadow mode: log-only, không ảnh hưởng user-facing decision
+        if self.ml_shadow_mode:
+            logger.info(f"[ML-SHADOW] core_score={core_score:.3f} ml={ml_output}")
+            return adjusted_score, ml_output
+
+        delta = 0.0
+        if ml_output.get("anomaly_score", 0.0) > 0.7:
+            delta -= self.ML_ADJUST_STEP
+
+        if ml_output.get("risk_score", 0.0) > 0.7:
+            delta -= self.ML_ADJUST_STEP
+
+        delta = self._clip(delta, -self.ML_SCORE_CAP, self.ML_SCORE_CAP)
+
+        adjusted_score = core_score + delta
+
+        if ml_output.get("uncertainty", False):
+            adjusted_score *= 0.85
+
+        return adjusted_score, ml_output
+
+    def _status_from_score(self, score: float, improving_ratio: float, worsening_ratio: float, confidence: str) -> str:
+        if confidence == "high":
+            good_cut = self.SCORE_GOOD_HIGH_CONF
+            bad_cut = self.SCORE_BAD_HIGH_CONF
+        else:
+            good_cut = self.SCORE_GOOD_LOW_CONF
+            bad_cut = self.SCORE_BAD_LOW_CONF
+
+        if score >= good_cut and improving_ratio >= 0.45:
+            return "good"
+        if score <= bad_cut and worsening_ratio >= 0.45:
+            return "bad"
+        return "normal"
+
+    def _apply_hysteresis(self, prev_status: str, candidate_status: str, score: float, confidence: str) -> str:
+        margin = 0.08 if confidence == "high" else 0.12
+
+        if prev_status == "bad" and candidate_status == "normal" and score < margin:
+            return "bad"
+
+        if prev_status == "good" and candidate_status == "normal" and score > -margin:
+            return "good"
+
+        if prev_status == "normal" and candidate_status == "good" and score < (self.SCORE_GOOD_HIGH_CONF + margin):
+            return "normal"
+
+        if prev_status == "normal" and candidate_status == "bad" and score > (self.SCORE_BAD_HIGH_CONF - margin):
+            return "normal"
+
+        return candidate_status
+
+    def decision_engine(
+        self,
+        deviations: Dict[str, Dict[str, float]],
+        trends: Dict[str, str],
+        confidence: str,
+        safety_trigger: bool = False,
+        baseline: Optional[Dict[str, Dict[str, float]]] = None,
+        history: Optional[List[dict]] = None,
+    ) -> Tuple[str, Dict[str, float]]:
+        baseline = baseline or {}
+        history = history or []
+
+        core_status, core_diag = self._decision_core(deviations, trends, confidence)
+        core_score = float(core_diag.get("score", 0.0))
+
+        final_score, ml_output = self._integrate_ml(
+            core_score=core_score,
+            confidence=confidence,
+            safety_trigger=safety_trigger,
+            deviations=deviations,
+            trends=trends,
+            baseline=baseline,
+        )
+
+        improving_ratio = float(core_diag.get("improving", 0.0))
+        worsening_ratio = float(core_diag.get("worsening", 0.0))
+
+        candidate_status = self._status_from_score(final_score, improving_ratio, worsening_ratio, confidence)
+
+        prev_status = self._compute_prev_status(history, confidence, baseline)
+        final_status = self._apply_hysteresis(prev_status, candidate_status, final_score, confidence)
+
+        return final_status, {
+            "score": final_score,
+            "core_score": core_score,
+            "improving": improving_ratio,
+            "worsening": worsening_ratio,
+            "ml_risk_score": float(ml_output.get("risk_score", 0.0)),
+            "ml_anomaly_score": float(ml_output.get("anomaly_score", 0.0)),
+            "ml_uncertainty": 1.0 if ml_output.get("uncertainty", False) else 0.0,
+            "core_status_id": 1.0 if core_status == "good" else -1.0 if core_status == "bad" else 0.0,
+        }
+
+    # ------------------------------------------------------------
+    # Presentation helpers
+    # ------------------------------------------------------------
+    def build_compare(self, deviations: Dict[str, Dict[str, float]]) -> Dict[str, str]:
+        compare: Dict[str, str] = {}
+        for metric, d in deviations.items():
+            cfg = self.METRIC_CFG[metric]
+            current = d["current"]
+            baseline = d["baseline"]
+            pct = d["pct_dev"] * 100
+            sign = "+" if pct >= 0 else ""
+
+            compare[metric] = (
+                f"{cfg['label']}: hiện tại {current:.1f}{cfg['unit']}, "
+                f"baseline {baseline:.1f}{cfg['unit']} ({sign}{pct:.1f}% so với baseline)"
+            )
+
+        return compare
+
+    def build_message_advice(self, status: str, confidence: str, diagnostics: Dict[str, float], safety_reasons: List[str]) -> Tuple[str, str]:
+        if status == "bad":
+            if safety_reasons:
+                return (
+                    f"Phát hiện chỉ số nguy hiểm: {', '.join(safety_reasons)}.",
+                    "Hãy nghỉ ngơi, đo lại chỉ số ngay và liên hệ hỗ trợ y tế nếu triệu chứng kéo dài.",
+                )
+            return (
+                "Một số chỉ số đang thấp hơn baseline cá nhân và có xu hướng xấu đi.",
+                "Nên giảm tải hoạt động, cải thiện giấc ngủ và theo dõi sát trong 24 giờ tới.",
+            )
+
+        if status == "good":
+            return (
+                "Các chỉ số đang tốt hơn baseline cá nhân và xu hướng đang cải thiện.",
+                "Tiếp tục duy trì thói quen hiện tại để giữ nhịp sức khỏe ổn định.",
+            )
+
+        if confidence == "insufficient":
+            return (
+                "Chưa đủ dữ liệu để phân tích xu hướng sức khỏe cá nhân.",
+                "Hãy tiếp tục ghi nhận chỉ số thêm vài ngày để hệ thống đánh giá chính xác hơn.",
+            )
+
+        if confidence == "low":
+            return (
+                "Tình trạng hiện tại ở mức bình thường (độ tin cậy còn thấp do dữ liệu ngắn hạn).",
+                "Tiếp tục duy trì thói quen sinh hoạt đều và theo dõi thêm để tăng độ chính xác.",
+            )
+
+        score = diagnostics.get("score", 0.0)
+        return (
+            f"Tình trạng hiện tại ở mức bình thường, gần baseline cá nhân (điểm tổng hợp {score:.2f}).",
+            "Tiếp tục duy trì vận động, giấc ngủ điều độ và theo dõi định kỳ.",
+        )
+
+    # ------------------------------------------------------------
+    # Main entry
+    # ------------------------------------------------------------
     def predict(self, data: HealthDataInput) -> HealthEvaluationResponse:
         try:
-            current_raw = (
+            current = (
                 data.current_metrics.model_dump()
                 if hasattr(data.current_metrics, "model_dump")
                 else data.current_metrics.dict()
             )
-            history_objs = data.history or []
-            history_raw = [h.model_dump() if hasattr(h, "model_dump") else h.dict() for h in history_objs]
+            history = [h.model_dump() if hasattr(h, "model_dump") else h.dict() for h in (data.history or [])]
 
-            current = self._apply_ema(current_raw, history_raw)
-            compare = compare_daily(current_raw, history_raw)
+            df_hist = process_history(history)
+            history_sorted = df_hist.to_dict("records") if not df_hist.empty else []
 
-            # 1) SAFETY RULE (HARD LOCK - RETURN IMMEDIATELY)
-            safety = self.safety_rule(current)
-            if safety["matched"]:
-                message, advice = self._build_output_text("xau", safety["reason"])
-                return self._resp("xau", message, advice, compare)
+            confidence = self.compute_confidence(len(history_sorted))
 
-            # 2) COMPUTE CANDIDATE STATUS (NO EARLY RETURN)
-            good_zone = self.good_zone_gate(current)
-            baseline = self.baseline_normal_gate(current)
+            if confidence == "insufficient":
+                message, advice = self.build_message_advice("normal", confidence, {}, [])
+                return self._resp("normal", message, advice, {})
 
-            if good_zone["matched"]:
-                candidate_status = "tot"
-                candidate_reason = good_zone["reason"]
-            elif baseline["matched"]:
-                candidate_status = "binh_thuong"
-                candidate_reason = baseline["reason"]
-            else:
-                # 3) MODEL PREDICTION (fallback region)
-                if self.use_model and len(history_raw) >= 1:
-                    f = build_features(current, history_raw)
-                    X = [[f.get(col, 0) for col in self.features_cols]]
-                    pred = self.model.predict(X)[0]
-                    candidate_status = {0: "xau", 1: "binh_thuong", 2: "tot"}.get(int(pred), "binh_thuong")
-                    candidate_reason = []
-                else:
-                    candidate_status = "binh_thuong"
-                    candidate_reason = []
+            is_safety, safety_reasons = self.safety_layer(current)
+            baseline = self.compute_baseline(history_sorted)
+            deviations = self.compute_deviation(current, baseline)
+            compare = self.build_compare(deviations)
 
-            # 4) HYSTERESIS + DEADBAND (APPLY FOR ALL NON-SAFETY)
-            final_status = self.apply_hysteresis(candidate_status, current, history_raw)
+            if is_safety:
+                message, advice = self.build_message_advice("bad", confidence, {}, safety_reasons)
+                return self._resp("bad", message, advice, compare)
 
-            message, advice = self._build_output_text(final_status, candidate_reason)
-            return self._resp(final_status, message, advice, compare)
+            trends = self.compute_trend(history_sorted, current)
+            status, diagnostics = self.decision_engine(
+                deviations=deviations,
+                trends=trends,
+                confidence=confidence,
+                safety_trigger=is_safety,
+                baseline=baseline,
+                history=history_sorted,
+            )
+
+            message, advice = self.build_message_advice(status, confidence, diagnostics, [])
+            return self._resp(status, message, advice, compare)
 
         except Exception as e:
             logger.error(f"Predict Error: {e}", exc_info=True)
-            message, advice = self._build_output_text("binh_thuong", [])
-            return self._resp("binh_thuong", message, advice, {})
+            return self._resp(
+                "normal",
+                "Có lỗi trong quá trình phân tích, tạm thời trả kết quả bình thường.",
+                "Vui lòng thử lại sau và tiếp tục theo dõi dữ liệu hằng ngày.",
+                {},
+            )
