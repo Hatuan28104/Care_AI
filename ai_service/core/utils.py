@@ -52,13 +52,11 @@ def format_change(diff: float, current: float, unit: str = "", positive_good: bo
         return f"{curr_str}{unit} (duy trì ổn định)"
     
     if diff > 0:
-        icon = "👍" if positive_good else "⚠️"
         action = "tăng"
-        return f"{curr_str}{unit} ({action} {diff_str} so với lần đo gần nhất {icon})"
+        return f"{curr_str}{unit} ({action} {diff_str} so với lần đo gần nhất)"
     elif diff < 0:
-        icon = "⚠️" if positive_good else "👍"
         action = "giảm"
-        return f"{curr_str}{unit} ({action} {diff_str} so với lần đo gần nhất {icon})"
+        return f"{curr_str}{unit} ({action} {diff_str} so với lần đo gần nhất)"
     
     return f"{curr_str}{unit} (duy trì ổn định)"
 
@@ -66,34 +64,71 @@ def compare_daily(current: dict, history: list) -> dict:
     df = process_history(history)
     if df.empty:
         return {}
-        
+
     # Use last record as baseline
     last_record = df.iloc[-1]
-        
     today = current
-    
+
     compare = {}
     # format: key -> (unit, is_good_when_up, threshold)
     metrics = {
-        "steps": (" bước", True, 1500),         
-        "sleep_hours": (" giờ", True, 1.0),   
-        "heart_rate": (" bpm", False, 5),    
-        "spo2": ("%", True, 2),             
-        "hrv": (" ms", True, 5),          
+        "steps": (" bước", True, 1500),
+        "sleep_hours": (" giờ", True, 1.0),
+        "heart_rate": (" bpm", False, 5),
+        "spo2": ("%", True, 2),
+        "hrv": (" ms", True, 5),
         "distance": (" km", True, 0.5)
     }
-    
+
     for key, (unit, is_good_when_up, threshold) in metrics.items():
         val_today = today.get(key, 0)
-        if val_today > 0:
-            val_last = last_record.get(key, 0)
-            if val_last > 0:
-                diff = val_today - val_last
-                compare[key] = format_change(diff, val_today, unit, is_good_when_up, threshold)
+        if val_today <= 0:
+            continue
+
+        val_last = last_record.get(key, 0)
+        if val_last <= 0:
+            compare[key] = f"{format_number(val_today)}{unit}"
+            continue
+
+        diff = val_today - val_last
+
+        # Absolute-aware compare for critical vitals
+        if key == "spo2" and val_today < 90:
+            action = "tăng" if diff > 0 else "giảm" if diff < 0 else "không đổi"
+            if diff == 0:
+                compare[key] = f"{format_number(val_today)}{unit} (rất thấp)"
             else:
-                compare[key] = f"{format_number(val_today)}{unit}"
-                
+                compare[key] = (
+                    f"{format_number(val_today)}{unit} "
+                    f"({action} {format_number(abs(diff))} nhưng vẫn rất thấp)"
+                )
+            continue
+
+        if key == "heart_rate" and val_today > 130:
+            action = "tăng" if diff > 0 else "giảm" if diff < 0 else "không đổi"
+            if diff == 0:
+                compare[key] = f"{format_number(val_today)}{unit} (rất cao)"
+            else:
+                compare[key] = (
+                    f"{format_number(val_today)}{unit} "
+                    f"({action} {format_number(abs(diff))} nhưng vẫn rất cao)"
+                )
+            continue
+
+        if key == "heart_rate" and val_today > 110:
+            action = "tăng" if diff > 0 else "giảm" if diff < 0 else "không đổi"
+            if diff == 0:
+                compare[key] = f"{format_number(val_today)}{unit} (cao)"
+            else:
+                compare[key] = (
+                    f"{format_number(val_today)}{unit} "
+                    f"({action} {format_number(abs(diff))} nhưng vẫn cao)"
+                )
+            continue
+
+        compare[key] = format_change(diff, val_today, unit, is_good_when_up, threshold)
+
     if "sleep_hours" in compare:
         compare["sleep"] = compare.pop("sleep_hours")
-        
+
     return compare

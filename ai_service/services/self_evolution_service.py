@@ -1,5 +1,4 @@
 import logging
-import random
 from core.schema import HealthDataInput, HealthEvaluationResponse
 from core.utils import build_features, compare_daily
 
@@ -12,17 +11,28 @@ class SelfEvolutionService:
         self.use_model = self.model is not None and self.features_cols is not None
 
     def rule_guardrail(self, current: dict) -> dict:
-        """Check for critical vital signs that require immediate override"""
         spo2 = current.get("spo2", 100)
         hr = current.get("heart_rate", 70)
         sleep = current.get("sleep_hours", 8)
 
-        if spo2 < 92 or hr > 110 or sleep < 4:
-            return {"override": True, "status": "xấu", "reason": "Vital signs critical"}
-        return {"override": False}
+        reasons = []
+        if spo2 < 92:
+            reasons.append("SpO2 thấp")
+        if hr > 110:
+            reasons.append("Nhịp tim cao")
+        if sleep < 4:
+            reasons.append("Thiếu ngủ nghiêm trọng")
+
+        if reasons:
+            return {
+                "override": True,
+                "status": "xấu",
+                "reason": "; ".join(reasons),
+                "reasons": reasons
+            }
+        return {"override": False, "reasons": []}
 
     def evaluate_metrics(self, f: dict) -> dict:
-        """Extract metric diffs for message generation"""
         return {
             "steps": f.get("steps_diff", 0),
             "sleep_hours": f.get("sleep_diff", 0),
@@ -32,11 +42,30 @@ class SelfEvolutionService:
             "distance": f.get("distance_diff", 0)
         }
 
+    def validate_input_quality(self, current: dict) -> dict:
+        flags = []
+        warnings = []
+
+        spo2 = current.get("spo2", 0)
+        hr = current.get("heart_rate", 0)
+
+        if spo2 and spo2 < 70:
+            flags.append("sensor_error_or_critical")
+            warnings.append("SpO2 quá thấp bất thường, cần kiểm tra thiết bị hoặc đo lại ngay")
+
+        if hr and hr > 200:
+            flags.append("invalid_data")
+            warnings.append("Nhịp tim vượt ngưỡng dữ liệu hợp lệ, cần kiểm tra thiết bị")
+
+        return {
+            "has_anomaly": len(flags) > 0,
+            "flags": flags,
+            "warnings": warnings
+        }
+
     def build_metric_message(self, status: str, diffs: dict, override_info: dict) -> dict:
-        """Build natural language message and advice based on metric changes"""
         PRIORITY = ["spo2", "heart_rate", "sleep_hours", "steps", "hrv", "distance"]
 
-        # Metric message pools with intensity levels
         METRIC_MESSAGES = {
             "steps": {
                 "good": {
@@ -112,7 +141,6 @@ class SelfEvolutionService:
             }
         }
 
-        # Advice pools with intensity
         METRIC_ADVICE = {
             "spo2": {
                 "bad": {
@@ -158,8 +186,10 @@ class SelfEvolutionService:
             }
         }
 
-        # Determine metric statuses and intensities
-        def get_metric_status_and_intensity(metric: str, diff: float):
+
+        current_metrics = override_info.get("current_metrics", {}) if isinstance(override_info, dict) else {}
+
+        def get_metric_status_and_intensity(metric: str, diff: float, current_value: float = None):
             if metric == "steps":
                 if diff > 1000: return "good", "strong"
                 elif diff > 500: return "good", "moderate"
@@ -182,6 +212,11 @@ class SelfEvolutionService:
                 elif diff > 5: return "bad", "moderate"
                 elif diff > 2: return "bad", "mild"
             elif metric == "spo2":
+                if current_value is None:
+                    return "neutral", None
+
+                if current_value < 90:
+                    return "bad", "strong"
                 if diff > 5: return "good", "strong"
                 elif diff > 2: return "good", "moderate"
                 elif diff > 1: return "good", "mild"
@@ -204,38 +239,41 @@ class SelfEvolutionService:
                 elif diff < -0.2: return "bad", "mild"
             return "neutral", None
 
-        # Get all metric statuses
         metric_data = {}
         for metric, diff in diffs.items():
-            metric_status, intensity = get_metric_status_and_intensity(metric, diff)
+            metric_status, intensity = get_metric_status_and_intensity(metric, diff, current_metrics.get(metric))
             if metric_status != "neutral":
                 metric_data[metric] = {"status": metric_status, "intensity": intensity, "priority": PRIORITY.index(metric)}
 
-        # Sort by priority
-        good_metrics = sorted([m for m, d in metric_data.items() if d["status"] == "good"],
-                            key=lambda x: metric_data[x]["priority"])
-        bad_metrics = sorted([m for m, d in metric_data.items() if d["status"] == "bad"],
-                           key=lambda x: metric_data[x]["priority"])
+        good_metrics = sorted(
+            [m for m, d in metric_data.items() if d["status"] == "good"],
+            key=lambda x: metric_data[x]["priority"]
+        )
+        bad_metrics = sorted(
+            [m for m, d in metric_data.items() if d["status"] == "bad"],
+            key=lambda x: metric_data[x]["priority"]
+        )
 
-        # Build message
+        if override_info.get("override") and "spo2" in bad_metrics:
+            bad_metrics.remove("spo2")
+            bad_metrics.insert(0, "spo2")
+        if override_info.get("override"):
+            good_metrics = []
         message_parts = []
 
-        # Add good metric (highest priority)
         if good_metrics:
             metric = good_metrics[0]
             intensity = metric_data[metric]["intensity"]
             variants = METRIC_MESSAGES[metric]["good"][intensity]
-            message_parts.append(random.choice(variants))
+            message_parts.append(variants[0])
 
-        # Add bad metric (highest priority)
         if bad_metrics:
             metric = bad_metrics[0]
             intensity = metric_data[metric]["intensity"]
             variants = METRIC_MESSAGES[metric]["bad"][intensity]
-            bad_msg = random.choice(variants)
+            bad_msg = variants[0]
             if message_parts:
-                connectors = ["tuy nhiên", "mặc dù", "nhưng"]
-                connector = random.choice(connectors)
+                connector = "tuy nhiên"
                 message_parts.append(f"{connector} {bad_msg.lower()}")
             else:
                 message_parts.append(bad_msg)
@@ -247,10 +285,10 @@ class SelfEvolutionService:
             message = f"{message_parts[0]}, {message_parts[1]}"
         else:
             message = message_parts[0]
-        # Build advice
+
         advice_parts = []
         if bad_metrics:
-            for metric in bad_metrics[:2]:  # Top 2 bad metrics
+            for metric in bad_metrics[:2]: 
                 intensity = metric_data[metric]["intensity"]
                 if metric in METRIC_ADVICE and "bad" in METRIC_ADVICE[metric]:
                     advice_parts.append(METRIC_ADVICE[metric]["bad"][intensity])
@@ -270,14 +308,12 @@ class SelfEvolutionService:
         else:
             advice = "Tiếp tục duy trì thói quen lành mạnh và theo dõi sức khỏe thường xuyên."
 
-        # Override for danger
         if override_info.get("override"):
-            message = f"Trạng thái nguy hiểm: {override_info['reason']}"
-            advice = "Hãy kiểm tra sức khỏe ngay và liên hệ bác sĩ nếu cần!"
+            readable_warning = override_info.get("reason", "một số chỉ số đang ở mức nguy hiểm")
+            message = f"{message}, cần chú ý vì {readable_warning.lower()}"
+            advice = f"{advice} Nếu cảm thấy bất thường, hãy kiểm tra sức khỏe ngay."
 
         return {"status": status, "message": message, "advice": advice}
-
-        
 
     def predict(self, data: HealthDataInput) -> HealthEvaluationResponse:
         try:
@@ -292,38 +328,45 @@ class SelfEvolutionService:
                     compare={}
                 )
 
-            # 1. Build features (baseline = last_record)
             f = build_features(current_data, history)
 
-            # 2. Model predict → status
+            data_quality = self.validate_input_quality(current_data)
+
             if self.use_model:
                 X = [[f.get(col, 0) for col in self.features_cols]]
                 result = self.model.predict(X)[0]
                 status = ["xấu", "bình thường", "tốt"][result]
             else:
-                # Fallback to neutral if no model
-                status = "bình thường"
+                return HealthEvaluationResponse(
+                    status="không xác định",
+                    message="Không đủ dữ liệu để đánh giá chính xác",
+                    advice="Hãy kiểm tra thiết bị hoặc thử lại sau",
+                    compare=compare_daily(current_data, history),
+                )
 
-            # 3. Rule guardrail → check danger
             override_info = self.rule_guardrail(current_data)
+            override_info["current_metrics"] = current_data
+            override_info["data_quality"] = data_quality
             if override_info["override"]:
                 status = override_info["status"]
 
-            # 4. Evaluate metrics → for explain
             metrics_info = self.evaluate_metrics(f)
 
-            # 5. Build metric-based message
             resp = self.build_metric_message(status, metrics_info, override_info)
 
-            # 6. Compare daily
             compare = compare_daily(current_data, history)
 
-            # 7. Return response
+            
+
+            if data_quality["has_anomaly"]:
+                resp["message"] = f"{resp['message']}. Cảnh báo dữ liệu: {'; '.join(data_quality['warnings'])}."
+                resp["advice"] = f"{resp['advice']} Vui lòng đo lại để xác nhận chỉ số."
+
             return HealthEvaluationResponse(
                 status=resp["status"],
                 message=resp["message"],
                 advice=resp["advice"],
-                compare=compare
+                compare=compare,
             )
 
         except Exception as e:
