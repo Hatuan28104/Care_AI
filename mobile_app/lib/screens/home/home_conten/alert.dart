@@ -114,9 +114,7 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
       return const Color(0xFFE6EA00);
     }
 
-    if (text.contains("tốt") ||
-        text.contains("tuyệt vời") ||
-        text.contains("cải thiện")) {
+    if (text.contains("tốt") || text.contains("tuyệt vời")) {
       return const Color(0xFF139D4A);
     }
 

@@ -98,7 +98,7 @@ function mapCompareTitleUser(status) {
 function mapCompareTitleGuardian(status) {
   switch (status) {
     case "tốt":
-      return "Chỉ số của người thân cải thiện";
+      return "Chỉ số của người thân tốt hơn hôm qua";
     case "xấu":
       return "Chỉ số của người thân giảm";
     default:
