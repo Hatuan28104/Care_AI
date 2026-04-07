@@ -170,22 +170,26 @@ export async function verifyOtp(phone, otp, req, deviceId) {
   );
 
   /* ===== LOGIN HISTORY ===== */
-  const userAgent = req.headers["user-agent"] || "Unknown";
+  const { device, deviceId: bodyDeviceId, login_time, ip: bodyIp } = req.body || {};
   const ip =
+    bodyIp ||
     req.headers["x-forwarded-for"]?.split(",")[0] ||
     req.socket.remoteAddress ||
     "";
-  const address = req.headers["x-forwarded-for"] || req.socket.remoteAddress || "";
-  const device = deviceId || userAgent;
 
-  const { error: loginHistoryError } = await db.from("lichsudangnhap").insert({
+  const insertData = {
     lichsu_id: crypto.randomUUID(),
-    thoigian: new Date().toISOString(),
-    thietbi: device || null,
-    diachi: address || null,
+    thoigian: login_time ? new Date(login_time) : new Date(),
+    thietbi: device && device.trim() !== "" 
+    ? device 
+    : "Unknown",    diachi: ip || null,
     ip: ip || null,
     taikhoan_id: user.taikhoan_id,
-  });
+  };
+
+  const { error: loginHistoryError } = await db
+    .from("lichsudangnhap")
+    .insert(insertData);
 
   if (loginHistoryError) {
     console.error("Insert login history failed", {

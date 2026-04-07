@@ -8,6 +8,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:Care_AI/config/api_config.dart';
 import 'api_exception.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:Care_AI/services/time_service.dart';
 import 'dart:io';
 
 class AuthApi {
@@ -24,6 +25,31 @@ class AuthApi {
     } else {
       return 'web-device';
     }
+  }
+
+  static Future<String> getDeviceName() async {
+    try {
+      final deviceInfo = DeviceInfoPlugin();
+      if (Platform.isAndroid) {
+        final androidInfo = await deviceInfo.androidInfo;
+        final brand = androidInfo.brand.trim();
+        final model = androidInfo.model.trim();
+        return "$brand $model".trim();
+      }
+      if (Platform.isIOS) {
+        final iosInfo = await deviceInfo.iosInfo;
+        final name = iosInfo.name.trim();
+        final model = iosInfo.model.trim();
+        return "$name $model".trim();
+      }
+      return "Unknown device";
+    } catch (_) {
+      return "Unknown device";
+    }
+  }
+
+  static String getLoginTime() {
+    return TimeService.nowLocalIso();
   }
 
   /* =========================     REGISTER – GỬI OTP
@@ -76,6 +102,8 @@ class AuthApi {
   ========================= */
   static Future<User> verifyOtp(String phone, String otp) async {
     final deviceId = await getDeviceId();
+    final deviceName = await getDeviceName();
+    final loginTime = getLoginTime();
     final fcmToken = await FirebaseMessaging.instance.getToken();
 
     final res = await http
@@ -86,6 +114,8 @@ class AuthApi {
             'phone': phone,
             'otp': otp,
             'deviceId': deviceId,
+            'device': deviceName,
+            'login_time': loginTime,
             'fcmToken': fcmToken,
           }),
         )

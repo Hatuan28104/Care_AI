@@ -106,20 +106,18 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
   Color _getBorderColor(String title, String detail) {
     final text = (title + " " + detail).toLowerCase();
 
-    if (text.contains("nguy hiểm") || text.contains("giảm")) {
+    if (text.contains("nguy hiểm") || text.contains("bất thường")) {
       return Colors.red;
     }
-
-    if (text.contains("bình thường")) {
-      return const Color(0xFFE6EA00);
-    }
-
     if (text.contains("tốt") ||
         text.contains("tuyệt vời") ||
         text.contains("tích cực")) {
       return const Color(0xFF139D4A);
     }
 
+    if (text.contains("bình thường")) {
+      return const Color(0xFFE6EA00);
+    }
     return Colors.grey.shade300;
   }
   /* ================= BUILD ================= */

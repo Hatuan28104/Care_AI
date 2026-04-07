@@ -1,4 +1,8 @@
 class TimeService {
+  static String nowLocalIso() {
+    return DateTime.now().toLocal().toIso8601String();
+  }
+
   static DateTime toLocal(String iso) {
     if (iso.isEmpty) return DateTime.now();
     try {
