@@ -1029,4 +1029,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get saved => 'Đã lưu dữ liệu';
+
+  @override
+  String get year => 'Năm';
 }

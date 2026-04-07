@@ -5,8 +5,23 @@ class TimeService {
 
   static DateTime toLocal(String iso) {
     if (iso.isEmpty) return DateTime.now();
+
     try {
-      return DateTime.parse(iso).toLocal();
+      final parsed = DateTime.parse(iso);
+
+      if (!iso.contains('Z') && !iso.contains('+')) {
+        return DateTime.utc(
+          parsed.year,
+          parsed.month,
+          parsed.day,
+          parsed.hour,
+          parsed.minute,
+          parsed.second,
+          parsed.millisecond,
+        ).toLocal();
+      }
+
+      return parsed.toLocal();
     } catch (e) {
       return DateTime.now();
     }
@@ -25,10 +40,13 @@ class TimeService {
     final d = toLocal(iso);
     final now = DateTime.now();
 
-    final isToday = d.year == now.year && d.month == now.month && d.day == now.day;
+    final isToday =
+        d.year == now.year && d.month == now.month && d.day == now.day;
 
     final yesterday = now.subtract(const Duration(days: 1));
-    final isYesterday = d.year == yesterday.year && d.month == yesterday.month && d.day == yesterday.day;
+    final isYesterday = d.year == yesterday.year &&
+        d.month == yesterday.month &&
+        d.day == yesterday.day;
 
     if (isToday) return "Hôm nay ${_two(d.hour)}:${_two(d.minute)}";
     if (isYesterday) return "Hôm qua ${_two(d.hour)}:${_two(d.minute)}";

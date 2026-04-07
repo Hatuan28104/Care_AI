@@ -1029,4 +1029,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get saved => '保存成功';
+
+  @override
+  String get year => '年';
 }

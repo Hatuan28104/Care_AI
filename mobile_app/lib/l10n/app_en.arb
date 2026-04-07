@@ -420,5 +420,7 @@
   "enterValue": "Enter value...",
   "cancel": "Cancel",
   "save": "Save",
-  "saved": "Saved successfully"
+  "saved": "Saved successfully",
+  "year": "Year"
+  
 }

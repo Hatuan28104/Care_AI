@@ -11,7 +11,7 @@ const TextStyle _axisTextStyle = TextStyle(
   fontWeight: FontWeight.w600,
 );
 
-enum MetricRange { d, w, m, m6 }
+enum MetricRange { d, w, m, y }
 
 class MetricDetailScreen extends StatefulWidget {
   const MetricDetailScreen({
@@ -36,6 +36,7 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
   MetricRange _range = MetricRange.d;
   List<double> _values = [];
   List<String> _labels = [];
+  int _loadVersion = 0;
 
   MetricConfig get _config =>
       metricConfigs[widget.metricId.trim()] ??
@@ -80,8 +81,8 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
       return "${context.tr.month} ${now.month}/${now.year}";
     }
 
-    if (_range == MetricRange.m6) {
-      final start = DateTime(now.year, now.month - 5);
+    if (_range == MetricRange.y) {
+      final start = DateTime(now.year - 1, now.month, now.day);
       return "${start.month}/${start.year} - ${now.month}/${now.year}";
     }
 
@@ -93,140 +94,165 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
     return days[weekday - 1];
   }
 
-  double _v(e) => (e != null && e.isNotEmpty)
-      ? (e['giatri'] as num?)?.toDouble() ?? -1
-      : -1;
   /* =========================
      LOAD DATA
   ========================= */
   Future<void> _loadData() async {
+    final targetRange = _range;
+    final requestVersion = ++_loadVersion;
+
+    setState(() {
+      _values = [];
+      _labels = [];
+    });
+
     try {
       final data = await HealthApi.getHealthHistoryByUser(
         widget.metricId,
-        _range.name,
+        targetRange.name,
       );
-      double? latest;
 
+      double? latest;
       data.sort((a, b) {
-        final t1 = TimeService.toLocal(a['thoigiancapnhat']);
-        final t2 = TimeService.toLocal(b['thoigiancapnhat']);
+        final t1 = TimeService.toLocal((a['thoigiancapnhat'] ?? '').toString());
+        final t2 = TimeService.toLocal((b['thoigiancapnhat'] ?? '').toString());
         return t2.compareTo(t1);
       });
 
-      for (var e in data) {
+      for (final e in data) {
         final v = (e['giatri'] as num?)?.toDouble();
         if (v != null) {
           latest = v;
           break;
         }
       }
-      debugPrint("DETAIL KEY: ${widget.metricId}");
-      debugPrint("DATA LENGTH: ${data.length}");
 
-      if (data.isEmpty) {
-        setState(() {
-          _values = [];
-          _labels = [];
-        });
-        return;
-      }
-
-      Map<String, List<double>> grouped = {};
-      if (_range == MetricRange.d) {
-        grouped = {"0": [], "6": [], "12": [], "18": []};
-      } else if (_range == MetricRange.w) {
-        grouped = {
-          "1": [],
-          "2": [],
-          "3": [],
-          "4": [],
-          "5": [],
-          "6": [],
-          "7": []
-        };
-      } else if (_range == MetricRange.m) {
-        grouped = {"0": [], "1": [], "2": [], "3": [], "4": []};
-      } else if (_range == MetricRange.m6) {
-        grouped = {
-          "1": [],
-          "2": [],
-          "3": [],
-          "4": [],
-          "5": [],
-          "6": [],
-          "7": [],
-          "8": [],
-          "9": [],
-          "10": [],
-          "11": [],
-          "12": []
-        };
-      }
-      for (var e in data) {
-        final raw = e['thoigiancapnhat'];
-        if (raw == null) continue;
-
-        final t = TimeService.toLocal(raw.toString());
-
-        String key;
-
-        if (_range == MetricRange.d) {
-          int block = (t.hour ~/ 6) * 6;
-          key = "$block";
-        } else if (_range == MetricRange.w) {
-          key = "${t.weekday}";
-        } else if (_range == MetricRange.m) {
-          int week = ((t.day - 1) ~/ 7);
-          key = "$week";
-        } else {
-          key = "${t.month}";
-        }
-
-        final value = (e['giatri'] as num?)?.toDouble();
-        if (value == null) continue;
-
-        grouped.putIfAbsent(key, () => []);
-        grouped[key]!.add(value);
-      }
-
-      if (grouped.isEmpty) {
-        setState(() {
-          _values = [];
-          _labels = [];
-        });
-        return;
-      }
       final values = <double>[];
       final labels = <String>[];
-      double avg(List<double>? list) {
-        if (list == null || list.isEmpty) return -1;
+      final now = DateTime.now();
+
+      double avg(List<double> list) {
+        if (list.isEmpty) return -1;
         return list.reduce((a, b) => a + b) / list.length;
       }
 
-      if (_range == MetricRange.d) {
-        for (var s in ["0", "6", "12", "18"]) {
-          values.add(avg(grouped[s]));
-          labels.add("${s}h");
+      if (targetRange == MetricRange.d) {
+        final grouped = List.generate(4, (_) => <double>[]);
+
+        for (final e in data) {
+          final raw = e['thoigiancapnhat'];
+          if (raw == null) continue;
+          final t = TimeService.toLocal(raw.toString());
+          final value = (e['giatri'] as num?)?.toDouble();
+          if (value == null) continue;
+
+          final diffHours = now.difference(t).inHours;
+          if (diffHours < 0 || diffHours >= 24) continue;
+
+          final slotFromNow = diffHours ~/ 6;
+          final bucket = 3 - slotFromNow;
+          if (bucket >= 0 && bucket < 4) {
+            grouped[bucket].add(value);
+          }
         }
-      } else if (_range == MetricRange.w) {
-        final now = DateTime.now();
+
+        const dayLabels = ["0h", "6h", "12h", "18h"];
+        for (int i = 0; i < 4; i++) {
+          values.add(avg(grouped[i]));
+          labels.add(dayLabels[i]);
+        }
+      } else if (targetRange == MetricRange.w) {
+        final grouped = List.generate(7, (_) => <double>[]);
+        final nowDay = DateTime(now.year, now.month, now.day);
+
+        for (final e in data) {
+          final raw = e['thoigiancapnhat'];
+          if (raw == null) continue;
+          final t = TimeService.toLocal(raw.toString());
+          final day = DateTime(t.year, t.month, t.day);
+          final value = (e['giatri'] as num?)?.toDouble();
+          if (value == null) continue;
+
+          final diff = nowDay.difference(day).inDays;
+          if (diff < 0 || diff >= 7) continue;
+
+          final bucket = 6 - diff;
+          grouped[bucket].add(value);
+        }
+
         for (int i = 6; i >= 0; i--) {
           final d = now.subtract(Duration(days: i));
-          values.add(_v(grouped["${d.weekday}"]));
+          final bucket = 6 - i;
+          values.add(avg(grouped[bucket]));
           labels.add(_weekdayLabel(d.weekday));
         }
-      } else if (_range == MetricRange.m) {
+      } else if (targetRange == MetricRange.m) {
+        final grouped = List.generate(5, (_) => <double>[]);
+        final nowDay = DateTime(now.year, now.month, now.day);
+
+        for (final e in data) {
+          final raw = e['thoigiancapnhat'];
+          if (raw == null) continue;
+          final t = TimeService.toLocal(raw.toString());
+          final day = DateTime(t.year, t.month, t.day);
+          final value = (e['giatri'] as num?)?.toDouble();
+          if (value == null) continue;
+
+          final diff = nowDay.difference(day).inDays;
+          if (diff < 0 || diff >= 30) continue;
+
+          final bucket = (29 - diff) ~/ 6;
+          grouped[bucket].add(value);
+        }
+
+        const monthLabels = ["1", "8", "15", "22", "30"];
         for (int i = 0; i < 5; i++) {
-          values.add(_v(grouped["$i"]));
-          labels.add("W${i + 1}");
+          values.add(avg(grouped[i]));
+          labels.add(monthLabels[i]);
         }
       } else {
-        final now = DateTime.now();
-        for (int i = 5; i >= 0; i--) {
-          final m = DateTime(now.year, now.month - i).month;
-          values.add(_v(grouped["$m"]));
+        final grouped = <int, List<double>>{
+          1: <double>[],
+          3: <double>[],
+          6: <double>[],
+          9: <double>[],
+          12: <double>[],
+        };
+
+        for (final e in data) {
+          final raw = e['thoigiancapnhat'];
+          if (raw == null) continue;
+          final t = TimeService.toLocal(raw.toString());
+          final value = (e['giatri'] as num?)?.toDouble();
+          if (value == null) continue;
+
+          if (t.year != now.year) continue;
+
+          int bucket;
+          if (t.month <= 1) {
+            bucket = 1;
+          } else if (t.month <= 3) {
+            bucket = 3;
+          } else if (t.month <= 6) {
+            bucket = 6;
+          } else if (t.month <= 9) {
+            bucket = 9;
+          } else {
+            bucket = 12;
+          }
+
+          grouped[bucket]!.add(value);
+        }
+
+        const yearLabels = [1, 3, 6, 9, 12];
+        for (final m in yearLabels) {
+          values.add(avg(grouped[m] ?? <double>[]));
           labels.add("$m");
         }
+      }
+
+      if (!mounted || requestVersion != _loadVersion || targetRange != _range) {
+        return;
       }
 
       setState(() {
@@ -346,17 +372,20 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
         },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          padding: const EdgeInsets.symmetric(horizontal: 21, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
             color: active ? Colors.white : Colors.transparent,
             borderRadius: BorderRadius.circular(4),
           ),
-          child: Text(
-            t,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
-              color: active ? Colors.black : Colors.black54,
+          child: Center(
+            child: Text(
+              t,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: active ? Colors.black : Colors.black54,
+              ),
             ),
           ),
         ),
@@ -374,10 +403,10 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            tab('D', MetricRange.d),
-            tab('W', MetricRange.w),
-            tab('M', MetricRange.m),
-            tab('6M', MetricRange.m6),
+            Expanded(child: tab(context.tr.day, MetricRange.d)),
+            Expanded(child: tab(context.tr.week, MetricRange.w)),
+            Expanded(child: tab(context.tr.month, MetricRange.m)),
+            Expanded(child: tab(context.tr.year, MetricRange.y)),
           ],
         ),
       ),

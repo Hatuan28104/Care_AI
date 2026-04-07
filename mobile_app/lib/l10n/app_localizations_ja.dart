@@ -1029,4 +1029,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get saved => '保存しました';
+
+  @override
+  String get year => '年';
 }

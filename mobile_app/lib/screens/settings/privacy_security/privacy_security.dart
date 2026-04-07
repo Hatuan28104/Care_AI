@@ -6,6 +6,7 @@ import 'terms_of_service.dart';
 import 'package:Care_AI/api/auth_api.dart';
 import 'package:Care_AI/models/login_history_item.dart';
 import 'package:Care_AI/widgets/app_components.dart';
+import 'package:Care_AI/services/time_service.dart';
 
 class PrivacySecurityScreen extends StatefulWidget {
   const PrivacySecurityScreen({super.key});
@@ -365,7 +366,7 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
               ),
               const SizedBox(height: 2),
               Text(
-                item.time,
+                TimeService.formatSmart(item.time),
                 style: const TextStyle(
                   fontSize: 12,
                   color: Colors.black45,
@@ -466,8 +467,8 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
 
     final list = latestByDevice.values.toList();
 
-    list.sort((a, b) => b.time.compareTo(a.time));
-
+    list.sort((a, b) =>
+        TimeService.toLocal(b.time).compareTo(TimeService.toLocal(a.time)));
     if (!_showAllHistory && list.length > 2) {
       return list.take(2).toList();
     }

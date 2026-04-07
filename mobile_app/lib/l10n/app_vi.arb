@@ -360,7 +360,7 @@
   "save": "Lưu",
   "saved": "Đã lưu dữ liệu",
   "disconnectDevice": "Ngắt kết nối thiết bị",
-
+"year": "Năm",
   "allowAccess": "Cho phép truy cập dữ liệu",
   "useDataFrom": "Ứng dụng sẽ sử dụng dữ liệu từ {appName}",
   "@useDataFrom": {

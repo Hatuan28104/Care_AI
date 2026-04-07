@@ -360,6 +360,7 @@
   "enterValue": "输入数值...",
   "cancel": "取消",
   "save": "保存",
-  "saved": "保存成功"
+  "saved": "保存成功",
+  "year": "年"
 
 }

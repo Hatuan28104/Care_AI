@@ -1029,4 +1029,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get saved => 'Saved successfully';
+
+  @override
+  String get year => 'Year';
 }

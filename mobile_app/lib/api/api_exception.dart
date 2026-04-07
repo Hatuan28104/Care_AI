@@ -5,7 +5,7 @@ class ApiException implements Exception {
   ApiException(this.message, {this.statusCode});
 
   @override
-  String toString() => message;
+  String toString() => "Đã xảy ra lỗi. Vui lòng thử lại.";
 
   String debug() {
     if (statusCode == null) return "ApiException: $message";
