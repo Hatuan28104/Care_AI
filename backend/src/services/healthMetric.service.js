@@ -73,8 +73,8 @@ export const handleSaveData = async (user, body) => {
   // =========================
   const aiAnalysis = await callSelfEvolutionAI(nguoiDungId, body);
 
-  if (aiAnalysis && aiAnalysis.compare) {
-    await insertAIInsight(nguoiDungId, aiAnalysis, today);
+  if (aiAnalysis && aiAnalysis.sosanh) {
+    await insertAIInsight(nguoiDungId, aiAnalysis);
     await createDailyCompareNotification(nguoiDungId, aiAnalysis);
   }
 
@@ -107,18 +107,17 @@ function mapCompareTitleGuardian(status) {
 }
 
 export const createDailyCompareNotification = async (userId, aiEvaluation) => {
-  if (!aiEvaluation || !aiEvaluation.compare) return;
+  if (!aiEvaluation || !aiEvaluation.sosanh) return;
 
-  const status = aiEvaluation.status || "bình thường";
-  const message = aiEvaluation.message || "";
-  const advice = aiEvaluation.advice || "";
-  const compareText = formatCompare(aiEvaluation.compare);
+  const trangthai = aiEvaluation.trangthai || "bình thường";
+  const thongdiep = aiEvaluation.thongdiep || "";
+  const loikhuyen = aiEvaluation.loikhuyen || "";
+  const sosanhText = formatSoSanh(aiEvaluation.sosanh);
 
-  const titleSelf = mapCompareTitleUser(status);
-  const titleGuardian = mapCompareTitleGuardian(status);
+  const titleSelf = mapCompareTitleUser(trangthai);
+  const titleGuardian = mapCompareTitleGuardian(trangthai);
 
-  // 🔥 NEW: Gộp message, compare và advice vào body
-  const body = `${message}\n\n${compareText}\n\n💡 Lời khuyên: ${advice}`.trim();
+  const body = `${thongdiep}\n\n${sosanhText}\n\n💡 Lời khuyên: ${loikhuyen}`.trim();
 
   try {
     await sendNotification(userId, titleSelf, body, 1, 'DAILY_COMPARE', titleGuardian);
@@ -127,12 +126,12 @@ export const createDailyCompareNotification = async (userId, aiEvaluation) => {
   }
 };
 
-function formatCompare(compare) {
-  if (!compare) return "Không có dữ liệu so sánh.";
-  if (typeof compare === 'string') return compare;
+function formatSoSanh(sosanh) {
+  if (!sosanh) return "Không có dữ liệu so sánh.";
+  if (typeof sosanh === 'string') return sosanh;
 
   const lines = [];
-  for (const value of Object.values(compare)) {
+  for (const value of Object.values(sosanh)) {
     if (value) lines.push(value);
   }
 

@@ -5,11 +5,12 @@ class AuthStorage {
   static String? userId;
   static String? deviceId;
   static SharedPreferences? _prefs;
-
+static String? accountId;
   static Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
     token = _prefs?.getString('token');
     userId = _prefs?.getString('userId');
+    accountId = _prefs?.getString('taikhoan_id');
     deviceId = _prefs?.getString('deviceId');
   }
 
@@ -28,15 +29,6 @@ class AuthStorage {
     await _prefs?.setString('deviceId', id);
   }
 
-  static Future<void> clear() async {
-    token = null;
-    userId = null;
-    deviceId = null;
-    await _prefs?.remove('token');
-    await _prefs?.remove('userId');
-    await _prefs?.remove('deviceId');
-  }
-
   static String? getToken() {
     return token;
   }
@@ -47,5 +39,25 @@ class AuthStorage {
 
   static String? getDeviceId() {
     return deviceId;
+  }
+
+  static Future<void> saveAccountId(String id) async {
+    accountId = id;
+    await _prefs?.setString('taikhoan_id', id);
+  }
+
+  static String? getAccountId() {
+    return accountId;
+  }
+  static Future<void> clear() async {
+  token = null;
+  userId = null;
+  deviceId = null;
+  accountId = null;
+
+  await _prefs?.remove('token');
+  await _prefs?.remove('userId');
+  await _prefs?.remove('deviceId');
+  await _prefs?.remove('taikhoan_id');
   }
 }

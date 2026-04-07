@@ -19,14 +19,14 @@ export async function handleChat(message, userId, digitalId, hoiThoaiId) {
   /* ===== SYSTEM PROMPT ===== */
   const { data: digital } = await db
     .from("digitalhuman")
-    .select("systemprompt")
+    .select("mota")
     .eq("digitalhuman_id", digitalId)
     .eq("danghoatdong", true)
     .single();
 
   if (!digital) throw new Error("Digital Human không tồn tại");
 
-  const systemPrompt = digital.systemprompt;
+  const mota = digital.mota;
 
   /* ===== TẠO HỘI THOẠI ===== */
   if (!conversationId) {
@@ -159,7 +159,7 @@ export async function handleChat(message, userId, digitalId, hoiThoaiId) {
     .order("thoigiangui", { ascending: false })
     .limit(20);
 
-  const messages = [{ role: "system", content: systemPrompt }];
+  const messages = [{ role: "system", content: mota }];
 
   (history || []).reverse().forEach(row => {
     messages.push({

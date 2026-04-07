@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional, List, Dict, Any
 
 
@@ -20,7 +20,7 @@ class HealthDataInput(BaseModel):
 
 
 class HealthEvaluationResponse(BaseModel):
-    status: str  # xấu | bình thường | tốt
-    message: str
-    advice: str
-    compare: Optional[Dict[str, Any]] = None
+    trangthai: str = "bình thường"
+    thongdiep: str = ""
+    loikhuyen: str = ""
+    sosanh: Dict[str, Any] = Field(default_factory=dict)

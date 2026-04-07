@@ -12,7 +12,7 @@ export async function getAllDigitalHuman() {
       digitalhuman_id,
       tendigitalhuman,
       imageurl,
-      systemprompt,
+      mota,
       gioitinh,
       nghenghiep_id,
       ngoaihinh
@@ -35,7 +35,7 @@ export async function getDigitalHumanById(id) {
       digitalhuman_id,
       tendigitalhuman,
       imageurl,
-      systemprompt,
+      mota,
       gioitinh,
       nghenghiep_id,
       ngoaihinh
@@ -61,7 +61,7 @@ export async function createDigitalHuman(dataInput) {
         digitalhuman_id: dataInput.id,
         tendigitalhuman: dataInput.name,
         imageurl: dataInput.image,
-        systemprompt: dataInput.prompt,
+        mota: dataInput.prompt,
         nghenghiep_id: dataInput.jobId,
         gioitinh: dataInput.gender,
         ngoaihinh: dataInput.appearance,
@@ -84,7 +84,7 @@ export async function updateDigitalHuman(id, dataInput) {
     .update({
       tendigitalhuman: dataInput.name,
       imageurl: dataInput.image,
-      systemprompt: dataInput.prompt,
+      mota: dataInput.prompt,
       nghenghiep_id: dataInput.jobId,
       gioitinh: dataInput.gender,
       ngoaihinh: dataInput.appearance,

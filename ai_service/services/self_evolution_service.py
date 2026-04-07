@@ -55,20 +55,27 @@ class SelfEvolutionService:
     # ------------------------------------------------------------
     # Output helpers
     # ------------------------------------------------------------
-    def _to_vi_status(self, status: str) -> str:
+    def _to_vi_trangthai(self, trangthai: str) -> str:
         mapping = {
             "good": "tốt",
             "normal": "bình thường",
             "bad": "xấu",
         }
-        return mapping.get(status, "bình thường")
+        return mapping.get(trangthai, "bình thường")
 
-    def _resp(self, status: str, message: str, advice: str, compare: Dict[str, str]) -> HealthEvaluationResponse:
+    def _resp(
+        self,
+        trangthai: str,
+        thongdiep: str,
+        loikhuyen: str,
+        sosanh: Optional[Dict[str, str]],
+    ) -> HealthEvaluationResponse:
+        safe_sosanh = sosanh if isinstance(sosanh, dict) else {}
         return HealthEvaluationResponse(
-            status=self._to_vi_status(status),
-            message=message,
-            advice=advice,
-            compare=compare,
+            trangthai=self._to_vi_trangthai((trangthai or "normal").strip().lower()),
+            thongdiep=(thongdiep or "").strip(),
+            loikhuyen=(loikhuyen or "").strip(),
+            sosanh=safe_sosanh,
         )
 
     # ------------------------------------------------------------
@@ -220,7 +227,7 @@ class SelfEvolutionService:
 
         return (len(reasons) > 0, reasons)
 
-    def _compute_prev_status(self, history: List[dict], confidence: str, baseline: Dict[str, Dict[str, float]]) -> str:
+    def _compute_prev_trangthai(self, history: List[dict], confidence: str, baseline: Dict[str, Dict[str, float]]) -> str:
         if not history:
             return "normal"
 
@@ -231,8 +238,8 @@ class SelfEvolutionService:
         prev_dev = self.compute_deviation(prev_current, prev_base)
         prev_tr = self.compute_trend(prev_hist, prev_current)
 
-        status, _ = self._decision_core(prev_dev, prev_tr, confidence)
-        return status
+        trangthai, _ = self._decision_core(prev_dev, prev_tr, confidence)
+        return trangthai
 
     def _decision_core(self, deviations: Dict[str, Dict[str, float]], trends: Dict[str, str], confidence: str) -> Tuple[str, Dict[str, float]]:
         if not deviations:
@@ -312,7 +319,7 @@ class SelfEvolutionService:
 
         return adjusted_score, ml_output
 
-    def _status_from_score(self, score: float, improving_ratio: float, worsening_ratio: float, confidence: str) -> str:
+    def _trangthai_from_score(self, score: float, improving_ratio: float, worsening_ratio: float, confidence: str) -> str:
         if confidence == "high":
             good_cut = self.SCORE_GOOD_HIGH_CONF
             bad_cut = self.SCORE_BAD_HIGH_CONF
@@ -326,22 +333,22 @@ class SelfEvolutionService:
             return "bad"
         return "normal"
 
-    def _apply_hysteresis(self, prev_status: str, candidate_status: str, score: float, confidence: str) -> str:
+    def _apply_hysteresis(self, prev_trangthai: str, candidate_trangthai: str, score: float, confidence: str) -> str:
         margin = 0.08 if confidence == "high" else 0.12
 
-        if prev_status == "bad" and candidate_status == "normal" and score < margin:
+        if prev_trangthai == "bad" and candidate_trangthai == "normal" and score < margin:
             return "bad"
 
-        if prev_status == "good" and candidate_status == "normal" and score > -margin:
+        if prev_trangthai == "good" and candidate_trangthai == "normal" and score > -margin:
             return "good"
 
-        if prev_status == "normal" and candidate_status == "good" and score < (self.SCORE_GOOD_HIGH_CONF + margin):
+        if prev_trangthai == "normal" and candidate_trangthai == "good" and score < (self.SCORE_GOOD_HIGH_CONF + margin):
             return "normal"
 
-        if prev_status == "normal" and candidate_status == "bad" and score > (self.SCORE_BAD_HIGH_CONF - margin):
+        if prev_trangthai == "normal" and candidate_trangthai == "bad" and score > (self.SCORE_BAD_HIGH_CONF - margin):
             return "normal"
 
-        return candidate_status
+        return candidate_trangthai
 
     def decision_engine(
         self,
@@ -355,7 +362,7 @@ class SelfEvolutionService:
         baseline = baseline or {}
         history = history or []
 
-        core_status, core_diag = self._decision_core(deviations, trends, confidence)
+        core_trangthai, core_diag = self._decision_core(deviations, trends, confidence)
         core_score = float(core_diag.get("score", 0.0))
 
         final_score, ml_output = self._integrate_ml(
@@ -370,12 +377,12 @@ class SelfEvolutionService:
         improving_ratio = float(core_diag.get("improving", 0.0))
         worsening_ratio = float(core_diag.get("worsening", 0.0))
 
-        candidate_status = self._status_from_score(final_score, improving_ratio, worsening_ratio, confidence)
+        candidate_trangthai = self._trangthai_from_score(final_score, improving_ratio, worsening_ratio, confidence)
 
-        prev_status = self._compute_prev_status(history, confidence, baseline)
-        final_status = self._apply_hysteresis(prev_status, candidate_status, final_score, confidence)
+        prev_trangthai = self._compute_prev_trangthai(history, confidence, baseline)
+        final_trangthai = self._apply_hysteresis(prev_trangthai, candidate_trangthai, final_score, confidence)
 
-        return final_status, {
+        return final_trangthai, {
             "score": final_score,
             "core_score": core_score,
             "improving": improving_ratio,
@@ -383,14 +390,14 @@ class SelfEvolutionService:
             "ml_risk_score": float(ml_output.get("risk_score", 0.0)),
             "ml_anomaly_score": float(ml_output.get("anomaly_score", 0.0)),
             "ml_uncertainty": 1.0 if ml_output.get("uncertainty", False) else 0.0,
-            "core_status_id": 1.0 if core_status == "good" else -1.0 if core_status == "bad" else 0.0,
+            "core_trangthai_id": 1.0 if core_trangthai == "good" else -1.0 if core_trangthai == "bad" else 0.0,
         }
 
     # ------------------------------------------------------------
     # Presentation helpers
     # ------------------------------------------------------------
-    def build_compare(self, deviations: Dict[str, Dict[str, float]]) -> Dict[str, str]:
-        compare: Dict[str, str] = {}
+    def build_sosanh(self, deviations: Dict[str, Dict[str, float]]) -> Dict[str, str]:
+        sosanh: Dict[str, str] = {}
         for metric, d in deviations.items():
             cfg = self.METRIC_CFG[metric]
             current = d["current"]
@@ -398,15 +405,15 @@ class SelfEvolutionService:
             pct = d["pct_dev"] * 100
             sign = "+" if pct >= 0 else ""
 
-            compare[metric] = (
+            sosanh[metric] = (
                 f"{cfg['label']}: hiện tại {current:.1f}{cfg['unit']}, "
                 f"baseline {baseline:.1f}{cfg['unit']} ({sign}{pct:.1f}% so với baseline)"
             )
 
-        return compare
+        return sosanh
 
-    def build_message_advice(self, status: str, confidence: str, diagnostics: Dict[str, float], safety_reasons: List[str]) -> Tuple[str, str]:
-        if status == "bad":
+    def build_thongdiep_loikhuyen(self, trangthai: str, confidence: str, diagnostics: Dict[str, float], safety_reasons: List[str]) -> Tuple[str, str]:
+        if trangthai == "bad":
             if safety_reasons:
                 return (
                     f"Phát hiện chỉ số nguy hiểm: {', '.join(safety_reasons)}.",
@@ -417,7 +424,7 @@ class SelfEvolutionService:
                 "Nên giảm tải hoạt động, cải thiện giấc ngủ và theo dõi sát trong 24 giờ tới.",
             )
 
-        if status == "good":
+        if trangthai == "good":
             return (
                 "Các chỉ số đang tốt hơn baseline cá nhân và xu hướng đang cải thiện.",
                 "Tiếp tục duy trì thói quen hiện tại để giữ nhịp sức khỏe ổn định.",
@@ -459,20 +466,20 @@ class SelfEvolutionService:
             confidence = self.compute_confidence(len(history_sorted))
 
             if confidence == "insufficient":
-                message, advice = self.build_message_advice("normal", confidence, {}, [])
-                return self._resp("normal", message, advice, {})
+                thongdiep, loikhuyen = self.build_thongdiep_loikhuyen("normal", confidence, {}, [])
+                return self._resp("normal", thongdiep, loikhuyen, {})
 
             is_safety, safety_reasons = self.safety_layer(current)
             baseline = self.compute_baseline(history_sorted)
             deviations = self.compute_deviation(current, baseline)
-            compare = self.build_compare(deviations)
+            sosanh = self.build_sosanh(deviations)
 
             if is_safety:
-                message, advice = self.build_message_advice("bad", confidence, {}, safety_reasons)
-                return self._resp("bad", message, advice, compare)
+                thongdiep, loikhuyen = self.build_thongdiep_loikhuyen("bad", confidence, {}, safety_reasons)
+                return self._resp("bad", thongdiep, loikhuyen, sosanh)
 
             trends = self.compute_trend(history_sorted, current)
-            status, diagnostics = self.decision_engine(
+            trangthai, diagnostics = self.decision_engine(
                 deviations=deviations,
                 trends=trends,
                 confidence=confidence,
@@ -481,8 +488,8 @@ class SelfEvolutionService:
                 history=history_sorted,
             )
 
-            message, advice = self.build_message_advice(status, confidence, diagnostics, [])
-            return self._resp(status, message, advice, compare)
+            thongdiep, loikhuyen = self.build_thongdiep_loikhuyen(trangthai, confidence, diagnostics, [])
+            return self._resp(trangthai, thongdiep, loikhuyen, sosanh)
 
         except Exception as e:
             logger.error(f"Predict Error: {e}", exc_info=True)

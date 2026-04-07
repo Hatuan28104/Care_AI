@@ -7,6 +7,21 @@ import 'api_exception.dart';
 class HealthApi {
   static String get _baseUrl => ApiConfig.baseUrl;
 
+  static Map<String, dynamic> _normalizePhanTichAi(Map<String, dynamic> raw) {
+    final fallbackTime = DateTime.now().toIso8601String();
+    final sosanhRaw = raw["sosanh"];
+
+    return {
+      "trangthai": (raw["trangthai"] ?? "unknown").toString(),
+      "thongdiep": (raw["thongdiep"] ?? "").toString(),
+      "loikhuyen": (raw["loikhuyen"] ?? "").toString(),
+      "sosanh": sosanhRaw is Map
+          ? Map<String, dynamic>.from(sosanhRaw)
+          : <String, dynamic>{},
+      "thoigian": (raw["thoigian"] ?? fallbackTime).toString(),
+    };
+  }
+
   /* =========================
      AUTH HEADER
   ========================= */
@@ -310,5 +325,31 @@ class HealthApi {
       if (e is Map) return _normalizeHealthData(Map<String, dynamic>.from(e));
       return {};
     }).toList();
+  }
+
+  static Future<Map<String, dynamic>> getLatestPhanTichAi() async {
+    final res = await http
+        .get(
+          Uri.parse('$_baseUrl/health/ai-insight/latest'),
+          headers: await _authHeaders(),
+        )
+        .timeout(const Duration(seconds: 8));
+
+    final decoded = _decodeBody(res.body);
+
+    if (res.statusCode != 200 || decoded['success'] != true) {
+      throw ApiException(decoded['message'] ?? "Lỗi lấy phân tích AI",
+          statusCode: res.statusCode);
+    }
+
+    final rawData = decoded['data'];
+    if (rawData is Map<String, dynamic>) {
+      return _normalizePhanTichAi(rawData);
+    }
+    if (rawData is Map) {
+      return _normalizePhanTichAi(Map<String, dynamic>.from(rawData));
+    }
+
+    return _normalizePhanTichAi(const <String, dynamic>{});
   }
 }

@@ -41,9 +41,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       final data = await SettingsApi.getSettings();
 
-      AppSettings.notificationOn.value = data['notificationOn'];
-      AppSettings.healthAlertOn.value = data['healthAlertOn'];
-      AppSettings.syncDataOn.value = data['syncDataOn'];
+      AppSettings.thongbao.value = data['thongbao'];
+
     } catch (e) {
       print("Load settings lỗi: $e");
     }
@@ -115,19 +114,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       _switchItem(
                         icon: Icons.notifications_none,
                         text: context.tr.notifications,
-                        notifier: AppSettings.notificationOn,
-                        settingKey: "notificationOn",
+                        notifier: AppSettings.thongbao,
+                        settingKey: "thongbao",
                       ),
                     ]),
                     _section(context.tr.device),
-                    _card([
-                      _switchItem(
-                        icon: Icons.sync,
-                        text: context.tr.syncData,
-                        notifier: AppSettings.syncDataOn,
-                        settingKey: "syncDataOn",
-                      ),
-                    ]),
+               
                     _card([
                       _item(
                         icon: Icons.volume_up_outlined,

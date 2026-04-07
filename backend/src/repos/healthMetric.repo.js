@@ -481,50 +481,49 @@ export async function saveMultipleHealthData(payload) {
 }
 
 /* =========================
-   AI INSIGHTS
+   PHÂN TÍCH AI
 ========================= */
-export async function insertAIInsight(nguoidung_id, insightData, dateStr) {
+export async function insertAIInsight(nguoidung_id, insightData) {
   const db = getDB();
 
   if (!nguoidung_id || !insightData) return;
 
-  console.log("[AI Insight] Inserting for user:", nguoidung_id);
+  console.log("[Phân tích AI] Inserting for user:", nguoidung_id);
 
-  const { error } = await db.from("ai_insights").insert({
+  const { error } = await db.from("phantich_ai").insert({
     nguoidung_id,
-    status: insightData.status,
-    message: insightData.message,
-    advice: insightData.advice,
-    compare: insightData.compare,
-    created_at: new Date().toISOString()
+    trangthai: insightData.trangthai ?? "unknown",
+    thongdiep: insightData.thongdiep ?? "",
+    loikhuyen: insightData.loikhuyen ?? "",
+    sosanh: insightData.sosanh ?? {},
+    thoigian: insightData.thoigian ?? new Date().toISOString(),
   });
 
   if (error) {
-    console.error("[AI Insight] DB INSERT ERROR:", error);
+    console.error("[Phân tích AI] DB INSERT ERROR:", error);
     throw error;
   }
 
-  console.log("[AI Insight] Insert OK for user:", nguoidung_id);
+  console.log("[Phân tích AI] Insert OK for user:", nguoidung_id);
 }
 
 export async function getAIInsightByDate(nguoidung_id, dateStr) {
   const db = getDB();
 
-  // Filter by created_at date range (table has no 'date' column)
   const startOfDay = getVNStartOfDayUTC(new Date(dateStr));
   const endOfDay = getVNEndOfDayUTC(new Date(dateStr));
 
   const { data, error } = await db
-    .from("ai_insights")
-    .select("status, message, advice, compare, created_at")
+    .from("phantich_ai")
+    .select("trangthai, thongdiep, loikhuyen, sosanh, thoigian")
     .eq("nguoidung_id", nguoidung_id)
-    .gte("created_at", startOfDay)
-    .lte("created_at", endOfDay)
-    .order("created_at", { ascending: false })
+    .gte("thoigian", startOfDay)
+    .lte("thoigian", endOfDay)
+    .order("thoigian", { ascending: false })
     .limit(1);
 
   if (error) {
-    console.error("[AI Insight] GET BY DATE ERROR:", error.message);
+    console.error("[Phân tích AI] GET BY DATE ERROR:", error.message);
     return null;
   }
   return data && data.length > 0 ? data[0] : null;
@@ -533,14 +532,14 @@ export async function getAIInsightByDate(nguoidung_id, dateStr) {
 export async function getLatestAIInsight(nguoidung_id) {
   const db = getDB();
   const { data, error } = await db
-    .from("ai_insights")
-    .select("status, message, advice, compare, created_at")
+    .from("phantich_ai")
+    .select("trangthai, thongdiep, loikhuyen, sosanh, thoigian")
     .eq("nguoidung_id", nguoidung_id)
-    .order("created_at", { ascending: false })
+    .order("thoigian", { ascending: false })
     .limit(1);
 
   if (error) {
-    console.error("Lỗi lấy AI Insight:", error.message);
+    console.error("Lỗi lấy phân tích AI:", error.message);
     return null;
   }
   return data && data.length > 0 ? data[0] : null;

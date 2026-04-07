@@ -116,6 +116,7 @@ export async function verifyOtp(phone, otp, req, deviceId) {
   let { data: user } = await db
     .from("taikhoan")
     .select(`
+      taikhoan_id,
       sodienthoai,
       nguoidung:nguoidung_id (
         nguoidung_id,
@@ -149,6 +150,7 @@ export async function verifyOtp(phone, otp, req, deviceId) {
     ]);
 
     user = {
+      taikhoan_id: newAccountId,
       sodienthoai: localPhone,
       nguoidung: {
         nguoidung_id: newUserId,
@@ -157,9 +159,9 @@ export async function verifyOtp(phone, otp, req, deviceId) {
     };
   }
 
-  const token = jwt.sign(
-    {
+    const token = jwt.sign({
       nguoidung_id: user.nguoidung.nguoidung_id,
+      taikhoan_id: user.taikhoan_id,
       sodienthoai: user.sodienthoai,
     },
     process.env.JWT_SECRET || "secret",
@@ -175,7 +177,7 @@ export async function verifyOtp(phone, otp, req, deviceId) {
 
   db.from("lichsudangnhap").insert({
     lichsu_id: "LS" + Date.now().toString().slice(-10),
-    nguoidung_id: user.nguoidung.nguoidung_id,
+    taikhoan_id: user.taikhoan_id,
     thietbi: userAgent,
     ip,
     device_id: deviceId,
@@ -214,13 +216,13 @@ export async function changePhone(userId, newPhone) {
 /* =========================
    LOGIN HISTORY
 ========================= */
-export async function getLoginHistory(userId) {
+export async function getLoginHistory(taikhoanId) {
   const db = getDB();
 
   const { data, error } = await db
     .from("lichsudangnhap")
     .select("thoigian, thietbi, ip")
-    .eq("nguoidung_id", userId)
+    .eq("taikhoan_id", taikhoanId)
     .order("thoigian", { ascending: false })
     .limit(10);
 

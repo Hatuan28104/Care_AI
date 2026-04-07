@@ -33,9 +33,9 @@ class _SoundVibrationScreenState extends State<SoundVibrationScreen> {
       final data = await SettingsApi.getSettings();
 
       setState(() {
-        _soundOn = data["soundOn"] ?? true;
-        _vibrationOn = data["vibrationOn"] ?? true;
-        _volume = data["volume"] ?? 0.6;
+        _soundOn = data["amthanh"] ?? true;
+        _vibrationOn = data["rung"] ?? true;
+        _volume = data["amluong"] ?? 0.6;
         _loading = false;
       });
     } catch (e) {
@@ -48,18 +48,17 @@ class _SoundVibrationScreenState extends State<SoundVibrationScreen> {
 
   void _updateSound(bool value) {
     setState(() => _soundOn = value);
-    SettingsApi.updateSetting("SoundOn", value);
+    SettingsApi.updateSetting("amthanh", value);
   }
 
   void _updateVibration(bool value) {
     setState(() => _vibrationOn = value);
-    SettingsApi.updateSetting("VibrationOn", value);
+    SettingsApi.updateSetting("rung", value);
   }
 
-  /// UPDATE VOLUME
 
   void _updateVolume(double value) {
-    SettingsApi.updateSetting("Volume", value);
+    SettingsApi.updateSetting("amluong", value);
   }
 
   @override

@@ -13,8 +13,6 @@ import 'dart:io';
 class AuthApi {
   static String get baseUrl => ApiConfig.baseUrl;
 
-  /* =========================     GET DEVICE ID
-  ========================= */
   static Future<String> getDeviceId() async {
     final deviceInfo = DeviceInfoPlugin();
     if (Platform.isAndroid) {
@@ -119,6 +117,7 @@ class AuthApi {
         throw ApiException('Không nhận được nguoiDungId');
       }
       await AuthStorage.saveUserId(user.nguoiDungId);
+      await AuthStorage.saveAccountId(userRaw['taikhoan_id'] ?? '');
       await AuthStorage.saveDeviceId(deviceId);
       AppSettings.phoneNumber.value = userRaw['sodienthoai']?.toString() ??
           userRaw['SoDienThoai']?.toString() ??

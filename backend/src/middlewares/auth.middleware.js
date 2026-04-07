@@ -17,8 +17,11 @@ export function auth(req, res, next) {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
 
-    req.user = decoded;
-
+    req.user = {
+      nguoidung_id: decoded.nguoidung_id,
+      taikhoan_id: decoded.taikhoan_id,
+      sodienthoai: decoded.sodienthoai,
+    };
 
     next();
   } catch (err) {

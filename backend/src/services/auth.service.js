@@ -27,8 +27,8 @@ export const handleChangePhone = async (userId, phone) => {
   return { success: true };
 };
 
-export const handleGetLoginHistory = async (userId) => {
-  const data = await getLoginHistory(userId);
+export const handleGetLoginHistory = async (taikhoanId) => {
+  const data = await getLoginHistory(taikhoanId);
   return { success: true, data };
 };
 

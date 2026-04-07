@@ -12,6 +12,7 @@ const metricsMap = {
   "CS023": "distance"
 };
 
+
 export const fetchAIHistory = async (nguoidungId) => {
   const db = getDB();
   const { data, error } = await db
@@ -67,8 +68,20 @@ export const callSelfEvolutionAI = async (nguoidung_id, currentBody) => {
       timeout: 10000
     });
 
-    console.log("[AI Client] Response status:", response.data?.status);
-    return response.data;
+    const raw = response.data || {};
+    const sosanhRaw = raw.sosanh ?? {};
+
+    const normalized = {
+      trangthai: (raw.trangthai ?? "unknown").toString(),
+      thongdiep: (raw.thongdiep ?? "").toString(),
+      loikhuyen: (raw.loikhuyen ?? "").toString(),
+      sosanh:
+        typeof sosanhRaw === "object" && sosanhRaw !== null ? sosanhRaw : {},
+      thoigian: new Date().toISOString(),
+    };
+
+    console.log("[AI Client] Response trangthai:", normalized.trangthai);
+    return normalized;
   } catch (err) {
     console.error("[AI Client] FAILED:", err.message, "| code:", err.code, "| HTTP:", err.response?.status);
     return null;

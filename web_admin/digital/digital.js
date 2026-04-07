@@ -133,7 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const gender = document.getElementById("gender");
     const jobId = document.getElementById("jobId");
     const appearance = document.getElementById("appearance");
-    const systemPrompt = document.getElementById("systemPrompt");
+    const mota = document.getElementById("mota");
 
     if (page === "digital-edit") {
 
@@ -153,7 +153,7 @@ document.addEventListener("DOMContentLoaded", () => {
           gender.value = d.gioitinh ? "1" : "0";
           jobId.value = (d.nghenghiep_id || "").trim();
           appearance.value = d.ngoaihinh || "";
-          systemPrompt.value = d.systemprompt || "";
+          mota.value = d.mota || "";
 
           if (d.imageurl && avatarPreview) {
             avatarPreview.src = toAbsoluteImageUrl(d.imageurl);
@@ -175,7 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
         form.append("gender", gender?.value || "");
         form.append("jobId", jobId?.value || "");
         form.append("appearance", appearance?.value || "");
-        form.append("prompt", systemPrompt?.value || "");
+        form.append("prompt", mota?.value || "");
 
         const file = avatarInput?.files?.[0];
 
@@ -354,7 +354,7 @@ document.addEventListener("DOMContentLoaded", () => {
         d.ngoaihinh || "-";
 
       document.getElementById("digitalPrompt").innerText =
-        d.systemprompt || "-";
+        d.mota || "-";
 
       const avatar = document.getElementById("digitalAvatar");
 

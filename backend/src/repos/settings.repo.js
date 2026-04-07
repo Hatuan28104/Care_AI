@@ -7,14 +7,12 @@ export async function getSettings(userId) {
   const db = getDB();
 
   let { data, error } = await db
-    .from("appsettings")
+    .from("caidat")
     .select(`
-      notificationon,
-      healthalerton,
-      syncdataon,
-      soundon,
-      vibrationon,
-      volume
+      thongbao,
+      amthanh,
+      rung,
+      amluong
     `)
     .eq("nguoidung_id", userId)
     .maybeSingle();
@@ -22,34 +20,28 @@ export async function getSettings(userId) {
   if (error) throw error;
 
   if (!data) {
-    const { error: insertErr } = await db.from("appsettings").insert({
+    const { error: insertErr } = await db.from("caidat").insert({
       nguoidung_id: userId,
-      notificationon: true,
-      healthalerton: true,
-      syncdataon: true,
-      soundon: true,
-      vibrationon: true,
-      volume: 0.6,
+      thongbao: true,
+      amthanh: true,
+      rung: true,
+      amluong: 0.6,
     });
     if (insertErr) throw insertErr;
 
     data = {
-      notificationon: true,
-      healthalerton: true,
-      syncdataon: true,
-      soundon: true,
-      vibrationon: true,
-      volume: 0.6,
+      thongbao: true,
+      amthanh: true,
+      rung: true,
+      amluong: 0.6,
     };
   }
 
   return {
-    notificationOn: data.notificationon === true,
-    healthAlertOn: data.healthalerton === true,
-    syncDataOn: data.syncdataon === true,
-    soundOn: data.soundon === true,
-    vibrationOn: data.vibrationon === true,
-    volume: data.volume ?? 0.6,
+    thongbao: data.thongbao === true,
+    amthanh: data.amthanh === true,
+    rung: data.rung === true,
+    amluong: data.amluong ?? 0.6,
   };
 }
 /* =========================
@@ -59,12 +51,10 @@ export async function updateSetting(userId, key, value) {
   const db = getDB();
 
   const allowedFields = [
-    "notificationon",
-    "healthalerton",
-    "syncdataon",
-    "soundon",
-    "vibrationon",
-    "volume"
+    "thongbao",
+    "amthanh",
+    "rung",
+    "amluong"
   ];
 
   const field = key.toLowerCase();
@@ -79,7 +69,7 @@ export async function updateSetting(userId, key, value) {
   };
 
   const { error } = await db
-    .from("appsettings")
+    .from("caidat")
     .upsert(payload, {
       onConflict: ["nguoidung_id"],
     });

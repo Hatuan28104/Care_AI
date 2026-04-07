@@ -7,11 +7,7 @@ class AppSettings {
   static VoidCallback? reloadAlert;
   static ValueNotifier<int> alertVersion = ValueNotifier(0);
   static final ValueNotifier<Locale> locale = ValueNotifier(const Locale('vi'));
-  static final ValueNotifier<bool> notificationOn = ValueNotifier<bool>(true);
-
-  static final ValueNotifier<bool> healthAlertOn = ValueNotifier<bool>(true);
-
-  static final ValueNotifier<bool> syncDataOn = ValueNotifier<bool>(true);
+  static final ValueNotifier<bool> thongbao = ValueNotifier<bool>(true);
 
   static final ValueNotifier<int> unreadAlertCount = ValueNotifier<int>(0);
 
@@ -27,11 +23,8 @@ class AppSettings {
 
     textScale.value = _prefs?.getDouble('textScale') ?? 1.1;
 
-    notificationOn.value = _prefs?.getBool('notificationOn') ?? true;
-
-    healthAlertOn.value = _prefs?.getBool('healthAlertOn') ?? true;
-
-    syncDataOn.value = _prefs?.getBool('syncDataOn') ?? true;
+    thongbao.value =
+        _prefs?.getBool('thongbao') ?? _prefs?.getBool('Thongbao') ?? true;
 
     phoneNumber.value = _prefs?.getString('phoneNumber') ?? '';
 
@@ -48,16 +41,8 @@ class AppSettings {
       _prefs?.setDouble('textScale', textScale.value);
     });
 
-    notificationOn.addListener(() {
-      _prefs?.setBool('notificationOn', notificationOn.value);
-    });
-
-    healthAlertOn.addListener(() {
-      _prefs?.setBool('healthAlertOn', healthAlertOn.value);
-    });
-
-    syncDataOn.addListener(() {
-      _prefs?.setBool('syncDataOn', syncDataOn.value);
+    thongbao.addListener(() {
+      _prefs?.setBool('thongbao', thongbao.value);
     });
 
     phoneNumber.addListener(() {

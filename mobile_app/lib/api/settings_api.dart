@@ -28,13 +28,17 @@ class SettingsApi {
     print("GET SETTINGS BODY: ${res.body}");
 
     if (res.statusCode == 200) {
-      final data = jsonDecode(res.body);
+      final decoded = jsonDecode(res.body) as Map<String, dynamic>;
+      final payload = (decoded["data"] is Map<String, dynamic>)
+          ? decoded["data"] as Map<String, dynamic>
+          : <String, dynamic>{};
 
-      if (data["volume"] != null) {
-        data["volume"] = (data["volume"] as num).toDouble();
-      }
-
-      return data["data"];
+      return {
+        "thongbao": payload["thongbao"] is bool ? payload["thongbao"] : true,
+        "amthanh": payload["amthanh"] is bool ? payload["amthanh"] : true,
+        "rung": payload["rung"] is bool ? payload["rung"] : true,
+        "amluong": (payload["amluong"] as num?)?.toDouble() ?? 0.6,
+      };
     }
 
     throw ApiException("Không load được settings (${res.statusCode})");
@@ -65,13 +69,11 @@ class SettingsApi {
     print("UPDATE SETTING STATUS: ${res.statusCode}");
     print("UPDATE SETTING BODY: ${res.body}");
 
-    final data = jsonDecode(res.body);
+    final data = jsonDecode(res.body) as Map<String, dynamic>;
 
     if (res.statusCode != 200 || data["success"] != true) {
-      throw ApiException("Không load được settings");
+      throw ApiException("Không cập nhật được settings");
     }
-
-    return data["data"];
   }
 
   // 🔹 UPDATE FCM TOKEN (KHÔNG cần userId)

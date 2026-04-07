@@ -76,16 +76,16 @@ export async function sendNotification(userId, title, body, level = 1, type = 'A
 
     // ===== 1. CHECK SETTING =====
     const { data: setting, error: settingErr } = await db
-      .from("appsettings")
-      .select("notificationon")
+      .from("caidat")
+      .select("thongbao")
       .eq("nguoidung_id", userId)
       .maybeSingle();
 
     if (settingErr) {
-      console.log("Bỏ qua check appsettings:", settingErr.message);
+      console.log("Bỏ qua check caidat:", settingErr.message);
     }
 
-    if (!settingErr && setting && setting.notificationon === false) {
+    if (!settingErr && setting && setting.thongbao === false) {
       console.log("🔕 User tắt thông báo");
       return;
     }
