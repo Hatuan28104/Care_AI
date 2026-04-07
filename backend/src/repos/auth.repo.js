@@ -179,7 +179,7 @@ export async function verifyOtp(phone, otp, req, deviceId) {
 
   const insertData = {
     lichsu_id: crypto.randomUUID(),
-    thoigian: login_time ? new Date(login_time) : new Date(),
+    thoigian: new Date().toISOString(),
     thietbi: device && device.trim() !== "" 
     ? device 
     : "Unknown",    diachi: ip || null,
