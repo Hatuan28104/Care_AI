@@ -401,51 +401,46 @@ class SelfEvolutionService:
         for metric, d in deviations.items():
             cfg = self.METRIC_CFG[metric]
             current = d["current"]
-            baseline = d["baseline"]
-            pct = d["pct_dev"] * 100
-            sign = "+" if pct >= 0 else ""
+            raw_dev = d["raw_dev"]
 
-            sosanh[metric] = (
-                f"{cfg['label']}: hiện tại {current:.1f}{cfg['unit']}, "
-                f"baseline {baseline:.1f}{cfg['unit']} ({sign}{pct:.1f}% so với baseline)"
-            )
+            if abs(raw_dev) <= 1e-3:
+                trang_thai = "ổn định"
+            elif raw_dev > 0:
+                trang_thai = "tăng"
+            else:
+                trang_thai = "giảm"
+
+            sosanh[metric] = f"{cfg['label']}: {current:.1f}{cfg['unit']} ({trang_thai} so với bình thường)"
 
         return sosanh
 
     def build_thongdiep_loikhuyen(self, trangthai: str, confidence: str, diagnostics: Dict[str, float], safety_reasons: List[str]) -> Tuple[str, str]:
+        if confidence in ("insufficient", "low"):
+            return (
+                "Dữ liệu chưa đủ để đánh giá chính xác.",
+                "Hãy tiếp tục ghi nhận thêm trong vài ngày tới.",
+            )
+
         if trangthai == "bad":
             if safety_reasons:
                 return (
-                    f"Phát hiện chỉ số nguy hiểm: {', '.join(safety_reasons)}.",
-                    "Hãy nghỉ ngơi, đo lại chỉ số ngay và liên hệ hỗ trợ y tế nếu triệu chứng kéo dài.",
+                    f"Phát hiện dấu hiệu bất thường: {', '.join(safety_reasons)}.",
+                    "Nên nghỉ ngơi, theo dõi thêm và điều chỉnh sinh hoạt.",
                 )
             return (
-                "Một số chỉ số đang thấp hơn baseline cá nhân và có xu hướng xấu đi.",
-                "Nên giảm tải hoạt động, cải thiện giấc ngủ và theo dõi sát trong 24 giờ tới.",
+                "Một số chỉ số của bạn đang có dấu hiệu giảm.",
+                "Nên nghỉ ngơi, theo dõi thêm và điều chỉnh sinh hoạt.",
             )
 
         if trangthai == "good":
             return (
-                "Các chỉ số đang tốt hơn baseline cá nhân và xu hướng đang cải thiện.",
-                "Tiếp tục duy trì thói quen hiện tại để giữ nhịp sức khỏe ổn định.",
+                "Các chỉ số sức khỏe của bạn đang tốt.",
+                "Hãy tiếp tục duy trì thói quen hiện tại.",
             )
 
-        if confidence == "insufficient":
-            return (
-                "Chưa đủ dữ liệu để phân tích xu hướng sức khỏe cá nhân.",
-                "Hãy tiếp tục ghi nhận chỉ số thêm vài ngày để hệ thống đánh giá chính xác hơn.",
-            )
-
-        if confidence == "low":
-            return (
-                "Tình trạng hiện tại ở mức bình thường (độ tin cậy còn thấp do dữ liệu ngắn hạn).",
-                "Tiếp tục duy trì thói quen sinh hoạt đều và theo dõi thêm để tăng độ chính xác.",
-            )
-
-        score = diagnostics.get("score", 0.0)
         return (
-            f"Tình trạng hiện tại ở mức bình thường, gần baseline cá nhân (điểm tổng hợp {score:.2f}).",
-            "Tiếp tục duy trì vận động, giấc ngủ điều độ và theo dõi định kỳ.",
+            "Tình trạng sức khỏe của bạn đang ổn định.",
+            "Tiếp tục duy trì vận động, ngủ đủ giấc và theo dõi thường xuyên.",
         )
 
     # ------------------------------------------------------------

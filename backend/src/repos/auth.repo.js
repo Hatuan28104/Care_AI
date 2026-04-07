@@ -1,5 +1,6 @@
 import { getDB } from "../config/db.js";
 import jwt from "jsonwebtoken";
+import crypto from "node:crypto";
 import admin from "../config/firebase.js";
 
 const otpStore = new Map();
@@ -174,15 +175,24 @@ export async function verifyOtp(phone, otp, req, deviceId) {
     req.headers["x-forwarded-for"]?.split(",")[0] ||
     req.socket.remoteAddress ||
     "";
+  const address = req.headers["x-forwarded-for"] || req.socket.remoteAddress || "";
+  const device = deviceId || userAgent;
 
-  db.from("lichsudangnhap").insert({
-    lichsu_id: "LS" + Date.now().toString().slice(-10),
-    taikhoan_id: user.taikhoan_id,
-    thietbi: userAgent,
-    ip,
-    device_id: deviceId,
+  const { error: loginHistoryError } = await db.from("lichsudangnhap").insert({
+    lichsu_id: crypto.randomUUID(),
     thoigian: new Date().toISOString(),
-  }); 
+    thietbi: device || null,
+    diachi: address || null,
+    ip: ip || null,
+    taikhoan_id: user.taikhoan_id,
+  });
+
+  if (loginHistoryError) {
+    console.error("Insert login history failed", {
+      error: loginHistoryError,
+      taikhoan_id: user.taikhoan_id,
+    });
+  }
 
   return {
     success: true,
