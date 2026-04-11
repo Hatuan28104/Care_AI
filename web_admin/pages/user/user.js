@@ -39,8 +39,9 @@ function pickFirstValue(...values) {
 }
 
 function normalizeGenderValue(value) {
-    if (value === true || value === 1 || value === '1' || value === 'true') return true;
-    if (value === false || value === 0 || value === '0' || value === 'false') return false;
+    if (value === 1 || value === '1' || value === true || value === 'true') return 1;
+    if (value === 0 || value === '0' || value === false || value === 'false') return 0;
+    if (value === 2 || value === '2') return 2;
     return null;
 }
 
@@ -64,12 +65,15 @@ function mapUserRecord(user) {
     const avatarPath = pickFirstValue(user?.avatarUrl, user?.avatarurl);
     const genderRaw = normalizeGenderValue(pickFirstValue(user?.gioiTinh, user?.gioitinh));
 
+    const genderLabel = genderRaw === 1 ? 'Nam' : (genderRaw === 0 ? 'Nữ' : (genderRaw === 2 ? 'Khác' : '-'));
+    const genderClass = genderRaw === 1 ? 'badge--info' : (genderRaw === 0 ? 'badge--pink' : (genderRaw === 2 ? 'badge--purple' : 'badge--neutral'));
+
     return {
         id: id ? String(id) : '',
         name: String(name),
         secondaryText: id ? `${id}` : '-',
-        gender: genderRaw === null ? '-' : (genderRaw ? 'Nam' : 'Nữ'),
-        genderClass: genderRaw === null ? 'badge--neutral' : (genderRaw ? 'badge--info' : 'badge--pink'),
+        gender: genderLabel,
+        genderClass: genderClass,
         genderRaw,
         phone: phone ? String(phone) : '-',
         created: formatDate(createdAtRaw),
@@ -350,6 +354,7 @@ function applyFiltersAndSort(searchQuery = '') {
     const base = q
         ? users.filter((u) =>
             u.name.toLowerCase().includes(q) ||
+            u.secondaryText.toLowerCase().includes(q) ||
             u.phone.toLowerCase().includes(q)
         )
         : [...users];
@@ -557,6 +562,15 @@ async function loadUserEdit(id) {
         }
 
         if (gioiTinh) gioiTinh.value = u.gioiTinh ? '1' : '0';
+        
+        // Handle Gender Switcher UI state
+        const genderSwitcher = document.getElementById('genderSwitcher');
+        if (genderSwitcher) {
+            const val = u.gioiTinh ? '1' : '0';
+            genderSwitcher.querySelectorAll('.gender-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.value === val);
+            });
+        }
         if (avatarPreview) avatarPreview.src = toAbsoluteImageUrl(u.avatarUrl);
     } catch (error) {
         console.error('Load user edit error:', error);
@@ -595,6 +609,18 @@ function initEditPage(id) {
         reader.readAsDataURL(file);
     });
 
+    // Gender Switcher Logic
+    const genderSwitcher = document.getElementById('genderSwitcher');
+    if (genderSwitcher) {
+        genderSwitcher.querySelectorAll('.gender-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                genderSwitcher.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                if (gioiTinh) gioiTinh.value = btn.dataset.value;
+            });
+        });
+    }
+
     btnSave?.addEventListener('click', () => {
         confirmDialog({
             type: 'success',
@@ -608,6 +634,7 @@ function initEditPage(id) {
                     formData.append('gioiTinh', document.getElementById('gioiTinh')?.value || '');
                     formData.append('chieuCao', document.getElementById('chieuCao')?.value || '');
                     formData.append('canNang', document.getElementById('canNang')?.value || '');
+                    formData.append('soDienThoai', document.getElementById('soDienThoai')?.value || '');
                     formData.append('email', document.getElementById('email')?.value || '');
                     formData.append('diaChi', document.getElementById('diaChi')?.value || '');
 

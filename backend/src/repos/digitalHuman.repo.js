@@ -15,7 +15,8 @@ export async function getAllDigitalHuman() {
       mota,
       gioitinh,
       nghenghiep_id,
-      ngoaihinh
+      ngoaihinh,
+      nghenghiep (tennghenghiep)
     `);
 
   if (error) throw error;
@@ -38,7 +39,8 @@ export async function getDigitalHumanById(id) {
       mota,
       gioitinh,
       nghenghiep_id,
-      ngoaihinh
+      ngoaihinh,
+      nghenghiep (tennghenghiep)
     `)
     .eq("digitalhuman_id", id)
     .single();

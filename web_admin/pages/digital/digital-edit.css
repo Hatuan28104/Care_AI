@@ -150,21 +150,23 @@
     display: flex;
     background: #F1F5F9;
     padding: 4px;
-    border-radius: 8px;
+    border-radius: 14px;
     gap: 4px;
-    height: 48px;
 }
 
 .gender-opt {
     flex: 1;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border: none;
     background: transparent;
-    padding: 0 16px;
     font-size: 14px;
     font-weight: 600;
     color: #64748B;
     cursor: pointer;
-    border-radius: 6px;
+    border-radius: 10px;
     transition: 0.2s;
 }
 

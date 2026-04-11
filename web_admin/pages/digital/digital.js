@@ -70,7 +70,7 @@ async function fetchDigitalCharacters() {
             return {
                 id: d.digitalhuman_id || '',
                 name: d.tendigitalhuman || '',
-                job: d.nghenghiep_id || '-',
+                job: d.nghenghiep?.tennghenghiep || d.nghenghiep_id || '-',
                 gender,
                 genderClass: d.gioitinh ? 'badge--info' : 'badge--pink',
                 img: toAbsoluteImageUrl(d.imageurl)
@@ -115,7 +115,7 @@ async function loadDigitalDetail(id) {
         if (digitalIdDetail) digitalIdDetail.innerText = d.digitalhuman_id || '';
         if (digitalName) digitalName.innerText = d.tendigitalhuman || '';
         if (digitalGender) digitalGender.innerText = d.gioitinh ? 'Nam' : 'Nữ';
-        if (digitalJob) digitalJob.innerText = d.nghenghiep_id || '-';
+        if (digitalJob) digitalJob.innerText = d.nghenghiep?.tennghenghiep || d.nghenghiep_id || '-';
         if (digitalAppearance) digitalAppearance.innerText = d.ngoaihinh || '-';
         if (digitalPrompt) digitalPrompt.innerText = d.systemprompt || d.mota || '-';
         if (digitalAvatar) digitalAvatar.src = toAbsoluteImageUrl(d.imageurl);
@@ -154,7 +154,18 @@ async function preloadDigitalForm(id) {
             digitalId.disabled = true;
         }
         if (digitalName) digitalName.value = d.tendigitalhuman || '';
-        if (gender) gender.value = d.gioitinh ? '1' : '0';
+        if (gender) {
+            const val = String(d.gioitinh);
+            gender.value = val;
+            
+            // Handle Switcher UI state
+            const genderSwitcher = document.getElementById('genderSwitcher');
+            if (genderSwitcher) {
+                genderSwitcher.querySelectorAll('.gender-opt').forEach(opt => {
+                    opt.classList.toggle('active', opt.dataset.value === val);
+                });
+            }
+        }
         if (jobId) jobId.value = (d.nghenghiep_id || '').trim();
         if (appearance) appearance.value = d.ngoaihinh || '';
         if (systemPrompt) systemPrompt.value = d.systemprompt || d.mota || '';
@@ -402,6 +413,19 @@ function initDigitalForm() {
             }
         });
     });
+
+    // Gender Switcher Logic
+    const genderSwitcher = document.getElementById('genderSwitcher');
+    const genderInput = document.getElementById('gender');
+    if (genderSwitcher && genderInput) {
+        genderSwitcher.querySelectorAll('.gender-opt').forEach(opt => {
+            opt.addEventListener('click', () => {
+                genderSwitcher.querySelectorAll('.gender-opt').forEach(b => b.classList.remove('active'));
+                opt.classList.add('active');
+                genderInput.value = opt.dataset.value;
+            });
+        });
+    }
 
     initAvatarUpload();
 }
