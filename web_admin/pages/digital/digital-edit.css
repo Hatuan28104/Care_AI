@@ -85,7 +85,7 @@
 
 .form-section-title i,
 .form-section-title svg {
-    color: var(--primary-blue) !important;
+    color: var(--primary-blue2) !important;
     width: 20px;
     height: 20px;
 }
@@ -196,7 +196,7 @@
 }
 
 .btn-pill--primary {
-    background: var(--primary-blue);
+    background: var(--primary-blue2);
     color: #fff;
 }
 
@@ -220,7 +220,7 @@
 
 /* Nút Tải lên đặc thù: Chữ và Icon màu xanh */
 .avatar-edit-box .btn-pill--secondary {
-    color: var(--primary-blue);
+    color: var(--primary-blue2);
     font-weight: 700;
     height: 36px;
     width: 220px;
@@ -229,7 +229,7 @@
 
 .avatar-edit-box .btn-pill--secondary i,
 .avatar-edit-box .btn-pill--secondary svg {
-    color: var(--primary-blue) !important;
+    color: var(--primary-blue2) !important;
     width: 14px;
     height: 14px;
 }

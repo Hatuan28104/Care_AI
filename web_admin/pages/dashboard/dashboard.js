@@ -214,6 +214,11 @@ function renderRecentAlerts(alerts) {
         const level = inferLevel(item.motacanhbao);
         const userIdText = item.nguoiDungId ? `Người dùng ID #${item.nguoiDungId}` : 'Hệ thống';
         
+        // Thêm tiền tố nếu là cảnh báo từ tin nhắn
+        const displayMsg = item.tinnhan_id 
+            ? `Phát hiện ngôn ngữ tiêu cực: "${item.motacanhbao}"` 
+            : item.motacanhbao;
+
         rowsHtml += `
             <tr>
                 <td class="alert-cell--first">
@@ -222,7 +227,7 @@ function renderRecentAlerts(alerts) {
                         ${level.text}
                     </div>
                 </td>
-                <td class="alert-desc">${item.motacanhbao} - ${userIdText}</td>
+                <td class="alert-desc">${displayMsg} - ${userIdText}</td>
                 <td class="alert-cell--last alert-time">${formatRelativeTime(item.thoigian)}</td>
             </tr>
         `;

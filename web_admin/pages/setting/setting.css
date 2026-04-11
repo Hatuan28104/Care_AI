@@ -45,7 +45,7 @@
 }
 
 .setting-nav__item.active .setting-nav__link {
-    color: var(--primary-blue);
+    color: var(--primary-blue2);
 }
 
 .setting-nav__link i {
@@ -79,7 +79,7 @@
 }
 
 .blue-icon {
-    color: var(--primary-blue);
+    color: var(--primary-blue2);
 }
 
 /* 4. Shared Footer Bar (Action Area) */
@@ -137,7 +137,7 @@
 }
 
 .btn-pill--primary {
-    background: var(--primary-blue);
+    background: var(--primary-blue2);
     color: #fff;
 }
 

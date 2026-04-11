@@ -4,8 +4,8 @@
 }
 
 :root {
-    --lp-primary-color: var(--primary-blue);
-    --lp-button-bg: var(--primary-blue);
+    --lp-primary-color: var(--primary-blue2);
+    --lp-button-bg: var(--primary-blue2);
     --lp-button-fg: #fff;
 }
 
@@ -54,23 +54,23 @@
 }
 
 .litepicker .container__days .day-item.is-today {
-    color: var(--primary-blue) !important;
+    color: var(--primary-blue2) !important;
     font-weight: 700 !important;
 }
 
 .litepicker .container__days .day-item.is-start-date,
 .litepicker .container__days .day-item.is-end-date {
-    background-color: var(--primary-blue) !important;
+    background-color: var(--primary-blue2) !important;
     box-shadow: 0 4px 12px rgba(24, 119, 242, 0.3) !important;
 }
 
 .litepicker .container__days .day-item.is-in-range {
     background-color: rgba(24, 119, 242, 0.08) !important;
-    color: var(--primary-blue) !important;
+    color: var(--primary-blue2) !important;
 }
 
 .litepicker .container__days .day-item:hover {
-    box-shadow: inset 0 0 0 1px var(--primary-blue) !important;
+    box-shadow: inset 0 0 0 1px var(--primary-blue2) !important;
 }
 
 .litepicker .container__main {
@@ -113,7 +113,7 @@
     align-items: center;
     gap: var(--space-1);
     padding: 10px 20px;
-    background: var(--primary-blue);
+    background: var(--primary-blue2);
     color: white;
     border: none;
     border-radius: 10px;
@@ -162,7 +162,7 @@
 
 .kpi-card__icon--blue {
     background: #EEF4FF;
-    color: var(--primary-blue);
+    color: var(--primary-blue2);
 }
 
 .kpi-card__icon--purple {
@@ -266,7 +266,7 @@
 
 .chart-tab.active {
     background: white;
-    color: var(--primary-blue);
+    color: var(--primary-blue2);
     box-shadow: var(--shadow-sm);
 }
 
@@ -297,7 +297,7 @@
 }
 
 .alerts-card__action {
-    color: var(--primary-blue);
+    color: var(--primary-blue2);
     font-weight: 700;
     font-size: 14px;
 }
@@ -343,7 +343,7 @@
 }
 
 .alerts-view-all {
-    color: var(--primary-blue);
+    color: var(--primary-blue2);
     font-size: 14px;
     font-weight: 600;
     transition: var(--transition);

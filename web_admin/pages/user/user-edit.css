@@ -41,7 +41,7 @@
     right: 5px;
     width: 40px;
     height: 40px;
-    background: var(--primary-blue);
+    background: var(--primary-blue2);
     color: white;
     border-radius: 50%;
     display: flex;
@@ -125,7 +125,7 @@
 
 .input-premium:focus {
     background: white;
-    border-color: var(--primary-blue);
+    border-color: var(--primary-blue2);
     box-shadow: 0 0 0 4px rgba(24, 119, 242, 0.1);
 }
 
@@ -194,7 +194,7 @@
 }
 
 .btn-primary-pill {
-    background: var(--primary-blue);
+    background: var(--primary-blue2);
     color: white;
     padding: 0 32px;
     border-radius: 999px;

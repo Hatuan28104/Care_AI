@@ -40,7 +40,7 @@
 }
 
 .search-field-shared input:focus {
-    border-color: var(--primary-blue);
+    border-color: var(--primary-blue2);
     box-shadow: 0 0 0 4px rgba(24, 119, 242, 0.1);
 }
 
@@ -146,7 +146,7 @@
 }
 
 .badge--info {
-    color: var(--primary-blue);
+    color: var(--primary-blue2);
     background: #EEF4FF;
 }
 
@@ -257,7 +257,7 @@
 
 .progress-bar__fill {
     height: 100%;
-    background: var(--primary-blue);
+    background: var(--primary-blue2);
     border-radius: inherit;
 }
 
@@ -282,7 +282,7 @@
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: var(--primary-blue);
+    background: var(--primary-blue2);
     color: white;
     font-size: 10px;
     font-weight: 700;
@@ -310,7 +310,8 @@
     color: var(--text-light);
 }
 
-.user-empty-state i, .user-empty-state svg {
+.user-empty-state i,
+.user-empty-state svg {
     width: 48px;
     height: 48px;
     margin-bottom: var(--space-3);
@@ -333,12 +334,12 @@
     .stats-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .table-controls-row {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .search-field-shared {
         max-width: 100%;
     }

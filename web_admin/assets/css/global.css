@@ -2,9 +2,10 @@
 
 :root {
     /* Colors */
-    --primary-blue: #1877F2;
+    --primary-blue: #1D4ED8;
+    --primary-blue2: #1877F2;
     --primary-blue-hover: #166FE5;
-    --primary-gradient: linear-gradient(135deg, #1877F2 0%, #166FE5 100%);
+    --primary-gradient: linear-gradient(135deg, #1D4ED8 0%, #166FE5 100%);
 
     --bg-main: #F6F6F6;
     --bg-card: #FFFFFF;
@@ -141,6 +142,7 @@ select:focus {
         transform: translateY(0);
     }
 }
+
 /* =============================================
    RESPONSIVE — Mobile / Tablet
    ============================================= */

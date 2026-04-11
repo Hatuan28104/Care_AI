@@ -24,7 +24,7 @@
 }
 
 h1 {
-    color: var(--primary-blue);
+    color: var(--primary-blue2);
     font-size: 35px;
     font-weight: 600;
     margin-bottom: 2px;
@@ -66,7 +66,7 @@ input {
 }
 
 input:focus {
-    border-color: var(--primary-blue);
+    border-color: var(--primary-blue2);
     box-shadow: 0 0 0 4px rgba(24, 119, 242, 0.1);
 }
 
@@ -86,7 +86,7 @@ input:focus {
 }
 
 .toggle:hover {
-    color: var(--primary-blue);
+    color: var(--primary-blue2);
 }
 
 button {
@@ -94,7 +94,7 @@ button {
     width: 370px;
     height: 67px;
     border-radius: 10px;
-    background: var(--primary-blue);
+    background: var(--primary-blue2);
     color: var(--bg-card);
     font-size: 20px;
     font-weight: 600;

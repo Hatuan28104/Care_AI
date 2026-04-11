@@ -219,16 +219,25 @@ export async function getAdminAlerts() {
       canhbaotinnhan_id,
       motacanhbao,
       thoigiancanhbao,
-      nguoidung_id
+      tinnhan_id,
+      tinnhan:tinnhan_id (
+        hoithoai:hoithoai_id (
+          nguoidung_id
+        )
+      )
     `)
     .eq("daxoa", false)
     .order("thoigiancanhbao", { ascending: false });
 
   if (error) throw error;
 
-  return (data || []).map(item => ({
-    ...item,
-    nguoiDungId: item.nguoidung_id,
-    thoigian: item.thoigiancanhbao ? new Date(item.thoigiancanhbao).toISOString() : ""
-  }));
+  return (data || []).map(item => {
+    const joinedUserId = item.tinnhan?.hoithoai?.nguoidung_id;
+    
+    return {
+      ...item,
+      nguoiDungId: item.nguoidung_id || joinedUserId || null,
+      thoigian: item.thoigiancanhbao ? new Date(item.thoigiancanhbao).toISOString() : ""
+    };
+  });
 }
