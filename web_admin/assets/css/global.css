@@ -47,6 +47,15 @@
     --space-10: 64px;
 }
 
+[data-theme="dark"] {
+    --bg-main: #0F172A;
+    --bg-card: #1E293B;
+    --border-color: #334155;
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    --text-light: #64748B;
+}
+
 * {
     margin: 0;
     padding: 0;

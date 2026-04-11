@@ -1,4 +1,8 @@
 const UI = {
+    initTheme: function () {
+        const savedTheme = localStorage.getItem('care_ai_theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    },
     // Modal
     showModal: function ({ type, title, message, confirmText, cancelText, onConfirm, extraClass }) {
         let modalOverlay = document.getElementById('global-modal-overlay');
@@ -299,6 +303,7 @@ const UI = {
 window.UI = UI;
 
 document.addEventListener('DOMContentLoaded', () => {
+    UI.initTheme();
     initNavigationFeedback();
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.header__action-wrapper') && !e.target.closest('.notif-dropdown')) {

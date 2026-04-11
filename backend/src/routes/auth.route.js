@@ -1,6 +1,6 @@
 import express from "express";
 import * as authService from "../services/auth.service.js";
-import { auth } from "../middlewares/auth.middleware.js";
+import { auth,requireAdmin  } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
@@ -49,6 +49,16 @@ router.post("/change-phone", auth, async (req, res) => {
   try {
     const response = await authService.handleChangePhone(req.user.nguoidung_id, req.body.phone);
     res.json(response);
+  } catch (e) {
+    res.status(400).json({ success: false, message: e.message });
+  }
+});
+
+router.post("/admin/change-password", auth, requireAdmin, async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+    const response = await authService.handleAdminChangePassword(req.user.taikhoan_id, oldPassword, newPassword);
+    res.json({ success: true, message: "Đổi mật khẩu thành công" });
   } catch (e) {
     res.status(400).json({ success: false, message: e.message });
   }

@@ -1,14 +1,16 @@
 const API_BASE = 'https://careai-production.up.railway.app';
 const API = `${API_BASE}/profile`;
 const PAGE_SIZE = 10;
+const DEFAULT_AVATAR = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
 
 let currentPage = 1;
 let users = [];
 let filteredUsers = [];
 let currentSort = 'default';
+const userDetailCache = new Map();
 
 function toAbsoluteImageUrl(path) {
-    if (!path) return 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+    if (!path) return DEFAULT_AVATAR;
     if (/^https?:\/\//i.test(path)) return path;
     const cleanPath = path.startsWith('/') ? path : `/${path}`;
     return `${API_BASE}${cleanPath}`;
@@ -19,6 +21,95 @@ function formatDate(dateStr) {
     const d = new Date(dateStr);
     if (Number.isNaN(d.getTime())) return '-';
     return d.toLocaleDateString('vi-VN');
+}
+
+function getAccountRecord(user) {
+    const account = user?.taikhoan;
+    if (Array.isArray(account)) return account[0] || null;
+    return account || null;
+}
+
+function pickFirstValue(...values) {
+    for (const value of values) {
+        if (value === undefined || value === null) continue;
+        if (typeof value === 'string' && value.trim() === '') continue;
+        return value;
+    }
+    return null;
+}
+
+function normalizeGenderValue(value) {
+    if (value === true || value === 1 || value === '1' || value === 'true') return true;
+    if (value === false || value === 0 || value === '0' || value === 'false') return false;
+    return null;
+}
+
+function mapUserRecord(user) {
+    const account = getAccountRecord(user);
+    const id = pickFirstValue(user?.nguoiDungId, user?.nguoidung_id, user?.id, '');
+    const name = pickFirstValue(user?.tenND, user?.tennd, user?.name, '(Chưa cập nhật)');
+    const phone = pickFirstValue(
+        user?.soDienThoai,
+        user?.sodienthoai,
+        user?.phone,
+        account?.soDienThoai,
+        account?.sodienthoai
+    );
+    const createdAtRaw = pickFirstValue(
+        user?.ngayTao,
+        user?.ngaytao,
+        account?.ngayTao,
+        account?.ngaytao
+    );
+    const avatarPath = pickFirstValue(user?.avatarUrl, user?.avatarurl);
+    const genderRaw = normalizeGenderValue(pickFirstValue(user?.gioiTinh, user?.gioitinh));
+
+    return {
+        id: id ? String(id) : '',
+        name: String(name),
+        secondaryText: phone ? String(phone) : (id ? `Mã người dùng #${id}` : '-'),
+        gender: genderRaw === null ? '-' : (genderRaw ? 'Nam' : 'Nữ'),
+        genderClass: genderRaw === null ? 'badge--neutral' : (genderRaw ? 'badge--info' : 'badge--pink'),
+        genderRaw,
+        phone: phone ? String(phone) : '-',
+        created: formatDate(createdAtRaw),
+        createdAtRaw: createdAtRaw ? String(createdAtRaw) : '',
+        avatar: toAbsoluteImageUrl(avatarPath)
+    };
+}
+
+function needsUserDetail(user) {
+    return user.phone === '-' || !user.createdAtRaw || user.avatar === DEFAULT_AVATAR || user.genderRaw === null;
+}
+
+async function fetchUserDetail(id) {
+    if (!id) return null;
+    if (userDetailCache.has(id)) return userDetailCache.get(id);
+
+    const request = fetch(`${API}/${id}`)
+        .then((res) => res.json())
+        .then((json) => (json?.success ? json.data || null : null))
+        .catch((error) => {
+            console.error(`Load detail for user ${id} error:`, error);
+            return null;
+        });
+
+    userDetailCache.set(id, request);
+    return request;
+}
+
+async function hydrateUsersWithDetails(rawUsers, mappedUsers) {
+    return Promise.all(mappedUsers.map(async (user, index) => {
+        if (!needsUserDetail(user) || !user.id) return user;
+
+        const detail = await fetchUserDetail(user.id);
+        if (!detail) return user;
+
+        return mapUserRecord({
+            ...rawUsers[index],
+            ...detail
+        });
+    }));
 }
 
 function getCurrentPage() {
@@ -87,7 +178,7 @@ function renderTable() {
                     <img src="${u.avatar}" alt="${u.name}">
                     <div class="user-info">
                         <div class="user-fullname">${u.name}</div>
-                        <div class="user-mail">${u.email}</div>
+                        <div class="user-mail">${u.secondaryText}</div>
                     </div>
                 </div>
             </td>
@@ -259,7 +350,6 @@ function applyFiltersAndSort(searchQuery = '') {
     const base = q
         ? users.filter((u) =>
             u.name.toLowerCase().includes(q) ||
-            u.email.toLowerCase().includes(q) ||
             u.phone.toLowerCase().includes(q)
         )
         : [...users];
@@ -280,21 +370,25 @@ async function fetchUsers() {
     try {
         const res = await fetch(API);
         const json = await res.json();
+        const rawUsers = json?.data || [];
 
-        users = (json?.data || []).map((u) => ({
-            id: u.nguoiDungId || '',
-            name: u.tenND || '(Chưa cập nhật)',
-            email: u.email || '-',
-            gender: u.gioiTinh ? 'Nam' : 'Nữ',
-            genderClass: u.gioiTinh ? 'badge--info' : 'badge--pink',
-            phone: u.soDienThoai || '-',
-            created: formatDate(u.ngayTao),
-            createdAtRaw: u.ngayTao || '',
-            avatar: toAbsoluteImageUrl(u.avatarUrl)
-        }));
-
+        users = rawUsers.map(mapUserRecord);
         await updateUserStats();
         applyFiltersAndSort(document.querySelector('.search-field-shared input')?.value || '');
+
+        const hydratedUsers = await hydrateUsersWithDetails(rawUsers, users);
+        const hasHydratedData = hydratedUsers.some((user, index) =>
+            user.phone !== users[index]?.phone ||
+            user.createdAtRaw !== users[index]?.createdAtRaw ||
+            user.avatar !== users[index]?.avatar ||
+            user.genderRaw !== users[index]?.genderRaw
+        );
+
+        if (hasHydratedData) {
+            users = hydratedUsers;
+            await updateUserStats();
+            applyFiltersAndSort(document.querySelector('.search-field-shared input')?.value || '');
+        }
     } catch (error) {
         console.error(error);
         users = [];

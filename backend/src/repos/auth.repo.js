@@ -218,11 +218,14 @@ export async function adminLogin(phone, password, req) {
     .maybeSingle();
 
   if (error) throw error;
-  if (!account) throw new Error("Tài khoản admin không tồn tại");
-  if (!account.matkhau) throw new Error("Tài khoản admin chưa cấu hình mật khẩu");
+  const inputPassword = String(password || "").trim();
+  const dbPassword = String(account?.matkhau || "").trim();
 
-  const ok = String(password) === String(account.matkhau);
-  if (!ok) throw new Error("Số điện thoại hoặc mật khẩu không đúng");
+  const ok = account && dbPassword && inputPassword === dbPassword;
+
+  if (!ok) {
+    throw new Error("Số điện thoại hoặc mật khẩu không đúng");
+  }
 
   const token = jwt.sign(
     {
@@ -357,6 +360,37 @@ export async function sendTestPush(userId) {
       },
     });
   }
+
+  return true;
+}
+
+/* =========================
+   ADMIN - CHANGE PASSWORD
+   ========================= */
+export async function changeAdminPassword(taikhoanId, oldPw, newPw) {
+  const db = getDB();
+
+  // 1. Check old password
+  const { data: account, error: fetchErr } = await db
+    .from("taikhoan")
+    .select("matkhau")
+    .eq("taikhoan_id", taikhoanId)
+    .maybeSingle();
+
+  if (fetchErr) throw fetchErr;
+  if (!account) throw new Error("Tài khoản không tồn tại");
+
+  if (String(account.matkhau).trim() !== String(oldPw).trim()) {
+    throw new Error("Mật khẩu cũ không chính xác");
+  }
+
+  // 2. Update to new password
+  const { error: updateErr } = await db
+    .from("taikhoan")
+    .update({ matkhau: String(newPw).trim() })
+    .eq("taikhoan_id", taikhoanId);
+
+  if (updateErr) throw updateErr;
 
   return true;
 }

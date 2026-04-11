@@ -1,7 +1,12 @@
 import {
   requestRegisterOtp, requestLoginOtp, verifyOtp, changePhone, adminLogin,
-  getLoginHistory, saveFcmToken, sendTestPush, removeFcmToken
+  getLoginHistory, saveFcmToken, sendTestPush, removeFcmToken, changeAdminPassword
 } from "../repos/auth.repo.js";
+
+export const handleAdminChangePassword = async (taikhoanId, oldPassword, newPassword) => {
+  if (!oldPassword || !newPassword) throw new Error("Thiếu mật khẩu cũ hoặc mật khẩu mới");
+  return await changeAdminPassword(taikhoanId, oldPassword, newPassword);
+};
 
 export const handleRequestRegisterOtp = async (phone) => {
   if (!phone) throw new Error("Thiếu số điện thoại");
