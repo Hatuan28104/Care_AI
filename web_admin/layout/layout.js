@@ -1,121 +1,140 @@
-/* ===============================
-   LOAD HTML HELPER
-   =============================== */
-function loadHTML(id, file, callback) {
-  fetch(file)
-    .then(res => res.text())
-    .then(html => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.innerHTML = html;
-      callback && callback();
-    })
-    .catch(err => console.error("Load error:", err));
-}
+const Layout = {
+    init: async function () {
+        document.body.classList.add('layout-loading');
+        try {
+            const response = await fetch('../../layout/layout.html');
+            if (!response.ok) throw new Error('Không thể tải file layout.html');
+            const data = await response.text();
 
-/* ===============================
-   LOAD LAYOUT PARTS
-   =============================== */
-loadHTML("sidebar", "../layout/sidebar.html", setActiveMenu);
-loadHTML("header", "../layout/header.html", initAvatar);
-loadHTML("popup", "../layout/popup.html");
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(data, 'text/html');
 
-/* ===============================
-   ACTIVE MENU
-   =============================== */
-function setActiveMenu() {
-  const page = document.body.dataset.page;
-  if (!page) return;
+            this.renderSidebar(doc);
+            this.renderHeader(doc);
+            this.setActiveLinks();
+            this.bindEvents();
 
-  document.querySelectorAll(".sidebar a").forEach(a => {
-    a.classList.toggle("active", a.dataset.page === page);
-  });
-}
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+        } catch (error) {
+            console.error('Error fetching layout:', error);
+        } finally {
+            document.body.classList.remove('layout-loading');
+        }
+    },
 
-/* ===============================
-   AVATAR DROPDOWN
-   =============================== */
-function initAvatar() {
-  const avatar = document.querySelector(".avatar");
-  const menu = document.querySelector(".avatar-menu");
-  if (!avatar || !menu) return;
+    renderSidebar: function (doc) {
+        const sidebarTarget = document.getElementById('sidebar-target');
+        const sidebarSource = doc.getElementById('layout-sidebar-source');
+        if (sidebarTarget && sidebarSource) {
+            sidebarTarget.innerHTML = sidebarSource.innerHTML;
+        }
+    },
 
-  avatar.addEventListener("click", e => {
-    e.stopPropagation();
-    menu.classList.toggle("show");
-  });
+    renderHeader: function (doc) {
+        const headerTarget = document.getElementById('header-target');
+        const headerSource = doc.getElementById('layout-header-source');
+        if (headerTarget && headerSource) {
+            headerTarget.innerHTML = headerSource.innerHTML;
+        }
+    },
 
-  document.addEventListener("click", () => {
-    menu.classList.remove("show");
-  });
-}
+    setActiveLinks: function () {
+        const path = window.location.pathname.toLowerCase();
 
-/* ===============================
-   LOGOUT
-   =============================== */
-document.addEventListener("click", e => {
-  if (e.target.closest("#logoutBtn")) {
-    localStorage.removeItem("loggedIn");
-    window.location.href = "../auth/auth.html";
-  }
-});
+        // Helper to check if current page belongs to a module
+        const checkModule = (moduleName) => {
+            return path.includes(`/${moduleName}/`) ||
+                path.includes(`/${moduleName}.html`) ||
+                path.includes(`/${moduleName}-`);
+        };
 
-/* ===============================
-   GLOBAL MODAL API
-   =============================== */
-window.openModal = function ({
-  title,
-  desc,
-  primaryText = "Confirm",
-  primaryClass = "btn-delete",
-  onConfirm
-}) {
-  const modal = document.getElementById("confirmModal");
-  if (!modal) return;
+        // Sidebar active detection
+        document.querySelectorAll('.sidebar__item').forEach(item => {
+            const module = item.getAttribute('data-page');
+            if (checkModule(module)) {
+                item.classList.add('sidebar__item--active');
+            } else {
+                item.classList.remove('sidebar__item--active');
+            }
+        });
 
-  const titleEl = document.getElementById("modalTitle");
-  const descEl = document.getElementById("modalDesc");
-  const confirmBtn = document.getElementById("modalConfirm");
-  const cancelBtn = document.getElementById("modalCancel");
+        // Header tab active detection
+        document.querySelectorAll('.header__tab').forEach(tab => {
+            const module = tab.getAttribute('data-tab');
+            if (checkModule(module)) {
+                tab.classList.add('header__tab--active');
+            } else {
+                tab.classList.remove('header__tab--active');
+            }
+        });
+    },
 
-  titleEl.innerText = title;
-  descEl.innerText = desc;
-
-  confirmBtn.innerText = primaryText;
-  confirmBtn.className = "";          // reset class
-  confirmBtn.classList.add(primaryClass);
-
-  modal.classList.remove("hidden");
-
-  const close = () => modal.classList.add("hidden");
-
-  confirmBtn.onclick = () => {
-    close();
-    onConfirm && onConfirm();
-  };
-
-  cancelBtn.onclick = close;
-document.addEventListener("click", e => {
-  if (e.target.classList.contains("modal-close")) {
-    e.target.closest(".modal").classList.add("hidden");
-  }
-});
-document.addEventListener("click", e => {
-  if (e.target.classList.contains("modal")) {
-    e.target.classList.add("hidden");
-  }
-});
-
+    bindEvents: function () {
+        const btnLogout = document.getElementById('btnLogoutAction');
+        if (btnLogout) {
+            btnLogout.addEventListener('click', () => {
+                if (window.UI) {
+                    UI.showModal({
+                        type: 'danger',
+                        title: 'Đăng xuất?',
+                        message: 'Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?',
+                        confirmText: 'Xác nhận',
+                        cancelText: 'Hủy',
+                        onConfirm: () => {
+                            window.location.href = '../auth/auth.html';
+                        }
+                    });
+                } else {
+                    // Fallback nếu UI chưa init
+                    window.location.href = 'pages/auth/auth.html';
+                }
+            });
+        }
+    }
 };
-/* ===============================
-   TOAST
-   =============================== */
-window.showToast = function (text) {
-  const toast = document.getElementById("toast");
-  if (!toast) return;
 
-  document.getElementById("toastText").innerText = text;
-  toast.classList.remove("hidden");
+document.addEventListener('DOMContentLoaded', () => {
+    Layout.init();
 
-  setTimeout(() => toast.classList.add("hidden"), 1500);
-};
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.header__action-wrapper') && !e.target.closest('.notif-dropdown')) {
+            document.querySelectorAll('.notif-dropdown').forEach(d => d.classList.remove('show'));
+        }
+
+        // Close sidebar overlay on overlay click
+        if (e.target.id === 'sidebar-overlay' || e.target.classList.contains('sidebar-overlay')) {
+            closeSidebar();
+        }
+    });
+
+    document.body.addEventListener('click', (e) => {
+        const toggleBtn = e.target.closest('#sidebarToggle');
+        if (toggleBtn) {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            const icon = toggleBtn.querySelector('i');
+            if (sidebar) {
+                const isOpen = sidebar.classList.toggle('sidebar--active');
+                if (overlay) overlay.classList.toggle('active', isOpen);
+                if (icon) {
+                    icon.setAttribute('data-lucide', isOpen ? 'x' : 'menu');
+                    if (window.lucide) window.lucide.createIcons();
+                }
+            }
+        }
+    });
+
+    function closeSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.querySelector('.sidebar-overlay');
+        const icon = document.querySelector('#sidebarToggle i');
+        if (sidebar) sidebar.classList.remove('sidebar--active');
+        if (overlay) overlay.classList.remove('active');
+        if (icon) {
+            icon.setAttribute('data-lucide', 'menu');
+            if (window.lucide) window.lucide.createIcons();
+        }
+    }
+});

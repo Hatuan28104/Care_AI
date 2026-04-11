@@ -21,6 +21,7 @@ export function auth(req, res, next) {
       nguoidung_id: decoded.nguoidung_id,
       taikhoan_id: decoded.taikhoan_id,
       sodienthoai: decoded.sodienthoai,
+      laadmin: !!decoded.laadmin,
     };
 
     next();
@@ -30,4 +31,14 @@ export function auth(req, res, next) {
       message: "Token không hợp lệ hoặc hết hạn",
     });
   }
+}
+export function requireAdmin(req, res, next) {
+  if (!req.user?.laadmin) {
+    return res.status(403).json({
+      success: false,
+      message: "Không có quyền admin",
+    });
+  }
+
+  next();
 }

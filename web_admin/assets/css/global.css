@@ -1,0 +1,149 @@
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+    /* Colors */
+    --primary-blue: #1877F2;
+    --primary-blue-hover: #166FE5;
+    --primary-gradient: linear-gradient(135deg, #1877F2 0%, #166FE5 100%);
+
+    --bg-main: #F6F6F6;
+    --bg-card: #FFFFFF;
+    --border-color: #E2E8F0;
+
+    /* Text */
+    --text-primary: #0B1C30;
+    --text-secondary: #64748B;
+    --text-light: #94A3B8;
+
+    /* Status */
+    --status-success: #059669;
+    --status-danger: #BA1A1A;
+    --status-warning: #F59E0B;
+    --status-info: #1877F2;
+
+    /* Shadows */
+    --shadow-sm: 0px 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0px 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0px 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --shadow-premium: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+
+    /* Radius */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+
+    /* Transition */
+    --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Spacing */
+    --space-1: 8px;
+    --space-2: 12px;
+    --space-3: 16px;
+    --space-4: 24px;
+    --space-5: 32px;
+    --space-6: 40px;
+    --space-7: 48px;
+    --space-8: 56px;
+    --space-10: 64px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body,
+input,
+button,
+textarea,
+select {
+    font-family: 'Be Vietnam Pro', sans-serif;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    overflow-x: hidden;
+    line-height: 1.5;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+ul {
+    list-style: none;
+}
+
+button {
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+input {
+    outline: none;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(24, 119, 242, 0.15);
+}
+
+/* Layout Grid */
+.dashboard-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Utility Cards & Layout */
+.dashboard-content {
+    flex: 1;
+    background-color: var(--bg-main);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.main-body {
+    padding: var(--space-4);
+    max-width: 1600px;
+    margin: 0;
+    width: 100%;
+    transition: opacity 0.25s ease;
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+/* =============================================
+   RESPONSIVE — Mobile / Tablet
+   ============================================= */
+
+@media (max-width: 480px) {
+    .main-body {
+        padding: var(--space-2);
+    }
+
+
+
+    .premium-table-wrapper {
+        overflow-x: auto;
+    }
+}

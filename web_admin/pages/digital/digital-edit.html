@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chỉnh sửa nhân vật | Care AI</title>
+    <!-- Scripts -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="../../assets/css/global.css">
+    <link rel="stylesheet" href="../../assets/css/ui.css">
+    <link rel="stylesheet" href="../../assets/css/layout.css">
+    <link rel="stylesheet" href="digital-edit.css">
+    <!-- Layout Component -->
+    <script src="../../layout/layout.js" defer></script>
+</head>
+
+<body class="digital-page" data-page="digital-edit">
+    <div class="dashboard-layout">
+        <div id="sidebar-target"></div>
+        <div class="dashboard-content">
+            <div id="header-target"></div>
+            <main class="main-body animate-fade-in">
+                <section class="page-header">
+                    <div class="page-header__title">
+                        <h2 class="page-title">Chỉnh sửa thông tin nhân vật số</h2>
+                        <p class="page-subtitle">Cập nhật hồ sơ nhân vật số để duy trì độ chính xác trong hệ thống.</p>
+                    </div>
+                </section>
+
+                <div class="view-content-grid">
+                    <aside class="form-card-premium flex-center">
+                        <div class="avatar-edit-box flex-center">
+                            <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+                                alt="Avatar Edit" class="avatar-lg" id="avatarPreview">
+                            <div class="avatar-label">Ảnh đại diện</div>
+                            <p class="avatar-sub">Tải lên hình ảnh rõ nét để đại diện cho nhân vật số này.</p>
+                            <button type="button" class="btn-pill btn-pill--secondary" id="avatarBox">
+                                <i data-lucide="upload" id="uploadIcon"></i> 
+                                <span id="uploadText">Tải lên</span>
+                                <input type="file" id="avatarInput" accept="image/*" hidden>
+                            </button>
+                            <button type="button" class="btn-pill btn-pill--danger hidden" id="btnRemoveAvatar">
+                                <span>Xóa ảnh</span>
+                            </button>
+                        </div>
+                    </aside>
+
+                    <div class="view-main-content">
+                        <form class="edit-form-box">
+                            <div class="form-section">
+                                <h4 class="form-section-title"><i data-lucide="user"></i> Thông tin cá nhân</h4>
+                                <div class="form-group-full">
+                                    <label>HỌ VÀ TÊN</label>
+                                    <input type="text" class="form-input-v2" id="digitalName" value="">
+                                </div>
+                                
+                                <div class="form-grid-2">
+                                    <div class="form-group-v2">
+                                        <label>GIỚI TÍNH</label>
+                                        <select id="gender" class="form-input-v2">
+                                            <option value="1">Nam</option>
+                                            <option value="0">Nữ</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group-v2">
+                                        <label>MÃ ID</label>
+                                        <input type="text" class="form-input-v2" id="digitalId" value="" readonly>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-section">
+                                <h4 class="form-section-title"><i data-lucide="briefcase"></i> Nghề nghiệp & Ngoại hình</h4>
+                                <div class="form-group-full">
+                                    <label>NGHỀ NGHIỆP</label>
+                                    <input type="text" class="form-input-v2" id="jobId" value="">
+                                </div>
+                                <div class="form-group-full">
+                                    <label>NGOẠI HÌNH</label>
+                                    <textarea class="textarea-v2" id="appearance"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="form-section">
+                                <h4 class="form-section-title"><i data-lucide="file-text"></i> Mô tả chi tiết</h4>
+                                <div class="form-group-full">
+                                    <label>MÔ TẢ CHI TIẾT</label>
+                                    <textarea class="textarea-v3" id="systemPrompt"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="form-footer-actions">
+                                <button type="button" class="btn-pill btn-pill--secondary" id="btnCancel">Hủy</button>
+                                <button type="button" class="btn-pill btn-pill--primary" id="btnSave">
+                                    <span>Lưu thay đổi</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script src="../../assets/js/main.js"></script>
+    <script src="../../assets/js/ui.js"></script>
+    <script src="digital.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết người dùng | Care AI</title>
+    <!-- Scripts -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="../../assets/css/global.css">
+    <link rel="stylesheet" href="../../assets/css/ui.css">
+    <link rel="stylesheet" href="../../assets/css/layout.css">
+    <link rel="stylesheet" href="user-view.css">
+    <!-- Layout Component -->
+    <script src="../../layout/layout.js" defer></script>
+</head>
+
+<body class="user-page" data-page="user-view">
+    <div class="dashboard-layout">
+        <div id="sidebar-target"></div>
+        <div class="dashboard-content">
+            <div id="header-target"></div>
+            <main class="main-body animate-fade-in">
+                <section class="user-view-header">
+                    <div class="view-header-profile">
+                        <div class="view-header__left">
+                            <div class="view-avatar-wrapper">
+                                <img id="avatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+                                    alt="Avatar" class="view-avatar-img">
+                            </div>
+                            <div class="view-name-group">
+                                <h2 class="view-display-name" id="name">-</h2>
+                                <span class="view-id-badge" id="updated">-</span>
+                            </div>
+                        </div>
+                        <div class="view-actions">
+                            <a class="btn-primary-pill" id="editBtn" href="user-edit.html">
+                                <i data-lucide="edit-2"></i>
+                                <span>Chỉnh sửa thông tin</span>
+                            </a>
+                            <button class="btn-danger-outline-pill" id="btnDeleteUser">
+                                <i data-lucide="trash-2"></i>
+                                <span>Xóa tài khoản</span>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="info-cards-grid user-view-grid user-bento-grid">
+                    <article class="info-card user-personal-card">
+                        <div class="info-card-header user-view-card-header">
+                            <div class="icon-box-blue"><i data-lucide="clipboard-list"></i></div>
+                            <h4 class="info-card-title">Thông tin cá nhân</h4>
+                            <i data-lucide="user-round" class="user-card-watermark" aria-hidden="true"></i>
+                        </div>
+                        <div class="info-content-grid user-info-grid">
+                            <div class="info-field-group personal-name">
+                                <span class="info-field-label">Họ và tên</span>
+                                <span class="info-field-value" id="fullName">-</span>
+                            </div>
+                            <div class="info-field-group personal-dob">
+                                <span class="info-field-label">Ngày sinh</span>
+                                <span class="info-field-value" id="dob">-</span>
+                            </div>
+                            <div class="info-field-group personal-gender">
+                                <span class="info-field-label">Giới tính</span>
+                                <span class="info-field-value" id="gender"><i data-lucide="mars"></i> -</span>
+                            </div>
+                            <div class="info-field-group personal-height">
+                                <span class="info-field-label">Chiều cao</span>
+                                <span class="info-field-value" id="height">-</span>
+                            </div>
+                            <div class="info-field-group personal-weight">
+                                <span class="info-field-label">Cân nặng</span>
+                                <span class="info-field-value" id="weight">-</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="info-card user-contact-card contact-details-card">
+                        <div class="info-card-header user-view-card-header contact-card-header">
+                            <div class="icon-box-blue"><i data-lucide="file-text"></i></div>
+                            <h4 class="info-card-title">Thông tin liên hệ</h4>
+                        </div>
+                        <div class="contact-stack">
+                            <div class="contact-row">
+                                <i data-lucide="phone" class="contact-icon-blue"></i>
+                                <div class="info-field-group">
+                                    <span class="info-field-label">Số điện thoại</span>
+                                    <span class="info-field-value" id="phone">-</span>
+                                </div>
+                            </div>
+                            <div class="contact-row">
+                                <i data-lucide="mail" class="contact-icon-blue"></i>
+                                <div class="info-field-group">
+                                    <span class="info-field-label">Email</span>
+                                    <span class="info-field-value" id="email">-</span>
+                                </div>
+                            </div>
+                            <div class="contact-row">
+                                <i data-lucide="map-pin" class="contact-icon-blue"></i>
+                                <div class="info-field-group">
+                                    <span class="info-field-label">Địa chỉ</span>
+                                    <span class="info-field-value" id="address">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </section>
+
+                <section class="timeline-block user-timeline-block activity-timeline-card">
+                    <h4 class="timeline-title-main">Lịch sử hoạt động gần đây</h4>
+                    <div class="timeline-list">
+                        <div class="timeline-row active">
+                            <div class="marker-icon-wrapper"><i data-lucide="check"></i></div>
+                            <div class="timeline-entry-content">
+                                <h5>Cập nhật thông tin sức khỏe</h5>
+                                <p>Thông số nhịp tim và huyết áp đã được đồng bộ từ thiết bị đeo.</p>
+                            </div>
+                            <span class="timeline-entry-time">15:30 - Hôm nay</span>
+                        </div>
+                        <div class="timeline-row">
+                            <div class="marker-icon-wrapper"><i data-lucide="monitor"></i></div>
+                            <div class="timeline-entry-content">
+                                <h5>Đăng nhập từ thiết bị mới</h5>
+                                <p>Trình duyệt Chrome trên MacOS (TP. HCM, Việt Nam)</p>
+                            </div>
+                            <span class="timeline-entry-time">08:12 - Hôm qua</span>
+                        </div>
+                        <div class="timeline-row">
+                            <div class="marker-icon-wrapper"><i data-lucide="calendar"></i></div>
+                            <div class="timeline-entry-content">
+                                <h5>Đặt lịch khám chuyên khoa</h5>
+                                <p>Lịch hẹn với Bác sĩ Nguyễn Văn A tại Bệnh viện Đa khoa Tâm Anh.</p>
+                            </div>
+                            <span class="timeline-entry-time">10:00 - 12/10/2023</span>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+    <script src="../../assets/js/main.js"></script>
+    <script src="../../assets/js/ui.js"></script>
+    <script src="user.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>

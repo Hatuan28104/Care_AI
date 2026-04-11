@@ -1,0 +1,267 @@
+/* --- Clinical Portal: Digital Edit Page Standalone (UI Aligned) --- */
+
+/* 1. Structural Layout */
+.view-content-grid {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 32px;
+    margin-bottom: 40px;
+    align-items: start;
+}
+
+.form-card-premium {
+    background: #fff;
+    border: 1px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 40px 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.flex-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+/* 2. Avatar Card (Left) */
+.avatar-edit-box {
+    width: 100%;
+}
+
+.avatar-lg {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #fff;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    margin-bottom: 24px;
+}
+
+.avatar-label {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1E293B;
+    margin-bottom: 8px;
+}
+
+.avatar-sub {
+    font-size: 13px;
+    color: #64748B;
+    line-height: 1.6;
+    margin-bottom: 24px;
+}
+
+/* 3. Main Form Area (Right) */
+.view-main-content {
+    background: #fff;
+    border: 1px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 40px;
+}
+
+.edit-form-box {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.form-section {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.form-section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1E293B;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+}
+
+.form-section-title i,
+.form-section-title svg {
+    color: var(--primary-blue) !important;
+    width: 20px;
+    height: 20px;
+}
+
+.form-group-full,
+.form-group-v2 {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+/* Typography for Labels */
+.edit-form-box label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748B;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Inputs & Textareas */
+.form-input-v2,
+.textarea-v2,
+.textarea-v3 {
+    width: 100%;
+    border: 1px solid transparent;
+    background: #F1F5F9;
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 15px;
+    color: #1E293B;
+    outline: none;
+    transition: 0.2s;
+}
+
+.form-input-v2 { height: 48px; }
+.textarea-v2 { height: 110px; resize: none; line-height: 1.6; }
+.textarea-v3 { height: 180px; resize: none; line-height: 1.6; }
+
+.form-input-v2:focus,
+.textarea-v2:focus,
+.textarea-v3:focus {
+    border-color: #2563EB;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+.form-input-v2:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* 4. Gender Selection Group */
+.gender-selection-group {
+    display: flex;
+    background: #F1F5F9;
+    padding: 4px;
+    border-radius: 8px;
+    gap: 4px;
+    height: 48px;
+}
+
+.gender-opt {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 0 16px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #64748B;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: 0.2s;
+}
+
+.gender-opt.active {
+    background: #fff;
+    color: #1E293B;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* 5. Pill Buttons Overrides */
+.btn-pill {
+    height: 38px;
+    padding: 0 24px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+    border: none;
+}
+
+.btn-pill i {
+    width: 16px;
+    height: 16px;
+}
+
+.btn-pill--primary {
+    background: var(--primary-blue);
+    color: #fff;
+}
+
+.btn-pill--primary:hover {
+    background: var(--primary-blue-hover);
+    color: #fff;
+    transform: translateY(-1.5px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.btn-pill--secondary {
+    background: #F1F5F9;
+    color: var(--text-primary);
+}
+
+.btn-pill--secondary:hover {
+    background: #E2E8F0;
+    transform: translateY(-1.5px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Nút Tải lên đặc thù: Chữ và Icon màu xanh */
+.avatar-edit-box .btn-pill--secondary {
+    color: var(--primary-blue);
+    font-weight: 700;
+    height: 36px;
+    width: 220px;
+    padding: 0 20px;
+}
+
+.avatar-edit-box .btn-pill--secondary i,
+.avatar-edit-box .btn-pill--secondary svg {
+    color: var(--primary-blue) !important;
+    width: 14px;
+    height: 14px;
+}
+
+.form-footer-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+    margin-top: 20px;
+}
+
+/* Responsive */
+@media (max-width: 1280px) {
+    .view-content-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .form-grid-2 {
+        grid-template-columns: 1fr;
+    }
+    
+    .view-main-content {
+        padding: 24px;
+    }
+    
+    .form-footer-actions {
+        flex-direction: column;
+    }
+    
+    .btn-pill {
+        width: 100%;
+    }
+}

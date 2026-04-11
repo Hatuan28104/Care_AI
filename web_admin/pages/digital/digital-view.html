@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết nhân vật | Care AI</title>
+    <!-- Scripts -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="../../assets/css/global.css">
+    <link rel="stylesheet" href="../../assets/css/ui.css">
+    <link rel="stylesheet" href="../../assets/css/layout.css">
+    <link rel="stylesheet" href="digital.css">
+    <link rel="stylesheet" href="digital-view.css">
+    <!-- Layout Component -->
+    <script src="../../layout/layout.js" defer></script>
+</head>
+
+<body class="digital-page" data-page="digital-view">
+    <div class="dashboard-layout">
+        <!-- Sidebar Navigation (Shared) -->
+        <div id="sidebar-target"></div>
+
+        <!-- Main Content Area -->
+        <div class="dashboard-content">
+            <!-- Header (Shared) -->
+            <div id="header-target"></div>
+
+            <main class="main-body animate-fade-in digital-view-page">
+                <div class="view-header-profile">
+                    <div class="view-header__left">
+                        <div class="view-avatar-box">
+                            <img id="digitalAvatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+                                alt="Digital Avatar" class="view-avatar">
+                        </div>
+                        <div class="view-header__info">
+                            <h2 class="view-name" id="digitalTitle">-</h2>
+                            <span class="id-badge" id="digitalId">-</span>
+                        </div>
+                    </div>
+
+                    <div class="view-header__actions">
+                        <button class="btn-edit-digital" id="btnEditFromView">
+                            <i data-lucide="pen"></i>
+                            <span>Chỉnh sửa thông tin</span>
+                        </button>
+                        <button class="btn-delete-view" id="btnDeleteFromView">
+                            <i data-lucide="trash-2"></i>
+                            <span>Xóa nhân vật</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="view-content-grid">
+                    <!-- [Cột 1] Thông tin cá nhân -->
+                    <aside class="view-side-card">
+                        <h4 class="view-section-title">THÔNG TIN CÁ NHÂN</h4>
+
+                        <div class="view-info-item">
+                            <label>HỌ VÀ TÊN</label>
+                            <p id="digitalName">-</p>
+                        </div>
+
+                        <div class="view-info-item">
+                            <label>MÃ ID</label>
+                            <p id="digitalIdDetail">-</p>
+                        </div>
+
+                        <div class="view-info-item">
+                            <label>GIỚI TÍNH</label>
+                            <div class="gender-display">
+                                <i data-lucide="venus" class="gender-icon"></i>
+                                <p id="digitalGender">-</p>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <!-- [Cột 2] Đặc điểm & Mô tả -->
+                    <section class="view-main-content">
+                        <h4 class="view-section-title">ĐẶC ĐIỂM &amp; MÔ TẢ</h4>
+
+                        <div class="view-spec-row">
+                            <div class="spec-card">
+                                <label>NGHỀ NGHIỆP</label>
+                                <div class="spec-content">
+                                    <div class="spec-icon-box">
+                                        <i data-lucide="briefcase"></i>
+                                    </div>
+                                    <span class="spec-value" id="digitalJob">-</span>
+                                </div>
+                            </div>
+
+                            <div class="spec-card">
+                                <label>NGOẠI HÌNH / VỀ BỀ NGOÀI</label>
+                                <p class="spec-desc-text" id="digitalAppearance">-</p>
+                            </div>
+                        </div>
+
+                        <div class="view-full-desc">
+                            <label>MÔ TẢ CHI TIẾT</label>
+                            <div class="desc-box-premium">
+                                <p id="digitalPrompt">-</p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="../../assets/js/main.js"></script>
+    <script src="../../assets/js/ui.js"></script>
+    <script src="digital.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>

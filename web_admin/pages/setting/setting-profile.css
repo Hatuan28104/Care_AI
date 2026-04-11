@@ -1,0 +1,78 @@
+/* --- Setting Module: Profile Specific --- */
+
+.setting-form-v2 {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-row-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+    margin-bottom: var(--space-5);
+}
+
+.setting-card-v2__header h3 {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.form-group-v2 label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-1);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.input-v2 {
+    width: 100%;
+    background: #F1F5F9;
+    border: none;
+    border-radius: 8px;
+    padding: var(--space-3);
+    font-size: 14px;
+    color: var(--text-primary);
+    transition: var(--transition);
+    outline: none;
+}
+
+.input-v2:focus {
+    background: var(--border-color);
+    box-shadow: inset 0 0 0 2px rgba(24, 119, 242, 0.2);
+}
+
+.section-divider {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: 0.5px;
+    margin-bottom: var(--space-5);
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    text-transform: uppercase;
+}
+
+.section-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--border-color);
+}
+
+.form-footer-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-4);
+    margin-top: var(--space-2);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .form-row-grid {
+        grid-template-columns: 1fr;
+    }
+}

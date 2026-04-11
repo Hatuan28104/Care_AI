@@ -1,0 +1,223 @@
+/* ==========================================================================
+   USER EDIT PAGE STYLES (user-edit.css)
+   ========================================================================== */
+
+.edit-container {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: var(--space-5);
+    align-items: start;
+}
+
+/* --- Avatar Setting --- */
+.edit-avatar-box {
+    background: var(--bg-card);
+    padding: var(--space-6);
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+}
+
+.profile-edit-circle {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    margin: 0 auto var(--space-4);
+}
+
+.profile-edit-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 6px solid #F1F5F9;
+    box-shadow: var(--shadow-md);
+}
+
+.img-edit-icon {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 40px;
+    height: 40px;
+    background: var(--primary-blue);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid white;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-upload-soft {
+    background: #F1F5F9;
+    color: var(--text-primary);
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: var(--space-4);
+    transition: var(--transition);
+}
+
+.btn-upload-soft:hover {
+    background: #E2E8F0;
+}
+
+/* --- Form --- */
+.edit-form-card {
+    background: var(--bg-card);
+    padding: var(--space-6);
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+}
+
+.form-header-group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-6);
+}
+
+.form-card-title {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.form-grid-layout {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+}
+
+.form-full-width {
+    grid-column: span 2;
+}
+
+.field-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.field-wrapper label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.input-premium {
+    width: 100%;
+    height: 48px;
+    background: #F8FAFC;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 0 16px;
+    font-size: 14px;
+    transition: var(--transition);
+}
+
+.input-premium:focus {
+    background: white;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 4px rgba(24, 119, 242, 0.1);
+}
+
+.input-with-tag {
+    position: relative;
+}
+
+.input-tag-label {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-light);
+}
+
+/* --- Gender Select --- */
+.gender-select-group {
+    background: #F1F5F9;
+    padding: 4px;
+    border-radius: 14px;
+    display: flex;
+    gap: 4px;
+}
+
+.gender-btn {
+    flex: 1;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    transition: var(--transition);
+}
+
+.gender-btn.active {
+    background: white;
+    color: var(--text-primary);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* --- Save/Cancel Actions --- */
+.edit-footer-actions {
+    display: flex;
+    gap: var(--space-3);
+    justify-content: flex-end;
+    margin-top: var(--space-6);
+}
+
+.btn-cancel-text {
+    height: 48px;
+    padding: 0 var(--space-6);
+    border-radius: 999px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    transition: var(--transition);
+}
+
+.btn-cancel-text:hover {
+    background: #F1F5F9;
+    color: var(--text-primary);
+}
+
+.btn-primary-pill {
+    background: var(--primary-blue);
+    color: white;
+    padding: 0 32px;
+    border-radius: 999px;
+    height: 48px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(24, 119, 242, 0.2);
+}
+
+/* --- Responsive --- */
+@media (max-width: 900px) {
+    .edit-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .form-grid-layout {
+        grid-template-columns: 1fr;
+    }
+    .form-full-width {
+        grid-column: span 1;
+    }
+}

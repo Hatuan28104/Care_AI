@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hồ sơ Admin | Care AI</title>
+    <!-- Scripts -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="../../assets/css/global.css">
+    <link rel="stylesheet" href="../../assets/css/ui.css">
+    <link rel="stylesheet" href="../../assets/css/layout.css">
+    <link rel="stylesheet" href="setting.css">
+    <link rel="stylesheet" href="setting-profile.css">
+    <!-- Layout Component -->
+    <script src="../../layout/layout.js" defer></script>
+    <!-- Pre-fetch major screens for smoother navigation -->
+    <link rel="prefetch" href="../dashboard/dashboard.html">
+    <link rel="prefetch" href="../user/user.html">
+    <link rel="prefetch" href="../digital/digital.html">
+    <link rel="prefetch" href="setting-system.html">
+    <link rel="prefetch" href="setting-logs.html">
+    <link rel="prefetch" href="setting-notifications.html">
+    <link rel="preload" href="setting-nav.html" as="fetch" crossorigin="anonymous">
+</head>
+
+<body class="setting-page">
+    <div class="dashboard-layout">
+        <!-- Sidebar Navigation (Shared) -->
+        <div id="sidebar-target"></div>
+
+        <!-- Main Content Area -->
+        <div class="dashboard-content">
+            <!-- Header (Shared) -->
+            <div id="header-target"></div>
+
+            <main class="main-body aimate-fade-in">
+                <section class="page-header">
+                    <div class="page-header__title">
+                        <h2 class="page-title">Cài đặt</h2>
+                        <p class="page-subtitle">Cấu hình không gian làm việc quản trị, các giao thức bảo mật và các tùy
+                            chọn vùng trên toàn hệ thống của bạn.</p>
+                    </div>
+                </section>
+
+                <div class="setting-layout">
+                    <!-- Internal Sidebar Nav (Shared for setting pages) -->
+                    <div id="setting-nav-target"></div>
+
+                    <!-- Content Card -->
+                    <div class="setting-content animate-fade-in">
+                        <div class="setting-card-v2">
+                            <div class="setting-card-v2__header">
+                                <i data-lucide="user" class="blue-icon"></i>
+                                <h3>Hồ sơ Admin</h3>
+                            </div>
+
+                            <form class="setting-form-v2">
+                                <div class="form-row-grid">
+                                    <div class="form-group-v2">
+                                        <label>ĐỊA CHỈ EMAIL</label>
+                                        <input type="email" class="input-v2" value="julian.c@precision-curator.io">
+                                    </div>
+                                </div>
+
+                                <div class="section-divider">
+                                    <span>THAY ĐỔI MẬT KHẨU</span>
+                                </div>
+
+                                <div class="form-row-grid">
+                                    <div class="form-group-v2">
+                                        <label>MẬT KHẨU CŨ</label>
+                                        <input type="password" class="input-v2" placeholder="••••••••">
+                                    </div>
+                                    <div class="form-group-v2">
+                                        <label>MẬT KHẨU MỚI</label>
+                                        <input type="password" class="input-v2" placeholder="••••••••">
+                                    </div>
+                                    <div class="form-group-v2">
+                                        <label>XÁC NHẬN MẬT KHẨU</label>
+                                        <input type="password" class="input-v2" placeholder="••••••••">
+                                    </div>
+                                </div>
+
+                                <div class="form-footer-actions">
+                                    <button type="button" class="btn-pill btn-pill--secondary">Hủy thay đổi</button>
+                                    <button type="submit" class="btn-pill btn-pill--primary">Cập nhật danh tính</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script src="../../assets/js/main.js"></script>
+    <script src="../../assets/js/ui.js"></script>
+    <script src="setting.js"></script>
+</body>
+
+</html>

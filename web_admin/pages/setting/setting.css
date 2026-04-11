@@ -1,0 +1,167 @@
+/* --- Setting Module: Common Foundation --- */
+
+/* 1. Global Layout for Settings */
+.setting-page .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.setting-layout {
+    display: flex;
+    gap: var(--space-5);
+    margin-top: 0;
+    align-items: flex-start;
+}
+
+/* 2. Shared Sidebar Navigation */
+#setting-nav-target {
+    width: 280px;
+    flex-shrink: 0;
+}
+
+.setting-nav__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.setting-nav__item {
+    border-radius: 12px;
+    transition: var(--transition);
+}
+
+.setting-nav__link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 14px 20px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.setting-nav__item.active {
+    background: white;
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.setting-nav__item.active .setting-nav__link {
+    color: var(--primary-blue);
+}
+
+.setting-nav__link i {
+    width: 20px;
+    height: 20px;
+}
+
+/* 3. Common Card Container */
+.setting-content {
+    flex: 1;
+}
+
+.setting-card-v2 {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.05);
+    padding: var(--space-6);
+}
+
+.setting-card-v2__header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-5);
+}
+
+.setting-card-v2__header h3 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.blue-icon {
+    color: var(--primary-blue);
+}
+
+/* 4. Shared Footer Bar (Action Area) */
+.setting-footer-bar {
+    background: transparent;
+    padding: var(--space-4) 0 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.last-update {
+    font-size: 13px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.last-update i {
+    width: 14px;
+    height: 14px;
+}
+
+.footer-btns {
+    display: flex;
+    gap: var(--space-2);
+}
+
+/* 5. Pill Buttons System (Shared) */
+.btn-pill {
+    height: 38px;
+    padding: 0 24px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border: none;
+}
+
+.btn-pill i {
+    width: 16px;
+    height: 16px;
+}
+
+.btn-pill:hover {
+    transform: translateY(-1.5px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.btn-pill--primary {
+    background: var(--primary-blue);
+    color: #fff;
+}
+
+.btn-pill--primary:hover {
+    background: var(--primary-blue-hover);
+    color: #fff;
+}
+
+.btn-pill--secondary {
+    background: #F1F5F9;
+    color: #334155;
+    border: 1px solid #E2E8F0;
+}
+
+.btn-pill--secondary:hover {
+    background: #E2E8F0;
+}
+
+/* Responsive Foundations */
+@media (max-width: 1024px) {
+    .setting-layout {
+        flex-direction: column;
+    }
+    #setting-nav-target {
+        width: 100%;
+    }
+}

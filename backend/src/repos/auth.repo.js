@@ -160,17 +160,18 @@ export async function verifyOtp(phone, otp, req, deviceId) {
     };
   }
 
-    const token = jwt.sign({
+  const token = jwt.sign({
       nguoidung_id: user.nguoidung.nguoidung_id,
       taikhoan_id: user.taikhoan_id,
       sodienthoai: user.sodienthoai,
+      laadmin: false,
     },
     process.env.JWT_SECRET || "secret",
     { expiresIn: "7d" }
   );
 
   /* ===== LOGIN HISTORY ===== */
-  const { device, deviceId: bodyDeviceId, login_time, ip: bodyIp } = req.body || {};
+  const { device, ip: bodyIp } = req.body || {};
   const ip =
     bodyIp ||
     req.headers["x-forwarded-for"]?.split(",")[0] ||
@@ -180,9 +181,8 @@ export async function verifyOtp(phone, otp, req, deviceId) {
   const insertData = {
     lichsu_id: crypto.randomUUID(),
     thoigian: new Date().toISOString(),
-    thietbi: device && device.trim() !== "" 
-    ? device 
-    : "Unknown",    diachi: ip || null,
+    thietbi: device && device.trim() !== "" ? device : "Unknown",
+    diachi: ip || null,
     ip: ip || null,
     taikhoan_id: user.taikhoan_id,
   };
@@ -203,6 +203,70 @@ export async function verifyOtp(phone, otp, req, deviceId) {
     user,
     token,
     profileCompleted: isProfileCompleted(user?.nguoidung),
+  };
+}
+
+export async function adminLogin(phone, password, req) {
+  const db = getDB();
+  const localPhone = normalizeVnPhone(phone);
+
+  const { data: account, error } = await db
+    .from("taikhoan")
+    .select("taikhoan_id, sodienthoai, laadmin, matkhau, nguoidung_id")
+    .eq("sodienthoai", localPhone)
+    .eq("laadmin", true)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!account) throw new Error("Tài khoản admin không tồn tại");
+  if (!account.matkhau) throw new Error("Tài khoản admin chưa cấu hình mật khẩu");
+
+  const ok = String(password) === String(account.matkhau);
+  if (!ok) throw new Error("Số điện thoại hoặc mật khẩu không đúng");
+
+  const token = jwt.sign(
+    {
+      taikhoan_id: account.taikhoan_id,
+      sodienthoai: account.sodienthoai,
+      nguoidung_id: account.nguoidung_id || null,
+      laadmin: true,
+    },
+    process.env.JWT_SECRET || "secret",
+    { expiresIn: "7d" }
+  );
+
+  const ip =
+    req?.headers?.["x-forwarded-for"]?.split(",")[0] ||
+    req?.socket?.remoteAddress ||
+    "";
+  const device = req?.body?.device || "Web Admin";
+
+  const { error: loginHistoryError } = await db
+    .from("lichsudangnhap")
+    .insert({
+      lichsu_id: crypto.randomUUID(),
+      thoigian: new Date().toISOString(),
+      thietbi: device,
+      diachi: ip || null,
+      ip: ip || null,
+      taikhoan_id: account.taikhoan_id,
+    });
+
+  if (loginHistoryError) {
+    console.error("Insert admin login history failed", {
+      error: loginHistoryError,
+      taikhoan_id: account.taikhoan_id,
+    });
+  }
+
+  return {
+    success: true,
+    token,
+    user: {
+      taikhoan_id: account.taikhoan_id,
+      sodienthoai: account.sodienthoai,
+      laadmin: true,
+    },
   };
 }
 

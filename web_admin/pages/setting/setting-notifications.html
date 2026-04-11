@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quy tắc thông báo | Care AI</title>
+    <!-- Scripts -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="../../assets/css/global.css">
+    <link rel="stylesheet" href="../../assets/css/ui.css">
+    <link rel="stylesheet" href="../../assets/css/layout.css">
+    <link rel="stylesheet" href="setting.css">
+    <link rel="stylesheet" href="setting-notifications.css">
+    <!-- Layout Component -->
+    <script src="../../layout/layout.js" defer></script>
+    <link rel="prefetch" href="setting.html">
+    <link rel="prefetch" href="setting-system.html">
+    <link rel="prefetch" href="setting-logs.html">
+    <link rel="preload" href="setting-nav.html" as="fetch" crossorigin="anonymous">
+</head>
+
+<body class="setting-page">
+    <div class="dashboard-layout">
+        <!-- Sidebar Navigation (Shared) -->
+        <div id="sidebar-target"></div>
+
+        <div class="dashboard-content">
+            <!-- Header (Shared) -->
+            <div id="header-target"></div>
+
+            <main class="main-body">
+                <section class="page-header">
+                    <div class="page-header__title">
+                        <h2 class="page-title">Cài đặt</h2>
+                        <p class="page-subtitle">Cấu hình không gian làm việc quản trị, các giao thức bảo mật và các tùy chọn vùng trên toàn hệ thống của bạn.</p>
+                    </div>
+                </section>
+
+                <div class="setting-layout">
+                    <div id="setting-nav-target"></div>
+
+                    <div class="setting-content animate-fade-in">
+                        <div class="notification-grid">
+                            <div class="notif-card">
+                                <div class="notif-card__top">
+                                    <div class="notif-icon-box"><i data-lucide="log-in"></i></div>
+                                    <label class="switch"><input type="checkbox" checked><span
+                                            class="slider round"></span></label>
+                                </div>
+                                <div class="notif-card__main">
+                                    <h4>Thông báo đăng nhập mới</h4>
+                                    <p>Gửi cảnh báo ngay lập tức khi phát hiện tài khoản quản trị đăng nhập từ thiết bị
+                                        lạ.</p>
+                                </div>
+                                <div class="notif-card__footer"><span class="notif-badge blue-badge">! ƯU TIÊN CAO</span></div>
+                            </div>
+                            <div class="notif-card">
+                                <div class="notif-card__top">
+                                    <div class="notif-icon-box"><i data-lucide="edit"></i></div>
+                                    <label class="switch"><input type="checkbox" checked><span
+                                            class="slider round"></span></label>
+                                </div>
+                                <div class="notif-card__main">
+                                    <h4>Thay đổi dữ liệu nhân vật</h4>
+                                    <p>Thông báo khi các thông số cốt lõi hoặc cấu hình AI của nhân vật số bị thay đổi.
+                                    </p>
+                                </div>
+                                <div class="notif-card__footer"><span class="notif-badge gray-badge"><i
+                                            data-lucide="history"></i> NHẬT KÝ HỆ THỐNG</span></div>
+                            </div>
+                            <div class="notif-card">
+                                <div class="notif-card__top">
+                                    <div class="notif-icon-box pink-box"><i data-lucide="bar-chart-2"></i></div>
+                                    <label class="switch"><input type="checkbox"><span
+                                            class="slider round"></span></label>
+                                </div>
+                                <div class="notif-card__main">
+                                    <h4>Báo cáo hệ thống hàng tuần</h4>
+                                    <p>Tổng hợp hiệu suất AI, số lượng người dùng mới và các chỉ số vận hành.</p>
+                                </div>
+                                <div class="notif-card__footer"><span class="notif-badge red-badge"><i
+                                            data-lucide="calendar"></i> ĐỊNH KỲ</span></div>
+                            </div>
+                            <div class="notif-card">
+                                <div class="notif-card__top">
+                                    <div class="notif-icon-box red-box"><i data-lucide="shield-alert"></i></div>
+                                    <label class="switch"><input type="checkbox" checked><span
+                                            class="slider round"></span></label>
+                                </div>
+                                <div class="notif-card__main">
+                                    <h4>Cảnh báo bảo mật</h4>
+                                    <p>Kích hoạt thông báo đa kênh khi có dấu hiệu tấn công Brute-force hoặc rò rỉ API
+                                        Key.</p>
+                                </div>
+                                <div class="notif-card__footer"><span class="notif-badge alert-red-badge">✱ KHẨN CẤP</span></div>
+                            </div>
+                        </div>
+                        <div class="setting-footer-bar">
+                            <span class="last-update"><i data-lucide="info"></i> Lần cập nhật cuối: 10 phút trước</span>
+                            <div class="footer-btns">
+                                <button class="btn-pill btn-pill--secondary">Hủy bỏ</button>
+                                <button class="btn-pill btn-pill--primary">Lưu cấu hình</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script src="../../assets/js/main.js"></script>
+    <script src="../../assets/js/ui.js"></script>
+    <script src="setting.js"></script>
+</body>
+
+</html>

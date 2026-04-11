@@ -1,0 +1,123 @@
+/* --- Setting Module: Notification Rules Specific --- */
+
+.notification-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+    margin-bottom: var(--space-5);
+}
+
+.notif-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    border: 1px solid #F1F5F9;
+}
+
+.notif-card__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.notif-icon-box {
+    width: 44px;
+    height: 44px;
+    background: #EFF6FF;
+    color: #2563EB;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.notif-icon-box.red-box {
+    background: #FEF2F2;
+    color: var(--status-danger);
+}
+
+.notif-icon-box.pink-box {
+    background: #FDF2F8;
+    color: #DB2777;
+}
+
+.notif-card__main h4 {
+    font-size: 16px;
+    margin-bottom: var(--space-1);
+    color: var(--text-primary);
+}
+
+.notif-card__main p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.notif-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.notif-badge i {
+    width: 12px;
+    height: 12px;
+}
+
+.blue-badge { background: #EFF6FF; color: #2563EB; }
+.gray-badge { background: #F8FAFC; color: var(--text-secondary); }
+.red-badge { background: #FFF1F2; color: #E11D48; }
+.alert-red-badge { background: #FEF2F2; color: var(--status-danger); border: 1px solid rgba(220, 38, 38, 0.1); }
+
+/* Toggle Switch Styles */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 22px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #CBD5E1;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider { background-color: var(--primary-blue); }
+input:checked + .slider:before { transform: translateX(22px); }
+
+/* Responsive */
+@media (max-width: 640px) {
+    .notification-grid {
+        grid-template-columns: 1fr;
+    }
+}

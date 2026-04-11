@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nhật ký bảo mật | Care AI</title>
+    <!-- Scripts -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="../../assets/css/global.css">
+    <link rel="stylesheet" href="../../assets/css/ui.css">
+    <link rel="stylesheet" href="../../assets/css/layout.css">
+    <link rel="stylesheet" href="setting.css">
+    <link rel="stylesheet" href="setting-logs.css">
+    <!-- Layout Component -->
+    <script src="../../layout/layout.js" defer></script>
+    <link rel="prefetch" href="setting.html">
+    <link rel="prefetch" href="setting-system.html">
+    <link rel="prefetch" href="setting-notifications.html">
+    <link rel="preload" href="setting-nav.html" as="fetch" crossorigin="anonymous">
+</head>
+<body class="setting-page">
+    <div class="dashboard-layout">
+        <!-- Sidebar Navigation (Shared) -->
+        <div id="sidebar-target"></div>
+
+        <div class="dashboard-content">
+            <!-- Header (Shared) -->
+            <div id="header-target"></div>
+
+            <main class="main-body">
+                <section class="page-header">
+                    <div class="page-header__title">
+                        <h2 class="page-title">Cài đặt</h2>
+                        <p class="page-subtitle">Cấu hình không gian làm việc quản trị, các giao thức bảo mật và các tùy chọn vùng trên toàn hệ thống của bạn.</p>
+                    </div>
+                </section>
+
+                <div class="setting-layout">
+                    <div id="setting-nav-target"></div>
+
+                    <div class="setting-content animate-fade-in">
+                        <div class="logs-header-cards">
+                            <div class="filter-card">
+                                <h3>Lọc dữ liệu</h3>
+                                <div class="filter-controls">
+                                    <div class="custom-select-wrapper simple-select">
+                                        <i data-lucide="calendar" class="prefix-icon"></i>
+                                        <select class="input-select-v2">
+                                            <option>7 ngày qua</option>
+                                        </select>
+                                    </div>
+                                    <div class="custom-select-wrapper simple-select">
+                                        <i data-lucide="filter" class="prefix-icon"></i>
+                                        <select class="input-select-v2">
+                                            <option>Loại hành động</option>
+                                        </select>
+                                    </div>
+                                    <button class="btn-pill btn-pill--primary">Áp dụng</button>
+                                </div>
+                            </div>
+                            <div class="alert-stats-card">
+                                <h5>CẢNH BÁO THẤT BẠI (24H)</h5>
+                                <div class="alert-value">
+                                    <span class="num">12</span>
+                                    <span class="trend trend-up"><i data-lucide="trending-up"></i>+5%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="logs-table-card">
+                            <table class="logs-table">
+                                <thead>
+                                    <tr>
+                                        <th>THỜI GIAN</th>
+                                        <th>HÀNH ĐỘNG</th>
+                                        <th>NGƯỜI THỰC HIỆN</th>
+                                        <th>ĐỊA CHỈ IP</th>
+                                        <th>TRẠNG THÁI</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="log-time">14:25:30</div>
+                                            <div class="log-date">24/05/2024</div>
+                                        </td>
+                                        <td>
+                                            <div class="log-action">
+                                                <i data-lucide="log-in" class="log-icon log-icon--blue"></i>
+                                                Đăng nhập hệ thống
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="log-user">
+                                                <div class="avatar-sm">AT</div>
+                                                Admin Trung
+                                            </div>
+                                        </td>
+                                        <td class="log-ip">192.168.1.105</td>
+                                        <td><span class="status-pill pill-success">THÀNH CÔNG</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="log-time">13:10:12</div>
+                                            <div class="log-date">24/05/2024</div>
+                                        </td>
+                                        <td>
+                                            <div class="log-action">
+                                                <i data-lucide="key" class="log-icon log-icon--amber"></i>
+                                                Thay đổi mật khẩu
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="log-user">
+                                                <div class="avatar-sm">ML</div>
+                                                Minh Lan (Editor)
+                                            </div>
+                                        </td>
+                                        <td class="log-ip">113.161.45.22</td>
+                                        <td><span class="status-pill pill-danger">THẤT BẠI</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="log-time">11:45:05</div>
+                                            <div class="log-date">24/05/2024</div>
+                                        </td>
+                                        <td>
+                                            <div class="log-action">
+                                                <i data-lucide="refresh-cw" class="log-icon log-icon--violet"></i>
+                                                Cập nhật nhân vật
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="log-user">
+                                                <div class="avatar-sm">AT</div>
+                                                Admin Trung
+                                            </div>
+                                        </td>
+                                        <td class="log-ip">192.168.1.105</td>
+                                        <td><span class="status-pill pill-success">THÀNH CÔNG</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="log-time">09:30:44</div>
+                                            <div class="log-date">24/05/2024</div>
+                                        </td>
+                                        <td>
+                                            <div class="log-action">
+                                                <i data-lucide="shield-alert" class="log-icon log-icon--red"></i>
+                                                Cảnh báo đăng nhập lạ
+                                            </div>
+                                        </td>
+                                        <td class="log-user">Hệ thống AI</td>
+                                        <td class="log-ip">45.281.12.8</td>
+                                        <td><span class="status-pill pill-danger">ĐÃ CHẶN</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div class="pagination-row">
+                                <div class="pagination-count">Hiển thị 1 - 10 trong số 1,240 nhật ký</div>
+                                <div class="pagination-controls">
+                                    <button class="page-link" aria-label="Trang trước"><i data-lucide="chevron-left"></i></button>
+                                    <button class="page-link active">1</button>
+                                    <button class="page-link">2</button>
+                                    <button class="page-link">3</button>
+                                    <button class="page-link" aria-label="Trang sau"><i data-lucide="chevron-right"></i></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="export-logs-card">
+                            <div class="export-icon"><i data-lucide="download"></i></div>
+                            <h3>Xuất dữ liệu nhật ký</h3>
+                            <p>Bạn có thể tải xuống toàn bộ nhật ký bảo mật<br>dưới định dạng CSV hoặc PDF để lưu trữ ngoại tuyến.</p>
+                            <div class="export-actions" style="display: flex; gap: 12px; justify-content: center; margin-top: 16px;">
+                                <button class="btn-pill btn-pill--secondary">Tải CSV</button>
+                                <button class="btn-pill btn-pill--primary">Tải PDF</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script src="../../assets/js/main.js"></script>
+    <script src="../../assets/js/ui.js"></script>
+    <script src="setting.js"></script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thư viện nhân vật | Care AI</title>
+    <!-- Scripts -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="../../assets/css/global.css">
+    <link rel="stylesheet" href="../../assets/css/ui.css">
+    <link rel="stylesheet" href="../../assets/css/layout.css">
+    <link rel="stylesheet" href="digital.css">
+    <!-- Layout Component -->
+    <script src="../../layout/layout.js" defer></script>
+    <!-- Pre-fetch major screens for smoother navigation -->
+    <link rel="prefetch" href="../dashboard/dashboard.html">
+    <link rel="prefetch" href="../user/user.html">
+    <link rel="prefetch" href="../setting/setting.html">
+</head>
+
+<body class="digital-page">
+    <div class="dashboard-layout">
+        <!-- Sidebar Navigation (Shared) -->
+        <div id="sidebar-target"></div>
+
+        <!-- Main Content Area -->
+        <div class="dashboard-content">
+            <!-- Header (Shared) -->
+            <div id="header-target"></div>
+
+            <main class="main-body animate-fade-in">
+                <section class="page-header">
+                    <div class="page-header__title">
+                        <h2 class="page-title">Thư viện nhân vật</h2>
+                        <p class="page-subtitle">Kiến tạo và quản lý các đại diện kỹ thuật số thông minh trong hệ sinh
+                            thái Care AI.</p>
+                    </div>
+                </section>
+
+                <div class="premium-table-wrapper animate-fade-in">
+                    <!-- Table Controls -->
+                    <div class="table-controls-row">
+                        <div class="search-field-shared">
+                            <i data-lucide="search"></i>
+                            <input type="text" placeholder="Tìm kiếm nhân vật theo tên hoặc ID...">
+                        </div>
+                        <div class="table-actions">
+                            <button class="btn btn--primary" onclick="window.location.href='digital-add.html'">
+                                <i data-lucide="plus"></i>
+                                <span>Thêm nhân vật mới</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Characters Table -->
+                    <table class="premium-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>ẢNH ĐẠI DIỆN</th>
+                                <th>NGHỀ NGHIỆP</th>
+                                <th>GIỚI TÍNH</th>
+                                <th class="text-right">THAO TÁC</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Rows rendered by digital.js -->
+                        </tbody>
+                    </table>
+
+                    <!-- Pagination -->
+                    <div class="pagination-row">
+                        <div class="pagination-count">Đang tải...</div>
+                        <div class="pagination-controls"></div>
+                    </div>
+                </div>
+
+                <!-- Footer Quote -->
+                <footer class="digital-footer">
+                    <p class="quote">"Đại diện số không chỉ là hình ảnh, mà là nhịp cầu tri thức nối liền khoảng cách
+                        giữa công nghệ và cảm xúc con người."</p>
+                    <div class="quote-author">
+                        <span class="line"></span>
+                        <span class="author">CARE AI STRATEGY TEAM</span>
+                        <span class="line"></span>
+                    </div>
+                </footer>
+            </main>
+        </div>
+    </div>
+    <script src="../../assets/js/main.js"></script>
+    <script src="../../assets/js/ui.js"></script>
+    <script src="digital.js"></script>
+</body>
+
+</html>

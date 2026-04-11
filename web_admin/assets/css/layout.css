@@ -1,0 +1,342 @@
+/* ==========================================================================
+   LAYOUT SYSTEM - Sidebar, Header & Infrastructure
+   ========================================================================== */
+
+/* --- 1. SIDEBAR COMPONENT --- */
+.sidebar {
+    width: 260px;
+    background: var(--bg-card);
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-5) 0 0;
+    transition: var(--transition);
+    z-index: 100;
+    border-right: 1px solid #E2E8F0;
+}
+
+.sidebar__brand {
+    padding: 0 var(--space-4);
+    margin-bottom: var(--space-4);
+}
+
+.sidebar__title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary-blue);
+    letter-spacing: -0.5px;
+}
+
+.sidebar__subtitle {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-light);
+    margin-top: 1px;
+    letter-spacing: 0.2px;
+}
+
+.sidebar__nav {
+    flex: 1;
+}
+
+.sidebar__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 0;
+}
+
+.sidebar__item {
+    position: relative;
+}
+
+.sidebar__link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 15px;
+    transition: var(--transition);
+    border-radius: 0;
+}
+
+.sidebar__link i {
+    width: 20px;
+    height: 20px;
+}
+
+.sidebar__item--active {
+    background: #F8FAFC;
+    border-left: 4px solid var(--primary-blue);
+}
+
+.sidebar__item--active .sidebar__link {
+    color: var(--primary-blue);
+}
+
+.sidebar__link:hover:not(.is-navigating) {
+    color: var(--primary-blue);
+}
+
+.sidebar__footer {
+    padding: var(--space-4);
+    margin-top: auto;
+}
+
+.btn-logout {
+    width: 100%;
+    background: var(--primary-blue);
+    color: white;
+    padding: var(--space-2);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    transition: var(--transition);
+}
+
+.btn-logout:hover {
+    background: var(--primary-blue-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(24, 119, 242, 0.3);
+}
+
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 150;
+    cursor: pointer;
+}
+
+.sidebar-overlay.active {
+    display: block;
+}
+
+/* --- 2. TOP HEADER COMPONENT --- */
+.header {
+    height: 64px;
+    background: white;
+    padding: 0 var(--space-4);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 90;
+    border-bottom: 1px solid #E2E8F0;
+    border-radius: 0;
+}
+
+.header__sidebar-toggle {
+    display: none;
+    width: 40px;
+    height: 40px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    margin-right: var(--space-1);
+    transition: var(--transition);
+    flex-shrink: 0;
+}
+
+.header__sidebar-toggle:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--primary-blue);
+}
+
+.header__nav {
+    flex: 1;
+}
+
+.header__tabs {
+    display: flex;
+    gap: var(--space-4);
+}
+
+.header__tab a {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-light);
+    padding: var(--space-2) 0;
+    transition: var(--transition);
+    position: relative;
+    display: block;
+}
+
+.header__tab--active a {
+    color: var(--primary-blue);
+}
+
+.header__tab--active a::after {
+    display: none;
+}
+
+.header__tab a:hover {
+    color: var(--text-primary);
+}
+
+.header__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+.header__action-wrapper {
+    position: relative;
+}
+
+.header__action-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: var(--text-secondary);
+    transition: var(--transition);
+}
+
+.header__action-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.header__divider {
+    width: 1px;
+    height: 32px;
+    background: var(--border-color);
+    margin: 0 var(--space-1);
+}
+
+.header__profile {
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.header__avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: block;
+    border: 2px solid white;
+    box-shadow: var(--shadow-sm);
+}
+
+/* --- 3. LAYOUT INFRASTRUCTURE & HELPERS --- */
+#sidebar-target {
+    flex-shrink: 0;
+    width: 260px;
+}
+
+#header-target {
+    width: 100%;
+}
+
+#header-target:empty {
+    height: 64px;
+    background: white;
+    border-bottom: 1px solid #E2E8F0;
+}
+
+body.layout-loading .main-body {
+    opacity: 0;
+}
+
+@keyframes toastIn {
+    from {
+        transform: translateX(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* --- 4. RESPONSIVE OVERRIDES --- */
+@media (max-width: 768px) {
+    /* Mobile Sidebar Management */
+    #sidebar-target {
+        width: 0;
+    }
+
+    .sidebar {
+        position: fixed;
+        left: -260px;
+        top: 0;
+        height: 100vh;
+        z-index: 200;
+        transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: none;
+    }
+
+    .sidebar.sidebar--active {
+        left: 0;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Mobile Header Management */
+    .header {
+        padding: 0 var(--space-3);
+    }
+
+    .header__sidebar-toggle {
+        display: flex;
+    }
+
+    .header__tabs {
+        display: none;
+    }
+
+    .header__actions {
+        gap: var(--space-2);
+    }
+
+    /* Global Content Adjustments */
+    .dashboard-content {
+        width: 100%;
+    }
+
+    .main-body {
+        padding: var(--space-3);
+    }
+
+    /* Mobile-specific Component Fixes */
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-3);
+    }
+
+    .page-header__controls {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .notif-dropdown {
+        width: calc(100vw - 32px);
+        right: -60px;
+    }
+
+    .modal-card {
+        width: calc(100vw - 48px);
+        padding: var(--space-5) var(--space-4);
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-card {
+        padding: var(--space-4) var(--space-3);
+    }
+}

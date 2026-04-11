@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh sách người dùng | Care AI</title>
+    <!-- Styles -->
+    <link rel="stylesheet" href="../../assets/css/global.css">
+    <link rel="stylesheet" href="../../assets/css/ui.css">
+    <link rel="stylesheet" href="../../assets/css/layout.css">
+    <link rel="stylesheet" href="user-list.css">
+    <!-- Scripts -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="../../layout/layout.js" defer></script>
+</head>
+
+<body class="user-page" data-page="user">
+    <div class="dashboard-layout">
+        <!-- Sidebar Navigation (Shared) -->
+        <div id="sidebar-target"></div>
+
+        <!-- Main Content Area -->
+        <div class="dashboard-content">
+            <!-- Header (Shared) -->
+            <div id="header-target"></div>
+
+            <main class="main-body animate-fade-in">
+                <section class="page-header">
+                    <div class="page-header__title">
+                        <h2 class="page-title">Danh sách người dùng</h2>
+                        <p class="page-subtitle">Quản lý và giám sát thông tin tài khoản người dùng trong hệ thống.</p>
+                    </div>
+                </section>
+
+                <div class="premium-table-wrapper animate-fade-in">
+                    <div class="table-controls-row">
+                        <div class="search-field-shared">
+                            <i data-lucide="search"></i>
+                            <input type="text" placeholder="Tìm kiếm người dùng...">
+                        </div>
+                        <div class="sort-control">
+                            <i data-lucide="list-filter"></i>
+                            <select id="sortUsers" class="sort-select" aria-label="Sắp xếp người dùng">
+                                <option value="default">Sắp xếp</option>
+                                <option value="name-asc">Họ tên A → Z</option>
+                                <option value="name-desc">Họ tên Z → A</option>
+                                <option value="created-newest">Ngày tạo mới nhất</option>
+                                <option value="created-oldest">Ngày tạo cũ nhất</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <table class="premium-table">
+                        <thead>
+                            <tr>
+                                <th>NGƯỜI DÙNG</th>
+                                <th>GIỚI TÍNH</th>
+                                <th>SỐ ĐIỆN THOẠI</th>
+                                <th>NGÀY TẠO</th>
+                                <th class="text-right">THAO TÁC</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Rows rendered by user.js -->
+                        </tbody>
+                    </table>
+
+                    <div class="pagination-row">
+                        <div class="pagination-count">Đang tải...</div>
+                        <div class="pagination-controls"></div>
+                    </div>
+
+                    <div class="stats-grid animate-fade-in">
+                        <div class="stat-card">
+                            <p class="stat-label">Tổng người dùng</p>
+                            <div style="display: flex; align-items: center; margin: 12px 0 24px;">
+                            <span class="stat-value" id="totalUsersValue">0</span>
+                            <span class="trend-badge trend-badge--up">+12%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-bar__fill" style="width: 65%;"></div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <p class="stat-label">Người dùng mới tháng này</p>
+                        <div style="display: flex; align-items: center; margin: 12px 0 24px;">
+                            <span class="stat-value" id="newUsersMonthValue">0</span>
+                            <span class="trend-badge trend-badge--up">+4%</span>
+                        </div>
+                        <div class="avatar-stack">
+                            <img src="https://ui-avatars.com/api/?name=User+1&background=CBD5E1&color=fff"
+                                class="avatar-stack__img">
+                            <img src="https://ui-avatars.com/api/?name=User+2&background=94A3B8&color=fff"
+                                class="avatar-stack__img">
+                            <img src="https://ui-avatars.com/api/?name=User+3&background=64748B&color=fff"
+                                class="avatar-stack__img">
+                            <div class="avatar-stack__more">+12</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <p class="stat-label">Tỷ lệ tương tác</p>
+                        <div class="stat-value-row">
+                            <span class="stat-value" id="interactionRateValue">0%</span>
+                            <span class="trend-badge trend-badge--warning" id="interactionRateTrend">+0%</span>
+                        </div>
+                        <p class="stat-card__footer-text">Dựa trên 7 ngày hoạt động gần nhất</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script src="../../assets/js/main.js"></script>
+    <script src="../../assets/js/ui.js"></script>
+    <script src="user.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+
+</html>

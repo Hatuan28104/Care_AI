@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tổng Quan Hệ Thống | Care AI</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
+    <link rel="stylesheet" href="../../assets/css/global.css">
+    <link rel="stylesheet" href="../../assets/css/ui.css">
+    <link rel="stylesheet" href="../../assets/css/layout.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <script src="../../layout/layout.js" defer></script>
+</head>
+
+<body class="dashboard-page">
+    <div class="dashboard-layout">
+        <div id="sidebar-target"></div>
+
+        <div class="dashboard-content">
+            <div id="header-target"></div>
+
+            <main class="main-body animate-fade-in">
+                <section class="page-header">
+                    <div class="page-header__title">
+                        <h2 class="page-title">Tổng quan hệ thống</h2>
+                        <p class="page-subtitle">Chào mừng bạn đã đến với Trang chủ!</p>
+                    </div>
+                    <div class="page-header__controls">
+                        <div class="date-picker" id="datePickerContainer">
+                            <button class="input-button" title="toggle" data-toggle><i
+                                    data-lucide="calendar"></i></button>
+                            <input type="text" id="dashboardDatePicker" placeholder="Chọn khoảng thời gian" readonly
+                                data-input>
+                            <button class="input-button" title="toggle" data-toggle><i
+                                    data-lucide="chevron-down"></i></button>
+                        </div>
+                        <button class="btn-export" id="exportReportBtn">
+                            <i data-lucide="download"></i>
+                            <span>XUẤT BÁO CÁO</span>
+                        </button>
+                    </div>
+                </section>
+
+
+                <!-- KPI Grid -->
+                <section class="kpi-grid">
+                    <article class="kpi-card">
+                        <div class="kpi-card__header">
+                            <div class="kpi-card__icon kpi-card__icon--blue">
+                                <i data-lucide="users"></i>
+                            </div>
+                            <div class="kpi-card__trend kpi-card__trend--up">
+                                <i data-lucide="trending-up"></i>
+                                <span>12.5%</span>
+                            </div>
+                        </div>
+                        <div class="kpi-card__content">
+                            <h4 class="kpi-card__label">TỔNG NGƯỜI DÙNG</h4>
+                            <p class="kpi-card__value" id="totalUsers">0</p>
+                        </div>
+                    </article>
+                    <article class="kpi-card">
+                        <div class="kpi-card__header">
+                            <div class="kpi-card__icon kpi-card__icon--purple">
+                                <i data-lucide="user-plus"></i>
+                            </div>
+                            <div class="kpi-card__trend kpi-card__trend--up">
+                                <i data-lucide="trending-up"></i>
+                                <span>8.2%</span>
+                            </div>
+                        </div>
+                        <div class="kpi-card__content">
+                            <h4 class="kpi-card__label">NGƯỜI DÙNG MỚI</h4>
+                            <p class="kpi-card__value" id="newUsers">0</p>
+                        </div>
+                    </article>
+                    <article class="kpi-card">
+                        <div class="kpi-card__header">
+                            <div class="kpi-card__icon kpi-card__icon--yellow">
+                                <i data-lucide="zap"></i>
+                            </div>
+                            <div class="kpi-card__trend kpi-card__trend--up">
+                                <i data-lucide="trending-up"></i>
+                                <span>23.1%</span>
+                            </div>
+                        </div>
+                        <div class="kpi-card__content">
+                            <h4 class="kpi-card__label">LƯỢT TƯƠNG TÁC</h4>
+                            <p class="kpi-card__value" id="totalInteractions">0</p>
+                        </div>
+                    </article>
+                    <article class="kpi-card">
+                        <div class="kpi-card__header">
+                            <div class="kpi-card__icon kpi-card__icon--red">
+                                <i data-lucide="timer"></i>
+                            </div>
+                            <div class="kpi-card__trend kpi-card__trend--down">
+                                <i data-lucide="trending-down"></i>
+                                <span>2.4%</span>
+                            </div>
+                        </div>
+                        <div class="kpi-card__content">
+                            <h4 class="kpi-card__label">CẢNH BÁO</h4>
+                            <p class="kpi-card__value" id="totalAlerts">0</p>
+                        </div>
+                    </article>
+                </section>
+
+                <!-- Charts Section -->
+                <section class="charts-grid-bottom">
+                    <div class="chart-container-premium">
+                        <div class="chart-header">
+                            <h3 class="chart-container__title">Tăng trưởng người dùng</h3>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="userGrowthChart"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="charts-grid-bottom">
+                    <div class="chart-container-premium">
+                        <div class="chart-header">
+                            <h3 class="chart-container__title">Tương tác và thời gian sử dụng</h3>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="interactionChart"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="alerts-grid-bottom mb-4">
+                    <div class="chart-container-premium">
+                        <div class="chart-header">
+                            <h3 class="chart-container__title">Cảnh báo bất thường gần đây</h3>
+                            <button type="button" class="alerts-view-all" onclick="UI.openAllAlertsPanel()">Xem tất cả</button>
+                        </div>
+                        <div class="premium-table-wrapper"
+                            style="box-shadow: none; border: none; border-radius: 0; margin: -24px; margin-top: 0;">
+                            <table class="premium-table w-full alerts-table">
+                                <thead>
+                                    <tr>
+                                        <th style="padding-left: 24px;">MỨC ĐỘ</th>
+                                        <th>MÔ TẢ CẢNH BÁO</th>
+                                        <th style="text-align: right; padding-right: 24px;">THỜI GIAN</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="alert-cell--first">
+                                            <div class="alert-level alert-level--danger">
+                                                <div class="alert-dot alert-dot--danger"></div>
+                                                CAO
+                                            </div>
+                                        </td>
+                                        <td class="alert-desc">Phát hiện ngôn ngữ tiêu cực: "Tôi muốn chết" - Người dùng
+                                            ID #8829</td>
+                                        <td class="alert-cell--last alert-time">2 phút trước</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="alert-cell--first">
+                                            <div class="alert-level alert-level--danger">
+                                                <div class="alert-dot alert-dot--danger"></div>
+                                                CAO
+                                            </div>
+                                        </td>
+                                        <td class="alert-desc">Nhịp tim nghỉ ngơi tăng cao bất thường (110 bpm) - Người
+                                            dùng ID #1022</td>
+                                        <td class="alert-cell--last alert-time">15 phút trước</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="alert-cell--first">
+                                            <div class="alert-level alert-level--warning">
+                                                <div class="alert-dot alert-dot--warning"></div>
+                                                TRUNG BÌNH
+                                            </div>
+                                        </td>
+                                        <td class="alert-desc">Dấu hiệu Stress cao kéo dài (Chỉ số: 85/100) - Người dùng
+                                            ID #4552</td>
+                                        <td class="alert-cell--last alert-time">1 giờ trước</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="alert-cell--first">
+                                            <div class="alert-level alert-level--success">
+                                                <div class="alert-dot alert-dot--success"></div>
+                                                NHẸ
+                                            </div>
+                                        </td>
+                                        <td class="alert-desc">Thay đổi chu kỳ giấc ngủ đột ngột (Ngủ ít hơn 3h/đêm) -
+                                            Người dùng ID #9921</td>
+                                        <td class="alert-cell--last alert-time">3 giờ trước</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+    <script src="../../assets/js/main.js"></script>
+    <script src="../../assets/js/ui.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+
+</html>

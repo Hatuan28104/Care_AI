@@ -1,0 +1,115 @@
+<div id="layout-sidebar-source">
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar__brand">
+            <div class="sidebar__logo">
+                <h1 class="sidebar__title">Care AI</h1>
+                <p class="sidebar__subtitle">The Digital Physician</p>
+            </div>
+        </div>
+        <nav class="sidebar__nav">
+            <ul class="sidebar__list">
+                <li class="sidebar__item" data-page="dashboard">
+                    <a href="../dashboard/dashboard.html" class="sidebar__link">
+                        <i data-lucide="layout-dashboard"></i>
+                        <span>Trang chủ</span>
+                    </a>
+                </li>
+                <li class="sidebar__item" data-page="user">
+                    <a href="../user/user.html" class="sidebar__link">
+                        <i data-lucide="users"></i>
+                        <span>Quản lý người dùng</span>
+                    </a>
+                </li>
+                <li class="sidebar__item" data-page="digital">
+                    <a href="../digital/digital.html" class="sidebar__link">
+                        <i data-lucide="bot"></i>
+                        <span>Quản lý nhân vật số</span>
+                    </a>
+                </li>
+                <li class="sidebar__item" data-page="setting">
+                    <a href="../setting/setting.html" class="sidebar__link">
+                        <i data-lucide="settings"></i>
+                        <span>Cài đặt</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <div class="sidebar__footer">
+            <button class="btn-logout" id="btnLogoutAction">
+                <i data-lucide="log-out"></i>
+                <span>ĐĂNG XUẤT</span>
+            </button>
+        </div>
+    </aside>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+</div>
+
+<!-- Header -->
+<div id="layout-header-source">
+    <header class="header">
+        <button id="sidebarToggle" class="header__sidebar-toggle" aria-label="Mở menu">
+            <i data-lucide="menu"></i>
+        </button>
+        <nav class="header__nav">
+            <ul class="header__tabs">
+                <li class="header__tab" data-tab="dashboard"><a href="../dashboard/dashboard.html">Báo cáo</a></li>
+                <li class="header__tab" data-tab="user"><a href="../user/user.html">Người dùng</a></li>
+                <li class="header__tab" data-tab="digital"><a href="../digital/digital.html">Nhân vật</a></li>
+            </ul>
+        </nav>
+        <div class="header__actions">
+            <div class="header__action-wrapper">
+                <button class="header__action-btn" aria-label="Notifications"
+                    onclick="UI.toggleDropdown('notif-dropdown'); event.stopPropagation();">
+                    <i data-lucide="bell"></i>
+                </button>
+
+                <!-- Notification Dropdown -->
+                <div id="notif-dropdown" class="notif-dropdown">
+                    <h3 class="notif-dropdown__title">Hoạt động gần đây</h3>
+                    <div class="notif-timeline">
+                        <div class="notif-item">
+                            <div class="notif-dot active"></div>
+                            <div class="notif-content">
+                                <h5>Cập nhật hồ sơ bệnh nhân mới</h5>
+                                <p>Hệ thống vừa đồng bộ dữ liệu từ thiết bị đeo thông minh.</p>
+                                <span class="notif-time">12 phút trước</span>
+                            </div>
+                        </div>
+                        <div class="notif-item">
+                            <div class="notif-dot"></div>
+                            <div class="notif-content">
+                                <h5>BS. Trần Thị B đã xem báo cáo</h5>
+                                <p>Truy cập báo cáo tuần của Khoa Nội tổng quát.</p>
+                                <span class="notif-time">45 phút trước</span>
+                            </div>
+                        </div>
+                        <div class="notif-item">
+                            <div class="notif-dot active"></div>
+                            <div class="notif-content">
+                                <h5>Tối ưu hóa mô hình AI</h5>
+                                <p>Cập nhật tham số nhận diện cảm xúc giọng nói v2.4.</p>
+                                <span class="notif-time">2 giờ trước</span>
+                            </div>
+                        </div>
+                        <div class="notif-item">
+                            <div class="notif-dot"></div>
+                            <div class="notif-content">
+                                <h5>Xuất báo cáo hàng tháng</h5>
+                                <p>Báo cáo tháng 7 đã được gửi đến hội đồng quản trị.</p>
+                                <span class="notif-time">4 giờ trước</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="notif-btn-all" onclick="UI.openAllActivitiesPanel()">Xem
+                        tất cả hoạt động</button>
+                </div>
+            </div>
+            <div class="header__divider"></div>
+            <div class="header__profile" onclick="window.location.href='../setting/setting.html'">
+                <img src="https://ui-avatars.com/api/?name=Admin&background=1877F2&color=fff" alt="Avatar"
+                    class="header__avatar">
+            </div>
+        </div>
+    </header>
+</div>

@@ -1,6 +1,6 @@
-import { 
-  requestRegisterOtp, requestLoginOtp, verifyOtp, changePhone, 
-  getLoginHistory, saveFcmToken, sendTestPush, removeFcmToken   
+import {
+  requestRegisterOtp, requestLoginOtp, verifyOtp, changePhone, adminLogin,
+  getLoginHistory, saveFcmToken, sendTestPush, removeFcmToken
 } from "../repos/auth.repo.js";
 
 export const handleRequestRegisterOtp = async (phone) => {
@@ -13,6 +13,11 @@ export const handleRequestLoginOtp = async (phone) => {
   if (!phone) throw new Error("Thiếu số điện thoại");
   await requestLoginOtp(phone);
   return { success: true, message: "OTP đăng nhập đã được gửi" };
+};
+
+export const handleAdminLogin = async (phone, password, req) => {
+  if (!phone || !password) throw new Error("Thiếu số điện thoại hoặc mật khẩu");
+  return await adminLogin(phone, password, req);
 };
 
 export const handleVerifyOtp = async (phone, otp, req, deviceId, fcmToken) => {

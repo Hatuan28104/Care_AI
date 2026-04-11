@@ -34,6 +34,17 @@ router.post("/verify-otp", async (req, res) => {
   }
 });
 
+router.post("/admin/login", async (req, res) => {
+  try {
+    const phone = req.body?.phone ?? req.body?.sodienthoai;
+    const password = req.body?.password ?? req.body?.matkhau;
+    const response = await authService.handleAdminLogin(phone, password, req);
+    res.json(response);
+  } catch (e) {
+    res.status(401).json({ success: false, message: e.message });
+  }
+});
+
 router.post("/change-phone", auth, async (req, res) => {
   try {
     const response = await authService.handleChangePhone(req.user.nguoidung_id, req.body.phone);

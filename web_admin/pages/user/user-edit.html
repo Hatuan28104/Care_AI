@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chỉnh sửa người dùng | Care AI</title>
+    <!-- Scripts -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="../../assets/css/global.css">
+    <link rel="stylesheet" href="../../assets/css/ui.css">
+    <link rel="stylesheet" href="../../assets/css/layout.css">
+    <link rel="stylesheet" href="user-edit.css">
+    <!-- Layout Component -->
+    <script src="../../layout/layout.js" defer></script>
+</head>
+
+<body class="user-page" data-page="user-edit">
+    <div class="dashboard-layout">
+        <div id="sidebar-target"></div>
+        <div class="dashboard-content">
+            <div id="header-target"></div>
+            <main class="main-body animate-fade-in">
+                <section class="page-header">
+                    <div class="page-header__title">
+                        <h2 class="page-title">Chỉnh sửa thông tin người dùng</h2>
+                        <p class="page-subtitle">Cập nhật hồ sơ cá nhân và thông tin liên lạc của bạn để duy trì hồ sơ bệnh án chính xác.</p>
+                    </div>
+                </section>
+
+                <div class="edit-container">
+                    <!-- Left Aside: Avatar -->
+                    <div class="edit-aside">
+                        <div class="edit-avatar-box">
+                            <div class="profile-edit-circle">
+                                <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Avatar"
+                                    class="profile-edit-img" id="avatarPreview">
+                                <div class="img-edit-icon"><i data-lucide="edit-2"></i></div>
+                            </div>
+                            <h4 class="form-card-title mb-2">Ảnh đại diện</h4>
+                            <p class="text-secondary text-sm px-4" style="line-height: 1.6;">Sử dụng tệp
+                                PNG hoặc JPG dung lượng tối đa 5MB. Kích thước khuyến nghị 800×800px.</p>
+                            <button class="btn-upload-soft" type="button" id="btnChangeAvatar"><i data-lucide="upload"></i> Tải lên</button>
+                            <input type="file" id="avatarInput" accept="image/*" hidden>
+                        </div>
+                    </div>
+
+                    <!-- Right Main: Forms -->
+                    <div class="edit-form-main">
+                        <!-- Card 1: Thông tin cá nhân -->
+                        <div class="edit-form-card">
+                            <div class="form-header-group">
+                                <div class="icon-box-blue"><i data-lucide="user"></i></div>
+                                <h4 class="form-card-title">Thông tin cá nhân</h4>
+                            </div>
+                            <div class="form-grid-layout">
+                                <div class="field-wrapper form-full-width">
+                                    <label>Họ và tên</label>
+                                    <input type="text" value="" class="input-soft" id="tenND">
+                                </div>
+                                <div class="field-wrapper">
+                                    <label>Ngày sinh</label>
+                                    <input type="date" value="" class="input-soft" id="ngaySinh">
+                                </div>
+                                <div class="field-wrapper">
+                                    <label>Giới tính</label>
+                                    <select class="input-soft" id="gioiTinh">
+                                        <option value="1">Nam</option>
+                                        <option value="0">Nữ</option>
+                                    </select>
+                                </div>
+                                <div class="field-wrapper">
+                                    <label>Chiều cao</label>
+                                    <div class="input-with-tag">
+                                        <input type="text" value="" class="input-soft" id="chieuCao">
+                                        <span class="input-tag-label">cm</span>
+                                    </div>
+                                </div>
+                                <div class="field-wrapper">
+                                    <label>Cân nặng</label>
+                                    <div class="input-with-tag">
+                                        <input type="text" value="" class="input-soft" id="canNang">
+                                        <span class="input-tag-label">kg</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 2: Thông tin liên hệ -->
+                        <div class="edit-form-card">
+                            <div class="form-header-group">
+                                <div class="icon-box-blue"><i data-lucide="book"></i></div>
+                                <h4 class="form-card-title">Thông tin liên hệ</h4>
+                            </div>
+                            <div class="form-grid-layout">
+                                <div class="field-wrapper">
+                                    <label>Số điện thoại</label>
+                                    <input type="text" value="" class="input-soft" id="soDienThoai" readonly>
+                                </div>
+                                <div class="field-wrapper">
+                                    <label>Email</label>
+                                    <input type="email" value="" class="input-premium input-soft" id="email">
+                                </div>
+                                <div class="field-wrapper form-full-width">
+                                    <label>Địa chỉ</label>
+                                    <textarea
+                                        class="textarea-premium input-soft" id="diaChi"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer Actions -->
+                        <div class="edit-footer-actions">
+                            <button class="btn-cancel-text" id="btnCancel" type="button">Hủy bỏ</button>
+                            <button class="btn-primary-pill" id="btnSave" type="button">Cập nhật hồ sơ</button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script src="../../assets/js/main.js"></script>
+    <script src="../../assets/js/ui.js"></script>
+    <script src="user.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>
