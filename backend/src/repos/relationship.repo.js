@@ -125,6 +125,6 @@ export async function getRelationshipProfile(qhId, userId) {
     avatarurl: targetUser.avatarurl,
     gioitinh: targetUser.gioitinh,
     ngaysinh: targetUser.ngaysinh,
-    sodienthoai: targetUser.taikhoan?.sodienthoai || "",
+    sodienthoai: (Array.isArray(targetUser.taikhoan) ? targetUser.taikhoan[0] : targetUser.taikhoan)?.sodienthoai || "",
   };
 }

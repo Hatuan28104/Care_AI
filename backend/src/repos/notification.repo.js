@@ -218,7 +218,8 @@ export async function getAdminAlerts() {
     .select(`
       canhbaotinnhan_id,
       motacanhbao,
-      thoigiancanhbao
+      thoigiancanhbao,
+      nguoidung_id
     `)
     .eq("daxoa", false)
     .order("thoigiancanhbao", { ascending: false });
@@ -227,6 +228,7 @@ export async function getAdminAlerts() {
 
   return (data || []).map(item => ({
     ...item,
+    nguoiDungId: item.nguoidung_id,
     thoigian: item.thoigiancanhbao ? new Date(item.thoigiancanhbao).toISOString() : ""
   }));
 }

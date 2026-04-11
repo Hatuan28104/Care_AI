@@ -174,6 +174,63 @@ function setKPI(id, value) {
     el.textContent = formatCompactNumber(value);
 }
 
+function formatRelativeTime(isoString) {
+    if (!isoString) return '-';
+    const now = new Date();
+    const past = new Date(isoString);
+    const diffMs = now - past;
+    const diffMin = Math.floor(diffMs / 60000);
+    if (diffMin < 1) return 'Vừa xong';
+    if (diffMin < 60) return `${diffMin} phút trước`;
+    const diffHour = Math.floor(diffMin / 60);
+    if (diffHour < 24) return `${diffHour} giờ trước`;
+    const diffDay = Math.floor(diffHour / 24);
+    return `${diffDay} ngày trước`;
+}
+
+function inferLevel(msg) {
+    const lowKeywords = ['pin', 'thay đổi nhẹ', 'nhiệt độ'];
+    const midKeywords = ['stress', 'spo2', 'áp lực', 'buồn'];
+    const msgLower = (msg || '').toLowerCase();
+    if (midKeywords.some(k => msgLower.includes(k))) return { text: 'TRUNG BÌNH', class: 'warning' };
+    if (lowKeywords.some(k => msgLower.includes(k))) return { text: 'NHẸ', class: 'success' };
+    return { text: 'CAO', class: 'danger' };
+}
+
+function renderRecentAlerts(alerts) {
+    const tableBody = document.getElementById('dashboard-alerts-body');
+    if (!tableBody) return;
+
+    if (!alerts || alerts.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 24px;">Không có cảnh báo nào gần đây.</td></tr>';
+        return;
+    }
+
+    // Hiển thị tối đa 4 cảnh báo mới nhất
+    const recent = alerts.slice(0, 4);
+    let rowsHtml = '';
+
+    recent.forEach(item => {
+        const level = inferLevel(item.motacanhbao);
+        const userIdText = item.nguoiDungId ? `Người dùng ID #${item.nguoiDungId}` : 'Hệ thống';
+        
+        rowsHtml += `
+            <tr>
+                <td class="alert-cell--first">
+                    <div class="alert-level alert-level--${level.class}">
+                        <div class="alert-dot alert-dot--${level.class}"></div>
+                        ${level.text}
+                    </div>
+                </td>
+                <td class="alert-desc">${item.motacanhbao} - ${userIdText}</td>
+                <td class="alert-cell--last alert-time">${formatRelativeTime(item.thoigian)}</td>
+            </tr>
+        `;
+    });
+
+    tableBody.innerHTML = rowsHtml;
+}
+
 async function loadDashboardData() {
     try {
         const [users, conversations, alerts] = await Promise.all([
@@ -206,6 +263,9 @@ async function loadDashboardData() {
         setKPI('newUsers', newUsers);
         setKPI('totalInteractions', totalInteractions);
         setKPI('totalAlerts', totalAlerts);
+
+        // Render alert list
+        renderRecentAlerts(alerts);
     } catch (error) {
         console.error('Load dashboard data error:', error);
     }

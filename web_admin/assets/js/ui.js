@@ -215,68 +215,44 @@ const UI = {
         });
     },
 
-    openAllAlertsPanel: function () {
+    openAllAlertsPanel: async function () {
+        const API_BASE = 'https://careai-production.up.railway.app';
+        
+        const formatRelativeTime = (isoString) => {
+            if (!isoString) return '-';
+            const now = new Date();
+            const past = new Date(isoString);
+            const diffMs = now - past;
+            const diffMin = Math.floor(diffMs / 60000);
+            if (diffMin < 1) return 'Vừa xong';
+            if (diffMin < 60) return `${diffMin} phút trước`;
+            const diffHour = Math.floor(diffMin / 60);
+            if (diffHour < 24) return `${diffHour} giờ trước`;
+            const diffDay = Math.floor(diffHour / 24);
+            return `${diffDay} ngày trước`;
+        };
+
+        const inferLevel = (msg) => {
+            const lowKeywords = ['pin', 'thay đổi nhẹ', 'nhiệt độ'];
+            const midKeywords = ['stress', 'spo2', 'áp lực', 'buồn'];
+            const msgLower = (msg || '').toLowerCase();
+            if (midKeywords.some(k => msgLower.includes(k))) return { text: 'TRUNG BÌNH', class: 'warning' };
+            if (lowKeywords.some(k => msgLower.includes(k))) return { text: 'NHẸ', class: 'success' };
+            return { text: 'CAO', class: 'danger' };
+        };
+
         const bodyHtml = `
             <div class="panel-table-wrap">
                 <table class="panel-table">
                     <thead>
                         <tr>
-                            <th>Mức độ</th>
+                            <th style="width: 150px;">Mức độ</th>
                             <th>Mô tả cảnh báo</th>
-                            <th>Thời gian</th>
+                            <th style="width: 150px;">Thời gian</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <div class="panel-alert-level panel-alert-level--danger">
-                                    <span class="panel-alert-dot panel-alert-dot--danger"></span>
-                                    CAO
-                                </div>
-                            </td>
-                            <td>Phát hiện ngôn ngữ tiêu cực: "Tôi muốn chết" - Người dùng ID #8829</td>
-                            <td class="panel-alert-time">2 phút trước</td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="panel-alert-level panel-alert-level--danger">
-                                    <span class="panel-alert-dot panel-alert-dot--danger"></span>
-                                    CAO
-                                </div>
-                            </td>
-                            <td>Nhịp tim nghỉ ngơi tăng cao bất thường (110 bpm) - Người dùng ID #1022</td>
-                            <td class="panel-alert-time">15 phút trước</td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="panel-alert-level panel-alert-level--warning">
-                                    <span class="panel-alert-dot panel-alert-dot--warning"></span>
-                                    TRUNG BÌNH
-                                </div>
-                            </td>
-                            <td>Dấu hiệu Stress cao kéo dài (Chỉ số: 85/100) - Người dùng ID #4552</td>
-                            <td class="panel-alert-time">1 giờ trước</td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="panel-alert-level panel-alert-level--success">
-                                    <span class="panel-alert-dot panel-alert-dot--success"></span>
-                                    NHẸ
-                                </div>
-                            </td>
-                            <td>Thay đổi chu kỳ giấc ngủ đột ngột (Ngủ ít hơn 3h/đêm) - Người dùng ID #9921</td>
-                            <td class="panel-alert-time">3 giờ trước</td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="panel-alert-level panel-alert-level--danger">
-                                    <span class="panel-alert-dot panel-alert-dot--danger"></span>
-                                    CAO
-                                </div>
-                            </td>
-                            <td>Truy vấn API bất thường vượt ngưỡng giới hạn</td>
-                            <td class="panel-alert-time">5 giờ trước</td>
-                        </tr>
+                    <tbody id="alerts-table-body">
+                        <tr><td colspan="3" style="text-align:center; padding: 40px;">Đang tải dữ liệu...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -287,6 +263,38 @@ const UI = {
             bodyHtml,
             extraClass: 'modal-card--alerts'
         });
+
+        try {
+            const response = await fetch(`${API_BASE}/notification/admin/alerts`);
+            const result = await response.json();
+            const tableBody = document.getElementById('alerts-table-body');
+            if (result.success && result.data && result.data.length > 0) {
+                let rowsHtml = '';
+                result.data.forEach(item => {
+                    const level = inferLevel(item.motacanhbao);
+                    const userIdText = item.nguoiDungId ? `Người dùng ID #${item.nguoiDungId}` : 'Hệ thống';
+                    rowsHtml += `
+                        <tr>
+                            <td>
+                                <div class="panel-alert-level panel-alert-level--${level.class}">
+                                    <span class="panel-alert-dot panel-alert-dot--${level.class}"></span>
+                                    ${level.text}
+                                </div>
+                            </td>
+                            <td>${item.motacanhbao} - ${userIdText}</td>
+                            <td class="panel-alert-time">${formatRelativeTime(item.thoigian)}</td>
+                        </tr>
+                    `;
+                });
+                tableBody.innerHTML = rowsHtml;
+            } else {
+                tableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 40px;">Không có cảnh báo nào gần đây.</td></tr>';
+            }
+        } catch (err) {
+            console.error('Lỗi tải cảnh báo:', err);
+            const tableBody = document.getElementById('alerts-table-body');
+            if (tableBody) tableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 40px; color: var(--status-danger);">Lỗi khi kết nối đến máy chủ.</td></tr>';
+        }
     },
 
     // Dropdown System

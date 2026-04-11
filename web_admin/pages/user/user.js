@@ -67,7 +67,7 @@ function mapUserRecord(user) {
     return {
         id: id ? String(id) : '',
         name: String(name),
-        secondaryText: phone ? String(phone) : (id ? `Mã người dùng #${id}` : '-'),
+        secondaryText: id ? `${id}` : '-',
         gender: genderRaw === null ? '-' : (genderRaw ? 'Nam' : 'Nữ'),
         genderClass: genderRaw === null ? 'badge--neutral' : (genderRaw ? 'badge--info' : 'badge--pink'),
         genderRaw,

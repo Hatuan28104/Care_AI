@@ -14,6 +14,7 @@
     padding: var(--space-5) 0 0;
     transition: var(--transition);
     z-index: 100;
+    background-color: #EFF4FF;
     border-right: 1px solid #E2E8F0;
 }
 
@@ -23,17 +24,16 @@
 }
 
 .sidebar__title {
-    font-size: 22px;
-    font-weight: 700;
+    font-size: 20px;
+    font-weight: 600;
     color: var(--primary-blue);
     letter-spacing: -0.5px;
 }
 
 .sidebar__subtitle {
-    font-size: 11px;
-    font-weight: 500;
+    font-size: 12px;
+    font-weight: 400;
     color: var(--text-light);
-    margin-top: 1px;
     letter-spacing: 0.2px;
 }
 
@@ -258,6 +258,7 @@ body.layout-loading .main-body {
         transform: translateX(50px);
         opacity: 0;
     }
+
     to {
         transform: translateX(0);
         opacity: 1;
@@ -266,6 +267,7 @@ body.layout-loading .main-body {
 
 /* --- 4. RESPONSIVE OVERRIDES --- */
 @media (max-width: 768px) {
+
     /* Mobile Sidebar Management */
     #sidebar-target {
         width: 0;

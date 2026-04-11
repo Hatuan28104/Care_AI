@@ -131,7 +131,14 @@ export async function getInvites(userId) {
 
   if (error) throw error;
 
-  return data;
+  return (data || []).map(item => {
+    const user = item.nguoidung;
+    if (user) {
+      const account = Array.isArray(user.taikhoan) ? user.taikhoan[0] : user.taikhoan;
+      user.sodienthoai = account?.sodienthoai || "";
+    }
+    return item;
+  });
 }
 /* =========================
    GỬI LỜI MỜI BẰNG SĐT

@@ -116,24 +116,24 @@ export async function updateProfile(data) {
     throw err;
   }
   // ===== UPDATE =====
-const updateData = {
-  tennd: tenND.trim(),
-  ngaysinh: formatDateToPostgres(dob),
-  gioitinh: gender === 1,
-  chieucao: height,
-  cannang: weight,
-  email: email?.trim() || null,
-  diachi: diaChiClean || null,
-};
+  const updateData = {
+    tennd: tenND.trim(),
+    ngaysinh: formatDateToPostgres(dob),
+    gioitinh: gender === 1,
+    chieucao: height,
+    cannang: weight,
+    email: email?.trim() || null,
+    diachi: diaChiClean || null,
+  };
 
-if (avatarUrl !== undefined) {
-  updateData.avatarurl = avatarUrl;
-}
-const { data: updated, error } = await getDB()
-  .from("nguoidung")
-  .update(updateData)
-  .eq("nguoidung_id", nguoiDungId)
-  .select();
+  if (avatarUrl !== undefined) {
+    updateData.avatarurl = avatarUrl;
+  }
+  const { data: updated, error } = await getDB()
+    .from("nguoidung")
+    .update(updateData)
+    .eq("nguoidung_id", nguoiDungId)
+    .select();
   return true;
 }
 
@@ -157,9 +157,8 @@ export async function getAllUsers() {
   if (error) throw error;
 
   return data.map((u) => {
-    // Handle both array (default join) and object (strict 1-1 join)
     const account = Array.isArray(u.taikhoan) ? u.taikhoan[0] : u.taikhoan;
-    
+
     return {
       nguoiDungId: u.nguoidung_id,
       tenND: u.tennd,
@@ -220,9 +219,9 @@ export async function deleteUser(userId) {
 
   // delete TaiKhoan trước
   const { error: err1 } = await db
-  .from("taikhoan")
-  .delete()
-  .eq("nguoidung_id", userId);
+    .from("taikhoan")
+    .delete()
+    .eq("nguoidung_id", userId);
 
   if (err1) throw err1;
 
