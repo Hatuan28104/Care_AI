@@ -242,58 +242,79 @@ const UI = {
         };
 
         const bodyHtml = `
-            <div class="panel-table-wrap">
-                <table class="panel-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 150px;">Mức độ</th>
-                            <th>Mô tả cảnh báo</th>
-                            <th style="width: 150px;">Thời gian</th>
-                        </tr>
-                    </thead>
-                    <tbody id="alerts-table-body">
-                        <tr><td colspan="3" style="text-align:center; padding: 40px;">Đang tải dữ liệu...</td></tr>
-                    </tbody>
-                </table>
+            <div class="panel-container">
+                <div class="premium-table-wrapper" style="box-shadow: none; border: none;">
+                    <table class="premium-table w-full">
+                        <thead>
+                            <tr>
+                                <th style="padding-left: 24px; width: 180px;">MỨC ĐỘ</th>
+                                <th>MÔ TẢ CẢNH BÁO</th>
+                                <th style="text-align: right; padding-right: 24px; width: 180px;">THỜI GIAN</th>
+                            </tr>
+                        </thead>
+                        <tbody id="alerts-table-body">
+                            <tr><td colspan="3" style="text-align:center; padding: 100px; color: var(--text-light);">Đang tải dữ liệu cảnh báo...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         `;
 
         this.showPanel({
             title: 'Tất cả cảnh báo bất thường',
             bodyHtml,
-            extraClass: 'modal-card--alerts'
+            extraClass: 'modal-card--panel' // Full screen panel
         });
 
         try {
             const response = await fetch(`${API_BASE}/notification/admin/alerts`);
             const result = await response.json();
             const tableBody = document.getElementById('alerts-table-body');
+            
             if (result.success && result.data && result.data.length > 0) {
                 let rowsHtml = '';
                 result.data.forEach(item => {
                     const level = inferLevel(item.motacanhbao);
                     const userIdText = item.nguoiDungId ? `Người dùng ID #${item.nguoiDungId}` : 'Hệ thống';
+                    
+                    let displayMsg = item.motacanhbao;
+                    const msgLower = (item.motacanhbao || '').toLowerCase();
+
+                    if (item.tinnhan_id) {
+                        displayMsg = `Phát hiện ngôn ngữ tiêu cực: "${item.motacanhbao}"`;
+                    } else if (msgLower.includes('nhịp tim')) {
+                        displayMsg = `Cảnh báo nhịp tim: ${item.motacanhbao}`;
+                    } else if (msgLower.includes('stress') || msgLower.includes('áp lực')) {
+                        displayMsg = `Cảnh báo mức độ căng thẳng: ${item.motacanhbao}`;
+                    } else if (msgLower.includes('spo2') || msgLower.includes('oxy')) {
+                        displayMsg = `Cảnh báo nồng độ oxy máu: ${item.motacanhbao}`;
+                    } else if (msgLower.includes('giấc ngủ') || msgLower.includes('ngủ')) {
+                        displayMsg = `Cảnh báo giấc ngủ: ${item.motacanhbao}`;
+                    } else if (level.class === 'danger' || level.class === 'warning') {
+                        displayMsg = `Cảnh báo sức khỏe: ${item.motacanhbao}`;
+                    }
+
                     rowsHtml += `
                         <tr>
-                            <td>
-                                <div class="panel-alert-level panel-alert-level--${level.class}">
-                                    <span class="panel-alert-dot panel-alert-dot--${level.class}"></span>
+                            <td class="alert-cell--first">
+                                <div class="alert-level alert-level--${level.class}">
+                                    <div class="alert-dot alert-dot--${level.class}"></div>
                                     ${level.text}
                                 </div>
                             </td>
-                            <td>${item.motacanhbao} - ${userIdText}</td>
-                            <td class="panel-alert-time">${formatRelativeTime(item.thoigian)}</td>
+                            <td class="alert-desc">${displayMsg} - ${userIdText}</td>
+                            <td class="alert-cell--last alert-time" style="text-align: right; padding-right: 24px;">${formatRelativeTime(item.thoigian)}</td>
                         </tr>
                     `;
                 });
                 tableBody.innerHTML = rowsHtml;
             } else {
-                tableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 40px;">Không có cảnh báo nào gần đây.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 100px; color: var(--text-light);">Không có cảnh báo nào gần đây.</td></tr>';
             }
         } catch (err) {
             console.error('Lỗi tải cảnh báo:', err);
             const tableBody = document.getElementById('alerts-table-body');
-            if (tableBody) tableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 40px; color: var(--status-danger);">Lỗi khi kết nối đến máy chủ.</td></tr>';
+            if (tableBody) tableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 100px; color: var(--status-danger);">Lỗi khi kết nối đến máy chủ.</td></tr>';
         }
     },
 

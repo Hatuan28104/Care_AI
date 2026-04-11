@@ -214,10 +214,22 @@ function renderRecentAlerts(alerts) {
         const level = inferLevel(item.motacanhbao);
         const userIdText = item.nguoiDungId ? `Người dùng ID #${item.nguoiDungId}` : 'Hệ thống';
         
-        // Thêm tiền tố nếu là cảnh báo từ tin nhắn
-        const displayMsg = item.tinnhan_id 
-            ? `Phát hiện ngôn ngữ tiêu cực: "${item.motacanhbao}"` 
-            : item.motacanhbao;
+        let displayMsg = item.motacanhbao;
+        const msgLower = (item.motacanhbao || '').toLowerCase();
+
+        if (item.tinnhan_id) {
+            displayMsg = `Phát hiện ngôn ngữ tiêu cực: "${item.motacanhbao}"`;
+        } else if (msgLower.includes('nhịp tim')) {
+            displayMsg = `Cảnh báo nhịp tim: ${item.motacanhbao}`;
+        } else if (msgLower.includes('stress') || msgLower.includes('áp lực')) {
+            displayMsg = `Cảnh báo mức độ căng thẳng: ${item.motacanhbao}`;
+        } else if (msgLower.includes('spo2') || msgLower.includes('oxy')) {
+            displayMsg = `Cảnh báo nồng độ oxy máu: ${item.motacanhbao}`;
+        } else if (msgLower.includes('giấc ngủ') || msgLower.includes('ngủ')) {
+            displayMsg = `Cảnh báo giấc ngủ: ${item.motacanhbao}`;
+        } else if (level.class === 'danger' || level.class === 'warning') {
+            displayMsg = `Cảnh báo sức khỏe: ${item.motacanhbao}`;
+        }
 
         rowsHtml += `
             <tr>

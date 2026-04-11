@@ -83,7 +83,7 @@ class HealthBackendSync {
       if (!hasChange) return 0;
 
       await HealthApi.saveMultipleHealthData({
-        "thietbi_id": deviceId,
+        "nguondulieu_id": deviceId,
         ...payload,
       });
 

@@ -88,7 +88,7 @@ class HealthApi {
       "donvido": (metric["donvido"] ?? raw["donvido"] ?? "").toString(),
       "loaichiso_id":
           (metric["loaichiso_id"] ?? raw["loaichiso_id"] ?? "").toString(),
-      "thietbi_id": (raw["thietbi_id"] ?? "").toString(),
+      "nguondulieu_id": (raw["nguondulieu_id"] ?? "").toString(),
     };
   }
 
@@ -160,7 +160,7 @@ class HealthApi {
           statusCode: res.statusCode);
     }
 
-    return data['data']['ThietBi_ID'].toString();
+    return data['data']['nguondulieu_id'].toString();
   }
 
   /* =========================
@@ -179,7 +179,7 @@ class HealthApi {
             'giatri': giaTri,
             'loaichiso_id': loaiChiSoId,
             if (thietBiId != null && thietBiId.isNotEmpty)
-              'thietbi_id': thietBiId,
+              'nguondulieu_id': thietBiId,
           }),
         )
         .timeout(const Duration(seconds: 8));

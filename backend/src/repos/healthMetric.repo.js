@@ -16,7 +16,7 @@ function normalizeMetric(data) {
 function normalizeHealthData(data) {
   return {
     giatri: data.giatri ?? data.GiaTri,
-    thietbi_id: data.thietbi_id ?? data.ThietBi_ID,
+    nguondulieu_id: data.nguondulieu_id ?? data.NguonDuLieu_ID,
     loaichiso_id: data.loaichiso_id ?? data.LoaiChiSo_ID,
     thoigiancapnhat:
       data.thoigiancapnhat ??
@@ -69,7 +69,7 @@ export async function ensureDeviceForUser(nguoiDungId) {
 
   const { data, error } = await db
     .from("thietbisuckhoe")
-    .select("thietbi_id")
+    .select("nguondulieu_id")
     .eq("nguoidung_id", nguoiDungId)
     .eq("daxoa", false)
     .limit(1);
@@ -77,7 +77,7 @@ export async function ensureDeviceForUser(nguoiDungId) {
   if (error) throw error;
 
   if (data && data.length > 0) {
-    return data[0].thietbi_id;
+    return data[0].nguondulieu_id;
   }
 
   const thietBiId = ("HC" + String(nguoiDungId || "")
@@ -89,7 +89,7 @@ export async function ensureDeviceForUser(nguoiDungId) {
   const { error: insertError } = await db
     .from("thietbisuckhoe")
     .insert({
-      thietbi_id: thietBiId,
+      nguondulieu_id: thietBiId,
       nguoidung_id: nguoiDungId,
       daxoa: false,
     });
@@ -119,7 +119,7 @@ export async function getLatestHealthDataByDevice(thietBiId) {
         donvido
       )
     `)
-    .eq("thietbi_id", thietBiId)
+    .eq("nguondulieu_id", thietBiId)
     .order("thoigiancapnhat", { ascending: false });
 
   if (error) throw error;
@@ -146,7 +146,7 @@ export async function getLatestHealthDataByUser(nguoiDungId) {
     .select(`
       giatri,
       thoigiancapnhat,
-      thietbi_id,
+      nguondulieu_id,
       loaichisosuckhoe (
         loaichiso_id,
         tenchiso,
@@ -184,7 +184,7 @@ export async function getHealthHistory(thietBiId, loaiChiSoId) {
   const { data, error } = await db
     .from("dulieusuckhoe")
     .select("giatri, thoigiancapnhat")
-    .eq("thietbi_id", thietBiId)
+    .eq("nguondulieu_id", thietBiId)
     .eq("loaichiso_id", loaiChiSoId)
     .order("thoigiancapnhat", { ascending: false })
     .limit(50);
@@ -372,9 +372,9 @@ export async function saveMultipleHealthData(payload) {
   }
 
 
-  let thietbi_id = payload.thietbi_id ?? payload.ThietBi_ID;
+  let nguondulieu_id = payload.nguondulieu_id ?? payload.NguonDuLieu_ID;
 
-  const isManual = !thietbi_id;
+  const isManual = !nguondulieu_id;
 
 
   // =========================
@@ -390,7 +390,7 @@ export async function saveMultipleHealthData(payload) {
   // LOOP ALL PAYLOAD
   // =========================
   for (const [key, value] of Object.entries(payload)) {
-    if (["type", "thietbi_id", "ThietBi_ID", "nguoidung_id"].includes(key)) continue;
+    if (["type", "nguondulieu_id", "NguonDuLieu_ID", "nguoidung_id"].includes(key)) continue;
 
     if (value === undefined || value === null || value === "" || Number(value) <= 0) continue;
 
@@ -428,7 +428,7 @@ export async function saveMultipleHealthData(payload) {
           .from("dulieusuckhoe")
           .update({
             thoigiancapnhat: nowISO,
-            thietbi_id: isManual ? null : thietbi_id,
+            nguondulieu_id: isManual ? null : nguondulieu_id,
           })
           .eq("dulieusk_id", existing[0].dulieusk_id);
 
@@ -443,7 +443,7 @@ export async function saveMultipleHealthData(payload) {
           dulieusk_id: id,
           giatri: value,
           thoigiancapnhat: nowISO,
-          thietbi_id: isManual ? null : thietbi_id,
+          nguondulieu_id: isManual ? null : nguondulieu_id,
           loaichiso_id,
           nguoidung_id: payload.nguoidung_id,
         });
@@ -460,7 +460,7 @@ export async function saveMultipleHealthData(payload) {
         dulieusk_id: id,
         giatri: value,
         thoigiancapnhat: nowISO,
-        thietbi_id: isManual ? null : thietbi_id,
+        nguondulieu_id: isManual ? null : nguondulieu_id,
         loaichiso_id,
         nguoidung_id: payload.nguoidung_id,
       });

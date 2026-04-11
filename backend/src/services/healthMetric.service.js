@@ -26,19 +26,18 @@ export const handleDeviceEnsure = async (user) => {
   if (!nguoiDungId) throw new Error("Chưa đăng nhập");
 
   const thietBiId = await ensureDeviceForUser(nguoiDungId);
-  return { success: true, data: { ThietBi_ID: thietBiId } };
+  return { success: true, data: { nguondulieu_id: thietBiId } };
 };
 
 export const handleSaveData = async (user, body) => {
   const nguoiDungId = user?.NguoiDung_ID || user?.nguoidung_id;
   if (!nguoiDungId) throw new Error("Chưa đăng nhập");
 
-  const thietbi_id = body.thietbi_id ?? body.ThietBi_ID ?? null;
-
+const nguondulieu_id = body.nguondulieu_id ?? body.NguonDuLieu_ID ?? null;
   await saveMultipleHealthData({
     ...body,
     nguoidung_id: nguoiDungId,
-    thietbi_id,
+    nguondulieu_id,
   });
 
   const vnHour = getCurrentVNHour();
