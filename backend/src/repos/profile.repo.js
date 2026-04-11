@@ -141,28 +141,33 @@ const { data: updated, error } = await getDB()
    GET ALL USERS
 ========================= */
 export async function getAllUsers() {
-const { data, error } = await getDB()
-  .from("nguoidung")
-  .select(`
-    nguoidung_id,
-    tennd,
-    ngaysinh,
-    taikhoan (
-      sodienthoai,
-      ngaytao
-    )
-  `)
+  const { data, error } = await getDB()
+    .from("nguoidung")
+    .select(`
+      nguoidung_id,
+      tennd,
+      ngaysinh,
+      taikhoan!nguoidung_id (
+        sodienthoai,
+        ngaytao
+      )
+    `)
     .order("nguoidung_id", { ascending: true });
 
   if (error) throw error;
 
-  return data.map((u) => ({
-    nguoiDungId: u.nguoidung_id,
-    tenND: u.tennd,
-    ngaySinh: u.ngaysinh,
-soDienThoai: u.taikhoan?.[0]?.sodienthoai ?? null,
-ngayTao: u.taikhoan?.[0]?.ngaytao ?? null,
-  }));
+  return data.map((u) => {
+    // Handle both array (default join) and object (strict 1-1 join)
+    const account = Array.isArray(u.taikhoan) ? u.taikhoan[0] : u.taikhoan;
+    
+    return {
+      nguoiDungId: u.nguoidung_id,
+      tenND: u.tennd,
+      ngaySinh: u.ngaysinh,
+      soDienThoai: account?.sodienthoai ?? null,
+      ngayTao: account?.ngaytao ?? null,
+    };
+  });
 }
 
 /* =========================
@@ -202,9 +207,8 @@ export async function getProfileById(nguoiDungId) {
     email: data.email,
     diaChi: data.diachi,
     avatarUrl: data.avatarurl,
-
-    soDienThoai: data.taikhoan?.[0]?.sodienthoai ?? null,
-    ngayTao: data.taikhoan?.[0]?.ngaytao ?? null,
+    soDienThoai: (Array.isArray(data.taikhoan) ? data.taikhoan[0] : data.taikhoan)?.sodienthoai ?? null,
+    ngayTao: (Array.isArray(data.taikhoan) ? data.taikhoan[0] : data.taikhoan)?.ngaytao ?? null,
   };
 }
 
