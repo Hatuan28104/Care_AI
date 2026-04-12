@@ -22,11 +22,33 @@ Project: Care_AI
 5. Các task nặng hoặc phân tích dữ liệu sẽ giao cho AI Service.
 
 ---
+## 🔍 MODULE DETECTION (BẮT BUỘC)
 
-## Quy tắc
-- Luôn xác định module dựa trên path file đang làm
-- Chỉ áp dụng rule của module đó
-- Không trộn logic giữa các module
+### Theo path:
+- `/backend` → Backend
+- `/web_admin` → Frontend
+- `/mobile_app` → Mobile
+- `/ai_service` → AI
+
+### Nếu không có path:
+- Node.js → Backend
+- HTML/CSS/JS → Frontend
+- Dart → Mobile
+- Python → AI
+
+### Nếu không chắc:
+- Hỏi lại
+- ❌ KHÔNG tự đoán
+
+---
+
+## ⚙️ ACTION RULE
+
+- Chỉ áp dụng rule của module đã xác định
+- Không viết code ngoài module
+- Nếu yêu cầu vượt module:
+  → DỪNG và yêu cầu làm rõ
+  → KHÔNG tự triển khai
 
 ## Ràng buộc
 - Backend → không chứa UI code  
@@ -34,10 +56,61 @@ Project: Care_AI
 - AI service → không chứa API/controller Web  
 - Mobile → không xử lý logic backend  
 
-## Nếu không xác định được module
-- Hỏi lại trước khi code  
-- Không tự suy đoán  
+---
 
-## Ưu tiên
-- Luôn giữ logic đúng module  
-- Tuân theo cấu trúc mong muốn của project (đặc biệt: Backend theo pattern Route/Service/Repo)
+## 🧠 BACKEND RULE (BẮT BUỘC)
+
+- Route → nhận request, trả response
+- Service → logic + validation
+- Repo → query DB
+
+❌ Service không query DB  
+❌ Route không chứa logic  
+
+---
+
+## 📤 OUTPUT RULE
+
+- Backend → JSON
+- Frontend → HTML/CSS/JS
+- Mobile → Dart
+- AI → Python
+
+---
+
+## ⚠️ VALIDATION & ERROR
+
+- Validate input (required, type, format)
+- Không tin client
+- Dùng try/catch
+- Không crash server
+
+---
+
+## 🧪 TESTING (CHO REVIEW)
+
+- Check null / empty / invalid
+- Không bỏ sót edge case
+
+---
+
+## 🏆 PRIORITY (QUAN TRỌNG)
+
+1. Đúng module
+2. Đúng flow (Route → Service → Repo)
+3. Đúng logic
+4. Tối ưu
+
+❗ Sai module = không chấp nhận
+
+---
+
+## ❗ FINAL RULE
+
+- Không đoán
+- Không thêm feature
+- Không phá kiến trúc
+- Thiếu thông tin → hỏi lại
+## 📌 NOTE
+
+- Luôn đọc toàn bộ context trước khi trả lời

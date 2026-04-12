@@ -1,124 +1,131 @@
-# 🧠 AI RULES - Care_AI (Compact)
-
-> Mục tiêu: Code đúng context, không phá structure, giảm bug, tối ưu thay đổi.
+# 🧠 AI RULES - Care_AI (FINAL)
 
 ---
 
-# ⚖️ PRIORITY
+## ⚖️ PRIORITY
 
 1. context.md  
 2. AI rules  
-3. yêu cầu user  
+3. user request  
 
-👉 Luôn ưu tiên context
+👉 Context luôn là nguồn sự thật
 
 ---
 
-# 🔥 CORE
+## 🔒 EXECUTION RULE (RẤT QUAN TRỌNG)
 
-Bạn là senior fullstack developer của Care_AI.
+- Luôn đọc context trước khi làm  
+- Không được bỏ qua bất kỳ rule nào  
+- Nếu thiếu thông tin → DỪNG và hỏi  
 
-## Bắt buộc
-- Luôn đọc context.md trước khi làm  
-- Không đoán nếu thiếu context → hỏi  
+---
 
+## 🎯 ROLE
 
+Bạn là senior developer trong hệ multi-agent:
 
-## Nguyên tắc
-- Chỉ sửa code liên quan  
-- Không scan toàn bộ project nếu không cần  
+- PM → plan  
+- DEV → implement  
+- REVIEW → kiểm tra  
+
+👉 Không làm sai vai trò
+
+---
+
+## 🔥 CORE RULE
+
+- Không đoán  
+- Không làm ngoài scope  
 - Không phá structure  
-- Ưu tiên reuse code  
-- Code clean, tối giản, nhất quán  
+- Chỉ sửa phần liên quan  
+- Ưu tiên code tối giản  
 
 ---
 
-# 🚀 IMPLEMENTATION
+## ⚙️ IMPLEMENTATION FLOW
 
-## Quy trình
+BẮT BUỘC theo thứ tự:
+
 1. Hiểu context  
 2. Xác định vấn đề  
-3. Liệt kê file ảnh hưởng  
+3. Liệt kê file liên quan  
 4. Đề xuất giải pháp  
 5. Sau đó mới code  
 
-## Không được
-- Nhảy vào code ngay  
-- Làm ngoài phạm vi  
+❌ Không được code trước khi phân tích  
 
 ---
 
-# 🔒 SCOPE CONTROL
+## 🔒 SCOPE CONTROL
 
 - Chỉ sửa file liên quan trực tiếp  
 - Phải liệt kê file trước khi sửa  
-- Không tự tạo file mới nếu chưa cần  
+- Không tạo file mới nếu không cần  
 
 ---
 
-# 🔁 REUSE
+## 🔁 REUSE RULE
 
-- Luôn kiểm tra code cũ trước khi viết mới  
-- Ưu tiên reuse / extend  
+- Kiểm tra code cũ trước  
+- Ưu tiên reuse  
 - Không duplicate logic  
 
 ---
 
-# 🔧 BACKEND
+## 🧠 BACKEND RULE
 
-- Không làm vỡ API hiện tại  
-- Giữ consistency database  
-- Theo pattern controller/service  
+- Không phá API  
+- Giữ DB consistency  
+- Theo Route → Service → Repo  
 
 ---
 
-# 🎨 FRONTEND (web_admin)
+## 🎨 FRONTEND RULE
 
-- Giữ HTML/CSS/JS thuần  
 - Không đổi layout  
 - Không thêm framework  
-- Chỉ sửa phần cần thiết  
+- Chỉ sửa UI cần thiết  
 
 ---
 
-# 📱 MOBILE
+## 📱 MOBILE RULE
 
-- Không làm lỗi navigation  
-- Giữ UI responsive  
+- Không lỗi navigation  
+- Giữ responsive  
 
 ---
 
-# 🤖 AI SERVICE
+## 🤖 AI SERVICE RULE
 
-- Logic rõ ràng, predictable  
+- Logic rõ ràng  
 - Không đổi behavior nếu không cần  
 - Code modular  
 
 ---
 
-# 📤 OUTPUT FORMAT CƠ BẢN
+## 📤 OUTPUT RULE
 
-Luôn trả lời theo format:
+Mặc định:
 
-## 1. Phân tích
-## 2. File bị ảnh hưởng
-## 3. Giải pháp
-## 4. Code
-## 5. Kiểm tra
+1. Phân tích  
+2. File ảnh hưởng  
+3. Giải pháp  
+4. Code  
+5. Kiểm tra  
 
-👉 LƯU Ý QUAN TRỌNG: Nếu file Prompt truyền vào có quy định format Output riêng biệt, AI bắt buộc phải tuân thủ nghiêm ngặt format của Prompt đó thay thế bộ bước này.
+👉 Nếu prompt có format riêng → override hoàn toàn  
 
 ---
 
-# 🔍 VERIFY
+## 🔍 VERIFY
 
-- Không làm hỏng feature cũ  
+- Không phá feature cũ  
 - Logic đúng  
-- Check edge cases  
+- Check edge case  
 
 ---
 
-# 🔧 FIX BUG
+## 🔧 FIX BUG
 
 1. Tìm root cause  
 2. Fix tối giản  
@@ -126,40 +133,36 @@ Luôn trả lời theo format:
 
 ---
 
-# ❌ ANTI-PATTERN
+## ❌ ANTI-PATTERN
 
 Không được:
-- Tự đổi structure  
-- Tự thêm framework  
-- Viết lại code không cần thiết  
+
 - Đoán logic  
+- Viết lại code không cần thiết  
+- Thay đổi structure  
+- Làm vượt scope  
 
 ---
 
-# 🚫 RESTRICTION
+## 🚫 RESTRICTION
 
-- Không tự push git  
-- Không tự commit  
-- Không giải thích dài dòng  
-- Chỉ trả lời đúng yêu cầu  
-
----
-
-# 🧠 WORKFLOW
-
-1. Hiểu context  
-2. List file  
-3. Code (minimal)  
-4. Verify  
-5. Fix nếu cần  
+- Không commit / push  
+- Không tự tạo feature mới  
+- Không trả lời ngoài yêu cầu  
 
 ---
 
-# ⚠️ NGUYÊN TẮC
+## 🏆 PRIORITY RULE
 
-- Context > Spec  
+1. Đúng module  
+2. Đúng flow  
+3. Đúng logic  
+4. Tối ưu  
+
+---
+
+## 📌 FINAL RULE
+
+- Context > tất cả  
 - Minimal change  
-- Không sửa ngoài scope  
 - Luôn verify  
-
----

@@ -45,8 +45,6 @@ def predict_stress(data, model, scaler):
     hrv_log = np.log1p(hrv)
     steps_log = np.log1p(steps)
 
-    hrv_steps_interaction = hrv_log * steps_log  # 🔥 FIX
-
     features = [
         hrv,
         hr,
@@ -66,8 +64,6 @@ def predict_stress(data, model, scaler):
         1 if steps > 10000 else 0,
         1 if (hrv < 20 or hrv > 100) else 0,
         sleep / (hrv + 1),
-
-        hrv_steps_interaction,  # 🔥 QUAN TRỌNG
 
         (hr / (hrv + 1)) * (8 / (sleep + 1)),
         (hrv * sleep) / (hr + 1),

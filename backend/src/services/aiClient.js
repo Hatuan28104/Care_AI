@@ -97,3 +97,27 @@ export const callSelfEvolutionAI = async (nguoidung_id, currentBody) => {
     return null;
   }
 };
+
+export const callStressAI = async (nguoidung_id, inputData) => {
+  try {
+    const url = `${AI_SERVER_URL}/stress/predict`;
+    console.log("[AI Client Stress] Calling:", url);
+
+    const payload = {
+      nguoidung_id,
+      ...inputData
+    };
+
+    const response = await axios.post(url, payload, {
+      timeout: 10000
+    });
+
+    const raw = response.data || {};
+    console.log("[AI Client Stress] Response:", raw);
+
+    return raw;
+  } catch (err) {
+    console.error("[AI Client Stress] FAILED:", err.message, "| code:", err.code, "| HTTP:", err.response?.status);
+    return null;
+  }
+};

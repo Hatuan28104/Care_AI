@@ -1,13 +1,13 @@
 # VALIDATION
 
-## Nguyên tắc
-- Validate tất cả input
+## WHEN
+- Khi có input (body, params, query)
+
+## DO
+- Check required
+- Check type
+- Check format
+
+## RULE
 - Không tin dữ liệu client
-
-## Check
-- required
-- type
-- format
-
-## Lỗi
-- Trả message rõ ràng
+- Thiếu hoặc sai → throw error rõ ràng

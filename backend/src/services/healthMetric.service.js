@@ -1,6 +1,6 @@
-import { getAllHealthMetrics, createHealthMetric, getLatestHealthDataByDevice, getLatestHealthDataByUser, getHealthHistory, getHealthHistoryByUser, getHealthReport, ensureDeviceForUser, saveMultipleHealthData, insertAIInsight, getLatestAIInsight, getAIInsightByDate } from "../repos/healthMetric.repo.js";
+import { getAllHealthMetrics, createHealthMetric, getLatestHealthDataByDevice, getLatestHealthDataByUser, getHealthHistory, getHealthHistoryByUser, getHealthReport, ensureDeviceForUser, saveMultipleHealthData, insertAIInsight, getLatestAIInsight, getAIInsightByDate, getStressInputData, saveHealthData } from "../repos/healthMetric.repo.js";
 import { sendNotification } from "../repos/notification.repo.js";
-import { callSelfEvolutionAI } from "./aiClient.js";
+import { callSelfEvolutionAI, callStressAI } from "./aiClient.js";
 import { getCurrentVNHour, getVNDateString } from "../utils/time.js";
 
 
@@ -175,4 +175,38 @@ export const handleGetReport = async (user, quanHeId, type) => {
   const userId = user?.NguoiDung_ID || user?.nguoidung_id;
   const data = await getHealthReport(userId, quanHeId, type);
   return { success: true, data };
+};
+
+export const handleAnalyzeStress = async (user, deviceId) => {
+  const nguoiDungId = user?.NguoiDung_ID || user?.nguoidung_id;
+  if (!nguoiDungId) throw new Error("Chưa đăng nhập");
+
+  // 1. Lấy dữ liệu đầu vào (HRV, HR, Sleep, Steps)
+  const inputData = await getStressInputData(deviceId);
+
+  // 2. Gọi AI Stress (truyền cả nguoiDungId cho đồng bộ với self_evo)
+  const aiRes = await callStressAI(nguoiDungId, inputData);
+  if (!aiRes || aiRes.stress === undefined) {
+    throw new Error("Không nhận được kết quả từ AI Stress");
+  }
+
+  const stressScore = aiRes.stress;
+
+  // 3. Tận dụng hàm saveHealthData để lưu vào bảng dulieusuckhoe
+  console.log(`[Stress] Saving for user ${nguoiDungId}, device ${deviceId}, score ${stressScore}`);
+  
+  await saveHealthData({
+    nguoidung_id: nguoiDungId,
+    loaichiso_id: "CS016",
+    giatri: stressScore,
+    nguondulieu_id: deviceId
+  });
+
+  return { 
+    success: true, 
+    data: { 
+      stress: stressScore,
+      thoigian: new Date().toISOString()
+    } 
+  };
 };
