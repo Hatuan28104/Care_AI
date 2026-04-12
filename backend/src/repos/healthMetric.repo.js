@@ -544,15 +544,15 @@ export async function getLatestAIInsight(nguoidung_id) {
   return data && data.length > 0 ? data[0] : null;
 }
 
-export async function getStressInputData(thietBiId) {
+export async function getStressInputData(nguoiDungId) {
   const db = getDB();
 
-  const targetMetricIds = ["CS008", "CS001", "CS037", "CS004"]; // HRV, HR, Sleep, Steps
+  const targetMetricIds = ["CS008", "CS001", "CS037", "CS004"]; 
 
   const { data, error } = await db
     .from("dulieusuckhoe")
     .select("loaichiso_id, giatri, thoigiancapnhat")
-    .eq("nguondulieu_id", thietBiId)
+    .eq("nguoidung_id", nguoiDungId)
     .in("loaichiso_id", targetMetricIds)
     .order("thoigiancapnhat", { ascending: false })
     .limit(200);

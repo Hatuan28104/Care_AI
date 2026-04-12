@@ -177,14 +177,14 @@ export const handleGetReport = async (user, quanHeId, type) => {
   return { success: true, data };
 };
 
-export const handleAnalyzeStress = async (user, deviceId) => {
+export const handleAnalyzeStress = async (user) => {
   const nguoiDungId = user?.NguoiDung_ID || user?.nguoidung_id;
   if (!nguoiDungId) throw new Error("Chưa đăng nhập");
 
-  // 1. Lấy dữ liệu đầu vào (HRV, HR, Sleep, Steps)
-  const inputData = await getStressInputData(deviceId);
+  // 1. Lấy dữ liệu đầu vào (HRV, HR, Sleep, Steps) dựa trên người dùng
+  const inputData = await getStressInputData(nguoiDungId);
 
-  // 2. Gọi AI Stress (truyền cả nguoiDungId cho đồng bộ với self_evo)
+  // 2. Gọi AI Stress
   const aiRes = await callStressAI(nguoiDungId, inputData);
   if (!aiRes || aiRes.stress === undefined) {
     throw new Error("Không nhận được kết quả từ AI Stress");
@@ -192,14 +192,14 @@ export const handleAnalyzeStress = async (user, deviceId) => {
 
   const stressScore = aiRes.stress;
 
-  // 3. Tận dụng hàm saveHealthData để lưu vào bảng dulieusuckhoe
-  console.log(`[Stress] Saving for user ${nguoiDungId}, device ${deviceId}, score ${stressScore}`);
-  
+  // 3. Lưu vào bảng dulieusuckhoe
+  console.log(`[Stress] Saving for user ${nguoiDungId}, score ${stressScore}`);
+
   await saveHealthData({
     nguoidung_id: nguoiDungId,
     loaichiso_id: "CS016",
     giatri: stressScore,
-    nguondulieu_id: deviceId
+    nguondulieu_id: null // Stress là chỉ số tính toán, không gắn với 1 thiết bị cụ thể
   });
 
   return { 
