@@ -27,11 +27,14 @@ export const fetchAIHistory = async (nguoidungId) => {
   const pivot = {};
   for (let r of data) {
     const time = r.thoigiancapnhat;
-    const dateStr = time ? time.split('T')[0] : new Date().toISOString().split('T')[0];
+    const dateStr = time
+      ? time.split('T')[0]
+      : new Date().toISOString().split('T')[0];
 
     if (!pivot[dateStr]) {
       pivot[dateStr] = { date: dateStr };
     }
+
     const cid = r.loaichiso_id;
     const val = r.giatri;
 
@@ -39,9 +42,14 @@ export const fetchAIHistory = async (nguoidungId) => {
       pivot[dateStr][metricsMap[cid]] = val;
     }
   }
-  return Object.values(pivot).slice(0, 7);
-};
 
+  const today = new Date().toISOString().split('T')[0];
+
+  return Object.values(pivot)
+    .filter(d => d.date !== today)
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(-7);
+};
 export const callSelfEvolutionAI = async (nguoidung_id, currentBody) => {
   try {
     const history = await fetchAIHistory(nguoidung_id);
@@ -61,7 +69,7 @@ export const callSelfEvolutionAI = async (nguoidung_id, currentBody) => {
       history
     };
 
-    const url = `${AI_SERVER_URL}/ai/self-evolution`;
+    const url = `${AI_SERVER_URL}/self/self_evolution`;
     console.log("[AI Client] Calling:", url);
 
     const response = await axios.post(url, payload, {
@@ -70,13 +78,15 @@ export const callSelfEvolutionAI = async (nguoidung_id, currentBody) => {
 
     const raw = response.data || {};
     const sosanhRaw = raw.sosanh ?? {};
-
     const normalized = {
-      trangthai: (raw.trangthai ?? "unknown").toString(),
-      thongdiep: (raw.thongdiep ?? "").toString(),
-      loikhuyen: (raw.loikhuyen ?? "").toString(),
+      trangthai: (raw.trangthai ?? raw.status ?? "unknown").toString(),
+      thongdiep: (raw.thongdiep ?? raw.message ?? "").toString(),
+      loikhuyen: (raw.loikhuyen ?? raw.advice ?? "").toString(),
       sosanh:
-        typeof sosanhRaw === "object" && sosanhRaw !== null ? sosanhRaw : {},
+        typeof (raw.sosanh ?? raw.compare) === "object" &&
+        (raw.sosanh ?? raw.compare) !== null
+          ? (raw.sosanh ?? raw.compare)
+          : {},
       thoigian: new Date().toISOString(),
     };
 

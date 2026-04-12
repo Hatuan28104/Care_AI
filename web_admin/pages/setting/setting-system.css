@@ -37,7 +37,7 @@
 .input-select-v2 {
     appearance: none;
     width: 100%;
-    background: var(--border-color);
+    background: var(--bg-input);
     border: none;
     border-radius: 8px;
     padding: var(--space-2) var(--space-6) var(--space-2) var(--space-3);
@@ -61,7 +61,7 @@
 
 .segmented-control {
     display: flex;
-    background: var(--border-color);
+    background: var(--bg-input);
     border-radius: 8px;
     padding: 4px;
 }
@@ -87,7 +87,7 @@
 }
 
 .segment.active {
-    background: white;
+    background: var(--bg-white);
     color: var(--primary-blue2);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }

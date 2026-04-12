@@ -5,5 +5,6 @@ scikit-learn
 joblib
 psycopg2-binary
 requests
-
-# python -m uvicorn app:app --reload --port 8000
+pydantic
+numpy
+xgboost

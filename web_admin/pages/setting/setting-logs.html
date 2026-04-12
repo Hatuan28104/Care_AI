@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,6 +19,7 @@
     <link rel="prefetch" href="setting-notifications.html">
     <link rel="preload" href="setting-nav.html" as="fetch" crossorigin="anonymous">
 </head>
+
 <body class="setting-page">
     <div class="dashboard-layout">
         <!-- Sidebar Navigation (Shared) -->
@@ -31,7 +33,8 @@
                 <section class="page-header">
                     <div class="page-header__title">
                         <h2 class="page-title">Cài đặt</h2>
-                        <p class="page-subtitle">Cấu hình không gian làm việc quản trị, các giao thức bảo mật và các tùy chọn vùng trên toàn hệ thống của bạn.</p>
+                        <p class="page-subtitle">Cấu hình không gian làm việc quản trị, các giao thức bảo mật và các tùy
+                            chọn vùng trên toàn hệ thống của bạn.</p>
                     </div>
                 </section>
 
@@ -43,28 +46,20 @@
                             <div class="filter-card">
                                 <h3>Lọc dữ liệu</h3>
                                 <div class="filter-controls">
-                                    <div class="custom-select-wrapper simple-select">
+                                    <div class="filter-dropdown">
                                         <i data-lucide="calendar" class="prefix-icon"></i>
-                                        <select class="input-select-v2">
-                                            <option>7 ngày qua</option>
-                                        </select>
+                                        <span>7 ngày qua</span>
+                                        <i data-lucide="chevron-down" class="suffix-icon"></i>
                                     </div>
-                                    <div class="custom-select-wrapper simple-select">
+                                    <div class="filter-dropdown">
                                         <i data-lucide="filter" class="prefix-icon"></i>
-                                        <select class="input-select-v2">
-                                            <option>Loại hành động</option>
-                                        </select>
+                                        <span>Loại hành động</span>
+                                        <i data-lucide="chevron-down" class="suffix-icon"></i>
                                     </div>
                                     <button class="btn-pill btn-pill--primary">Áp dụng</button>
                                 </div>
                             </div>
-                            <div class="alert-stats-card">
-                                <h5>CẢNH BÁO THẤT BẠI (24H)</h5>
-                                <div class="alert-value">
-                                    <span class="num">12</span>
-                                    <span class="trend trend-up"><i data-lucide="trending-up"></i>+5%</span>
-                                </div>
-                            </div>
+
                         </div>
 
                         <div class="logs-table-card">
@@ -86,13 +81,14 @@
                                         </td>
                                         <td>
                                             <div class="log-action">
-                                                <i data-lucide="log-in" class="log-icon log-icon--blue"></i>
+                                                <div class="icon-indicator icon-indicator--blue">
+                                                    <i data-lucide="log-in"></i>
+                                                </div>
                                                 Đăng nhập hệ thống
                                             </div>
                                         </td>
                                         <td>
                                             <div class="log-user">
-                                                <div class="avatar-sm">AT</div>
                                                 Admin Trung
                                             </div>
                                         </td>
@@ -106,13 +102,14 @@
                                         </td>
                                         <td>
                                             <div class="log-action">
-                                                <i data-lucide="key" class="log-icon log-icon--amber"></i>
+                                                <div class="icon-indicator icon-indicator--amber">
+                                                    <i data-lucide="lock"></i>
+                                                </div>
                                                 Thay đổi mật khẩu
                                             </div>
                                         </td>
                                         <td>
                                             <div class="log-user">
-                                                <div class="avatar-sm">ML</div>
                                                 Minh Lan (Editor)
                                             </div>
                                         </td>
@@ -126,13 +123,14 @@
                                         </td>
                                         <td>
                                             <div class="log-action">
-                                                <i data-lucide="refresh-cw" class="log-icon log-icon--violet"></i>
+                                                <div class="icon-indicator icon-indicator--violet">
+                                                    <i data-lucide="user-cog"></i>
+                                                </div>
                                                 Cập nhật nhân vật
                                             </div>
                                         </td>
                                         <td>
                                             <div class="log-user">
-                                                <div class="avatar-sm">AT</div>
                                                 Admin Trung
                                             </div>
                                         </td>
@@ -146,11 +144,15 @@
                                         </td>
                                         <td>
                                             <div class="log-action">
-                                                <i data-lucide="shield-alert" class="log-icon log-icon--red"></i>
+                                                <div class="icon-indicator icon-indicator--red">
+                                                    <i data-lucide="shield-alert"></i>
+                                                </div>
                                                 Cảnh báo đăng nhập lạ
                                             </div>
                                         </td>
-                                        <td class="log-user">Hệ thống AI</td>
+                                        <td>
+                                            <div class="log-user">Hệ thống AI</div>
+                                        </td>
                                         <td class="log-ip">45.281.12.8</td>
                                         <td><span class="status-pill pill-danger">ĐÃ CHẶN</span></td>
                                     </tr>
@@ -159,22 +161,25 @@
                             <div class="pagination-row">
                                 <div class="pagination-count">Hiển thị 1 - 10 trong số 1,240 nhật ký</div>
                                 <div class="pagination-controls">
-                                    <button class="page-link" aria-label="Trang trước"><i data-lucide="chevron-left"></i></button>
+                                    <button class="page-link" aria-label="Trang trước"><i
+                                            data-lucide="chevron-left"></i></button>
                                     <button class="page-link active">1</button>
                                     <button class="page-link">2</button>
                                     <button class="page-link">3</button>
-                                    <button class="page-link" aria-label="Trang sau"><i data-lucide="chevron-right"></i></button>
+                                    <button class="page-link" aria-label="Trang sau"><i
+                                            data-lucide="chevron-right"></i></button>
                                 </div>
                             </div>
                         </div>
 
                         <div class="export-logs-card">
-                            <div class="export-icon"><i data-lucide="download"></i></div>
+                            <div class="export-icon"><i data-lucide="cloud-download"></i></div>
                             <h3>Xuất dữ liệu nhật ký</h3>
-                            <p>Bạn có thể tải xuống toàn bộ nhật ký bảo mật<br>dưới định dạng CSV hoặc PDF để lưu trữ ngoại tuyến.</p>
-                            <div class="export-actions" style="display: flex; gap: 12px; justify-content: center; margin-top: 16px;">
-                                <button class="btn-pill btn-pill--secondary">Tải CSV</button>
-                                <button class="btn-pill btn-pill--primary">Tải PDF</button>
+                            <p>Bạn có thể tải xuống toàn bộ nhật ký bảo mật<br>dưới định dạng CSV hoặc PDF để lưu trữ
+                                ngoại tuyến.</p>
+                            <div class="export-actions">
+                                <button class="btn-pill btn-pill--white">Tải CSV</button>
+                                <button class="btn-pill btn-pill--blue">Tải PDF</button>
                             </div>
                         </div>
                     </div>
@@ -186,4 +191,5 @@
     <script src="../../assets/js/ui.js"></script>
     <script src="setting.js"></script>
 </body>
+
 </html>

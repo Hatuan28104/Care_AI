@@ -5,6 +5,7 @@ import 'digital_human.dart';
 import 'chat.dart';
 import 'data/basic_health_data.dart';
 import 'data/activity_data.dart';
+import 'stress.dart';
 import 'package:Care_AI/models/tr.dart';
 
 class HomeTab extends StatefulWidget {
@@ -78,6 +79,13 @@ class _HomeTabState extends State<HomeTab> {
             iconColor: Colors.purple,
             text: context.tr.healthData,
             onTap: () => _go(context, const BasicHealthDataScreen()),
+          ),
+          const SizedBox(height: 6),
+          _categoryItem(
+            icon: Icons.psychology_outlined,
+            iconColor: Colors.indigoAccent,
+            text: "Dự đoán mức độ stress",
+            onTap: () => _go(context, const StressScreen()),
           ),
           const SizedBox(height: 40),
         ],

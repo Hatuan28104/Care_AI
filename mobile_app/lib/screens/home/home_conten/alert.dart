@@ -73,7 +73,7 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
         _alerts.addAll(
           data.map(
             (e) => _AlertItem(
-              id: e["notification_id"].toString(),
+              id: e["thongbao_id"].toString(),
               icon: Icons.warning_amber_rounded,
               iconColor: Colors.red,
               title: (e["tieude"] ?? "Thông báo").toString(),

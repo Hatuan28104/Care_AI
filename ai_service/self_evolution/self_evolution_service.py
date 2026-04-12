@@ -2,9 +2,9 @@ import logging
 from statistics import mean, median, pstdev
 from typing import Dict, List, Tuple, Optional
 
-from core.schema import HealthDataInput, HealthEvaluationResponse
-from core.utils import process_history
-from services.ml_support import MLSupport
+from self_evolution.schema import HealthDataInput, HealthEvaluationResponse
+from self_evolution.utils import process_history
+from self_evolution.ml_support import MLSupport
 
 logger = logging.getLogger(__name__)
 

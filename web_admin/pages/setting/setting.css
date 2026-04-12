@@ -40,7 +40,7 @@
 }
 
 .setting-nav__item.active {
-    background: white;
+    background: var(--bg-white);
     box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.05);
 }
 
@@ -59,7 +59,7 @@
 }
 
 .setting-card-v2 {
-    background: white;
+    background: var(--bg-card);
     border-radius: 12px;
     box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.05);
     padding: var(--space-6);

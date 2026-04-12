@@ -68,10 +68,10 @@ export async function ensureDeviceForUser(nguoiDungId) {
   const db = getDB();
 
   const { data, error } = await db
-    .from("thietbisuckhoe")
+    .from("nguondulieusuckhoe")
     .select("nguondulieu_id")
     .eq("nguoidung_id", nguoiDungId)
-    .eq("daxoa", false)
+    .eq("dangatketnoi", false)
     .limit(1);
 
   if (error) throw error;
@@ -80,18 +80,18 @@ export async function ensureDeviceForUser(nguoiDungId) {
     return data[0].nguondulieu_id;
   }
 
-  const thietBiId = ("HC" + String(nguoiDungId || "")
+  const nguonDuLieuId = ("HC" + String(nguoiDungId || "")
     .replace(/\s/g, "")
     .slice(-10))
     .padEnd(12, "0")
     .slice(0, 12);
 
   const { error: insertError } = await db
-    .from("thietbisuckhoe")
+    .from("nguondulieusuckhoe")
     .insert({
-      nguondulieu_id: thietBiId,
+      nguondulieu_id: nguonDuLieuId,
       nguoidung_id: nguoiDungId,
-      daxoa: false,
+      dangatketnoi: false,
     });
 
   if (insertError) {
@@ -99,7 +99,7 @@ export async function ensureDeviceForUser(nguoiDungId) {
     throw insertError;
   }
 
-  return thietBiId;
+  return nguonDuLieuId;
 }
 
 /* =========================
@@ -258,7 +258,7 @@ export async function getHealthReport(userId, quanHeId, type) {
     .select("nguoiduocgiamho_id")
     .eq("quanhegiamho_id", quanHeId)
     .or(`nguoigiamho_id.eq.${userId},nguoiduocgiamho_id.eq.${userId}`)
-    .eq("daxoa", false)
+    .eq("dangatketnoi", false)
     .single();
 
   if (!rel) throw new Error("Không có quyền");
@@ -352,7 +352,6 @@ export async function saveMultipleHealthData(payload) {
     throw new Error("Thiếu nguoidung_id");
   }
 
-  const type = payload.type || "device";
 
   // =========================
   // LOAD METRIC MAP
@@ -372,7 +371,7 @@ export async function saveMultipleHealthData(payload) {
   }
 
 
-  let nguondulieu_id = payload.nguondulieu_id ?? payload.NguonDuLieu_ID;
+  let nguondulieu_id = payload.nguondulieu_id ?? payload.NguonDuLieu_ID ?? payload.thietbi_id ?? payload.ThietBi_ID;
 
   const isManual = !nguondulieu_id;
 
@@ -390,7 +389,7 @@ export async function saveMultipleHealthData(payload) {
   // LOOP ALL PAYLOAD
   // =========================
   for (const [key, value] of Object.entries(payload)) {
-    if (["type", "nguondulieu_id", "NguonDuLieu_ID", "nguoidung_id"].includes(key)) continue;
+    if (["type", "nguondulieu_id", "NguonDuLieu_ID", "thietbi_id", "ThietBi_ID", "nguoidung_id"].includes(key)) continue;
 
     if (value === undefined || value === null || value === "" || Number(value) <= 0) continue;
 
@@ -543,4 +542,93 @@ export async function getLatestAIInsight(nguoidung_id) {
     return null;
   }
   return data && data.length > 0 ? data[0] : null;
+}
+
+export async function getStressInputData(thietBiId) {
+  const db = getDB();
+
+  const targetMetricIds = ["CS008", "CS001", "CS037", "CS004"]; // HRV, HR, Sleep, Steps
+
+  const { data, error } = await db
+    .from("dulieusuckhoe")
+    .select("loaichiso_id, giatri, thoigiancapnhat")
+    .eq("nguondulieu_id", thietBiId)
+    .in("loaichiso_id", targetMetricIds)
+    .order("thoigiancapnhat", { ascending: false })
+    .limit(200);
+
+  if (error) throw error;
+
+  const rows = data || [];
+
+  const valuesByMetric = {
+    CS008: [],
+    CS001: [],
+    CS037: [],
+    CS004: [],
+  };
+
+  for (const row of rows) {
+    if (!valuesByMetric[row.loaichiso_id]) continue;
+    const val = Number(row.giatri);
+    if (!Number.isFinite(val)) continue;
+    valuesByMetric[row.loaichiso_id].push(val);
+  }
+
+  const hrvSeries = valuesByMetric.CS008;
+  const hrSeries = valuesByMetric.CS001;
+  const sleepSeries = valuesByMetric.CS037;
+  const stepsSeries = valuesByMetric.CS004;
+
+  return {
+    hrv_rmssd_ms: hrvSeries[0] ?? 35,
+    resting_hr_bpm: hrSeries[0] ?? 70,
+    sleep_duration_hours: sleepSeries[0] ?? 7,
+    steps: stepsSeries[0] ?? 3000,
+    hrv_history: hrvSeries.slice(1, 8).reverse(),
+    sleep_history: sleepSeries.slice(1, 8).reverse(),
+    hr_history: hrSeries.slice(1, 8).reverse(),
+  };
+}
+
+export async function saveHealthData(payload) {
+  const db = getDB();
+
+  const normalized = normalizeHealthData(payload);
+  const nguoidung_id = payload.nguoidung_id ?? payload.NguoiDung_ID;
+
+  if (!normalized.loaichiso_id) throw new Error("Thiếu loaichiso_id");
+  if (normalized.giatri === undefined || normalized.giatri === null || normalized.giatri === "") {
+    throw new Error("Thiếu giatri");
+  }
+
+  const record = {
+    dulieusk_id: Date.now().toString() + Math.random().toString(36).substring(2, 6),
+    giatri: Number(normalized.giatri),
+    thoigiancapnhat: new Date(normalized.thoigiancapnhat).toISOString(),
+    nguondulieu_id: normalized.nguondulieu_id ?? null,
+    loaichiso_id: normalized.loaichiso_id,
+    nguoidung_id: nguoidung_id ?? null,
+  };
+
+  const { error } = await db.from("dulieusuckhoe").insert(record);
+  if (error) throw error;
+
+  return true;
+}
+
+export async function getLatestMetricByDevice(thietBiId, loaiChiSoId) {
+  const db = getDB();
+
+  const { data, error } = await db
+    .from("dulieusuckhoe")
+    .select("giatri, thoigiancapnhat")
+    .eq("nguondulieu_id", thietBiId)
+    .eq("loaichiso_id", loaiChiSoId)
+    .order("thoigiancapnhat", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data || null;
 }

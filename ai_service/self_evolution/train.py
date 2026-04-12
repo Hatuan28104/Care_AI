@@ -6,7 +6,7 @@ from preprocess import preprocess
 # ==========================
 # LOAD DATA
 # ==========================
-df = pd.read_csv("../../data/wearables_health_6mo_daily.csv")
+df = pd.read_csv("../../wearables_health_6mo_daily.csv")
 
 # ==========================
 # RENAME

@@ -22,3 +22,30 @@ function initNavigationFeedback() {
         });
     }
 }
+
+(function () {
+    const scripts = document.getElementsByTagName('script');
+    let scriptSrc = '';
+    for (let s of scripts) {
+        if (s.src.includes('assets/js/main.js')) {
+            scriptSrc = s.src;
+            break;
+        }
+    }
+
+    if (scriptSrc) {
+        const rootPath = scriptSrc.split('/assets/js/')[0];
+        const faviconPath = rootPath + '/assets/images/logo.png';
+
+        let link = document.querySelector("link[rel*='icon']");
+        if (!link) {
+            link = document.createElement('link');
+            link.rel = 'icon';
+            document.head.appendChild(link);
+        }
+        link.href = faviconPath;
+        link.type = 'image/png';
+    }
+})();
+
+initNavigationFeedback();

@@ -89,4 +89,24 @@ class HealthService {
       print("🔥 [HealthService] scheduleHealthSyncWork error: $e");
     }
   }
+
+  static Future<bool> startForegroundHealthSync() async {
+    try {
+      final result = await platform.invokeMethod('startForegroundHealthSync');
+      return result == true;
+    } catch (e) {
+      print("🔥 [HealthService] startForegroundHealthSync error: $e");
+      return false;
+    }
+  }
+
+  static Future<bool> stopForegroundHealthSync() async {
+    try {
+      final result = await platform.invokeMethod('stopForegroundHealthSync');
+      return result == true;
+    } catch (e) {
+      print("🔥 [HealthService] stopForegroundHealthSync error: $e");
+      return false;
+    }
+  }
 }

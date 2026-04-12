@@ -112,4 +112,17 @@ router.get("/report/:quanHeId", auth, async (req, res) => {
   }
 });
 
+router.post("/analyze-stress/:deviceId", auth, async (req, res) => {
+  try {
+    const response = await healthMetricService.handleAnalyzeStress(req.user, req.params.deviceId);
+    res.json(response);
+  } catch (err) {
+    console.error("Stress Analysis Error:", err.message);
+    res.status(err.message === "Chưa đăng nhập" ? 401 : 500).json({
+      success: false,
+      message: "Lỗi khi phân tích Stress: " + err.message,
+    });
+  }
+});
+
 export default router;

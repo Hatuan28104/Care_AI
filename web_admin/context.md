@@ -10,9 +10,8 @@
 ## Cấu trúc thư mục (Tree)
 
 ```
-AG/
+web_admin/
 ├── index.html                   ← Entry point (redirect tự động)
-├── rules.md                     ← Quy tắc coding bắt buộc
 ├── context.md                   ← File này
 │
 ├── assets/
@@ -157,14 +156,21 @@ AG/
 
 ### `auth.html`
 - Trang đăng nhập — **không dùng layout chung** (không có sidebar/header).
-- Import: `global.css`, `auth.css`, `lucide`, `main.js`, `ui.js`, `auth.js`.
-- UI: Logo + form email/password với nút toggle show/hide password.
-- Demo account hiển thị luôn: `admin@example.com / admin123`.
+- Import: `global.css`, `auth.css`, `lucide CDN`, `main.js`, `ui.js`, `auth.js`.
+- Form fields:
+  - **Số điện thoại** (id: `sdt`, placeholder: `03xxxxxxxx`)
+  - **Mật khẩu** (id: `password`, toggle show/hide bằng `togglePassword()`)
+- Demo account: `09xxxxxxxx / admin123`
+- Error display: span `#loginError` với inline style
 
 ### `auth.js`
+- **API Endpoint**: `POST ${API_BASE}/auth/admin/login` (prod: `careai-production.up.railway.app`)
 - `togglePassword()` — đổi type input + icon lucide `eye`/`eye-off`.
-- `login()` — validate email + password. Nếu đúng: `localStorage.setItem('loggedIn', 'true')` → sau 1.2s redirect `dashboard.html`. Nếu sai: hiển thị lỗi inline.
-- **Lưu ý**: Chưa có real auth, check cứng `admin@example.com / admin123`.
+- `login()` — validate **số điện thoại** + password:
+  - Body: `{ sodienthoai: phone, matkhau: password }`
+  - Success: lưu `localStorage.setItem("token", data.token)` + `localStorage.setItem("user_phone", phone)` → redirect `dashboard.html`
+  - Failure: hiển thị error message từ API
+- **Demo account**: `09xxxxxxxx / admin123` (số điện thoại format)
 
 ---
 
@@ -179,10 +185,15 @@ AG/
   - **Alerts table**: Bảng cảnh báo bất thường (4 row hardcoded) + nút "Xem tất cả" → `UI.openAllAlertsPanel()`.
 
 ### `dashboard.js`
+- **API Endpoints**:
+  - `GET ${API_BASE}/profile/dashboard/users` — dữ liệu người dùng
+  - `GET ${API_BASE}/api/chat/conversations` — dữ liệu tương tác
+  - `GET ${API_BASE}/notification/admin/alerts` — dữ liệu cảnh báo
 - `initCharts()` — khởi tạo 2 chart rỗng bằng Chart.js với config màu sắc, grid style.
-- `updateChartsWithDateRange(startDate, endDate)` — tính số ngày chênh lệch → generate labels (theo giờ / ngày / tuần / tháng) → generate mock data ngẫu nhiên → update cả 2 chart.
-- `Litepicker` — date range picker, mặc định chọn 7 ngày gần nhất, khi chọn range mới thì gọi `updateChartsWithDateRange`.
-- Nút **Xuất báo cáo**: `UI.showModal()` xác nhận → `UI.showToast()`.
+- `groupByDate(data, dateField, valueField)` — nhóm dữ liệu từ API theo ngày, hỗ trợ filter date range.
+- `toChartSeries(map)` — chuyển đổi dữ liệu thành labels và values cho chart.
+- **Litepicker**: date range picker (CDN), mặc định chọn 7 ngày gần nhất. Khi chọn range mới → fetch API với filter date → render chart thực.
+- Alert table: dữ liệu từ API endpoint `/notification/admin/alerts`.
 
 ---
 
@@ -196,12 +207,17 @@ AG/
 - Static pages xem chi tiết và chỉnh sửa thông tin 1 người dùng.
 
 ### `user.js`
-- Data: Mảng cố định `USERS` gồm 8 người dùng với avatar từ `ui-avatars.com`.
-- `PAGE_SIZE = 5`, phân trang client-side.
-- `renderTable()` — render tbody + gọi `renderPagination()` + `updateCount()`.
+- **API**: `GET ${API_BASE}/profile` — fetch danh sách người dùng từ backend.
+- `PAGE_SIZE = 10`, phân trang client-side.
+- Data mapping:
+  - `toAbsoluteImageUrl(path)` — convert relative path → full URL từ API_BASE
+  - `mapUserRecord(user)` — map API response field sang UI field (id, name, email, phone, gender, created_date, avatar)
+  - `normalizeGenderValue(value)` — chuẩn hóa giá trị giới tính (0, 1, 2)
+- `renderTable()` — render tbody từ `filteredUsers` (hay toàn bộ `users` nếu chưa search) + gọi `renderPagination()` + `updateCount()`.
 - `renderPagination()` — render nút prev/next và số trang (ẩn giữa nếu > 6 trang).
-- `confirmDelete(name, idx)` — `UI.showModal({ type: 'danger' })` → xóa khỏi mảng → re-render → `UI.showToast()`.
+- `confirmDelete(name, idx)` — call `confirmModal()` (uses `UI.showModal()` if available, fallback `confirm()`) → xóa khỏi mảng → re-render → toast.
 - `initSearch()` — lắng nghe input trong `.search-field-shared input`, lọc theo tên/email/điện thoại.
+- Fallback: nếu `UI` không có, dùng `alert()` / `confirm()` mặc định.
 
 ---
 
@@ -221,11 +237,17 @@ AG/
 - Form chỉnh sửa thông tin nhân vật số.
 
 ### `digital.js`
-- Data: Mảng `CHARACTERS` gồm 7 nhân vật: LuNa (y tá), Đức Nam (luật sư), Mỹ Huyền, SuLi, Bà Nula, Dr. Hùng (bác sĩ nội khoa), Ms. Tâm. Ảnh từ Unsplash.
-- `DIGITAL_PAGE_SIZE = 5`. Logic tương tự `user.js`.
-- `confirmAddChar()` — modal xác nhận → toast → redirect `digital.html`.
-- `confirmEditChar()` — modal xác nhận lưu → toast → redirect.
-- `confirmDeleteChar(name, idx)` — modal xóa → xóa khỏi mảng → toast → redirect.
+- **API**: `GET ${API_BASE}/api/digital-human` — fetch danh sách nhân vật số từ backend.
+- `DIGITAL_PAGE_SIZE = 10`. Logic tương tự `user.js`.
+- Data mapping:
+  - `toAbsoluteImageUrl(path)` — convert relative → full URL
+  - `toStoredImagePath(urlOrPath)` — convert full URL → relative path khi lưu
+  - Map API fields: `digitalhuman_id`, `tendigitalhuman`, `nghenghiep`, `gioitinh`, `imageurl`
+- `showToastMessage(message)` — gọi `UI.showToast()` nếu có, fallback `alert()`
+- `confirmModal({ title, message, type, onConfirm })` — gọi `UI.showModal()` nếu có, fallback `confirm()`
+- `confirmAddChar()` — modal xác nhận → POST API → toast → redirect `digital.html`.
+- `confirmEditChar()` — modal xác nhận lưu → PUT API → toast → redirect.
+- `confirmDeleteChar(name, idx)` — modal xóa (type: 'danger') → DELETE API → toast → redirect.
 - `initDigitalSearch()` — lọc theo tên, mã ID, nghề nghiệp.
 
 ---
@@ -249,9 +271,12 @@ Setting dùng 2 lớp inject:
 - Nút `.btn-cancel`: `UI.showToast('Đã hủy thay đổi')`.
 
 ### `setting.html` (Hồ sơ Admin)
-- Form chỉnh sửa thông tin admin: tên, email, ảnh đại diện.
-- Form đổi mật khẩu: mật khẩu cũ, mới, xác nhận.
-- CSS riêng: `setting.css` + `setting-profile.css`.
+- Form chỉnh sửa admin:
+  - **Số điện thoại** (id: `admin-phone`, readonly hoặc display only)
+  - **Thay đổi mật khẩu** (3 input: `old-password`, `new-password`, `confirm-password`)
+  - Buttons: "Hủy thay đổi" (class: `btn-pill btn-pill--secondary`), "Cập nhật danh tính" (class: `btn-pill btn-pill--primary`)
+- **Không có** form tên, email, ảnh đại diện
+- CSS riêng: `setting.css` + `setting-profile.css`
 
 ### `setting-system.html` (Cài đặt hệ thống)
 - Các toggle / input cấu hình hệ thống.
@@ -292,18 +317,19 @@ index.html
 
 ## Data & State hiện tại
 
-| Module | Dữ liệu | Nguồn |
-|--------|---------|-------|
-| Dashboard KPIs | Hardcoded HTML | dashboard.html |
-| Dashboard Charts | Mock random | dashboard.js (updateChartsWithDateRange) |
-| Dashboard Alerts | Hardcoded HTML + JS | dashboard.html + ui.js |
-| Users | Mảng JS 8 phần tử | user.js (`USERS`) |
-| Characters | Mảng JS 7 phần tử | digital.js (`CHARACTERS`) |
-| Notifications (header) | Hardcoded HTML | layout.html |
-| All Activities Panel | Hardcoded JS | ui.js (`openAllActivitiesPanel`) |
-| All Alerts Panel | Hardcoded JS | ui.js (`openAllAlertsPanel`) |
+| Module | Dữ liệu | API Endpoint | Notes |
+|--------|---------|--------------|-------|
+| Dashboard KPIs | 4 thẻ stats | Hardcoded HTML | Cập nhật bên ngoài |
+| Dashboard Charts | User growth, Interaction | `/profile/dashboard/users`, `/api/chat/conversations` | Fetch từ API, filter theo date range |
+| Dashboard Alerts | Bảng cảnh báo | `/notification/admin/alerts` | Fetch từ API |
+| Users List | Danh sách người dùng | `/profile` | Fetch từ API, PAGE_SIZE = 10 |
+| Characters List | Danh sách nhân vật số | `/api/digital-human` | Fetch từ API, DIGITAL_PAGE_SIZE = 10 |
+| Auth | Login endpoint | `/auth/admin/login` | POST { sodienthoai, matkhau } |
+| Notifications (header) | Dropdown thông báo | Hardcoded HTML | Cập nhật bên ngoài |
+| All Activities Panel | Activities history | Hardcoded JS | ui.js (`openAllActivitiesPanel`) |
+| All Alerts Panel | Alerts panel | Hardcoded JS | ui.js (`openAllAlertsPanel`) |
 
-> ⚠️ Toàn bộ data hiện tại là **mock/hardcoded** — chưa có API backend thực.
+> ✅ **API Backend đang hoạt động** — base URL: `${API_BASE} = 'https://careai-production.up.railway.app'`
 
 ---
 
@@ -317,11 +343,12 @@ index.html
 
 ---
 
-## Quy tắc quan trọng (từ `rules.md`)
+## Quy tắc dự án (Guidelines)
 
 1. **Không duplicate** Sidebar/Header — luôn inject qua `layout.js`.
-2. **Không inline style** trong HTML — dùng class từ `ui.css` hoặc CSS module riêng.
-3. **CRUD UI actions** phải dùng `UI.showModal()` + `UI.showToast()` — không alert/confirm mặc định.
-4. **CSS module** mỗi trang có file riêng, luôn import `global.css` + `ui.css` + `layout.css`.
-5. **Naming pages**: `module.html` → `module-view.html` → `module-edit.html` → `module-add.html`.
+2. **Inline style**: Hiện tại vẫn có ở một số trang (ví dụ `dashboard.html:143`). Khuyến cáo dùng class từ `ui.css` hoặc CSS module riêng.
+3. **UI Feedback**: Nên dùng `UI.showModal()` + `UI.showToast()` khi có. Hiện tại có fallback `alert/confirm` ở `user.js:135`, `digital.js:42`.
+4. **CSS modules**: Mỗi trang có file riêng, luôn import `global.css` + `ui.css` + `layout.css` (trừ auth.html).
+5. **Naming convention**: `module.html` → `module-view.html` → `module-edit.html` → `module-add.html`.
 6. **Responsive**: Desktop (≥1280) / Tablet (~768–1279) / Mobile (<768).
+7. **API Integration**: Modules (auth, dashboard, user, digital, setting) đều kết nối backend qua fetch API với error handling.

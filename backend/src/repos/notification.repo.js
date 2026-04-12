@@ -32,9 +32,9 @@ async function insertNoti(db, userId, title, body, type = 'ALERT') {
     .padStart(3, "0")}`;
 
   const { error } = await db
-    .from("notifications")
+    .from("thongbao")
     .insert({
-      notification_id: id,
+      thongbao_id: id,
       nguoidung_id: userId,
       tieude: title,
       noidung: body,
@@ -53,7 +53,7 @@ async function sendFCM(db, token, title, body) {
   try {
     await admin.messaging().send({
       token,
-      notification: { title, body },
+      thongbao: { title, body },
     });
   } catch (err) {
     if (err.errorInfo?.code === "messaging/registration-token-not-registered") {
@@ -160,29 +160,29 @@ export async function sendNotification(userId, title, body, level = 1, type = 'A
 export async function sendToAll(title, body) {
   await admin.messaging().send({
     topic: "all_users",
-    notification: { title, body },
+    thongbao: { title, body },
   });
 
   console.log("Broadcast sent");
 }
-export async function markAsRead(notificationId, userId) {
+export async function markAsRead(thongbaoId, userId) {
   const db = getDB();
 
   const { error } = await db
-    .from("notifications")
+    .from("thongbao")
     .update({ dadoc: true })
-    .eq("notification_id", notificationId)
+    .eq("thongbao_id", thongbaoId)
     .eq("nguoidung_id", userId);
 
   if (error) throw error;
 }
-export async function deleteNotification(notificationId, userId) {
+export async function deleteNotification(thongbaoId, userId) {
   const db = getDB();
 
   const { error } = await db
-    .from("notifications")
+    .from("thongbao")
     .delete()
-    .eq("notification_id", notificationId)
+    .eq("thongbao_id", thongbaoId)
     .eq("nguoidung_id", userId);
 
   if (error) throw error;
@@ -191,9 +191,9 @@ export async function getAlerts(userId) {
   const db = getDB();
 
   const { data, error } = await db
-    .from("notifications")
+    .from("thongbao")
     .select(`
-      notification_id,
+      thongbao_id,
       tieude,
       noidung,
       thoigian,

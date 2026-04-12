@@ -14,8 +14,8 @@
     padding: var(--space-5) 0 0;
     transition: var(--transition);
     z-index: 100;
-    background-color: #EFF4FF;
-    border-right: 1px solid #E2E8F0;
+    background-color: var(--bg-sidebar);
+    border-right: 1px solid var(--border-color);
 }
 
 .sidebar__brand {
@@ -70,7 +70,7 @@
 }
 
 .sidebar__item--active {
-    background: #F8FAFC;
+    background: var(--bg-soft);
     border-left: 4px solid var(--primary-blue);
 }
 
@@ -124,7 +124,7 @@
 /* --- 2. TOP HEADER COMPONENT --- */
 .header {
     height: 64px;
-    background: white;
+    background: var(--bg-white);
     padding: 0 var(--space-4);
     display: flex;
     align-items: center;
@@ -134,7 +134,7 @@
     left: 0;
     right: 0;
     z-index: 90;
-    border-bottom: 1px solid #E2E8F0;
+    border-bottom: 1px solid var(--border-color);
     border-radius: 0;
 }
 
@@ -152,7 +152,7 @@
 }
 
 .header__sidebar-toggle:hover {
-    background: rgba(0, 0, 0, 0.05);
+    background: var(--bg-hover);
     color: var(--primary-blue);
 }
 
@@ -209,7 +209,7 @@
 }
 
 .header__action-btn:hover {
-    background: rgba(0, 0, 0, 0.05);
+    background: var(--bg-hover);
 }
 
 .header__divider {
@@ -229,7 +229,7 @@
     height: 40px;
     border-radius: 50%;
     display: block;
-    border: 2px solid white;
+    border: 2px solid var(--bg-white);
     box-shadow: var(--shadow-sm);
 }
 
@@ -245,8 +245,8 @@
 
 #header-target:empty {
     height: 64px;
-    background: white;
-    border-bottom: 1px solid #E2E8F0;
+    background: var(--bg-white);
+    border-bottom: 1px solid var(--border-color);
 }
 
 body.layout-loading .main-body {

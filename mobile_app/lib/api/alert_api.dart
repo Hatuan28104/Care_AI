@@ -49,7 +49,7 @@ class AlertApi {
                 ? Map<String, dynamic>.from(item)
                 : <String, dynamic>{});
         return <String, dynamic>{
-          "notification_id": row["notification_id"]?.toString() ?? "",
+          "thongbao_id": row["thongbao_id"]?.toString() ?? "",
           "tieude": row["tieude"]?.toString() ?? "",
           "noidung": row["noidung"]?.toString() ?? "",
           "thoigian": row["thoigian"]?.toString() ?? "",

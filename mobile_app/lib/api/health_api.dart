@@ -168,7 +168,7 @@ class HealthApi {
   ========================= */
   static Future<void> saveHealthData({
     required double giaTri,
-    String? thietBiId,
+    String? nguondulieuId,
     required String loaiChiSoId,
   }) async {
     final res = await http
@@ -178,8 +178,8 @@ class HealthApi {
           body: jsonEncode({
             'giatri': giaTri,
             'loaichiso_id': loaiChiSoId,
-            if (thietBiId != null && thietBiId.isNotEmpty)
-              'nguondulieu_id': thietBiId,
+            if (nguondulieuId != null && nguondulieuId.isNotEmpty)
+              'nguondulieu_id': nguondulieuId,
           }),
         )
         .timeout(const Duration(seconds: 8));
@@ -351,5 +351,26 @@ class HealthApi {
     }
 
     return _normalizePhanTichAi(const <String, dynamic>{});
+  }
+
+  static Future<Map<String, dynamic>> analyzeStressByDevice(String deviceId) async {
+    final res = await http
+        .post(
+          Uri.parse('$_baseUrl/health/analyze-stress/$deviceId'),
+          headers: await _authHeaders(),
+        )
+        .timeout(const Duration(seconds: 15));
+
+    final data = _decodeBody(res.body);
+
+    if (res.statusCode != 200 || data['success'] != true) {
+      throw ApiException(data['message'] ?? "Lỗi phân tích stress",
+          statusCode: res.statusCode);
+    }
+
+    final raw = data['data'];
+    if (raw is Map<String, dynamic>) return raw;
+    if (raw is Map) return Map<String, dynamic>.from(raw);
+    return <String, dynamic>{};
   }
 }
