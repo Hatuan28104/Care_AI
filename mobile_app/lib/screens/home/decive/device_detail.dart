@@ -470,47 +470,6 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen>
     );
   }
 
-  Widget _goodHealthCard() {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFFEFFAF0),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(Icons.check_circle, color: Colors.green, size: 26),
-          SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  context.tr.connectedHealthConnect,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    color: Colors.green,
-                    fontSize: 16,
-                  ),
-                ),
-                SizedBox(height: 6),
-                Text(
-                  context.tr.healthNote,
-                  style: TextStyle(
-                    color: Colors.black54,
-                    height: 1.3,
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _metricTile(_MetricViewItem item) {
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
@@ -598,7 +557,6 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen>
                               children: [
                                 _deviceCard(),
                                 const SizedBox(height: 14),
-                                _goodHealthCard(),
                                 const SizedBox(height: 16),
                                 Text(
                                   context.tr.allMetrics,

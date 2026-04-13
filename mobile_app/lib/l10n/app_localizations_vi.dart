@@ -78,6 +78,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get healthData => 'Dữ liệu sức khỏe';
 
   @override
+  String get stressTitle => 'Dự đoán mức độ căng thẳng';
+
+  @override
   String get value => 'Giá trị';
 
   @override
@@ -153,7 +156,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get family => 'Gia đình';
 
   @override
-  String get deviceTab => 'Thiết bị';
+  String get deviceTab => 'Nguồn dữ liệu';
 
   @override
   String get history => 'Lịch sử';
@@ -1002,9 +1005,6 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
-  String get connectedHealthConnect => 'Đã kết nối Health Connect';
-
-  @override
   String get healthNote => 'Hiển thị toàn bộ chỉ số được cung cấp. Chỉ số chưa có dữ liệu sẽ hiện \"--\".';
 
   @override
@@ -1013,7 +1013,7 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
-  String get allMetrics => 'Toàn bộ chỉ số từ Health Connect';
+  String get allMetrics => 'Toàn bộ chỉ số từ Huawei Health';
 
   @override
   String get noMetrics => 'Chưa có danh sách chỉ số.';
@@ -1032,4 +1032,16 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get year => 'Năm';
+
+  @override
+  String get stressDesc => 'Hệ thống CareAI đang theo dõi sát sao các chỉ số sinh học của bạn.';
+
+  @override
+  String get good => 'TỐT';
+
+  @override
+  String get stable => 'ỔN ĐỊNH';
+
+  @override
+  String get stress => 'CĂNG THẲNG';
 }

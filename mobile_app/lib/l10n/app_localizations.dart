@@ -237,6 +237,12 @@ abstract class AppLocalizations {
   /// **'Health Data'**
   String get healthData;
 
+  /// No description provided for @stressTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stress Prediction'**
+  String get stressTitle;
+
   /// No description provided for @value.
   ///
   /// In en, this message translates to:
@@ -2061,12 +2067,6 @@ abstract class AppLocalizations {
   /// **'Sync failed: {error}'**
   String syncError(Object error);
 
-  /// No description provided for @connectedHealthConnect.
-  ///
-  /// In en, this message translates to:
-  /// **'Health Connect connected'**
-  String get connectedHealthConnect;
-
   /// No description provided for @healthNote.
   ///
   /// In en, this message translates to:
@@ -2082,7 +2082,7 @@ abstract class AppLocalizations {
   /// No description provided for @allMetrics.
   ///
   /// In en, this message translates to:
-  /// **'All metrics from Health Connect'**
+  /// **'All metrics from Huawei Health'**
   String get allMetrics;
 
   /// No description provided for @noMetrics.
@@ -2120,6 +2120,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Year'**
   String get year;
+
+  /// No description provided for @stressDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'CareAI is monitoring your biological signals closely.'**
+  String get stressDesc;
+
+  /// No description provided for @good.
+  ///
+  /// In en, this message translates to:
+  /// **'GOOD'**
+  String get good;
+
+  /// No description provided for @stable.
+  ///
+  /// In en, this message translates to:
+  /// **'STABLE'**
+  String get stable;
+
+  /// No description provided for @stress.
+  ///
+  /// In en, this message translates to:
+  /// **'STRESSED'**
+  String get stress;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

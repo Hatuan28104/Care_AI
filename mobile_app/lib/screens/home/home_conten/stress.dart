@@ -29,27 +29,56 @@ class StressScreen extends StatefulWidget {
   State<StressScreen> createState() => _StressScreenState();
 }
 
-class _StressScreenState extends State<StressScreen> with WidgetsBindingObserver {
-  double stressValue = 42.0;
+class _StressScreenState extends State<StressScreen>
+    with WidgetsBindingObserver {
+  double stressValue = 0.0;
+  double hrValue = 0.0;
+  double hrvValue = 0.0;
+  double sleepValue = 0.0;
+  double stepsValue = 0.0;
+
   bool _loading = false;
   String? _error;
-  String? _lastDeviceId;
   Timer? _autoRefreshTimer;
   DateTime? _lastAnalyzeAt;
 
   static const Duration _resumeMinInterval = Duration(minutes: 5);
   static const Duration _manualMinInterval = Duration(seconds: 30);
 
-  String getStatus(double v) {
-    if (v < 40) return "TỐT";
-    if (v < 70) return "ỔN ĐỊNH";
-    return "CĂNG THẲNG";
+  String getStatus(BuildContext context, double v) {
+    if (v < 40) return context.tr.good;
+    if (v < 70) return context.tr.stable;
+    return context.tr.stress;
   }
 
   Color getStatusColor(double v) {
-    if (v < 40) return const Color(0xFF10B981); // Emerald
-    if (v < 70) return const Color(0xFF3B82F6); // Blue
-    return const Color(0xFFF43F5E); // Rose
+    if (v < 40) return const Color(0xFF10B981);
+    if (v < 70) return const Color(0xFF3B82F6);
+    return const Color(0xFFF43F5E);
+  }
+
+  Future<void> _loadLatestMetrics() async {
+    try {
+      final data = await HealthApi.getLatestHealthDataByUser();
+      if (!mounted) return;
+
+      setState(() {
+        for (var item in data) {
+          final cid = item['loaichiso_id'];
+          final val =
+              item['giatri'] is num ? (item['giatri'] as num).toDouble() : 0.0;
+
+          if (cid == 'CS016') stressValue = val;
+          if (cid == 'CS001') hrValue = val;
+          if (cid == 'CS008') hrvValue = val;
+          if (cid == 'CS037') sleepValue = val;
+          if (cid == 'CS016') stressValue = val;
+          if (cid == 'CS004') stepsValue = val;
+        }
+      });
+    } catch (e) {
+      debugPrint("Error loading latest metrics: $e");
+    }
   }
 
   Future<void> _analyzeStress() async {
@@ -64,14 +93,17 @@ class _StressScreenState extends State<StressScreen> with WidgetsBindingObserver
       final deviceId = await HealthApi.getOrCreateDevice();
       final result = await HealthApi.analyzeStressByDevice(deviceId);
 
-      final scoreRaw = result['stress_score'] ?? 0;
+      // Backend trả về: data: { stress: score, thoigian: ... }
+      final scoreRaw = result['stress'] ?? 0;
       final score = scoreRaw is num ? scoreRaw.toDouble() : 0.0;
 
       setState(() {
-        _lastDeviceId = deviceId;
-        stressValue = score.clamp(0, 100);
+        stressValue = score;
         _lastAnalyzeAt = DateTime.now();
       });
+
+      // Sau khi AI tính xong và lưu vào DB, load lại toàn bộ để đồng bộ
+      await _loadLatestMetrics();
     } on ApiException catch (e) {
       setState(() {
         _error = e.message;
@@ -96,7 +128,10 @@ class _StressScreenState extends State<StressScreen> with WidgetsBindingObserver
   }
 
   Future<void> _onManualRefresh() async {
-    if (!_canRefreshBy(_manualMinInterval)) return;
+    if (!_canRefreshBy(_manualMinInterval)) {
+      await _loadLatestMetrics(); // Nếu chưa đến lúc gọi AI thì chỉ làm mới UI từ DB
+      return;
+    }
     await _analyzeStress();
   }
 
@@ -104,7 +139,7 @@ class _StressScreenState extends State<StressScreen> with WidgetsBindingObserver
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _analyzeStress();
+    _loadLatestMetrics(); // Load data cũ ngay khi vào màn hình
     _autoRefreshTimer = Timer.periodic(const Duration(hours: 1), (_) {
       if (mounted) {
         _analyzeStress();
@@ -114,7 +149,9 @@ class _StressScreenState extends State<StressScreen> with WidgetsBindingObserver
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed && mounted && _canRefreshBy(_resumeMinInterval)) {
+    if (state == AppLifecycleState.resumed &&
+        mounted &&
+        _canRefreshBy(_resumeMinInterval)) {
       _analyzeStress();
     }
   }
@@ -142,12 +179,15 @@ class _StressScreenState extends State<StressScreen> with WidgetsBindingObserver
           Positioned(
             top: 200,
             left: -150,
-            child: _LightBlob(color: const Color(0xFF818CF8).withOpacity(0.08), size: 500),
+            child: _LightBlob(
+                color: const Color(0xFF818CF8).withOpacity(0.08), size: 500),
           ),
           SafeArea(
             child: Column(
               children: [
-                AppHeader(title: "Dự đoán mực độ căng thẳng"),
+                AppHeader(
+                  title: context.tr.stressTitle,
+                ),
                 Expanded(
                   child: RefreshIndicator(
                     onRefresh: _onManualRefresh,
@@ -161,14 +201,16 @@ class _StressScreenState extends State<StressScreen> with WidgetsBindingObserver
                           const SizedBox(height: 12),
                           Container(
                             width: double.infinity,
-                            padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 40, horizontal: 20),
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.9),
                               borderRadius: BorderRadius.circular(48),
                               border: Border.all(color: Colors.white, width: 2),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF334155).withOpacity(0.06),
+                                  color:
+                                      const Color(0xFF334155).withOpacity(0.06),
                                   blurRadius: 40,
                                   offset: const Offset(0, 20),
                                 ),
@@ -179,13 +221,14 @@ class _StressScreenState extends State<StressScreen> with WidgetsBindingObserver
                                 StressCircle(
                                   value: stressValue,
                                   color: statusColor,
-                                  statusText: getStatus(stressValue),
+                                  statusText: getStatus(context, stressValue),
                                 ),
                                 const SizedBox(height: 36),
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 24),
                                   child: Text(
-                                    "Hệ thống CareAI đang theo dõi sát sao các chỉ số sinh học của bạn.",
+                                    context.tr.stressDesc,
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       color: const Color(0xFF64748B),
@@ -227,7 +270,12 @@ class _StressScreenState extends State<StressScreen> with WidgetsBindingObserver
                             ),
                           ],
                           const SizedBox(height: 32),
-                          _MetricsGrid(),
+                          _MetricsGrid(
+                            hr: hrValue,
+                            hrv: hrvValue,
+                            sleep: sleepValue,
+                            steps: stepsValue,
+                          ),
                           const SizedBox(height: 40),
                         ],
                       ),
@@ -251,8 +299,8 @@ class StressCircle extends StatelessWidget {
   final String statusText;
 
   const StressCircle({
-    super.key, 
-    required this.value, 
+    super.key,
+    required this.value,
     required this.color,
     required this.statusText,
   });
@@ -319,38 +367,66 @@ class StressCircle extends StatelessWidget {
 }
 
 class _MetricsGrid extends StatelessWidget {
+  final double hr;
+  final double hrv;
+  final double sleep;
+  final double steps;
+
+  const _MetricsGrid({
+    required this.hr,
+    required this.hrv,
+    required this.sleep,
+    required this.steps,
+  });
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Row(
           children: [
-            Expanded(child: _PurityTile(
+            Expanded(
+                child: _PurityTile(
               title: "Nhịp tim",
-              value: "68", unit: "bpm",
-              icon: Icons.favorite_rounded, color: const Color(0xFFEF4444),
+              value: hr > 0 ? hr.toInt().toString() : "--",
+              unit: "bpm",
+              icon: Icons.favorite_rounded,
+              color: const Color(0xFFEF4444),
             )),
             const SizedBox(width: 16),
-            Expanded(child: _PurityTile(
+            Expanded(
+                child: _PurityTile(
               title: "HRV",
-              value: "42", unit: "ms",
-              icon: Icons.waves_rounded, color: const Color(0xFF10B981),
+              value: hrv > 0 ? hrv.toInt().toString() : "--",
+              unit: "ms",
+              icon: Icons.waves_rounded,
+              color: const Color(0xFF10B981),
             )),
           ],
         ),
         const SizedBox(height: 16),
         Row(
           children: [
-            Expanded(child: _PurityTile(
+            Expanded(
+                child: _PurityTile(
               title: "Giấc ngủ",
-              value: "7.7", unit: "giờ",
-              icon: Icons.nightlight_round, color: const Color(0xFF6366F1),
+              value: sleep > 0 ? sleep.toStringAsFixed(1) : "--",
+              unit: "giờ",
+              icon: Icons.nightlight_round,
+              color: const Color(0xFF6366F1),
             )),
             const SizedBox(width: 16),
-            Expanded(child: _PurityTile(
+            Expanded(
+                child: _PurityTile(
               title: "Bước chân",
-              value: "12.4K", unit: "bước",
-              icon: Icons.directions_walk_rounded, color: const Color(0xFFF59E0B),
+              value: steps > 0
+                  ? (steps >= 1000
+                      ? "${(steps / 1000).toStringAsFixed(1)}K"
+                      : steps.toInt().toString())
+                  : "--",
+              unit: "bước",
+              icon: Icons.directions_walk_rounded,
+              color: const Color(0xFFF59E0B),
             )),
           ],
         ),
@@ -367,8 +443,11 @@ class _PurityTile extends StatelessWidget {
   final Color color;
 
   const _PurityTile({
-    required this.title, required this.value, required this.unit,
-    required this.icon, required this.color,
+    required this.title,
+    required this.value,
+    required this.unit,
+    required this.icon,
+    required this.color,
   });
 
   @override
@@ -402,15 +481,27 @@ class _PurityTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
-              Text(value, style: const TextStyle(color: Color(0xFF0F172A), fontSize: 24, fontWeight: FontWeight.w900)),
+              Text(value,
+                  style: const TextStyle(
+                      color: Color(0xFF0F172A),
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900)),
               const SizedBox(width: 4),
-              Text(unit, style: TextStyle(color: const Color(0xFF94A3B8), fontSize: 10, fontWeight: FontWeight.bold)),
+              Text(unit,
+                  style: TextStyle(
+                      color: const Color(0xFF94A3B8),
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold)),
             ],
           ),
           const SizedBox(height: 4),
           Text(
             title.toUpperCase(),
-            style: TextStyle(color: const Color(0xFF94A3B8).withOpacity(0.6), fontSize: 9, fontWeight: FontWeight.w800, letterSpacing: 0.5),
+            style: TextStyle(
+                color: const Color(0xFF94A3B8).withOpacity(0.6),
+                fontSize: 9,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.5),
           ),
         ],
       ),
@@ -424,7 +515,11 @@ class _PremiumButton extends StatelessWidget {
   final String label;
   final Color color;
 
-  const _PremiumButton({this.onPressed, required this.loading, required this.label, required this.color});
+  const _PremiumButton(
+      {this.onPressed,
+      required this.loading,
+      required this.label,
+      required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -449,10 +544,15 @@ class _PremiumButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         ),
         child: loading
-            ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3))
+            ? const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                    color: Colors.white, strokeWidth: 3))
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -460,7 +560,10 @@ class _PremiumButton extends StatelessWidget {
                   const SizedBox(width: 12),
                   Text(
                     label,
-                    style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w800),
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800),
                   ),
                 ],
               ),

@@ -84,7 +84,7 @@ class _HomeTabState extends State<HomeTab> {
           _categoryItem(
             icon: Icons.psychology_outlined,
             iconColor: Colors.indigoAccent,
-            text: "Dự đoán mức độ stress",
+            text: context.tr.stressTitle,
             onTap: () => _go(context, const StressScreen()),
           ),
           const SizedBox(height: 40),

@@ -25,6 +25,7 @@
   "value": "Giá trị",
   "latest": "Mới nhất",
   "alert": "Cảnh báo",
+  "stressTitle": "Dự đoán mức độ stress",
   "today": "Hôm nay",
   "markAllRead": "Đánh dấu đã đọc",
   "deleteAlert": "Xóa cảnh báo",
@@ -47,7 +48,7 @@
   "chooseImage": "Ảnh",
   "home": "Trang chủ",
   "family": "Gia đình",
-  "deviceTab": "Thiết bị",
+  "deviceTab": "Nguồn dữ liệu",
   "history": "Lịch sử",
   "configurePermissions": "Thiết lập quyền",
   "conversationHistory": "Lịch sử trò chuyện",
@@ -410,7 +411,6 @@
   },
 
   "connected": "Đã kết nối",
-  "connectedHealthConnect": "Đã kết nối Health Connect",
   "healthNote": "Hiển thị toàn bộ chỉ số được cung cấp. Chỉ số chưa có dữ liệu sẽ hiện \"--\".",
   "noData": "Chưa có dữ liệu",
   "category": "Danh mục: {category}",
@@ -419,6 +419,11 @@
       "category": {}
     }
   },
-  "allMetrics": "Toàn bộ chỉ số từ Health Connect",
-  "noMetrics": "Chưa có danh sách chỉ số." 
+  "allMetrics": "Toàn bộ chỉ số từ Huawei Health",
+  "noMetrics": "Chưa có danh sách chỉ số." ,
+    "stressTitle": "Dự đoán mức độ căng thẳng",
+  "stressDesc": "Hệ thống CareAI đang theo dõi sát sao các chỉ số sinh học của bạn.",
+  "good": "TỐT",
+  "stable": "ỔN ĐỊNH",
+  "stress": "CĂNG THẲNG"
 }

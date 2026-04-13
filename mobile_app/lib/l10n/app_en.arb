@@ -22,6 +22,7 @@
   "searchData": "Search data...",
   "activityData": "Activity Data",
   "healthData": "Health Data",
+    "stressTitle": "Stress Level Prediction",
   "value": "Value",
   "latest": "Latest",
   "alert": "Alert",
@@ -402,7 +403,6 @@
   },
 
   "connected": "Connected",
-  "connectedHealthConnect": "Health Connect connected",
   "healthNote": "All available metrics are displayed. Missing data will show \"--\".",
   "noData": "No data",
   "category": "Category: {category}",
@@ -411,7 +411,7 @@
       "category": {}
     }
   },
-  "allMetrics": "All metrics from Health Connect",
+  "allMetrics": "All metrics from Huawei Health",
   "noMetrics": "No metrics available",
     "value": "Value",
   "latest": "Latest",
@@ -421,6 +421,11 @@
   "cancel": "Cancel",
   "save": "Save",
   "saved": "Saved successfully",
-  "year": "Year"
+  "year": "Year",
+    "stressTitle": "Stress Prediction",
+  "stressDesc": "CareAI is monitoring your biological signals closely.",
+  "good": "GOOD",
+  "stable": "STABLE",
+  "stress": "STRESSED"
   
 }

@@ -78,6 +78,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get healthData => 'Health Data';
 
   @override
+  String get stressTitle => 'Stress Prediction';
+
+  @override
   String get value => 'Value';
 
   @override
@@ -1002,9 +1005,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get connectedHealthConnect => 'Health Connect connected';
-
-  @override
   String get healthNote => 'All available metrics are displayed. Missing data will show \"--\".';
 
   @override
@@ -1013,7 +1013,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get allMetrics => 'All metrics from Health Connect';
+  String get allMetrics => 'All metrics from Huawei Health';
 
   @override
   String get noMetrics => 'No metrics available';
@@ -1032,4 +1032,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get year => 'Year';
+
+  @override
+  String get stressDesc => 'CareAI is monitoring your biological signals closely.';
+
+  @override
+  String get good => 'GOOD';
+
+  @override
+  String get stable => 'STABLE';
+
+  @override
+  String get stress => 'STRESSED';
 }

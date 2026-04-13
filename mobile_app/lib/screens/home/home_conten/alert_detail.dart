@@ -23,8 +23,9 @@ class AlertMessageDetail extends StatelessWidget {
     }
     if (text.contains("tốt") ||
         text.contains("tuyệt vời") ||
+        text.contains("ổn định") ||
         text.contains("tích cực")) {
-      return const Color(0xFF139D4A);
+      return Colors.green;
     }
 
     if (text.contains("bình thường")) {
