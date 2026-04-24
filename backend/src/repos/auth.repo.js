@@ -24,8 +24,7 @@ function normalizeVnPhone(phone) {
 async function sendOtpSms(localPhone, otp) {
   if (
     !process.env.ESMS_API_KEY ||
-    !process.env.ESMS_SECRET_KEY ||
-    !process.env.ESMS_BRANDNAME
+    !process.env.ESMS_SECRET_KEY
   ) {
     throw new Error("Thiếu cấu hình ESMS");
   }
@@ -45,8 +44,7 @@ async function sendOtpSms(localPhone, otp) {
           SecretKey: process.env.ESMS_SECRET_KEY,
           Phone: localPhone,
           Content: content,
-          Brandname: process.env.ESMS_BRANDNAME,
-          SmsType: process.env.ESMS_SMS_TYPE || "2",
+          SmsType: process.env.ESMS_SMS_TYPE || "4",
           IsUnicode: "0",
           RequestId: crypto.randomUUID(),
         }),
