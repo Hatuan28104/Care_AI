@@ -22,6 +22,10 @@ function normalizeVnPhone(phone) {
   return digits;
 }
 async function sendOtpSms(localPhone, otp) {
+  if (process.env.DEV_MODE === "true") {
+    await sendOtpTelegram(localPhone, otp);
+    return;
+  }
   if (
     !process.env.ESMS_API_KEY ||
     !process.env.ESMS_SECRET_KEY
@@ -74,6 +78,42 @@ async function sendOtpSms(localPhone, otp) {
 
     throw new Error("Không thể gửi OTP SMS");
   }
+}
+async function sendOtpTelegram(localPhone, otp) {
+  if (
+    process.env.OTP_DEBUG_CHANNEL !== "telegram" ||
+    !process.env.TELEGRAM_BOT_TOKEN ||
+    !process.env.TELEGRAM_CHAT_ID
+  ) {
+    return false;
+  }
+
+  const url = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      chat_id: process.env.TELEGRAM_CHAT_ID,
+      text: `CareAI OTP\nPhone: ${localPhone}\nOTP: ${otp}\nHet han: 2 phut`,
+    }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok || data.ok !== true) {
+    console.error("Telegram OTP failed:", data);
+    throw new Error("Không thể gửi OTP Telegram");
+  }
+
+  console.log("Telegram OTP sent:", {
+    phone: localPhone,
+    messageId: data.result?.message_id,
+  });
+
+  return true;
 }
 async function phoneExists(db, phone) {
   const { data, error } = await db
