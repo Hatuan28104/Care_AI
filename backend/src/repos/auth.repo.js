@@ -3,8 +3,6 @@ import jwt from "jsonwebtoken";
 import crypto from "node:crypto";
 import admin from "../config/firebase.js";
 
-const otpStore = new Map();
-
 /* =========================
    HELPER
 ========================= */
@@ -33,9 +31,6 @@ async function phoneExists(db, phone) {
   return !!data;
 }
 
-function generateOtp() {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-}
 
 function isProfileCompleted(nguoidung) {
   if (!nguoidung) return false;
@@ -50,71 +45,24 @@ function isProfileCompleted(nguoidung) {
 }
 
 /* =========================
-   REGISTER – REQUEST OTP
+   FIREBASE PHONE LOGIN
 ========================= */
-export async function requestRegisterOtp(phone) {
-  const db = getDB();
-  const localPhone = normalizeVnPhone(phone);
-
-  if (await phoneExists(db, localPhone)) {
-    throw new Error("Số điện thoại đã được đăng ký");
+export async function firebasePhoneLogin(idToken, req) {
+  if (!idToken || typeof idToken !== "string") {
+    throw new Error("Thiếu Firebase ID token");
   }
 
-  const otp = generateOtp();
-  otpStore.set(phone, {
-    otp,
-    expires: Date.now() + 2 * 60 * 1000,
-  });
+  const decoded = await admin.auth().verifyIdToken(idToken);
 
-  console.log(`REGISTER OTP ${phone}: ${otp}`);
-}
-
-/* =========================
-   LOGIN – REQUEST OTP
-========================= */
-export async function requestLoginOtp(phone) {
-  const db = getDB();
-  const localPhone = normalizeVnPhone(phone);
-
-  if (!(await phoneExists(db, localPhone))) {
-    throw new Error("Số điện thoại chưa đăng ký");
-  }
-
-  const otp = generateOtp();
-  otpStore.set(phone, {
-    otp,
-    expires: Date.now() + 2 * 60 * 1000,
-  });
-
-  console.log(`LOGIN OTP ${phone}: ${otp}`);
-}
-
-/* =========================
-   VERIFY OTP
-========================= */
-export async function verifyOtp(phone, otp, req, deviceId) {
-  const data = otpStore.get(phone);
-
-  const isDevBypass =
-    process.env.DEV_MODE === "true" && otp === "123456";
-
-  if (!isDevBypass) {
-    if (!data) throw new Error("OTP không tồn tại");
-    if (Date.now() > data.expires) throw new Error("OTP hết hạn");
-    if (data.otp !== otp) throw new Error("OTP không đúng");
-
-    otpStore.delete(phone);
-  } else {
-    console.log("🔥 DEV MODE OTP BYPASS:", phone);
-
-    otpStore.delete(phone);
+  const firebasePhone = decoded.phone_number;
+  if (!firebasePhone) {
+    throw new Error("Token Firebase không có số điện thoại");
   }
 
   const db = getDB();
-  const localPhone = normalizeVnPhone(phone);
+  const localPhone = normalizeVnPhone(firebasePhone);
 
-  /* ===== CHECK USER ===== */
-  let { data: user } = await db
+  let { data: user, error: userError } = await db
     .from("taikhoan")
     .select(`
       taikhoan_id,
@@ -131,24 +79,29 @@ export async function verifyOtp(phone, otp, req, deviceId) {
     .eq("sodienthoai", localPhone)
     .maybeSingle();
 
-  /* ===== CREATE IF NOT EXIST ===== */
-  if (!user) {
-    const newUserId = "ND" + Date.now().toString().slice(-10);
-    const newAccountId = "TK" + Date.now().toString().slice(-10);
+  if (userError) throw userError;
 
-    await Promise.all([
-      db.from("nguoidung").insert({
-        nguoidung_id: newUserId,
-        tennd: null,
-      }),
-      db.from("taikhoan").insert({
-        taikhoan_id: newAccountId,
-        nguoidung_id: newUserId,
-        sodienthoai: localPhone,
-        laadmin: false,
-        ngaytao: new Date().toISOString().slice(0, 10),
-      })
-    ]);
+  if (!user) {
+    const timestamp = Date.now().toString().slice(-10);
+    const newUserId = "ND" + timestamp;
+    const newAccountId = "TK" + timestamp;
+
+    const { error: nguoiDungError } = await db.from("nguoidung").insert({
+      nguoidung_id: newUserId,
+      tennd: null,
+    });
+
+    if (nguoiDungError) throw nguoiDungError;
+
+    const { error: taiKhoanError } = await db.from("taikhoan").insert({
+      taikhoan_id: newAccountId,
+      nguoidung_id: newUserId,
+      sodienthoai: localPhone,
+      laadmin: false,
+      ngaytao: new Date().toISOString().slice(0, 10),
+    });
+
+    if (taiKhoanError) throw taiKhoanError;
 
     user = {
       taikhoan_id: newAccountId,
@@ -156,11 +109,16 @@ export async function verifyOtp(phone, otp, req, deviceId) {
       nguoidung: {
         nguoidung_id: newUserId,
         tennd: null,
+        ngaysinh: null,
+        gioitinh: null,
+        chieucao: null,
+        cannang: null,
       },
     };
   }
 
-  const token = jwt.sign({
+  const token = jwt.sign(
+    {
       nguoidung_id: user.nguoidung.nguoidung_id,
       taikhoan_id: user.taikhoan_id,
       sodienthoai: user.sodienthoai,
@@ -170,7 +128,6 @@ export async function verifyOtp(phone, otp, req, deviceId) {
     { expiresIn: "7d" }
   );
 
-  /* ===== LOGIN HISTORY ===== */
   const { device, ip: bodyIp } = req.body || {};
   const ip =
     bodyIp ||
@@ -178,18 +135,16 @@ export async function verifyOtp(phone, otp, req, deviceId) {
     req.socket.remoteAddress ||
     "";
 
-  const insertData = {
-    lichsu_id: crypto.randomUUID(),
-    thoigian: new Date().toISOString(),
-    thietbi: device && device.trim() !== "" ? device : "Unknown",
-    diachi: ip || null,
-    ip: ip || null,
-    taikhoan_id: user.taikhoan_id,
-  };
-
   const { error: loginHistoryError } = await db
     .from("lichsudangnhap")
-    .insert(insertData);
+    .insert({
+      lichsu_id: crypto.randomUUID(),
+      thoigian: new Date().toISOString(),
+      thietbi: device && device.trim() !== "" ? device : "Unknown",
+      diachi: ip || null,
+      ip: ip || null,
+      taikhoan_id: user.taikhoan_id,
+    });
 
   if (loginHistoryError) {
     console.error("Insert login history failed", {

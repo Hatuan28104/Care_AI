@@ -47,77 +47,77 @@
                         </div>
                     </div>
 
-                        <form class="edit-form-box">
-                            <!-- Card 1: Thông tin cá nhân -->
-                            <div class="edit-form-card">
-                                <div class="form-header-group">
-                                    <div class="icon-box-blue"><i data-lucide="user"></i></div>
-                                    <h4 class="form-card-title">Thông tin cá nhân</h4>
+                    <form class="edit-form-box">
+                        <!-- Card 1: Thông tin cá nhân -->
+                        <div class="edit-form-card">
+                            <div class="form-header-group">
+                                <div class="icon-box-blue"><i data-lucide="user"></i></div>
+                                <h4 class="form-card-title">Thông tin cá nhân</h4>
+                            </div>
+                            <div class="form-grid-layout">
+                                <div class="field-wrapper form-full-width">
+                                    <label>Họ và tên</label>
+                                    <input type="text" value="" class="input-premium" id="tenND">
                                 </div>
-                                <div class="form-grid-layout">
-                                    <div class="field-wrapper form-full-width">
-                                        <label>Họ và tên</label>
-                                        <input type="text" value="" class="input-premium" id="tenND">
+                                <div class="field-wrapper">
+                                    <label>Ngày sinh</label>
+                                    <input type="date" value="" class="input-premium" id="ngaySinh">
+                                </div>
+                                <div class="field-wrapper">
+                                    <label>Giới tính</label>
+                                    <div class="gender-select-group" id="genderSwitcher">
+                                        <div class="gender-btn active" data-value="1">Nam</div>
+                                        <div class="gender-btn" data-value="0">Nữ</div>
+                                        <div class="gender-btn" data-value="2">Khác</div>
                                     </div>
-                                    <div class="field-wrapper">
-                                        <label>Ngày sinh</label>
-                                        <input type="date" value="" class="input-premium" id="ngaySinh">
-                                    </div>
-                                    <div class="field-wrapper">
-                                        <label>Giới tính</label>
-                                        <div class="gender-select-group" id="genderSwitcher">
-                                            <div class="gender-btn active" data-value="1">Nam</div>
-                                            <div class="gender-btn" data-value="0">Nữ</div>
-                                            <div class="gender-btn" data-value="2">Khác</div>
-                                        </div>
-                                        <input type="hidden" id="gioiTinh" value="1">
-                                    </div>
-                                    <div class="field-wrapper">
-                                        <label>Chiều cao (cm)</label>
-                                        <input type="number" value="" class="input-premium" id="chieuCao">
-                                    </div>
-                                    <div class="field-wrapper">
-                                        <label>Cân nặng (kg)</label>
-                                        <input type="number" value="" class="input-premium" id="canNang">
-                                    </div>
+                                    <input type="hidden" id="gioiTinh" value="1">
+                                </div>
+                                <div class="field-wrapper">
+                                    <label>Chiều cao (cm)</label>
+                                    <input type="number" value="" class="input-premium" id="chieuCao">
+                                </div>
+                                <div class="field-wrapper">
+                                    <label>Cân nặng (kg)</label>
+                                    <input type="number" value="" class="input-premium" id="canNang">
                                 </div>
                             </div>
+                        </div>
 
-                            <!-- Card 2: Thông tin liên hệ -->
-                            <div class="edit-form-card mt-4">
-                                <div class="form-header-group">
-                                    <div class="icon-box-blue"><i data-lucide="smartphone"></i></div>
-                                    <h4 class="form-card-title">Thông tin liên hệ</h4>
+                        <!-- Card 2: Thông tin liên hệ -->
+                        <div class="edit-form-card mt-4">
+                            <div class="form-header-group">
+                                <div class="icon-box-blue"><i data-lucide="smartphone"></i></div>
+                                <h4 class="form-card-title">Thông tin liên hệ</h4>
+                            </div>
+                            <div class="form-grid-layout">
+                                <div class="field-wrapper">
+                                    <label>Số điện thoại</label>
+                                    <input type="text" value="" class="input-premium" id="soDienThoai">
                                 </div>
-                                <div class="form-grid-layout">
-                                    <div class="field-wrapper">
-                                        <label>Số điện thoại</label>
-                                        <input type="text" value="" class="input-premium" id="soDienThoai">
-                                    </div>
-                                    <div class="field-wrapper">
-                                        <label>Email</label>
-                                        <input type="email" value="" class="input-premium" id="email">
-                                    </div>
-                                    <div class="field-wrapper form-full-width">
-                                        <label>Địa chỉ</label>
-                                        <textarea class="input-premium textarea-premium-box" id="diaChi"></textarea>
-                                    </div>
+                                <div class="field-wrapper">
+                                    <label>Email</label>
+                                    <input type="email" value="" class="input-premium" id="email">
+                                </div>
+                                <div class="field-wrapper form-full-width">
+                                    <label>Địa chỉ</label>
+                                    <textarea class="input-premium textarea-premium-box" id="diaChi"></textarea>
                                 </div>
                             </div>
+                        </div>
 
-                            <!-- Footer Actions -->
-                            <div class="edit-footer-actions">
-                                <button class="btn-cancel-text" id="btnCancel" type="button">Hủy bỏ</button>
-                                <button class="btn-primary-pill" id="btnSave" type="button">Cập nhật hồ sơ</button>
-                            </div>
-                        </form>
+                        <!-- Footer Actions -->
+                        <div class="edit-footer-actions">
+                            <button class="btn-cancel-text" id="btnCancel" type="button">Hủy bỏ</button>
+                            <button class="btn-primary-pill" id="btnSave" type="button">Cập nhật hồ sơ</button>
+                        </div>
+                    </form>
                 </div>
             </main>
         </div>
     </div>
     <script src="../../assets/js/main.js"></script>
     <script src="../../assets/js/ui.js"></script>
-    <script src="user.js"></script>
+    <script src="user-edit.js"></script>
     <script>
         lucide.createIcons();
     </script>

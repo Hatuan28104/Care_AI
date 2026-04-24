@@ -1,39 +1,23 @@
 import express from "express";
 import * as authService from "../services/auth.service.js";
-import { auth,requireAdmin  } from "../middlewares/auth.middleware.js";
+import { auth, requireAdmin } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
-
-router.post("/register/request-otp", async (req, res) => {
+router.post("/firebase-login", async (req, res) => {
   try {
-    const { phone } = req.body;
-    const response = await authService.handleRequestRegisterOtp(phone);
-    res.json(response);
-  } catch (e) {
-    res.status(400).json({ success: false, message: e.message });
-  }
-});
+    const { idToken, fcmToken } = req.body;
 
-router.post("/login/request-otp", async (req, res) => {
-  try {
-    const { phone } = req.body;
-    const response = await authService.handleRequestLoginOtp(phone);
-    res.json(response);
-  } catch (e) {
-    res.status(400).json({ success: false, message: e.message });
-  }
-});
+    const response = await authService.handleFirebasePhoneLogin(
+      idToken,
+      req,
+      fcmToken
+    );
 
-router.post("/verify-otp", async (req, res) => {
-  try {
-    const { phone, otp, fcmToken, deviceId } = req.body;
-    const response = await authService.handleVerifyOtp(phone, otp, req, deviceId, fcmToken);
     res.json(response);
   } catch (e) {
     res.status(401).json({ success: false, message: e.message });
   }
 });
-
 router.post("/admin/login", async (req, res) => {
   try {
     const phone = req.body?.phone ?? req.body?.sodienthoai;
@@ -66,7 +50,7 @@ router.post("/admin/change-password", auth, requireAdmin, async (req, res) => {
 
 router.get("/login-history", auth, async (req, res) => {
   try {
-    const response = await authService.handleGetLoginHistory(req.user.taikhoan_id);    res.json(response);
+    const response = await authService.handleGetLoginHistory(req.user.taikhoan_id); res.json(response);
   } catch (e) {
     res.status(400).json({ success: false, message: e.message });
   }
