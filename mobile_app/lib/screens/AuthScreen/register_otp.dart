@@ -9,12 +9,13 @@ class RegisterOtp extends StatefulWidget {
   final String phoneE164;
   final String displayPhone;
   final VoidCallback onBack;
-
+  final String verificationId;
   const RegisterOtp({
     super.key,
     required this.phoneE164,
     required this.displayPhone,
     required this.onBack,
+    required this.verificationId,
   });
 
   @override
@@ -35,12 +36,13 @@ class _RegisterOtpState extends State<RegisterOtp> {
   int _secondsLeft = 90;
   bool _loading = false;
   String? _errorText;
-
+  late String _verificationId;
   // ===== LIFECYCLE =====
   @override
   void initState() {
     super.initState();
     _startTimer();
+    _verificationId = widget.verificationId;
   }
 
   @override
@@ -88,9 +90,10 @@ class _RegisterOtpState extends State<RegisterOtp> {
     });
 
     try {
-      // 🔥 GỌI BACKEND VERIFY OTP
-      await AuthApi.verifyOtp(widget.phoneE164, otp);
-
+      await AuthApi.firebaseLoginWithOtp(
+        verificationId: _verificationId,
+        otp: otp,
+      );
       if (!mounted) return;
 
       await SuccessDialog.show(
@@ -118,9 +121,8 @@ class _RegisterOtpState extends State<RegisterOtp> {
     if (_secondsLeft > 0) return;
 
     try {
-      // 🔥 GỬI LẠI OTP ĐĂNG KÝ
-      await AuthApi.requestRegisterOtp(widget.phoneE164);
-
+      final newVerificationId = await AuthApi.sendFirebaseOtp(widget.phoneE164);
+      _verificationId = newVerificationId;
       for (final c in _controllers) {
         c.clear();
       }

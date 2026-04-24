@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "1037784419913",
-    "project_id": "careai-c7ce0",
-    "storage_bucket": "careai-c7ce0.firebasestorage.app"
+    "project_number": "183044079993",
+    "project_id": "careai-fbd9a",
+    "storage_bucket": "careai-fbd9a.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1037784419913:android:31aad18bb7fefd5d06f998",
+        "mobilesdk_app_id": "1:183044079993:android:8272de80d5cedd36926fa8",
         "android_client_info": {
           "package_name": "com.example.demo_app"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyB-6-u0gvLTIPpxxKbDQUNueE2VoXqc0Iw"
+          "current_key": "AIzaSyA_rwpv8DcdUd6AbHYjRkCEye8ljXZTWsw"
         }
       ],
       "services": {

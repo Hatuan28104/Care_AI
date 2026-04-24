@@ -17,12 +17,13 @@ class LoginOtpScreen extends StatefulWidget {
   final String phoneE164;
   final String displayPhone;
   final VoidCallback onBack;
-
+  final String verificationId;
   const LoginOtpScreen({
     super.key,
     required this.phoneE164,
     required this.displayPhone,
     required this.onBack,
+    required this.verificationId,
   });
 
   @override
@@ -42,11 +43,12 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
   int _secondsLeft = 90;
   bool _loading = false;
   String? _errorText;
-
+  late String _verificationId;
   // ===== LIFECYCLE =====
   @override
   void initState() {
     super.initState();
+    _verificationId = widget.verificationId;
     _startTimer();
   }
 
@@ -92,7 +94,10 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
     });
 
     try {
-      final user = await AuthApi.verifyOtp(widget.phoneE164, otp);
+      final user = await AuthApi.firebaseLoginWithOtp(
+        verificationId: _verificationId,
+        otp: otp,
+      );
       if (!mounted) return;
 
       CurrentUser.user = user;
@@ -223,8 +228,8 @@ class _LoginOtpScreenState extends State<LoginOtpScreen> {
     if (_secondsLeft > 0) return;
 
     try {
-      // 🔥 LOGIN resend
-      await AuthApi.requestLoginOtp(widget.phoneE164);
+      final newVerificationId = await AuthApi.sendFirebaseOtp(widget.phoneE164);
+      _verificationId = newVerificationId;
 
       for (final c in _controllers) {
         c.clear();

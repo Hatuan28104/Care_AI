@@ -1,12 +1,6 @@
 import {
-  firebasePhoneLogin,
-  changePhone,
-  adminLogin,
-  getLoginHistory,
-  saveFcmToken,
-  sendTestPush,
-  removeFcmToken,
-  changeAdminPassword
+  requestRegisterOtp, requestLoginOtp, verifyOtp, changePhone, adminLogin,
+  getLoginHistory, saveFcmToken, sendTestPush, removeFcmToken, changeAdminPassword
 } from "../repos/auth.repo.js";
 
 export const handleAdminChangePassword = async (taikhoanId, oldPassword, newPassword) => {
@@ -14,19 +8,29 @@ export const handleAdminChangePassword = async (taikhoanId, oldPassword, newPass
   return await changeAdminPassword(taikhoanId, oldPassword, newPassword);
 };
 
+export const handleRequestRegisterOtp = async (phone) => {
+  if (!phone) throw new Error("Thiếu số điện thoại");
+  await requestRegisterOtp(phone);
+  return { success: true, message: "OTP đăng ký đã được gửi" };
+};
+
+export const handleRequestLoginOtp = async (phone) => {
+  if (!phone) throw new Error("Thiếu số điện thoại");
+  await requestLoginOtp(phone);
+  return { success: true, message: "OTP đăng nhập đã được gửi" };
+};
+
 export const handleAdminLogin = async (phone, password, req) => {
   if (!phone || !password) throw new Error("Thiếu số điện thoại hoặc mật khẩu");
   return await adminLogin(phone, password, req);
 };
-export const handleFirebasePhoneLogin = async (idToken, req, fcmToken) => {
-  if (!idToken) throw new Error("Thiếu Firebase ID token");
 
-  const result = await firebasePhoneLogin(idToken, req);
-
+export const handleVerifyOtp = async (phone, otp, req, deviceId, fcmToken) => {
+  if (!phone || !otp) throw new Error("Thiếu số điện thoại hoặc OTP");
+  const result = await verifyOtp(phone, otp, req, deviceId);
   if (fcmToken) {
     await saveFcmToken(result.user.nguoidung.nguoidung_id, fcmToken);
   }
-
   return result;
 };
 

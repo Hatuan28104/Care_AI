@@ -2,10 +2,52 @@ import { getDB } from "../config/db.js";
 import jwt from "jsonwebtoken";
 import crypto from "node:crypto";
 import admin from "../config/firebase.js";
+import twilio from "twilio";
+const otpStore = new Map();
 
 /* =========================
    HELPER
 ========================= */
+const twilioClient = twilio(
+  process.env.TWILIO_ACCOUNT_SID,
+  process.env.TWILIO_AUTH_TOKEN
+);
+
+function toE164VnPhone(localPhone) {
+  return "+84" + localPhone.slice(1);
+}
+
+async function sendOtpSms(localPhone, otp) {
+  if (
+    !process.env.TWILIO_ACCOUNT_SID ||
+    !process.env.TWILIO_AUTH_TOKEN ||
+    !process.env.TWILIO_PHONE_NUMBER
+  ) {
+    throw new Error("Thiếu cấu hình Twilio");
+  }
+
+  try {
+    const response = await twilioClient.messages.create({
+      body: `CareAI OTP của bạn là: ${otp}. Mã có hiệu lực trong 2 phút.`,
+      from: process.env.TWILIO_PHONE_NUMBER,
+      to: toE164VnPhone(localPhone),
+    });
+
+    console.log("OTP sent:", {
+      phone: localPhone,
+      sid: response.sid,
+    });
+
+  } catch (error) {
+    console.error("Twilio send OTP failed:", {
+      phone: localPhone,
+      error: error.message,
+    });
+
+    throw new Error("Không thể gửi OTP SMS");
+  }
+}
+
 function normalizeVnPhone(phone) {
   let digits = phone.replace(/\D/g, "");
 
@@ -31,6 +73,9 @@ async function phoneExists(db, phone) {
   return !!data;
 }
 
+function generateOtp() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
 
 function isProfileCompleted(nguoidung) {
   if (!nguoidung) return false;
@@ -45,24 +90,71 @@ function isProfileCompleted(nguoidung) {
 }
 
 /* =========================
-   FIREBASE PHONE LOGIN
+   REGISTER – REQUEST OTP
 ========================= */
-export async function firebasePhoneLogin(idToken, req) {
-  if (!idToken || typeof idToken !== "string") {
-    throw new Error("Thiếu Firebase ID token");
+export async function requestRegisterOtp(phone) {
+  const db = getDB();
+  const localPhone = normalizeVnPhone(phone);
+
+  if (await phoneExists(db, localPhone)) {
+    throw new Error("Số điện thoại đã được đăng ký");
   }
 
-  const decoded = await admin.auth().verifyIdToken(idToken);
+  const otp = generateOtp();
 
-  const firebasePhone = decoded.phone_number;
-  if (!firebasePhone) {
-    throw new Error("Token Firebase không có số điện thoại");
+  otpStore.set(localPhone, {
+    otp,
+    expires: Date.now() + 2 * 60 * 1000,
+  });
+
+  await sendOtpSms(localPhone, otp);
+}
+
+/* =========================
+   LOGIN – REQUEST OTP
+========================= */
+export async function requestLoginOtp(phone) {
+  const db = getDB();
+  const localPhone = normalizeVnPhone(phone);
+
+  if (!(await phoneExists(db, localPhone))) {
+    throw new Error("Số điện thoại chưa đăng ký");
   }
+
+  const otp = generateOtp();
+
+  otpStore.set(localPhone, {
+    otp,
+    expires: Date.now() + 2 * 60 * 1000,
+  });
+
+  await sendOtpSms(localPhone, otp);
+}
+
+/* =========================
+   VERIFY OTP
+========================= */
+export async function verifyOtp(phone, otp, req, deviceId) {
+  const localPhone = normalizeVnPhone(phone);
+  const data = otpStore.get(localPhone);
+
+  if (!data) throw new Error("OTP không tồn tại");
+
+  if (Date.now() > data.expires) {
+    otpStore.delete(localPhone);
+    throw new Error("OTP hết hạn");
+  }
+
+  if (data.otp !== otp) {
+    throw new Error("OTP không đúng");
+  }
+
+  otpStore.delete(localPhone);
 
   const db = getDB();
-  const localPhone = normalizeVnPhone(firebasePhone);
 
-  let { data: user, error: userError } = await db
+  /* ===== CHECK USER ===== */
+  let { data: user } = await db
     .from("taikhoan")
     .select(`
       taikhoan_id,
@@ -79,29 +171,24 @@ export async function firebasePhoneLogin(idToken, req) {
     .eq("sodienthoai", localPhone)
     .maybeSingle();
 
-  if (userError) throw userError;
-
+  /* ===== CREATE IF NOT EXIST ===== */
   if (!user) {
-    const timestamp = Date.now().toString().slice(-10);
-    const newUserId = "ND" + timestamp;
-    const newAccountId = "TK" + timestamp;
+    const newUserId = "ND" + Date.now().toString().slice(-10);
+    const newAccountId = "TK" + Date.now().toString().slice(-10);
 
-    const { error: nguoiDungError } = await db.from("nguoidung").insert({
-      nguoidung_id: newUserId,
-      tennd: null,
-    });
-
-    if (nguoiDungError) throw nguoiDungError;
-
-    const { error: taiKhoanError } = await db.from("taikhoan").insert({
-      taikhoan_id: newAccountId,
-      nguoidung_id: newUserId,
-      sodienthoai: localPhone,
-      laadmin: false,
-      ngaytao: new Date().toISOString().slice(0, 10),
-    });
-
-    if (taiKhoanError) throw taiKhoanError;
+    await Promise.all([
+      db.from("nguoidung").insert({
+        nguoidung_id: newUserId,
+        tennd: null,
+      }),
+      db.from("taikhoan").insert({
+        taikhoan_id: newAccountId,
+        nguoidung_id: newUserId,
+        sodienthoai: localPhone,
+        laadmin: false,
+        ngaytao: new Date().toISOString().slice(0, 10),
+      })
+    ]);
 
     user = {
       taikhoan_id: newAccountId,
@@ -109,25 +196,21 @@ export async function firebasePhoneLogin(idToken, req) {
       nguoidung: {
         nguoidung_id: newUserId,
         tennd: null,
-        ngaysinh: null,
-        gioitinh: null,
-        chieucao: null,
-        cannang: null,
       },
     };
   }
 
-  const token = jwt.sign(
-    {
-      nguoidung_id: user.nguoidung.nguoidung_id,
-      taikhoan_id: user.taikhoan_id,
-      sodienthoai: user.sodienthoai,
-      laadmin: false,
-    },
+  const token = jwt.sign({
+    nguoidung_id: user.nguoidung.nguoidung_id,
+    taikhoan_id: user.taikhoan_id,
+    sodienthoai: user.sodienthoai,
+    laadmin: false,
+  },
     process.env.JWT_SECRET || "secret",
     { expiresIn: "7d" }
   );
 
+  /* ===== LOGIN HISTORY ===== */
   const { device, ip: bodyIp } = req.body || {};
   const ip =
     bodyIp ||
@@ -135,16 +218,18 @@ export async function firebasePhoneLogin(idToken, req) {
     req.socket.remoteAddress ||
     "";
 
+  const insertData = {
+    lichsu_id: crypto.randomUUID(),
+    thoigian: new Date().toISOString(),
+    thietbi: device && device.trim() !== "" ? device : "Unknown",
+    diachi: ip || null,
+    ip: ip || null,
+    taikhoan_id: user.taikhoan_id,
+  };
+
   const { error: loginHistoryError } = await db
     .from("lichsudangnhap")
-    .insert({
-      lichsu_id: crypto.randomUUID(),
-      thoigian: new Date().toISOString(),
-      thietbi: device && device.trim() !== "" ? device : "Unknown",
-      diachi: ip || null,
-      ip: ip || null,
-      taikhoan_id: user.taikhoan_id,
-    });
+    .insert(insertData);
 
   if (loginHistoryError) {
     console.error("Insert login history failed", {
