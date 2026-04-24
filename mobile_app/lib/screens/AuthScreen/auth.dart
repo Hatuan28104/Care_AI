@@ -23,7 +23,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
   late AuthTab _tab;
   AuthStep _step = AuthStep.form;
-  String _verificationId = '';
+
   String _phoneE164 = '';
   String _displayPhone = '';
 
@@ -146,24 +146,21 @@ class _AuthScreenState extends State<AuthScreen> {
               key: const ValueKey('login-otp'),
               phoneE164: _phoneE164,
               displayPhone: _displayPhone,
-              verificationId: _verificationId,
               onBack: () => setState(() => _step = AuthStep.form),
             )
           : RegisterOtp(
               key: const ValueKey('register-otp'),
               phoneE164: _phoneE164,
               displayPhone: _displayPhone,
-              verificationId: _verificationId,
               onBack: () => setState(() => _step = AuthStep.form),
             ),
     );
   }
 
-  void _goOtp(String phoneE164, String displayPhone, String verificationId) {
+  void _goOtp(String phoneE164, String displayPhone) {
     setState(() {
       _phoneE164 = phoneE164;
       _displayPhone = displayPhone;
-      _verificationId = verificationId;
       _step = AuthStep.otp;
     });
   }

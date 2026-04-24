@@ -8,11 +8,7 @@ import 'package:Care_AI/api/auth_api.dart';
 import 'package:Care_AI/models/tr.dart';
 
 class RegisterForm extends StatefulWidget {
-  final void Function(
-    String phoneE164,
-    String displayPhone,
-    String verificationId,
-  ) onOtp;
+  final void Function(String phoneE164, String displayPhone) onOtp;
 
   const RegisterForm({super.key, required this.onOtp});
 
@@ -60,10 +56,7 @@ class _RegisterFormState extends State<RegisterForm> {
   }
 
   Future<void> _onContinue() async {
-    setState(() {
-      _submitted = true;
-      _serverError = null;
-    });
+    setState(() => _submitted = true);
 
     if (!(_formKey.currentState?.validate() ?? false)) return;
     if (_phone == null) return;
@@ -71,8 +64,9 @@ class _RegisterFormState extends State<RegisterForm> {
     final phone = _buildE164(_phone!);
 
     try {
-      final verificationId = await AuthApi.sendFirebaseOtp(phone);
-      widget.onOtp(phone, _rawNumber, verificationId);
+      await AuthApi.requestRegisterOtp(phone);
+
+      widget.onOtp(phone, _rawNumber);
     } catch (e) {
       setState(() {
         _serverError = e.toString().replaceFirst('Exception: ', '');

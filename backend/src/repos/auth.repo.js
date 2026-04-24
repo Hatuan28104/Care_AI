@@ -2,52 +2,12 @@ import { getDB } from "../config/db.js";
 import jwt from "jsonwebtoken";
 import crypto from "node:crypto";
 import admin from "../config/firebase.js";
-import twilio from "twilio";
+
 const otpStore = new Map();
 
 /* =========================
    HELPER
 ========================= */
-const twilioClient = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
-
-function toE164VnPhone(localPhone) {
-  return "+84" + localPhone.slice(1);
-}
-
-async function sendOtpSms(localPhone, otp) {
-  if (
-    !process.env.TWILIO_ACCOUNT_SID ||
-    !process.env.TWILIO_AUTH_TOKEN ||
-    !process.env.TWILIO_PHONE_NUMBER
-  ) {
-    throw new Error("Thiếu cấu hình Twilio");
-  }
-
-  try {
-    const response = await twilioClient.messages.create({
-      body: `CareAI OTP của bạn là: ${otp}. Mã có hiệu lực trong 2 phút.`,
-      from: process.env.TWILIO_PHONE_NUMBER,
-      to: toE164VnPhone(localPhone),
-    });
-
-    console.log("OTP sent:", {
-      phone: localPhone,
-      sid: response.sid,
-    });
-
-  } catch (error) {
-    console.error("Twilio send OTP failed:", {
-      phone: localPhone,
-      error: error.message,
-    });
-
-    throw new Error("Không thể gửi OTP SMS");
-  }
-}
-
 function normalizeVnPhone(phone) {
   let digits = phone.replace(/\D/g, "");
 
@@ -61,7 +21,62 @@ function normalizeVnPhone(phone) {
 
   return digits;
 }
+async function sendOtpSms(localPhone, otp) {
+  if (
+    !process.env.ESMS_API_KEY ||
+    !process.env.ESMS_SECRET_KEY ||
+    !process.env.ESMS_BRANDNAME
+  ) {
+    throw new Error("Thiếu cấu hình ESMS");
+  }
 
+  const content = `${otp} la ma xac minh dang ky CareAI cua ban`;
+
+  try {
+    const response = await fetch(
+      "https://rest.esms.vn/MainService.svc/json/SendMultipleMessage_V4_post_json/",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ApiKey: process.env.ESMS_API_KEY,
+          SecretKey: process.env.ESMS_SECRET_KEY,
+          Phone: localPhone,
+          Content: content,
+          Brandname: process.env.ESMS_BRANDNAME,
+          SmsType: process.env.ESMS_SMS_TYPE || "2",
+          IsUnicode: "0",
+          RequestId: crypto.randomUUID(),
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok || String(data.CodeResult) !== "100") {
+      console.error("ESMS send OTP failed:", {
+        phone: localPhone,
+        response: data,
+      });
+
+      throw new Error("Không thể gửi OTP SMS");
+    }
+
+    console.log("ESMS OTP sent:", {
+      phone: localPhone,
+      smsId: data.SMSID,
+    });
+  } catch (error) {
+    console.error("ESMS send OTP error:", {
+      phone: localPhone,
+      error: error.message,
+    });
+
+    throw new Error("Không thể gửi OTP SMS");
+  }
+}
 async function phoneExists(db, phone) {
   const { data, error } = await db
     .from("taikhoan")
@@ -101,7 +116,6 @@ export async function requestRegisterOtp(phone) {
   }
 
   const otp = generateOtp();
-
   otpStore.set(localPhone, {
     otp,
     expires: Date.now() + 2 * 60 * 1000,
@@ -122,7 +136,6 @@ export async function requestLoginOtp(phone) {
   }
 
   const otp = generateOtp();
-
   otpStore.set(localPhone, {
     otp,
     expires: Date.now() + 2 * 60 * 1000,
