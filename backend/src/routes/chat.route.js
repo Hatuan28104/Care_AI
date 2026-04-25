@@ -5,8 +5,23 @@ const router = express.Router();
 
 router.post("/", async (req, res) => {
   try {
-    const { message, userId, digitalId, hoiThoaiId } = req.body;
-    const response = await chatService.handlePostChat(message, userId, digitalId, hoiThoaiId);
+    const {
+      message = "",
+      userId,
+      digitalId,
+      hoiThoaiId,
+      loaiTinNhan = "text",
+      mediaUrl = null,
+    } = req.body;
+
+    const response = await chatService.handlePostChat(
+      message,
+      userId,
+      digitalId,
+      hoiThoaiId,
+      loaiTinNhan,
+      mediaUrl
+    );
     res.json(response);
   } catch (error) {
     console.error("CHAT ERROR:", error);

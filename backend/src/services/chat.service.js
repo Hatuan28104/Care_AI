@@ -1,14 +1,40 @@
 import { handleChat, getChatHistory, getMessages, deleteConversation, getConversationsStats } from "../repos/chat.repo.js";
 
-export const handlePostChat = async (message, userId, digitalId, hoiThoaiId) => {
-  if (!message || !userId || !digitalId) throw new Error("Thiếu dữ liệu");
+export const handlePostChat = async (
+  message,
+  userId,
+  digitalId,
+  hoiThoaiId,
+  loaiTinNhan = "text",
+  mediaUrl = null
+) => {
+  const cleanMessage = (message || "").trim();
+  const type = loaiTinNhan || "text";
+
+  if (!userId || !digitalId) throw new Error("Thiếu dữ liệu");
+
+  if (type === "text" && !cleanMessage) {
+    throw new Error("Thiếu dữ liệu");
+  }
+
+  if (type === "image" && !mediaUrl) {
+    throw new Error("Image phải có mediaUrl");
+  }
 
   let conversationId = null;
   if (hoiThoaiId && hoiThoaiId !== "" && hoiThoaiId !== "null") {
     conversationId = hoiThoaiId;
   }
 
-  const result = await handleChat(message.trim(), userId, digitalId, conversationId);
+  const result = await handleChat(
+    cleanMessage,
+    userId,
+    digitalId,
+    conversationId,
+    type,
+    mediaUrl
+  );
+
   return result;
 };
 

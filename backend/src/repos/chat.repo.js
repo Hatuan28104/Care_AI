@@ -11,11 +11,18 @@ const client = new OpenAI({
    CHAT
 ========================= */
 
-export async function handleChat(message, userId, digitalId, hoiThoaiId) {
+export async function handleChat(
+  message,
+  userId,
+  digitalId,
+  hoiThoaiId,
+  loaiTinNhan = "text",
+  mediaUrl = null
+) {
   const db = getDB();
   let conversationId = hoiThoaiId;
   const now = new Date();
-
+  const isImage = loaiTinNhan === "image";
   /* ===== SYSTEM PROMPT ===== */
   const { data: digital } = await db
     .from("digitalhuman")
@@ -54,9 +61,11 @@ export async function handleChat(message, userId, digitalId, hoiThoaiId) {
     .insert({
       tinnhan_id: "TN" + Date.now().toString().slice(-11),
       hoithoai_id: conversationId,
-      noidung: message,
+      noidung: isImage ? (message || "") : message,
       ladigital: false,
       thoigiangui: new Date().toISOString(),
+      loai_tin_nhan: isImage ? "image" : "text",
+      media_url: isImage ? mediaUrl : null,
     })
     .select()
     .single();
@@ -64,79 +73,87 @@ export async function handleChat(message, userId, digitalId, hoiThoaiId) {
   if (errMsg) throw errMsg;
 
   /* ===== DETECT ===== */
-  const normalized = message
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/\s+/g, " ");
-
-  const { data: keywords, error: keywordErr } = await db
-    .from("tukhoabatthuong")
-    .select("tukhoa_id, tukhoa, pattern, mucdotinnhan_id");
-  if (keywordErr) throw keywordErr;
-
-  let matched = [];
-
-  for (let k of keywords || []) {
-    if (k.pattern) {
-      try {
-        const regex = new RegExp(k.pattern, "i");
-        if (regex.test(normalized)) matched.push(k);
-      } catch (_) {
-      }
-    } else {
-      if (!k.tukhoa) continue;
-      const kw = k.tukhoa
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "");
-
-      if (normalized.includes(kw)) matched.push(k);
-    }
-  }
-
   let mucDoMax = 0;
 
-  if (matched.length > 0) {
-    const uniqueMatched = Array.from(
-      new Map((matched || []).map(k => [k.tukhoa_id, k])).values()
-    );
+  if (!isImage && message?.trim()) {
+    const normalized = message
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ");
 
-    for (let k of uniqueMatched) {
-      if (!k?.tukhoa_id) continue;
-      await db.from("tinnhan_tukhoa").upsert(
-        {
-          tinnhan_id: userMsg.tinnhan_id,
-          tukhoabatthuong_id: k.tukhoa_id,
-        },
-        { onConflict: "tinnhan_id,tukhoabatthuong_id" }
-      );
+    const { data: keywords, error: keywordErr } = await db
+      .from("tukhoabatthuong")
+      .select("tukhoa_id, tukhoa, pattern, mucdotinnhan_id");
+
+    if (keywordErr) throw keywordErr;
+
+    let matched = [];
+
+    for (let k of keywords || []) {
+      if (k.pattern) {
+        try {
+          const regex = new RegExp(k.pattern, "i");
+          if (regex.test(normalized)) matched.push(k);
+        } catch (_) {}
+      } else {
+        if (!k.tukhoa) continue;
+
+        const kw = k.tukhoa
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "");
+
+        if (normalized.includes(kw)) matched.push(k);
+      }
     }
 
-    const levelIds = uniqueMatched
-      .map(i => i.mucdotinnhan_id)
-      .filter(Boolean);
+    if (matched.length > 0) {
+      const uniqueMatched = Array.from(
+        new Map((matched || []).map(k => [k.tukhoa_id, k])).values()
+      );
 
-    if (levelIds.length > 0) {
-      const { data: levels, error: levelErr } = await db
-        .from("mucdotinnhan")
-        .select("mucdotinnhan_id, mucdo")
-        .in("mucdotinnhan_id", levelIds);
-      if (levelErr) throw levelErr;
+      for (let k of uniqueMatched) {
+        if (!k?.tukhoa_id) continue;
 
-      const parsedLevels = (levels || []).map(i => {
-        const raw = i?.mucdo;
-        const num = typeof raw === "number" ? raw : Number(raw);
-        return Number.isFinite(num) ? num : 0;
-      });
-      mucDoMax = Math.max(...parsedLevels, 0);
+        await db.from("tinnhan_tukhoa").upsert(
+          {
+            tinnhan_id: userMsg.tinnhan_id,
+            tukhoabatthuong_id: k.tukhoa_id,
+          },
+          { onConflict: "tinnhan_id,tukhoabatthuong_id" }
+        );
+      }
+
+      const levelIds = uniqueMatched
+        .map(i => i.mucdotinnhan_id)
+        .filter(Boolean);
+
+      if (levelIds.length > 0) {
+        const { data: levels, error: levelErr } = await db
+          .from("mucdotinnhan")
+          .select("mucdotinnhan_id, mucdo")
+          .in("mucdotinnhan_id", levelIds);
+
+        if (levelErr) throw levelErr;
+
+        const parsedLevels = (levels || []).map(i => {
+          const raw = i?.mucdo;
+          const num = typeof raw === "number" ? raw : Number(raw);
+          return Number.isFinite(num) ? num : 0;
+        });
+
+        mucDoMax = Math.max(...parsedLevels, 0);
+      }
     }
   }
 
   /* ===== ALERT ===== */
-  if (mucDoMax >= 1) {
+  if (!isImage && mucDoMax >= 1) {
+    const safeMsg = message || "";
+
     const shortMsg =
-      message.length > 50 ? message.substring(0, 50) + "..." : message;
+      safeMsg.length > 50 ? safeMsg.substring(0, 50) + "..." : safeMsg;
 
     const notiBody = shortMsg;
 
@@ -154,7 +171,7 @@ export async function handleChat(message, userId, digitalId, hoiThoaiId) {
   /* ===== LẤY HISTORY ===== */
   const { data: history } = await db
     .from("tinnhan")
-    .select("noidung, ladigital")
+    .select("noidung, ladigital, loai_tin_nhan")
     .eq("hoithoai_id", conversationId)
     .order("thoigiangui", { ascending: false })
     .limit(20);
@@ -162,6 +179,8 @@ export async function handleChat(message, userId, digitalId, hoiThoaiId) {
   const messages = [{ role: "system", content: mota }];
 
   (history || []).reverse().forEach(row => {
+    if (row.loai_tin_nhan === "image") return;
+
     messages.push({
       role: row.ladigital ? "assistant" : "user",
       content: row.noidung,
@@ -184,6 +203,8 @@ export async function handleChat(message, userId, digitalId, hoiThoaiId) {
     noidung: aiReply,
     ladigital: true,
     thoigiangui: new Date().toISOString(),
+    loai_tin_nhan: "text",
+    media_url: null,
   });
 
   /* ===== UPDATE LAST CHAT ===== */
@@ -244,7 +265,7 @@ export async function getMessages(hoiThoaiId) {
 
   const { data, error } = await db
     .from("tinnhan")
-    .select("noidung, ladigital, thoigiangui")
+    .select("noidung, ladigital, thoigiangui, loai_tin_nhan, media_url")
     .eq("hoithoai_id", hoiThoaiId)
     .order("thoigiangui", { ascending: true });
 

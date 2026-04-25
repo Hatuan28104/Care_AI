@@ -103,24 +103,45 @@ class _AlertScreenState extends State<AlertScreen> with WidgetsBindingObserver {
     });
   }
 
-  Color _getBorderColor(String title, String detail) {
-    final text = (title + " " + detail).toLowerCase();
+Color _getBorderColor(String title, String detail) {
+  final text = (title + " " + detail).toLowerCase();
 
-    if (text.contains("nguy hiểm") || text.contains("bất thường")) {
-      return Colors.red;
-    }
-    if (text.contains("tốt") ||
-        text.contains("tuyệt vời") ||
-        text.contains("ổn định") ||
-        text.contains("tích cực")) {
-      return Colors.green;
-    }
-
-    if (text.contains("bình thường")) {
-      return const Color(0xFFE6EA00);
-    }
-    return Colors.grey.shade300;
+  // 🔴 LEVEL 3 - nguy hiểm
+  if (text.contains("nguy hiểm") ||
+      text.contains("rất thấp") ||
+      text.contains("rất cao")) {
+    return Colors.red;
   }
+
+  // 🟠 LEVEL 2 - bất thường
+  if (text.contains("bất thường") ||
+      text.contains("thấp") ||
+      text.contains("cao")) {
+    return Colors.orange;
+  }
+
+  // 🟡 LEVEL 1 - nhẹ
+  if (text.contains("hơi") ||
+      text.contains("chưa tốt") ||
+      text.contains("tăng")) {
+    return Colors.amber;
+  }
+
+  // 🟢 tốt
+  if (text.contains("tốt") ||
+      text.contains("tuyệt vời") ||
+      text.contains("ổn định") ||
+      text.contains("tích cực")) {
+    return Colors.green;
+  }
+
+  // 🟡 bình thường
+  if (text.contains("bình thường")) {
+    return const Color(0xFFE6EA00);
+  }
+
+  return Colors.grey.shade300;
+}
   /* ================= BUILD ================= */
 
   @override
