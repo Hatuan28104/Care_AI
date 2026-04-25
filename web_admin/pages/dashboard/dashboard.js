@@ -8,6 +8,20 @@ let userGrowthChartInstance = null;
 let interactionChartInstance = null;
 let selectedStart = null;
 let selectedEnd = null;
+let pickerInstance = null;
+
+function t(key) {
+    return window.I18n?.t(key) || key;
+}
+
+function tf(key, params = {}) {
+    if (window.I18n?.format) return window.I18n.format(key, params);
+    return key.replace(/\{(\w+)\}/g, (_, token) => params[token] ?? '');
+}
+
+function getCurrentLocale() {
+    return window.I18n?.getCurrentLang?.() === 'en' ? 'en-US' : 'vi-VN';
+}
 
 async function fetchData(url) {
     const res = await fetch(url);
@@ -57,7 +71,7 @@ function toChartSeries(map) {
     const sorted = Object.entries(map).sort((a, b) => new Date(a[0]) - new Date(b[0]));
 
     return {
-        labels: sorted.map(([date]) => new Date(date).toLocaleDateString('vi-VN')),
+        labels: sorted.map(([date]) => new Date(date).toLocaleDateString(getCurrentLocale())),
         values: sorted.map(([, value]) => value)
     };
 }
@@ -133,7 +147,7 @@ function updateUserGrowthChart(labels, values) {
 
     userGrowthChartInstance.data.labels = labels;
     userGrowthChartInstance.data.datasets = [{
-        label: 'Người dùng mới',
+        label: t('Người dùng mới'),
         data: values,
         borderColor: '#1877F2',
         borderWidth: 2,
@@ -154,7 +168,7 @@ function updateInteractionChart(labels, values) {
 
     interactionChartInstance.data.labels = labels;
     interactionChartInstance.data.datasets = [{
-        label: 'Lượt tương tác',
+        label: t('Lượt tương tác'),
         data: values,
         backgroundColor: '#1877F2',
         borderRadius: 12,
@@ -165,7 +179,7 @@ function updateInteractionChart(labels, values) {
 }
 
 function formatCompactNumber(value) {
-    return Number(value || 0).toLocaleString('vi-VN');
+    return Number(value || 0).toLocaleString(getCurrentLocale());
 }
 
 function setKPI(id, value) {
@@ -176,25 +190,36 @@ function setKPI(id, value) {
 
 function formatRelativeTime(isoString) {
     if (!isoString) return '-';
+
     const now = new Date();
     const past = new Date(isoString);
     const diffMs = now - past;
     const diffMin = Math.floor(diffMs / 60000);
-    if (diffMin < 1) return 'Vừa xong';
-    if (diffMin < 60) return `${diffMin} phút trước`;
+
+    if (diffMin < 1) return t('Vừa xong');
+    if (diffMin < 60) return tf('{count} phút trước', { count: diffMin });
+
     const diffHour = Math.floor(diffMin / 60);
-    if (diffHour < 24) return `${diffHour} giờ trước`;
+    if (diffHour < 24) return tf('{count} giờ trước', { count: diffHour });
+
     const diffDay = Math.floor(diffHour / 24);
-    return `${diffDay} ngày trước`;
+    return tf('{count} ngày trước', { count: diffDay });
 }
 
 function inferLevel(msg) {
     const lowKeywords = ['pin', 'thay đổi nhẹ', 'nhiệt độ'];
     const midKeywords = ['stress', 'spo2', 'áp lực', 'buồn'];
     const msgLower = (msg || '').toLowerCase();
-    if (midKeywords.some(k => msgLower.includes(k))) return { text: 'TRUNG BÌNH', class: 'warning' };
-    if (lowKeywords.some(k => msgLower.includes(k))) return { text: 'NHẸ', class: 'success' };
-    return { text: 'CAO', class: 'danger' };
+
+    if (midKeywords.some((k) => msgLower.includes(k))) {
+        return { text: t('TRUNG BÌNH'), class: 'warning' };
+    }
+
+    if (lowKeywords.some((k) => msgLower.includes(k))) {
+        return { text: t('NHẸ'), class: 'success' };
+    }
+
+    return { text: t('CAO'), class: 'danger' };
 }
 
 function renderRecentAlerts(alerts) {
@@ -202,33 +227,40 @@ function renderRecentAlerts(alerts) {
     if (!tableBody) return;
 
     if (!alerts || alerts.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 24px;">Không có cảnh báo nào gần đây.</td></tr>';
+        tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 24px;">${t('Không có cảnh báo nào gần đây.')}</td></tr>`;
         return;
     }
 
-    // Hiển thị tối đa 4 cảnh báo mới nhất
     const recent = alerts.slice(0, 4);
     let rowsHtml = '';
 
-    recent.forEach(item => {
+    recent.forEach((item) => {
         const level = inferLevel(item.motacanhbao);
-        const userIdText = item.nguoiDungId ? `Người dùng ID #${item.nguoiDungId}` : 'Hệ thống';
-        
+        const userIdText = item.nguoiDungId
+            ? tf('Người dùng ID #{id}', { id: item.nguoiDungId })
+            : t('Hệ thống');
+
         let displayMsg = item.motacanhbao;
         const msgLower = (item.motacanhbao || '').toLowerCase();
 
         if (item.tinnhan_id) {
-            displayMsg = `Phát hiện ngôn ngữ tiêu cực: "${item.motacanhbao}"`;
+            displayMsg = tf('Phát hiện ngôn ngữ tiêu cực: "{message}"', {
+                message: item.motacanhbao
+            });
         } else if (msgLower.includes('nhịp tim')) {
-            displayMsg = `Cảnh báo nhịp tim: ${item.motacanhbao}`;
+            displayMsg = tf('Cảnh báo nhịp tim: {message}', { message: item.motacanhbao });
         } else if (msgLower.includes('stress') || msgLower.includes('áp lực')) {
-            displayMsg = `Cảnh báo mức độ căng thẳng: ${item.motacanhbao}`;
+            displayMsg = tf('Cảnh báo mức độ căng thẳng: {message}', {
+                message: item.motacanhbao
+            });
         } else if (msgLower.includes('spo2') || msgLower.includes('oxy')) {
-            displayMsg = `Cảnh báo nồng độ oxy máu: ${item.motacanhbao}`;
+            displayMsg = tf('Cảnh báo nồng độ oxy máu: {message}', {
+                message: item.motacanhbao
+            });
         } else if (msgLower.includes('giấc ngủ') || msgLower.includes('ngủ')) {
-            displayMsg = `Cảnh báo giấc ngủ: ${item.motacanhbao}`;
+            displayMsg = tf('Cảnh báo giấc ngủ: {message}', { message: item.motacanhbao });
         } else if (level.class === 'danger' || level.class === 'warning') {
-            displayMsg = `Cảnh báo sức khỏe: ${item.motacanhbao}`;
+            displayMsg = tf('Cảnh báo sức khỏe: {message}', { message: item.motacanhbao });
         }
 
         rowsHtml += `
@@ -281,7 +313,6 @@ async function loadDashboardData() {
         setKPI('totalInteractions', totalInteractions);
         setKPI('totalAlerts', totalAlerts);
 
-        // Render alert list
         renderRecentAlerts(alerts);
     } catch (error) {
         console.error('Load dashboard data error:', error);
@@ -332,7 +363,9 @@ function initExport() {
                 pushSection(rows, 'ALERTS', groupByDate(alerts, 'thoigian'));
 
                 exportCSV('dashboard_all.csv', rows);
-                if (window.UI?.showToast) UI.showToast('Xuất báo cáo thành công');
+                if (window.UI?.showToast) {
+                    UI.showToast(t('Xuất báo cáo thành công'));
+                }
             } catch (error) {
                 console.error('Export error:', error);
             }
@@ -341,10 +374,10 @@ function initExport() {
         if (window.UI?.showModal) {
             UI.showModal({
                 type: 'export',
-                title: 'Xác nhận xuất file',
-                message: 'Bạn có chắc chắn muốn xuất báo cáo này không?',
-                confirmText: 'Đồng ý',
-                cancelText: 'Hủy bỏ',
+                title: t('Xác nhận xuất file'),
+                message: t('Bạn có chắc chắn muốn xuất báo cáo này không?'),
+                confirmText: t('Đồng ý'),
+                cancelText: t('Hủy bỏ'),
                 onConfirm: onConfirmExport
             });
             return;
@@ -358,6 +391,10 @@ function initDatePicker() {
     const pickerInput = document.getElementById('dashboardDatePicker');
     if (!pickerInput || typeof Litepicker === 'undefined') return;
 
+    try {
+        pickerInstance?.destroy?.();
+    } catch (_) {}
+
     const today = new Date();
     const startOfLast7Days = new Date(today);
     startOfLast7Days.setDate(today.getDate() - 6);
@@ -367,7 +404,7 @@ function initDatePicker() {
     selectedStart = new Date(startOfLast7Days);
     selectedEnd = new Date(today);
 
-    const picker = new Litepicker({
+    pickerInstance = new Litepicker({
         element: pickerInput,
         singleMode: false,
         numberOfMonths: 1,
@@ -378,10 +415,15 @@ function initDatePicker() {
             months: true,
             years: true
         },
+        lang: getCurrentLocale(),
         format: 'DD/MM/YYYY',
+        buttonText: {
+            apply: t('Áp dụng'),
+            cancel: t('Hủy')
+        },
         tooltipText: {
-            one: 'ngày',
-            other: 'ngày'
+            one: t('ngày'),
+            other: t('ngày')
         },
         setup: (instance) => {
             instance.on('selected', (date1, date2) => {
@@ -396,12 +438,17 @@ function initDatePicker() {
         }
     });
 
-    picker.setDateRange(startOfLast7Days, today);
+    pickerInstance.setDateRange(startOfLast7Days, today);
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
     initCharts();
     initExport();
+    initDatePicker();
+    await loadDashboardData();
+});
+
+document.addEventListener('care-ai-language-changed', async () => {
     initDatePicker();
     await loadDashboardData();
 });

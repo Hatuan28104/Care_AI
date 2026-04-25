@@ -1,7 +1,31 @@
 const Layout = {
+    loadI18n: async function () {
+        try {
+            if (window.I18n) return;
+
+            const i18nUrl = new URL('../../assets/js/i18n.js', window.location.href).href;
+
+            await new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = i18nUrl;
+                script.defer = true;
+                script.onload = resolve;
+                script.onerror = () => reject(new Error(`Failed to load ${i18nUrl}`));
+                document.head.appendChild(script);
+            });
+
+            if (window.I18n && typeof window.I18n.init === 'function') {
+                window.I18n.init();
+            }
+        } catch (error) {
+            console.warn('I18n load failed:', error);
+        }
+    },
+
     init: async function () {
         document.body.classList.add('layout-loading');
         try {
+            await this.loadI18n();
             const response = await fetch('../../layout/layout.html');
             if (!response.ok) throw new Error('Không thể tải file layout.html');
             const data = await response.text();
@@ -13,6 +37,10 @@ const Layout = {
             this.renderHeader(doc);
             this.setActiveLinks();
             this.bindEvents();
+
+            if (window.I18n) {
+                window.I18n.translatePage();
+            }
 
             if (window.lucide) {
                 window.lucide.createIcons();
@@ -78,10 +106,10 @@ const Layout = {
                 if (window.UI) {
                     UI.showModal({
                         type: 'danger',
-                        title: 'Đăng xuất?',
-                        message: 'Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?',
-                        confirmText: 'Xác nhận',
-                        cancelText: 'Hủy',
+                        title: window.I18n ? window.I18n.t('Đăng xuất?') : 'Đăng xuất?',
+                        message: window.I18n ? window.I18n.t('Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?') : 'Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?',
+                        confirmText: window.I18n ? window.I18n.t('Xác nhận') : 'Xác nhận',
+                        cancelText: window.I18n ? window.I18n.t('Hủy') : 'Hủy',
                         onConfirm: () => {
                             window.location.href = '../auth/auth.html';
                         }
@@ -92,6 +120,41 @@ const Layout = {
                 }
             });
         }
+    },
+
+    addLanguageSwitcher: function () {
+        const headerActions = document.querySelector('.header__actions');
+        if (!headerActions || document.getElementById('langToggleBtn')) return;
+
+        const button = document.createElement('button');
+        button.id = 'langToggleBtn';
+        button.type = 'button';
+        button.className = 'header__action-btn';
+        button.style.minWidth = '48px';
+        button.style.padding = '0 10px';
+        button.style.fontSize = '0.8rem';
+        button.style.letterSpacing = '0.05em';
+        button.style.textTransform = 'uppercase';
+        button.style.display = 'flex';
+        button.style.alignItems = 'center';
+        button.style.justifyContent = 'center';
+
+        const updateLabel = () => {
+            if (!window.I18n) return;
+            const currentLang = window.I18n.getCurrentLang();
+            button.textContent = currentLang === 'vi' ? 'EN' : 'VI';
+            button.title = currentLang === 'vi' ? 'Switch to English' : 'Chuyển sang tiếng Việt';
+        };
+
+        button.addEventListener('click', () => {
+            if (!window.I18n) return;
+            const nextLang = window.I18n.getCurrentLang() === 'vi' ? 'en' : 'vi';
+            window.I18n.setLanguage(nextLang);
+            updateLabel();
+        });
+
+        updateLabel();
+        headerActions.appendChild(button);
     }
 };
 

@@ -471,14 +471,30 @@ export async function saveMultipleHealthData(payload) {
   // =========================
   // INSERT BATCH
   // =========================
+  // =========================
+  // INSERT BATCH
+  // =========================
   if (inserts.length > 0) {
-    const { error } = await db.from("dulieusuckhoe").insert(inserts);
+    const { data, error } = await db
+      .from("dulieusuckhoe")
+      .insert(inserts)
+      .select(`
+      dulieusk_id,
+      nguoidung_id,
+      loaichiso_id,
+      giatri,
+      loaichisosuckhoe (
+        code
+      )
+    `);
+
     if (error) throw error;
+
+    return data || [];
   }
 
-  return true;
+  return [];
 }
-
 /* =========================
    PHÂN TÍCH AI
 ========================= */
@@ -547,7 +563,7 @@ export async function getLatestAIInsight(nguoidung_id) {
 export async function getStressInputData(nguoiDungId) {
   const db = getDB();
 
-  const targetMetricIds = ["CS008", "CS001", "CS037", "CS004"]; 
+  const targetMetricIds = ["CS008", "CS001", "CS037", "CS004"];
 
   const { data, error } = await db
     .from("dulieusuckhoe")
@@ -611,10 +627,23 @@ export async function saveHealthData(payload) {
     nguoidung_id: nguoidung_id ?? null,
   };
 
-  const { error } = await db.from("dulieusuckhoe").insert(record);
+  const { data, error } = await db
+    .from("dulieusuckhoe")
+    .insert(record)
+    .select(`
+      dulieusk_id,
+      nguoidung_id,
+      loaichiso_id,
+      giatri,
+      loaichisosuckhoe (
+        code
+      )
+    `)
+    .single();
+
   if (error) throw error;
 
-  return true;
+  return data;
 }
 
 export async function getLatestMetricByDevice(thietBiId, loaiChiSoId) {

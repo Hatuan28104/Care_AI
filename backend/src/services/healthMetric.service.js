@@ -2,7 +2,7 @@ import { getAllHealthMetrics, createHealthMetric, getLatestHealthDataByDevice, g
 import { sendNotification } from "../repos/notification.repo.js";
 import { callSelfEvolutionAI, callStressAI } from "./aiClient.js";
 import { getCurrentVNHour, getVNDateString } from "../utils/time.js";
-
+import { HEALTH_ALERT_RULES } from "./healthAlertRules.js";
 
 export const handleGetMetrics = async () => {
   const data = await getAllHealthMetrics();
@@ -33,22 +33,21 @@ export const handleSaveData = async (user, body) => {
   const nguoiDungId = user?.NguoiDung_ID || user?.nguoidung_id;
   if (!nguoiDungId) throw new Error("Chưa đăng nhập");
 
-const nguondulieu_id = body.nguondulieu_id ?? body.NguonDuLieu_ID ?? null;
-  await saveMultipleHealthData({
+  const nguondulieu_id = body.nguondulieu_id ?? body.NguonDuLieu_ID ?? null;
+
+  const savedRows = await saveMultipleHealthData({
     ...body,
     nguoidung_id: nguoiDungId,
     nguondulieu_id,
   });
 
+  await checkAndSendHealthAlert(nguoiDungId, savedRows);
+
   const vnHour = getCurrentVNHour();
   const today = getVNDateString();
 
-  // 🔥 check đã có AI hôm nay chưa
   const existingInsight = await getAIInsightByDate(nguoiDungId, today);
 
-  // =========================
-  // CASE 1: trước 9h
-  // =========================
   if (vnHour < 9) {
     return {
       success: true,
@@ -56,9 +55,6 @@ const nguondulieu_id = body.nguondulieu_id ?? body.NguonDuLieu_ID ?? null;
     };
   }
 
-  // =========================
-  // CASE 2: sau 9h nhưng đã có rồi
-  // =========================
   if (existingInsight) {
     return {
       success: true,
@@ -66,10 +62,6 @@ const nguondulieu_id = body.nguondulieu_id ?? body.NguonDuLieu_ID ?? null;
     };
   }
 
-  // =========================
-  // CASE 3: sau 9h và CHƯA có → chạy AI
-  // (bao gồm cả data gửi trước 9h nhưng giờ mới mở app)
-  // =========================
   const aiAnalysis = await callSelfEvolutionAI(nguoiDungId, body);
 
   if (aiAnalysis && aiAnalysis.sosanh) {
@@ -195,18 +187,53 @@ export const handleAnalyzeStress = async (user) => {
   // 3. Lưu vào bảng dulieusuckhoe
   console.log(`[Stress] Saving for user ${nguoiDungId}, score ${stressScore}`);
 
-  await saveHealthData({
+  const savedRow = await saveHealthData({
     nguoidung_id: nguoiDungId,
     loaichiso_id: "CS016",
     giatri: stressScore,
     nguondulieu_id: null // Stress là chỉ số tính toán, không gắn với 1 thiết bị cụ thể
   });
 
-  return { 
-    success: true, 
-    data: { 
+  await checkAndSendHealthAlert(nguoiDungId, [savedRow]);
+
+  return {
+    success: true,
+    data: {
       stress: stressScore,
       thoigian: new Date().toISOString()
-    } 
+    }
   };
 };
+async function checkAndSendHealthAlert(userId, savedRows = []) {
+  if (!Array.isArray(savedRows)) return;
+  for (const row of savedRows) {
+    const code = row.loaichisosuckhoe?.code;
+    const value = Number(row.giatri);
+
+    if (!code || !Number.isFinite(value)) continue;
+
+    const rule = HEALTH_ALERT_RULES[code];
+    if (!rule) continue;
+
+    const alert = rule.check(value);
+    if (!alert) continue;
+
+    const title =
+      alert.level === 3
+        ? `Cảnh báo nguy hiểm: ${rule.name}`
+        : alert.level === 2
+          ? `Cảnh báo sức khỏe: ${rule.name}`
+          : `Nhắc nhở sức khỏe: ${rule.name}`;
+
+    const body = `${alert.message}. Giá trị hiện tại: ${value} ${rule.unit}`;
+
+    await sendNotification(
+      userId,
+      title,
+      body,
+      alert.level,
+      "HEALTH",
+      `Cảnh báo sức khỏe người thân: ${rule.name}`
+    );
+  }
+}

@@ -5,8 +5,17 @@ const API = `${API_BASE}/api/digital-human`;
 let digitalPage = 1;
 let characters = [];
 let filteredChars = [];
+let isSearching = false;
 
-// ─── Utilities ────────────────────────────────────────────────────────────────
+function t(key) {
+    return window.I18n?.t(key) || key;
+}
+
+function tf(key, params = {}) {
+    if (window.I18n?.format) return window.I18n.format(key, params);
+    return key.replace(/\{(\w+)\}/g, (_, token) => params[token] ?? '');
+}
+
 function getCurrentDigitalPage() {
     const byData = document.body?.dataset?.page;
     if (byData) return byData;
@@ -48,31 +57,32 @@ function confirmModal({ title, message, type = 'success', onConfirm }) {
             type,
             title,
             message,
-            confirmText: type === 'danger' ? 'Xóa' : 'Xác nhận',
-            cancelText: 'Hủy bỏ',
+            confirmText: type === 'danger' ? t('Xóa') : t('Xác nhận'),
+            cancelText: t('Hủy bỏ'),
             onConfirm
         });
         return;
     }
 
-    const ok = window.confirm(message || title || 'Xác nhận thao tác?');
+    const ok = window.confirm(message || title || t('Xác nhận thao tác?'));
     if (ok && typeof onConfirm === 'function') onConfirm();
 }
 
-// ─── API ──────────────────────────────────────────────────────────────────────
 async function fetchDigitalCharacters() {
     try {
         const res = await fetch(API);
         const result = await res.json();
 
         const mapped = (result?.data || []).map((d) => {
-            const gender = d.gioitinh ? 'Nam' : 'Nữ';
+            const genderValue = d.gioitinh === 1 || d.gioitinh === true || d.gioitinh === '1';
+            const gender = genderValue ? t('Nam') : t('Nữ');
             return {
                 id: d.digitalhuman_id || '',
                 name: d.tendigitalhuman || '',
                 job: d.nghenghiep?.tennghenghiep || d.nghenghiep_id || '-',
                 gender,
-                genderClass: d.gioitinh ? 'badge--info' : 'badge--pink',
+                genderClass: genderValue ? 'badge--info' : 'badge--pink',
+                genderRaw: d.gioitinh,
                 img: toAbsoluteImageUrl(d.imageurl)
             };
         });
@@ -114,7 +124,10 @@ async function loadDigitalDetail(id) {
         if (digitalId) digitalId.innerText = d.digitalhuman_id || '';
         if (digitalIdDetail) digitalIdDetail.innerText = d.digitalhuman_id || '';
         if (digitalName) digitalName.innerText = d.tendigitalhuman || '';
-        if (digitalGender) digitalGender.innerText = d.gioitinh ? 'Nam' : 'Nữ';
+        if (digitalGender) {
+            const genderValue = d.gioitinh === 1 || d.gioitinh === true || d.gioitinh === '1';
+            digitalGender.innerText = genderValue ? t('Nam') : t('Nữ');
+        }
         if (digitalJob) digitalJob.innerText = d.nghenghiep?.tennghenghiep || d.nghenghiep_id || '-';
         if (digitalAppearance) digitalAppearance.innerText = d.ngoaihinh || '-';
         if (digitalPrompt) digitalPrompt.innerText = d.systemprompt || d.mota || '-';
@@ -125,7 +138,7 @@ async function loadDigitalDetail(id) {
         });
 
         btnDeleteFromView?.addEventListener('click', () => {
-            confirmDeleteChar(d.digitalhuman_id, d.tendigitalhuman || '');
+            confirmDeleteChar(d.digitalhuman_id);
         });
     } catch (error) {
         console.error(error);
@@ -157,11 +170,10 @@ async function preloadDigitalForm(id) {
         if (gender) {
             const val = String(d.gioitinh);
             gender.value = val;
-            
-            // Handle Switcher UI state
+
             const genderSwitcher = document.getElementById('genderSwitcher');
             if (genderSwitcher) {
-                genderSwitcher.querySelectorAll('.gender-opt').forEach(opt => {
+                genderSwitcher.querySelectorAll('.gender-opt').forEach((opt) => {
                     opt.classList.toggle('active', opt.dataset.value === val);
                 });
             }
@@ -179,7 +191,6 @@ async function preloadDigitalForm(id) {
     }
 }
 
-// ─── Render ───────────────────────────────────────────────────────────────────
 function renderDigitalTable() {
     const tbody = document.querySelector('.premium-table tbody');
     const emptyState = document.getElementById('empty-state');
@@ -190,8 +201,8 @@ function renderDigitalTable() {
     const pageData = filteredChars.slice(start, start + DIGITAL_PAGE_SIZE);
 
     if (filteredChars.length === 0) {
-        tbody.innerHTML = '';
-        if (emptyState) emptyState.classList.remove('hidden');
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 40px; color: #64748B;">${isSearching ? t('Không có dữ liệu phù hợp') : t('Không có nhân vật nào')}</td></tr>`;
+        if (emptyState) emptyState.classList.add('hidden');
         if (paginationWrapper) paginationWrapper.classList.add('hidden');
         return;
     }
@@ -212,9 +223,9 @@ function renderDigitalTable() {
             <td><span class="badge ${c.genderClass}">${c.gender}</span></td>
             <td class="text-right">
                 <div class="action-icons">
-                    <button class="btn-icon" aria-label="Xem chi tiết" onclick="window.location.href='digital-view.html?id=${c.id}'"><i data-lucide="eye"></i></button>
-                    <button class="btn-icon" aria-label="Chỉnh sửa" onclick="window.location.href='digital-edit.html?id=${c.id}'"><i data-lucide="edit-3"></i></button>
-                    <button class="btn-icon btn-icon--danger" aria-label="Xóa nhân vật" onclick="confirmDeleteChar('${c.id}', '${c.name}')"><i data-lucide="trash-2"></i></button>
+                    <button class="btn-icon" aria-label="${t('Xem chi tiết')}" onclick="window.location.href='digital-view.html?id=${c.id}'"><i data-lucide="eye"></i></button>
+                    <button class="btn-icon" aria-label="${t('Chỉnh sửa')}" onclick="window.location.href='digital-edit.html?id=${c.id}'"><i data-lucide="edit-3"></i></button>
+                    <button class="btn-icon btn-icon--danger" aria-label="${t('Xóa nhân vật')}" onclick="confirmDeleteChar('${c.id}')"><i data-lucide="trash-2"></i></button>
                 </div>
             </td>
         </tr>
@@ -230,17 +241,17 @@ function renderDigitalPagination() {
     const nav = document.querySelector('.pagination-controls');
     if (!nav) return;
 
-    let html = `<button class="page-link" aria-label="Chuyển trang" ${digitalPage === 1 ? 'disabled' : ''} onclick="changeDigitalPage(${digitalPage - 1})"><i data-lucide="chevron-left" class="nav-icon"></i></button>`;
+    let html = `<button class="page-link" aria-label="${t('Chuyển trang')}" ${digitalPage === 1 ? 'disabled' : ''} onclick="changeDigitalPage(${digitalPage - 1})"><i data-lucide="chevron-left" class="nav-icon"></i></button>`;
 
     for (let i = 1; i <= totalPages; i++) {
         if (totalPages > 6 && i > 3 && i < totalPages - 1) {
-            if (i === 4) html += `<span class="page-dots">...</span>`;
+            if (i === 4) html += '<span class="page-dots">...</span>';
             continue;
         }
         html += `<button class="page-link ${i === digitalPage ? 'active' : ''}" onclick="changeDigitalPage(${i})">${i}</button>`;
     }
 
-    html += `<button class="page-link" aria-label="Chuyển trang" ${digitalPage === totalPages ? 'disabled' : ''} onclick="changeDigitalPage(${digitalPage + 1})"><i data-lucide="chevron-right" class="nav-icon"></i></button>`;
+    html += `<button class="page-link" aria-label="${t('Chuyển trang')}" ${digitalPage === totalPages ? 'disabled' : ''} onclick="changeDigitalPage(${digitalPage + 1})"><i data-lucide="chevron-right" class="nav-icon"></i></button>`;
     nav.innerHTML = html;
     if (window.lucide) lucide.createIcons();
 }
@@ -248,11 +259,19 @@ function renderDigitalPagination() {
 function updateDigitalCount() {
     const el = document.querySelector('.pagination-count');
     if (!el) return;
+
+    if (filteredChars.length === 0) {
+        el.textContent = '';
+        return;
+    }
+
     const start = (digitalPage - 1) * DIGITAL_PAGE_SIZE + 1;
     const end = Math.min(digitalPage * DIGITAL_PAGE_SIZE, filteredChars.length);
-    el.textContent = filteredChars.length === 0
-        ? 'Không có nhân vật nào'
-        : `Hiển thị ${start} đến ${end} trong số ${filteredChars.length} nhân vật`;
+    el.textContent = tf('Hiển thị {start} đến {end} trong số {count} nhân vật', {
+        start,
+        end,
+        count: filteredChars.length
+    });
 }
 
 function changeDigitalPage(page) {
@@ -262,18 +281,18 @@ function changeDigitalPage(page) {
     renderDigitalTable();
 }
 
-// ─── Search/Delete/Form ───────────────────────────────────────────────────────
 function initDigitalSearch() {
     const input = document.querySelector('.search-field-shared input');
     if (!input) return;
 
     input.addEventListener('input', () => {
         const q = input.value.toLowerCase().trim();
+        isSearching = q.length > 0;
         filteredChars = q
             ? characters.filter((c) =>
-                c.name.toLowerCase().includes(q)
-                || c.id.toLowerCase().includes(q)
-                || c.job.toLowerCase().includes(q)
+                c.name.toLowerCase().includes(q) ||
+                c.id.toLowerCase().includes(q) ||
+                c.job.toLowerCase().includes(q)
             )
             : [...characters];
 
@@ -285,17 +304,16 @@ function initDigitalSearch() {
 function confirmDeleteChar(id) {
     confirmModal({
         type: 'danger',
-        title: 'Xóa nhân vật số?',
-        message: `Hành động này không thể hoàn tác. Tất cả dữ
-liệu liên quan sẽ bị xóa vĩnh viễn.`,
+        title: t('Xóa nhân vật số?'),
+        message: t('Hành động này không thể hoàn tác. Tất cả dữ liệu liên quan sẽ bị xóa vĩnh viễn.'),
         onConfirm: async () => {
             try {
                 await fetch(`${API}/${id}`, { method: 'DELETE' });
                 await fetchDigitalCharacters();
-                showToastMessage('Đã xóa nhân vật thành công!');
+                showToastMessage(t('Đã xóa nhân vật thành công!'));
             } catch (error) {
                 console.error(error);
-                showToastMessage('Xóa thất bại!');
+                showToastMessage(t('Xóa thất bại!'));
             }
         }
     });
@@ -358,8 +376,8 @@ function initDigitalForm() {
 
     btnSave?.addEventListener('click', () => {
         confirmModal({
-            title: 'Xác nhận lưu',
-            message: 'Bạn có chắc chắn muốn lưu các thay đổi này không?',
+            title: t('Xác nhận lưu'),
+            message: t('Bạn có chắc chắn muốn lưu các thay đổi này không?'),
             onConfirm: async () => {
                 const pageMode = getCurrentDigitalPage();
                 const digitalId = document.getElementById('digitalId');
@@ -391,16 +409,16 @@ function initDigitalForm() {
                         const res = await fetch(API, { method: 'POST', body: form });
                         const json = await res.json();
                         if (!json?.success) {
-                            showToastMessage(json?.message || 'Thêm thất bại');
+                            showToastMessage(json?.message || t('Thêm thất bại'));
                             return;
                         }
-                        showToastMessage('Thêm thành công');
+                        showToastMessage(t('Thêm thành công'));
                     }
 
                     if (pageMode === 'digital-edit') {
                         const id = new URLSearchParams(window.location.search).get('id');
                         await fetch(`${API}/${id}`, { method: 'PUT', body: form });
-                        showToastMessage('Cập nhật thành công');
+                        showToastMessage(t('Cập nhật thành công'));
                     }
 
                     setTimeout(() => {
@@ -408,19 +426,18 @@ function initDigitalForm() {
                     }, 900);
                 } catch (error) {
                     console.error(error);
-                    showToastMessage('Lưu thất bại!');
+                    showToastMessage(t('Lưu thất bại!'));
                 }
             }
         });
     });
 
-    // Gender Switcher Logic
     const genderSwitcher = document.getElementById('genderSwitcher');
     const genderInput = document.getElementById('gender');
     if (genderSwitcher && genderInput) {
-        genderSwitcher.querySelectorAll('.gender-opt').forEach(opt => {
+        genderSwitcher.querySelectorAll('.gender-opt').forEach((opt) => {
             opt.addEventListener('click', () => {
-                genderSwitcher.querySelectorAll('.gender-opt').forEach(b => b.classList.remove('active'));
+                genderSwitcher.querySelectorAll('.gender-opt').forEach((b) => b.classList.remove('active'));
                 opt.classList.add('active');
                 genderInput.value = opt.dataset.value;
             });
@@ -430,18 +447,16 @@ function initDigitalForm() {
     initAvatarUpload();
 }
 
-// Backward-compatible wrappers (in case old markup still references these)
 function confirmAddChar() {
-    showToastMessage('Đã thêm nhân vật thành công!');
+    showToastMessage(t('Đã thêm nhân vật thành công!'));
     setTimeout(() => window.location.href = 'digital.html', 800);
 }
 
 function confirmEditChar() {
-    showToastMessage('Cập nhật thông tin thành công!');
+    showToastMessage(t('Cập nhật thông tin thành công!'));
     setTimeout(() => window.location.href = 'digital.html', 800);
 }
 
-// ─── Page init ────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
     const page = getCurrentDigitalPage();
 
@@ -468,5 +483,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (page === 'digital-edit') {
         const id = new URLSearchParams(window.location.search).get('id');
         await preloadDigitalForm(id);
+    }
+});
+
+document.addEventListener('care-ai-language-changed', async () => {
+    const page = getCurrentDigitalPage();
+    if (page === 'digital') {
+        characters = characters.map((c) => ({
+            ...c,
+            gender: (c.genderRaw === 1 || c.genderRaw === true || c.genderRaw === '1') ? t('Nam') : t('Nữ')
+        }));
+        filteredChars = filteredChars.map((c) => ({
+            ...c,
+            gender: (c.genderRaw === 1 || c.genderRaw === true || c.genderRaw === '1') ? t('Nam') : t('Nữ')
+        }));
+        renderDigitalTable();
+    }
+
+    if (page === 'digital-view') {
+        const id = new URLSearchParams(window.location.search).get('id');
+        await loadDigitalDetail(id);
     }
 });

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:Care_AI/api/chat_api.dart';
 import 'package:Care_AI/models/tr.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class ChatDetailScreen extends StatefulWidget {
   final String? hoiThoaiId;
@@ -26,7 +29,12 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   final TextEditingController controller = TextEditingController();
   final ScrollController scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
+  final ImagePicker _imagePicker = ImagePicker();
+  final stt.SpeechToText _speechToText = stt.SpeechToText();
 
+  bool _isListening = false;
+  bool _speechInitialized = false;
+  String _speechBaseText = '';
   bool _isFocused = false;
   bool _sending = false;
   bool loading = true;
@@ -56,6 +64,9 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
 
   @override
   void dispose() {
+    if (_isListening) {
+      _speechToText.stop();
+    }
     controller.dispose();
     scrollController.dispose();
     _focusNode.dispose();
@@ -63,6 +74,144 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   }
 
   /* ================= LOAD ================= */
+  void _showErrorSnackBar() {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(context.tr.errorOccurred),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  Future<void> _openCamera() async {
+    try {
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 85,
+      );
+
+      if (image == null || image.path.isEmpty) return;
+      if (!mounted) return;
+
+      setState(() {
+        messages.add({
+          "text": image.path,
+          "path": image.path,
+          "isUser": true,
+          "isImage": true,
+        });
+      });
+
+      scrollToBottom();
+    } catch (_) {
+      _showErrorSnackBar();
+    }
+  }
+
+  Future<bool> _ensureSpeechReady() async {
+    if (_speechInitialized) return true;
+
+    try {
+      final bool available = await _speechToText.initialize(
+        onStatus: (status) {
+          if (!mounted) return;
+
+          final bool listening = status == 'listening';
+
+          if (status == 'listening' ||
+              status == 'done' ||
+              status == 'notListening') {
+            setState(() {
+              _isListening = listening;
+            });
+          }
+        },
+        onError: (_) {
+          if (!mounted) return;
+          setState(() {
+            _isListening = false;
+          });
+        },
+        options: [stt.SpeechToText.androidNoBluetooth],
+      );
+
+      if (!available) return false;
+
+      _speechInitialized = true;
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  void _updateVoiceText(String recognizedWords) {
+    final String voiceText = recognizedWords.trim();
+
+    final String nextText = _speechBaseText.isEmpty
+        ? voiceText
+        : voiceText.isEmpty
+            ? _speechBaseText
+            : '$_speechBaseText $voiceText';
+
+    controller.value = TextEditingValue(
+      text: nextText,
+      selection: TextSelection.collapsed(offset: nextText.length),
+    );
+  }
+
+  Future<void> _stopListening() async {
+    try {
+      await _speechToText.stop();
+    } catch (_) {}
+
+    if (!mounted) return;
+
+    setState(() {
+      _isListening = false;
+    });
+  }
+
+  Future<void> _toggleVoiceToText() async {
+    if (_isListening) {
+      await _stopListening();
+      return;
+    }
+
+    final bool isReady = await _ensureSpeechReady();
+
+    if (!isReady) {
+      _showErrorSnackBar();
+      return;
+    }
+
+    _speechBaseText = controller.text.trim();
+
+    try {
+      await _speechToText.listen(
+        localeId: 'vi_VN',
+        onResult: (result) {
+          if (!mounted) return;
+          _updateVoiceText(result.recognizedWords);
+        },
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _isListening = true;
+      });
+    } catch (_) {
+      if (!mounted) return;
+
+      setState(() {
+        _isListening = false;
+      });
+
+      _showErrorSnackBar();
+    }
+  }
 
   Future<void> loadMessages() async {
     try {
@@ -165,7 +314,8 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
 
   Widget messageBubble(Map<String, dynamic> msg) {
     final isUser = msg["isUser"] == true;
-
+    final isImage = msg["isImage"] == true;
+    final double maxWidth = MediaQuery.of(context).size.width * 0.7;
     return Row(
       mainAxisAlignment:
           isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
@@ -173,12 +323,15 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         Flexible(
           child: Container(
             margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-            padding: const EdgeInsets.all(12),
-            constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width * 0.7,
-            ),
+            padding:
+                isImage ? const EdgeInsets.all(4) : const EdgeInsets.all(12),
+            constraints: BoxConstraints(maxWidth: maxWidth),
             decoration: BoxDecoration(
-              color: isUser ? Colors.blue : Colors.grey[300],
+              color: isImage
+                  ? Colors.transparent
+                  : isUser
+                      ? Colors.blue
+                      : Colors.grey[300],
               borderRadius: BorderRadius.circular(10),
             ),
             child: msg["isTyping"] == true
@@ -194,12 +347,21 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                       Text("Typing..."),
                     ],
                   )
-                : Text(
-                    msg["text"] ?? "",
-                    style: TextStyle(
-                      color: isUser ? Colors.white : Colors.black,
-                    ),
-                  ),
+                : isImage
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.file(
+                          File((msg["path"] ?? msg["text"] ?? "").toString()),
+                          width: maxWidth,
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                    : Text(
+                        msg["text"] ?? "",
+                        style: TextStyle(
+                          color: isUser ? Colors.white : Colors.black,
+                        ),
+                      ),
           ),
         ),
       ],
@@ -233,11 +395,14 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
             ),
             IconButton(
               icon: const Icon(Icons.camera_alt_outlined, color: Colors.blue),
-              onPressed: () => _focusNode.requestFocus(),
+              onPressed: _openCamera,
             ),
             IconButton(
-              icon: const Icon(Icons.mic_none, color: Colors.blue),
-              onPressed: () => _focusNode.requestFocus(),
+              icon: Icon(
+                _isListening ? Icons.mic : Icons.mic_none,
+                color: _isListening ? Colors.red : Colors.blue,
+              ),
+              onPressed: _toggleVoiceToText,
             ),
           ],
           Expanded(

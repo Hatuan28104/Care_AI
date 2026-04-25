@@ -1,11 +1,15 @@
 const API_BASE = 'https://careai-production.up.railway.app';
 
-function togglePassword() {
-    const input = document.getElementById("password");
-    const icon = document.getElementById("eyeIcon");
+function t(key) {
+    return window.I18n?.t(key) || key;
+}
 
-    const isHidden = input.type === "password";
-    input.type = isHidden ? "text" : "password";
+function togglePassword() {
+    const input = document.getElementById('password');
+    const icon = document.getElementById('eyeIcon');
+
+    const isHidden = input.type === 'password';
+    input.type = isHidden ? 'text' : 'password';
 
     if (icon) {
         icon.setAttribute('data-lucide', isHidden ? 'eye' : 'eye-off');
@@ -14,23 +18,23 @@ function togglePassword() {
 }
 
 async function login() {
-    const phone = document.getElementById("sdt").value.trim();
-    const password = document.getElementById("password").value.trim();
-    const error = document.getElementById("loginError");
+    const phone = document.getElementById('sdt').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const error = document.getElementById('loginError');
 
-    error.style.display = "none";
+    error.style.display = 'none';
 
     if (!phone || !password) {
-        error.innerText = "Vui lòng nhập số điện thoại và mật khẩu";
-        error.style.display = "block";
+        error.innerText = t('Vui lòng nhập số điện thoại và mật khẩu');
+        error.style.display = 'block';
         return;
     }
 
     try {
         const res = await fetch(`${API_BASE}/auth/admin/login`, {
-            method: "POST",
+            method: 'POST',
             headers: {
-                "Content-Type": "application/json"
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 sodienthoai: phone,
@@ -41,16 +45,19 @@ async function login() {
         const data = await res.json();
 
         if (!data.success) {
-            throw new Error(data.message || "Đăng nhập thất bại");
+            throw new Error(data.message || t('Đăng nhập thất bại'));
         }
 
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user_phone", phone);
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user_phone', phone);
 
-        window.location.href = "../dashboard/dashboard.html";
-
+        window.location.href = '../dashboard/dashboard.html';
     } catch (err) {
         error.innerText = err.message;
-        error.style.display = "block";
+        error.style.display = 'block';
     }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    window.I18n?.init?.();
+});
