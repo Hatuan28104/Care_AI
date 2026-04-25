@@ -1,5 +1,12 @@
-import { sendNotification, sendToAll, markAsRead, deleteNotification, getAlerts, getAdminAlerts } from "../repos/notification.repo.js";
-
+import {
+  sendNotification,
+  sendToAll,
+  markAsRead,
+  deleteNotification,
+  getAlerts,
+  getAdminAlerts,
+  getHealthAlerts
+} from "../repos/notification.repo.js";
 export const handleTestNotification = async (userId) => {
   await sendNotification(userId, "Test tự động 🔥", "Backend tự gửi nè!");
   return { success: true };
@@ -27,5 +34,9 @@ export const handleDeleteNotification = async (userId, id) => {
 
 export const handleGetAdminAlerts = async () => {
   const data = await getAdminAlerts();
+  return { success: true, data };
+};
+export const handleGetHealthAlerts = async (userId) => {
+  const data = await getHealthAlerts(userId);
   return { success: true, data };
 };

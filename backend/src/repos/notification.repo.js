@@ -233,11 +233,35 @@ export async function getAdminAlerts() {
 
   return (data || []).map(item => {
     const joinedUserId = item.tinnhan?.hoithoai?.nguoidung_id;
-    
+
     return {
       ...item,
       nguoiDungId: item.nguoidung_id || joinedUserId || null,
       thoigian: item.thoigiancanhbao ? new Date(item.thoigiancanhbao).toISOString() : ""
     };
   });
+}
+export async function getHealthAlerts(userId) {
+  const db = getDB();
+
+  const { data, error } = await db
+    .from("thongbao")
+    .select(`
+      thongbao_id,
+      tieude,
+      noidung,
+      thoigian,
+      dadoc,
+      type
+    `)
+    .eq("nguoidung_id", userId)
+    .eq("type", "HEALTH")
+    .order("thoigian", { ascending: false });
+
+  if (error) throw error;
+
+  return (data || []).map(item => ({
+    ...item,
+    thoigian: item.thoigian ? new Date(item.thoigian).toISOString() : ""
+  }));
 }

@@ -39,7 +39,20 @@ router.post("/read/:id", auth, async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 });
-
+router.get("/health", auth, async (req, res) => {
+  try {
+    const response = await notificationService.handleGetHealthAlerts(
+      req.user.nguoidung_id
+    );
+    res.json(response);
+  } catch (err) {
+    console.error("HEALTH ALERT ERROR:", err);
+    res.status(500).json({
+      success: false,
+      message: "Không lấy được cảnh báo sức khỏe",
+    });
+  }
+});
 router.delete("/:id", auth, async (req, res) => {
   try {
     const response = await notificationService.handleDeleteNotification(req.user.nguoidung_id, req.params.id);
