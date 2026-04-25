@@ -22,7 +22,8 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-
+/* ===== STATIC ===== */
+app.use("/uploads", express.static("uploads"));
 /* ===== ROUTES ===== */
 app.use("/profile", profileRoute);
 app.use("/notification", notificationRoute);
@@ -34,9 +35,6 @@ app.use("/api/digital-human", digitalHumanRoute);
 app.use("/api/settings", settingsRoute);
 app.use("/health", healthMetricRoute);
 app.use("/auth", authRoute);
-
-/* ===== STATIC ===== */
-app.use("/uploads", express.static("uploads"));
 
 /* ===== ROOT ===== */
 app.get("/", (req, res) => {

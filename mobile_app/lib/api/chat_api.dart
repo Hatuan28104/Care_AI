@@ -2,6 +2,9 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:Care_AI/config/api_config.dart';
 import 'api_exception.dart';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 class ChatApi {
   static String get baseUrl => "${ApiConfig.baseUrl}/api/chat";
@@ -15,15 +18,19 @@ class ChatApi {
   ========================= */
 
   static Future<Map<String, dynamic>> sendMessage({
-    required String message,
+    String message = "",
     required String userId,
     required String digitalId,
     String? hoiThoaiId,
+    String loaiTinNhan = "text",
+    String? mediaUrl,
   }) async {
     final Map<String, dynamic> body = {
       "message": message.trim(),
       "userId": userId,
       "digitalId": digitalId,
+      "loaiTinNhan": loaiTinNhan,
+      "mediaUrl": mediaUrl,
     };
 
     if (hoiThoaiId != null && hoiThoaiId.isNotEmpty) {
@@ -58,6 +65,52 @@ class ChatApi {
     }
   }
 
+  static Future<String> uploadChatImage(String imagePath) async {
+    try {
+      final uri = Uri.parse("${ApiConfig.baseUrl}/api/upload/chat-image");
+
+      final request = http.MultipartRequest("POST", uri);
+
+      request.files.add(
+        await http.MultipartFile.fromPath("image", imagePath),
+      );
+
+      final streamed =
+          await request.send().timeout(const Duration(seconds: 30));
+      final res = await http.Response.fromStream(streamed);
+
+      debugPrint("UPLOAD STATUS: ${res.statusCode}");
+      debugPrint("UPLOAD BODY: ${res.body}");
+
+      final decoded = _decodeBody(res.body);
+
+      if (res.statusCode != 200 || decoded["success"] != true) {
+        throw ApiException(
+          (decoded["message"] ?? res.body).toString(),
+          statusCode: res.statusCode,
+        );
+      }
+
+      final mediaUrl = (decoded["mediaUrl"] ??
+              decoded["url"] ??
+              decoded["imageUrl"] ??
+              decoded["data"]?["mediaUrl"] ??
+              decoded["data"]?["url"] ??
+              "")
+          .toString();
+
+      if (mediaUrl.isEmpty) {
+        throw ApiException("BE không trả mediaUrl: ${res.body}");
+      }
+
+      return mediaUrl;
+    } catch (e) {
+      debugPrint("UPLOAD ERROR RAW: $e");
+
+      if (e is ApiException) rethrow;
+      throw ApiException("Không thể upload ảnh: $e");
+    }
+  }
   /* =========================
       GET HISTORY
   ========================= */
@@ -135,6 +188,9 @@ class ChatApi {
           "noidung": row["noidung"]?.toString() ?? "",
           "ladigital": row["ladigital"] == true,
           "thoigiangui": row["thoigiangui"]?.toString() ?? "",
+          "loai_tin_nhan": row["loai_tin_nhan"]?.toString() ?? "text",
+          "media_url":
+              row["media_url"] == null ? null : row["media_url"].toString(),
         };
       }).toList();
     } catch (e) {

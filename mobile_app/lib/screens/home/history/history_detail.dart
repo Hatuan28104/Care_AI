@@ -97,15 +97,40 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
 
       setState(() {
         messages.add({
-          "text": image.path,
+          "text": "",
           "path": image.path,
           "isUser": true,
           "isImage": true,
         });
+        messages.add({"isTyping": true});
       });
 
       scrollToBottom();
-    } catch (_) {
+
+      final mediaUrl = await ChatApi.uploadChatImage(image.path);
+
+      final response = await ChatApi.sendMessage(
+        message: "",
+        userId: widget.userId,
+        digitalId: widget.digitalId,
+        hoiThoaiId: conversationId,
+        loaiTinNhan: "image",
+        mediaUrl: mediaUrl,
+      );
+
+      if ((response["hoi_thoai_id"] ?? "").toString().isNotEmpty) {
+        conversationId = response["hoi_thoai_id"];
+      }
+
+      setState(() {
+        messages.removeWhere((m) => m["isTyping"] == true);
+        messages.last["media_url"] = mediaUrl;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        messages.removeWhere((m) => m["isTyping"] == true);
+      });
       _showErrorSnackBar();
     }
   }
@@ -220,9 +245,16 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
       final list = data.map<Map<String, dynamic>>((msg) {
         final laDigital = msg["ladigital"] == true;
 
+        final loaiTinNhan = (msg["loai_tin_nhan"] ?? "text").toString();
+        final mediaUrl =
+            msg["media_url"] == null ? null : msg["media_url"].toString();
+
         return {
           "text": (msg["noidung"] ?? "").toString(),
           "isUser": !laDigital,
+          "isImage": loaiTinNhan == "image",
+          "loai_tin_nhan": loaiTinNhan,
+          "media_url": mediaUrl,
         };
       }).toList();
 
@@ -314,7 +346,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
 
   Widget messageBubble(Map<String, dynamic> msg) {
     final isUser = msg["isUser"] == true;
-    final isImage = msg["isImage"] == true;
+    final isImage = msg["isImage"] == true || msg["loai_tin_nhan"] == "image";
     final double maxWidth = MediaQuery.of(context).size.width * 0.7;
     return Row(
       mainAxisAlignment:
@@ -350,10 +382,46 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                 : isImage
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(10),
-                        child: Image.file(
-                          File((msg["path"] ?? msg["text"] ?? "").toString()),
-                          width: maxWidth,
-                          fit: BoxFit.cover,
+                        child: Builder(
+                          builder: (_) {
+                            final path = (msg["path"] ?? "").toString();
+                            final mediaUrl =
+                                (msg["media_url"] ?? "").toString();
+
+                            if (mediaUrl.isNotEmpty) {
+                              return Image.network(
+                                mediaUrl,
+                                width: maxWidth,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Container(
+                                  width: maxWidth,
+                                  height: 180,
+                                  alignment: Alignment.center,
+                                  color: Colors.grey[300],
+                                  child: Text(
+                                    context.tr.errorOccurred,
+                                    style: const TextStyle(color: Colors.black),
+                                  ),
+                                ),
+                              );
+                            }
+
+                            return Image.file(
+                              File(path),
+                              width: maxWidth,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => Container(
+                                width: maxWidth,
+                                height: 180,
+                                alignment: Alignment.center,
+                                color: Colors.grey[300],
+                                child: Text(
+                                  context.tr.errorOccurred,
+                                  style: const TextStyle(color: Colors.black),
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       )
                     : Text(

@@ -97,18 +97,50 @@ class _ChatScreenState extends State<ChatScreen> {
       if (image == null || image.path.isEmpty) return;
       if (!mounted) return;
 
+      // hiển thị tạm
       setState(() {
         messages.add({
-          "text": image.path,
+          "text": "",
           "path": image.path,
           "isUser": true,
           "isImage": true,
         });
+        messages.add({"isTyping": true});
       });
 
       _scrollToBottom();
-    } catch (_) {
-      _showErrorSnackBar();
+
+      // 🔥 1. upload ảnh
+      final mediaUrl = await ChatApi.uploadChatImage(image.path);
+
+      // 🔥 2. gửi BE
+      final response = await ChatApi.sendMessage(
+        message: "",
+        userId: widget.userId,
+        digitalId: widget.digitalId,
+        hoiThoaiId: _conversationId,
+        loaiTinNhan: "image",
+        mediaUrl: mediaUrl,
+      );
+
+      _conversationId = response["hoi_thoai_id"];
+
+      // 🔥 3. update message → dùng URL server
+      setState(() {
+        messages.removeWhere((m) => m["isTyping"] == true);
+        messages.last["media_url"] = mediaUrl;
+      });
+    } catch (e) {
+      debugPrint("SEND IMAGE ERROR: $e");
+
+      if (!mounted) return;
+      setState(() {
+        messages.removeWhere((m) => m["isTyping"] == true);
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
     }
   }
 
@@ -286,7 +318,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget buildMessage(Map<String, dynamic> msg) {
     final isUser = msg["isUser"] == true;
-    final isImage = msg["isImage"] == true;
+    final isImage = msg["isImage"] == true || msg["loai_tin_nhan"] == "image";
     final double maxWidth = MediaQuery.of(context).size.width * 0.70;
 
     return Row(
@@ -297,12 +329,17 @@ class _ChatScreenState extends State<ChatScreen> {
         Flexible(
           child: Container(
             margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-            padding: isImage ? const EdgeInsets.all(4) : const EdgeInsets.all(12),
+            padding:
+                isImage ? const EdgeInsets.all(4) : const EdgeInsets.all(12),
             constraints: BoxConstraints(
               maxWidth: maxWidth,
             ),
             decoration: BoxDecoration(
-              color: isImage ? Colors.transparent : isUser ? Colors.blue : Colors.grey[300],
+              color: isImage
+                  ? Colors.transparent
+                  : isUser
+                      ? Colors.blue
+                      : Colors.grey[300],
               borderRadius: BorderRadius.circular(10),
             ),
             child: msg["isTyping"] == true
@@ -316,20 +353,46 @@ class _ChatScreenState extends State<ChatScreen> {
                 : isImage
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(10),
-                        child: Image.file(
-                          File((msg["path"] ?? msg["text"] ?? "").toString()),
-                          width: maxWidth,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
-                            width: maxWidth,
-                            height: 180,
-                            alignment: Alignment.center,
-                            color: Colors.grey[300],
-                            child: Text(
-                              context.tr.errorOccurred,
-                              style: const TextStyle(color: Colors.black),
-                            ),
-                          ),
+                        child: Builder(
+                          builder: (_) {
+                            final path = (msg["path"] ?? "").toString();
+                            final mediaUrl =
+                                (msg["media_url"] ?? "").toString();
+
+                            if (mediaUrl.isNotEmpty) {
+                              return Image.network(
+                                mediaUrl,
+                                width: maxWidth,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Container(
+                                  width: maxWidth,
+                                  height: 180,
+                                  alignment: Alignment.center,
+                                  color: Colors.grey[300],
+                                  child: Text(
+                                    context.tr.errorOccurred,
+                                    style: const TextStyle(color: Colors.black),
+                                  ),
+                                ),
+                              );
+                            }
+
+                            return Image.file(
+                              File(path),
+                              width: maxWidth,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => Container(
+                                width: maxWidth,
+                                height: 180,
+                                alignment: Alignment.center,
+                                color: Colors.grey[300],
+                                child: Text(
+                                  context.tr.errorOccurred,
+                                  style: const TextStyle(color: Colors.black),
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       )
                     : Text(

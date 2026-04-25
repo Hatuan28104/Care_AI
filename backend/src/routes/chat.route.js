@@ -1,8 +1,17 @@
 import express from "express";
 import * as chatService from "../services/chat.service.js";
-
+import multer from "multer";
+import path from "path";
 const router = express.Router();
+const storage = multer.diskStorage({
+  destination: "uploads/",
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname || ".jpg");
+    cb(null, `chat_${Date.now()}${ext}`);
+  },
+});
 
+const upload = multer({ storage });
 router.post("/", async (req, res) => {
   try {
     const {
@@ -65,5 +74,27 @@ router.get("/conversations", async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 });
+router.post("/upload-image", upload.single("image"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Thiếu file ảnh",
+      });
+    }
 
+    const mediaUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+
+    res.json({
+      success: true,
+      mediaUrl,
+    });
+  } catch (error) {
+    console.error("UPLOAD IMAGE ERROR:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
 export default router;
