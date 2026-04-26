@@ -78,7 +78,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get healthData => '健康データ';
 
   @override
-  String get stressTitle => 'Stress Prediction';
+  String get stressTitle => 'Stress Level';
 
   @override
   String get value => '値';
@@ -803,6 +803,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get fullNameExample => '山田 太郎';
 
   @override
+  String get invalidName => 'Name cannot contain numbers or special characters';
+
+  @override
   String get updatePhoto => '写真を更新';
 
   @override
@@ -1034,6 +1037,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get year => '年';
 
   @override
+  String get stressPrediction => 'Stress Prediction';
+
+  @override
   String get stressDesc => 'CareAI is monitoring your biological signals closely.';
 
   @override
@@ -1044,4 +1050,27 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get stress => 'STRESSED';
+
+  @override
+  String get stressLowDesc => 'You are in a fairly relaxed state.\nContinue maintaining this pace with a light activity like listening to music or taking a walk.\nYour body is doing great.';
+
+  @override
+  String get stressMidDesc => 'You show signs of being slightly stressed.\nTake a few minutes to breathe deeply and relax your body.\nA short break can help you regain balance.';
+
+  @override
+  String get stressHighDesc => 'You are at a high stress level.\nPlease stop and give yourself time to rest.\nTry closing your eyes, breathing slowly, and focusing on your body.\nYou don\'t need to push yourself right now.';
+
+  @override
+  String get stressCalibrationTitle => 'Note';
+
+  @override
+  String get stressCalibrationContent => 'CareAI needs data from at least 3 days within the last week to understand your circadian rhythm and \'baseline\'. Accumulating enough data helps Stress analysis results achieve the highest accuracy.';
+
+  @override
+  String get stressCalibrationButton => 'Understood';
+
+  @override
+  String stressCalibrationBadge(Object days) {
+    return 'Analyzing data ($days/3 days)';
+  }
 }

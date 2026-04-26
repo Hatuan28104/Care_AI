@@ -67,8 +67,7 @@ class ChatApi {
 
   static Future<String> uploadChatImage(String imagePath) async {
     try {
-      final uri = Uri.parse("${ApiConfig.baseUrl}/api/upload/chat-image");
-
+      final uri = Uri.parse("${ApiConfig.baseUrl}/api/chat/upload-image");
       final request = http.MultipartRequest("POST", uri);
 
       request.files.add(

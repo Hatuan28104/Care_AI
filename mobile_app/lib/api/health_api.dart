@@ -246,13 +246,13 @@ class HealthApi {
     }).toList();
   }
 
-  static Future<List<dynamic>> getLatestHealthDataByUser() async {
+  static Future<Map<String, dynamic>> getLatestHealthDataByUser() async {
     final res = await http
         .get(
           Uri.parse('$_baseUrl/health/data/latest/user'),
           headers: await _authHeaders(),
         )
-        .timeout(const Duration(seconds: 8));
+        .timeout(const Duration(seconds: 30));
 
     final data = _decodeBody(res.body);
 
@@ -262,12 +262,18 @@ class HealthApi {
     }
 
     final list = data['data'] as List? ?? [];
+    final calibrationDays = (data['calibration_days'] as num?)?.toInt() ?? 0;
 
-    return list.map((e) {
+    final normalizedList = list.map((e) {
       if (e is Map<String, dynamic>) return _normalizeHealthData(e);
       if (e is Map) return _normalizeHealthData(Map<String, dynamic>.from(e));
       return {};
     }).toList();
+
+    return {
+      'data': normalizedList,
+      'calibration_days': calibrationDays,
+    };
   }
 
   /* =========================
@@ -353,7 +359,8 @@ class HealthApi {
     return _normalizePhanTichAi(const <String, dynamic>{});
   }
 
-  static Future<Map<String, dynamic>> analyzeStressByDevice(String deviceId) async {
+  static Future<Map<String, dynamic>> analyzeStressByDevice(
+      String deviceId) async {
     final res = await http
         .post(
           Uri.parse('$_baseUrl/health/analyze-stress/$deviceId'),

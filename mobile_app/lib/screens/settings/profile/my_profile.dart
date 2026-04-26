@@ -67,6 +67,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   final _genderCtrl = TextEditingController();
   String? _avatarNetworkUrl;
   Map<String, String> _formErrors = {};
+  final _formKey = GlobalKey<FormState>();
 
   String? _gender;
 
@@ -213,6 +214,8 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
         return;
       }
 
+      if (!(_formKey.currentState?.validate() ?? false)) return;
+
       await profile_api.ProfileApi.updateProfile(
         nguoiDungId: userId,
         tenND: _nameCtrl.text.trim(),
@@ -262,8 +265,11 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 18),
-          child: Column(
-            children: [
+          child: Form(
+            key: _formKey,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            child: Column(
+              children: [
               const SizedBox(height: 10),
               _profileCard(),
               const SizedBox(height: 14),
@@ -276,6 +282,15 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                       controller: _nameCtrl,
                       required: true,
                       readOnly: !_isEditing,
+                      validator: (v) {
+                        if (!_isEditing) return null;
+                        final s = (v ?? '').trim();
+                        if (s.isEmpty) return context.tr.fullNameRequired;
+                        if (!RegExp(r'^[a-zA-ZÀ-ỹ\s]+$').hasMatch(s)) {
+                          return context.tr.invalidName;
+                        }
+                        return null;
+                      },
                     ),
                     const SizedBox(height: 10),
                     _input(
@@ -347,8 +362,9 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   // ===== APPBAR =====
   PreferredSizeWidget _appBar() {
@@ -492,6 +508,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     TextInputType keyboardType = TextInputType.text,
     String? suffixText,
     Widget? suffixIcon,
+    String? Function(String?)? validator,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -549,7 +566,10 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
 
             enabledBorder: _outline(_borderBlue, 1.2),
             focusedBorder: _outline(_borderBlue, 1.6),
+            errorBorder: _outline(Colors.red, 1.2),
+            focusedErrorBorder: _outline(Colors.red, 1.6),
           ),
+          validator: validator,
           onChanged: (_) {
             final key = _mapLabelToKey(label);
             if (_formErrors.containsKey(key)) {

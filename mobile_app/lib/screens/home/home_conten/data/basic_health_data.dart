@@ -83,7 +83,8 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
   /// =========================
   Future<void> _loadLatestHealthData() async {
     try {
-      final data = await HealthApi.getLatestHealthDataByUser();
+      final response = await HealthApi.getLatestHealthDataByUser();
+      final List<dynamic> data = response['data'] ?? [];
 
       // Sort newest first
       data.sort((a, b) {

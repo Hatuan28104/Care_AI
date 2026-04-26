@@ -78,7 +78,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get healthData => 'Dữ liệu sức khỏe';
 
   @override
-  String get stressTitle => 'Dự đoán mức độ căng thẳng';
+  String get stressTitle => 'Mức độ căng thẳng';
 
   @override
   String get value => 'Giá trị';
@@ -126,7 +126,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get meditationGuide => 'Hướng dẫn thiền';
 
   @override
-  String get digitalHumanSection => 'Digital Human';
+  String get digitalHumanSection => 'Nhân vật số';
 
   @override
   String get viewAll => 'Tất cả';
@@ -803,6 +803,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get fullNameExample => 'Nguyễn Văn A';
 
   @override
+  String get invalidName => 'Tên không được chứa số hoặc ký tự đặc biệt';
+
+  @override
   String get updatePhoto => 'Cập nhật ảnh';
 
   @override
@@ -1034,6 +1037,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get year => 'Năm';
 
   @override
+  String get stressPrediction => 'Dự đoán mức độ căng thẳng';
+
+  @override
   String get stressDesc => 'Hệ thống CareAI đang theo dõi sát sao các chỉ số sinh học của bạn.';
 
   @override
@@ -1044,4 +1050,27 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get stress => 'CĂNG THẲNG';
+
+  @override
+  String get stressLowDesc => 'Bạn đang ở trạng thái khá thư giãn. Hãy tiếp tục duy trì nhịp này bằng một hoạt động nhẹ như nghe nhạc hoặc đi dạo. Cơ thể bạn đang làm rất tốt.';
+
+  @override
+  String get stressMidDesc => 'Bạn có dấu hiệu đang hơi căng thẳng. Hãy dành vài phút để hít thở sâu và thả lỏng cơ thể. Một khoảng nghỉ ngắn có thể giúp bạn cân bằng lại.';
+
+  @override
+  String get stressHighDesc => 'Bạn đang ở mức căng thẳng cao. Hãy tạm dừng lại và cho bản thân thời gian nghỉ ngơi. Thử nhắm mắt, hít thở chậm và tập trung vào cơ thể. Bạn không cần phải cố gắng ngay lúc này.';
+
+  @override
+  String get stressCalibrationTitle => 'Lưu ý';
+
+  @override
+  String get stressCalibrationContent => 'CareAI cần dữ liệu của ít nhất 3 ngày trong vòng 1 tuần gần nhất để hiểu rõ nhịp sinh học và \'đường cơ sở\' của bạn. Việc tích lũy đủ dữ liệu giúp kết quả phân tích Stress đạt độ chính xác cao nhất.';
+
+  @override
+  String get stressCalibrationButton => 'Đã hiểu';
+
+  @override
+  String stressCalibrationBadge(Object days) {
+    return 'Đang phân tích dữ liệu ($days/3 ngày)';
+  }
 }

@@ -12,6 +12,7 @@ import 'help_support.dart';
 import 'package:Care_AI/api/settings_api.dart';
 import 'package:Care_AI/api/auth_storage.dart';
 import 'package:Care_AI/models/tr.dart';
+import 'package:Care_AI/widgets/common_confirm_dialog.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -42,7 +43,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       final data = await SettingsApi.getSettings();
 
       AppSettings.thongbao.value = data['thongbao'];
-
     } catch (e) {
       print("Load settings lỗi: $e");
     }
@@ -119,7 +119,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ]),
                     _section(context.tr.device),
-               
                     _card([
                       _item(
                         icon: Icons.volume_up_outlined,
@@ -271,14 +270,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
       height: 48,
       child: ElevatedButton(
         onPressed: () async {
-          await AuthStorage.clear();
-          await FirebaseMessaging.instance.deleteToken();
-
-          Navigator.pushAndRemoveUntil(
+          final ok = await showConfirmDialog(
             context,
-            MaterialPageRoute(builder: (_) => const WelcomeScreen()),
-            (_) => false,
+            title: "Đăng xuất",
+            message: "Đăng xuất khỏi tài khoản của bạn?",
+            confirmText: "Đăng xuất",
+            cancelText: "Hủy",
           );
+
+          if (ok == true) {
+            await AuthStorage.clear();
+            await FirebaseMessaging.instance.deleteToken();
+
+            if (context.mounted) {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+                (_) => false,
+              );
+            }
+          }
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: _blue,

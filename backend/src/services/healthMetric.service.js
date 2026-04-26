@@ -138,9 +138,22 @@ export const handleGetLatestUserData = async (user) => {
   const nguoiDungId = user?.NguoiDung_ID || user?.nguoidung_id;
   if (!nguoiDungId) throw new Error("Chưa đăng nhập");
 
-  const data = await getLatestHealthDataByUser(nguoiDungId);
-  return { success: true, data };
+  const [data, inputData] = await Promise.all([
+    getLatestHealthDataByUser(nguoiDungId),
+    getStressInputData(nguoiDungId)
+  ]);
+  
+  console.log(`[STRESS_DEBUG] Full inputData:`, JSON.stringify(inputData));
+  
+  return { 
+    success: true, 
+    data, 
+    calibration_days: Math.floor(inputData.calibration_days || 0),
+    debug_row_count: inputData.debug_row_count || 0,
+    debug_first_row: inputData.debug_first_row || null
+  };
 };
+
 
 export const handleGetLatestAIInsight = async (user) => {
   const nguoiDungId = user?.NguoiDung_ID || user?.nguoidung_id;
@@ -171,39 +184,29 @@ export const handleGetReport = async (user, quanHeId, type) => {
 
 export const handleAnalyzeStress = async (user) => {
   const nguoiDungId = user?.NguoiDung_ID || user?.nguoidung_id;
-  if (!nguoiDungId) throw new Error("Chưa đăng nhập");
 
-  // 1. Lấy dữ liệu đầu vào (HRV, HR, Sleep, Steps) dựa trên người dùng
   const inputData = await getStressInputData(nguoiDungId);
+  
+  const stressScore = calculateStress(inputData);
 
-  // 2. Gọi AI Stress
-  const aiRes = await callStressAI(nguoiDungId, inputData);
-  if (!aiRes || aiRes.stress === undefined) {
-    throw new Error("Không nhận được kết quả từ AI Stress");
-  }
-
-  const stressScore = aiRes.stress;
-
-  // 3. Lưu vào bảng dulieusuckhoe
-  console.log(`[Stress] Saving for user ${nguoiDungId}, score ${stressScore}`);
-
-  const savedRow = await saveHealthData({
+  await saveHealthData({
     nguoidung_id: nguoiDungId,
     loaichiso_id: "CS016",
     giatri: stressScore,
-    nguondulieu_id: null // Stress là chỉ số tính toán, không gắn với 1 thiết bị cụ thể
+    thoigiancapnhat: new Date().toISOString(),
+    nguondulieu_id: null 
   });
 
-  await checkAndSendHealthAlert(nguoiDungId, [savedRow]);
-
-  return {
-    success: true,
-    data: {
+  return { 
+    success: true, 
+    data: { 
       stress: stressScore,
-      thoigian: new Date().toISOString()
-    }
+      thoigian: new Date().toISOString(),
+      calibration_days: Math.floor(inputData.calibration_days || 0)
+    } 
   };
 };
+
 async function checkAndSendHealthAlert(userId, savedRows = []) {
   if (!Array.isArray(savedRows)) return;
   for (const row of savedRows) {

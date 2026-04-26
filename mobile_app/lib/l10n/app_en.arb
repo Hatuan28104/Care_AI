@@ -263,6 +263,7 @@
   "heightRequired": "Height is required.",
   "errorOccurred": "An error occurred",
   "fullNameExample": "John Doe",
+  "invalidName": "Name cannot contain numbers or special characters",
   "updatePhoto": "Update photo",
   "invalidHeightWeight": "Invalid height / weight",
   "invalidGender": "Please select a valid gender",
@@ -422,10 +423,17 @@
   "save": "Save",
   "saved": "Saved successfully",
   "year": "Year",
-    "stressTitle": "Stress Prediction",
+  "stressPrediction": "Stress Prediction",
+  "stressTitle": "Stress Level",
   "stressDesc": "CareAI is monitoring your biological signals closely.",
   "good": "GOOD",
   "stable": "STABLE",
-  "stress": "STRESSED"
-  
+  "stress": "STRESSED",
+  "stressLowDesc": "You are in a fairly relaxed state.\nContinue maintaining this pace with a light activity like listening to music or taking a walk.\nYour body is doing great.",
+  "stressMidDesc": "You show signs of being slightly stressed.\nTake a few minutes to breathe deeply and relax your body.\nA short break can help you regain balance.",
+  "stressHighDesc": "You are at a high stress level.\nPlease stop and give yourself time to rest.\nTry closing your eyes, breathing slowly, and focusing on your body.\nYou don't need to push yourself right now.",
+  "stressCalibrationTitle": "Note",
+  "stressCalibrationContent": "CareAI needs data from at least 3 days within the last week to understand your circadian rhythm and 'baseline'. Accumulating enough data helps Stress analysis results achieve the highest accuracy.",
+  "stressCalibrationButton": "Understood",
+  "stressCalibrationBadge": "Analyzing data ({days}/3 days)"
 }

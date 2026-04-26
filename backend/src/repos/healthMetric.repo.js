@@ -563,20 +563,20 @@ export async function getLatestAIInsight(nguoidung_id) {
 export async function getStressInputData(nguoiDungId) {
   const db = getDB();
 
-  const targetMetricIds = ["CS008", "CS001", "CS037", "CS004"];
+  const targetMetricIds = ["CS008", "CS001", "CS037", "CS004"]; 
 
   const { data, error } = await db
     .from("dulieusuckhoe")
     .select("loaichiso_id, giatri, thoigiancapnhat")
     .eq("nguoidung_id", nguoiDungId)
     .in("loaichiso_id", targetMetricIds)
+    .gte("thoigiancapnhat", new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString())
     .order("thoigiancapnhat", { ascending: false })
-    .limit(200);
+    .limit(1000);
 
   if (error) throw error;
 
   const rows = data || [];
-
   const valuesByMetric = {
     CS008: [],
     CS001: [],
@@ -596,14 +596,44 @@ export async function getStressInputData(nguoiDungId) {
   const sleepSeries = valuesByMetric.CS037;
   const stepsSeries = valuesByMetric.CS004;
 
+  // Kiểm tra xem bước chân có phải của hôm nay không
+  let todaySteps = 0;
+  if (stepsSeries.length > 0) {
+    const latestStep = rows.find(r => r.loaichiso_id === 'CS004');
+    if (latestStep && latestStep.thoigiancapnhat) {
+      const stepDate = getVNDateString(new Date(latestStep.thoigiancapnhat));
+      const todayDate = getVNDateString();
+      if (stepDate === todayDate) {
+        todaySteps = Number(latestStep.giatri);
+      }
+    }
+  }
+
+  // Tính số ngày có dữ liệu trong 7 ngày gần nhất (rolling 7-day window)
+  const sevenDaysLimit = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  
+  const uniqueDays = new Set();
+  for (const row of rows) {
+    const rowDate = new Date(row.thoigiancapnhat);
+    if (rowDate >= sevenDaysLimit) {
+      const vnDateStr = getVNDateString(rowDate);
+      uniqueDays.add(vnDateStr);
+    }
+  }
+  
+  const calibrationDays = Math.min(uniqueDays.size, 3);
+
   return {
     hrv_rmssd_ms: hrvSeries[0] ?? 35,
     resting_hr_bpm: hrSeries[0] ?? 70,
-    sleep_duration_hours: sleepSeries[0] ?? 7,
-    steps: stepsSeries[0] ?? 3000,
+    sleep_duration_hours: sleepSeries[0] ?? 7, 
+    steps: todaySteps, 
     hrv_history: hrvSeries.slice(1, 8).reverse(),
     sleep_history: sleepSeries.slice(1, 8).reverse(),
     hr_history: hrSeries.slice(1, 8).reverse(),
+    calibration_days: calibrationDays,
+    debug_row_count: rows.length,
+    debug_first_row: rows[0] || null
   };
 }
 

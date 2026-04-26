@@ -240,7 +240,7 @@ abstract class AppLocalizations {
   /// No description provided for @stressTitle.
   ///
   /// In en, this message translates to:
-  /// **'Stress Prediction'**
+  /// **'Stress Level'**
   String get stressTitle;
 
   /// No description provided for @value.
@@ -1683,6 +1683,12 @@ abstract class AppLocalizations {
   /// **'John Doe'**
   String get fullNameExample;
 
+  /// No description provided for @invalidName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name cannot contain numbers or special characters'**
+  String get invalidName;
+
   /// No description provided for @updatePhoto.
   ///
   /// In en, this message translates to:
@@ -2121,6 +2127,12 @@ abstract class AppLocalizations {
   /// **'Year'**
   String get year;
 
+  /// No description provided for @stressPrediction.
+  ///
+  /// In en, this message translates to:
+  /// **'Stress Prediction'**
+  String get stressPrediction;
+
   /// No description provided for @stressDesc.
   ///
   /// In en, this message translates to:
@@ -2144,6 +2156,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'STRESSED'**
   String get stress;
+
+  /// No description provided for @stressLowDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'You are in a fairly relaxed state.\nContinue maintaining this pace with a light activity like listening to music or taking a walk.\nYour body is doing great.'**
+  String get stressLowDesc;
+
+  /// No description provided for @stressMidDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'You show signs of being slightly stressed.\nTake a few minutes to breathe deeply and relax your body.\nA short break can help you regain balance.'**
+  String get stressMidDesc;
+
+  /// No description provided for @stressHighDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'You are at a high stress level.\nPlease stop and give yourself time to rest.\nTry closing your eyes, breathing slowly, and focusing on your body.\nYou don\'t need to push yourself right now.'**
+  String get stressHighDesc;
+
+  /// No description provided for @stressCalibrationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get stressCalibrationTitle;
+
+  /// No description provided for @stressCalibrationContent.
+  ///
+  /// In en, this message translates to:
+  /// **'CareAI needs data from at least 3 days within the last week to understand your circadian rhythm and \'baseline\'. Accumulating enough data helps Stress analysis results achieve the highest accuracy.'**
+  String get stressCalibrationContent;
+
+  /// No description provided for @stressCalibrationButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Understood'**
+  String get stressCalibrationButton;
+
+  /// No description provided for @stressCalibrationBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing data ({days}/3 days)'**
+  String stressCalibrationBadge(Object days);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

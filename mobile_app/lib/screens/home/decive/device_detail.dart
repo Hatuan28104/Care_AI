@@ -33,8 +33,8 @@ class DeviceDetailScreen extends StatefulWidget {
 class _DeviceDetailScreenState extends State<DeviceDetailScreen>
     with WidgetsBindingObserver {
   static const _bg = Color(0xFFF6F6F6);
-  // Trong app: polling 20s để ổn định, không quá 5s gây load quá mức.
-  static const _pollInterval = Duration(seconds: 20);
+
+  static const _pollInterval = Duration(minutes: 5);
 
   bool _loading = true;
   String? _error;
@@ -46,21 +46,21 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen>
   static final Map<String, dynamic> _lastGoodSummary = {};
 
   static const _fallbackDefinitions = {
-    'CS004': {'name': 'Số bước chân', 'unit': 'steps', 'category': 'activity'},
-    'CS023': {'name': 'Quãng đường', 'unit': 'km', 'category': 'activity'},
-    'CS005': {'name': 'Calo tiêu thụ', 'unit': 'kcal', 'category': 'activity'},
-    'CS001': {'name': 'Nhịp tim', 'unit': 'bpm', 'category': 'health'},
-    'CS003': {'name': 'Huyết áp', 'unit': 'mmHg', 'category': 'health'},
-    'CS018': {'name': 'SpO2', 'unit': '%', 'category': 'health'},
-    'CS006': {'name': 'Nhịp thở', 'unit': 'breaths/min', 'category': 'health'},
-    'CS021': {'name': 'Nhiệt độ cơ thể', 'unit': '°C', 'category': 'health'},
-    'CS037': {'name': 'Thời gian ngủ', 'unit': 'giờ', 'category': 'activity'},
-    'CS007': {'name': 'Nhịp tim nghỉ', 'unit': 'bpm', 'category': 'health'},
-    'CS008': {
-      'name': 'Biến thiên nhịp tim (HRV)',
-      'unit': 'ms',
-      'category': 'health'
+    'CS004': {'name': 'Số bước chân', 'unit': 'steps', 'category': 'hoạt động'},
+    'CS023': {'name': 'Quãng đường', 'unit': 'km', 'category': 'hoạt động'},
+    'CS005': {'name': 'Calo tiêu thụ', 'unit': 'kcal', 'category': 'hoạt động'},
+    'CS001': {'name': 'Nhịp tim', 'unit': 'bpm', 'category': 'sức khỏe'},
+    'CS003': {'name': 'Huyết áp', 'unit': 'mmHg', 'category': 'sức khỏe'},
+    'CS018': {'name': 'SpO2', 'unit': '%', 'category': 'sức khỏe'},
+    'CS006': {
+      'name': 'Nhịp thở',
+      'unit': 'breaths/min',
+      'category': 'sức khỏe'
     },
+    'CS021': {'name': 'Nhiệt độ cơ thể', 'unit': '°C', 'category': 'sức khỏe'},
+    'CS037': {'name': 'Thời gian ngủ', 'unit': 'giờ', 'category': 'hoạt động'},
+    'CS007': {'name': 'Nhịp tim nghỉ', 'unit': 'bpm', 'category': 'sức khỏe'},
+    'CS008': {'name': 'HRV', 'unit': 'ms', 'category': 'sức khỏe'},
   };
 
   @override
@@ -464,7 +464,6 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen>
               ],
             ),
           ),
-          const Icon(Icons.info_outline, color: Colors.black45),
         ],
       ),
     );

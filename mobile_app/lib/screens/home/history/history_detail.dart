@@ -376,7 +376,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       ),
                       SizedBox(width: 8),
-                      Text("Typing..."),
+                      Text("..."),
                     ],
                   )
                 : isImage
