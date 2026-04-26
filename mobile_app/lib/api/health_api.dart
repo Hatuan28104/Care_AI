@@ -255,11 +255,21 @@ class HealthApi {
         )
         .timeout(const Duration(seconds: 30));
 
+    debugPrint('[HealthApi latest user] status: ${res.statusCode}');
+    debugPrint('[HealthApi latest user] raw body: ${res.body}');
+
     final data = _decodeBody(res.body);
+    debugPrint('[HealthApi latest user] decoded: $data');
 
     if (res.statusCode != 200 || data['success'] != true) {
-      throw ApiException(data['message'] ?? "Lỗi latest user",
-          statusCode: res.statusCode);
+      final serverMessage =
+          data['message']?.toString() ?? 'Lỗi latest user';
+      final serverError = data['error']?.toString();
+
+      throw ApiException(
+        serverError == null ? serverMessage : '$serverMessage: $serverError',
+        statusCode: res.statusCode,
+      );
     }
 
     final list = data['data'] as List? ?? [];

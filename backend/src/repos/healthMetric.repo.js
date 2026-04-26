@@ -1,5 +1,5 @@
 import { getDB } from "../config/db.js";
-import { getVNStartOfDayUTC, getVNEndOfDayUTC } from "../utils/time.js";
+import { getVNStartOfDayUTC, getVNEndOfDayUTC, getVNDateString } from "../utils/time.js";
 
 /* =========================
    HELPER: normalize

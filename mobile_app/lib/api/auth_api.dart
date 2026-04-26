@@ -49,7 +49,7 @@ class AuthApi {
   }
 
   static String getLoginTime() {
-    return TimeService.nowLocalIso();
+    return TimeService.nowUtcIso();
   }
 
   /* =========================     REGISTER – GỬI OTP

@@ -1,28 +1,21 @@
+import 'package:flutter/foundation.dart';
+
 class TimeService {
-  static String nowLocalIso() {
-    return DateTime.now().toLocal().toIso8601String();
+  static String nowUtcIso() {
+    return DateTime.now().toUtc().toIso8601String();
   }
 
   static DateTime toLocal(String iso) {
     if (iso.isEmpty) return DateTime.now();
 
     try {
-      final parsed = DateTime.parse(iso);
+      final normalized = iso.endsWith('Z') || iso.contains('+')
+          ? iso
+          : '${iso}Z';
 
-      if (!iso.contains('Z') && !iso.contains('+')) {
-        return DateTime.utc(
-          parsed.year,
-          parsed.month,
-          parsed.day,
-          parsed.hour,
-          parsed.minute,
-          parsed.second,
-          parsed.millisecond,
-        ).toLocal();
-      }
-
-      return parsed.toLocal();
+      return DateTime.parse(normalized).toLocal();
     } catch (e) {
+      debugPrint('[TimeService] parse error: $iso => $e');
       return DateTime.now();
     }
   }
