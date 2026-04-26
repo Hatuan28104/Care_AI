@@ -186,10 +186,13 @@ class _StressScreenState extends State<StressScreen>
       // Sau khi AI tính xong và lưu vào DB, load lại toàn bộ để đồng bộ
       await _loadLatestMetrics();
     } on ApiException catch (e) {
+      debugPrint(
+          '[StressScreen] ApiException: ${e.message}, status: ${e.statusCode}');
       setState(() {
         _error = e.message;
       });
     } catch (e) {
+      debugPrint('[StressScreen] Unknown error: $e');
       setState(() {
         _error = 'Lỗi không xác định: $e';
       });

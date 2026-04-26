@@ -140,6 +140,7 @@ export async function getLatestHealthDataByDevice(thietBiId) {
 }
 export async function getLatestHealthDataByUser(nguoiDungId) {
   const db = getDB();
+  console.log("[latest-user] repo getLatestHealthDataByUser userId:", nguoiDungId);
 
   const { data, error } = await db
     .from("dulieusuckhoe")
@@ -156,11 +157,20 @@ export async function getLatestHealthDataByUser(nguoiDungId) {
     .eq("nguoidung_id", nguoiDungId)
     .order("thoigiancapnhat", { ascending: false });
 
-  if (error) throw error;
+  if (error) {
+    console.error("[latest-user] Supabase error:", error);
+    console.error("[latest-user] Supabase message:", error.message);
+    throw error;
+  }
+
+  console.log("[latest-user] Supabase data length:", data?.length ?? 0);
 
   const map = {};
 
   for (let item of data) {
+    if (!item.loaichisosuckhoe) {
+      console.log("[latest-user] missing loaichisosuckhoe relation:", item);
+    }
     const key = item.loaichisosuckhoe.loaichiso_id;
 
     if (!map[key]) {
@@ -574,7 +584,11 @@ export async function getStressInputData(nguoiDungId) {
     .order("thoigiancapnhat", { ascending: false })
     .limit(1000);
 
-  if (error) throw error;
+  if (error) {
+    console.error("[latest-user] Supabase stress input error:", error);
+    console.error("[latest-user] Supabase stress input message:", error.message);
+    throw error;
+  }
 
   const rows = data || [];
   const valuesByMetric = {

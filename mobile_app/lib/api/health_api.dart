@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 import 'auth_storage.dart';
 import 'package:Care_AI/config/api_config.dart';
 import 'api_exception.dart';
@@ -99,7 +100,7 @@ class HealthApi {
     final res = await http
         .get(Uri.parse('$_baseUrl/health/metrics'),
             headers: await _authHeaders())
-        .timeout(const Duration(seconds: 8));
+        .timeout(const Duration(seconds: 30));
 
     final data = _decodeBody(res.body);
 
@@ -228,7 +229,7 @@ class HealthApi {
           Uri.parse('$_baseUrl/health/data/latest/device/$deviceId'),
           headers: await _authHeaders(),
         )
-        .timeout(const Duration(seconds: 8));
+        .timeout(const Duration(seconds: 30));
 
     final data = _decodeBody(res.body);
 
@@ -290,7 +291,7 @@ class HealthApi {
               '$_baseUrl/health/history/$deviceId/$metricId?range=$range'),
           headers: await _authHeaders(),
         )
-        .timeout(const Duration(seconds: 8));
+        .timeout(const Duration(seconds: 30));
 
     final data = _decodeBody(res.body);
 
@@ -315,7 +316,7 @@ class HealthApi {
           Uri.parse('$_baseUrl/health/history/user/$metricId?range=$range'),
           headers: await _authHeaders(),
         )
-        .timeout(const Duration(seconds: 8));
+        .timeout(const Duration(seconds: 30));
 
     final data = _decodeBody(res.body);
 
@@ -339,7 +340,7 @@ class HealthApi {
           Uri.parse('$_baseUrl/health/ai-insight/latest'),
           headers: await _authHeaders(),
         )
-        .timeout(const Duration(seconds: 8));
+        .timeout(const Duration(seconds: 30));
 
     final decoded = _decodeBody(res.body);
 
@@ -361,16 +362,23 @@ class HealthApi {
 
   static Future<Map<String, dynamic>> analyzeStressByDevice(
       String deviceId) async {
+    debugPrint('[HealthAPI] Calling analyze-stress for device: $deviceId');
+
     final res = await http
         .post(
           Uri.parse('$_baseUrl/health/analyze-stress/$deviceId'),
           headers: await _authHeaders(),
         )
-        .timeout(const Duration(seconds: 15));
+        .timeout(const Duration(seconds: 30));
+
+    debugPrint('[HealthAPI] Response status: ${res.statusCode}');
+    debugPrint('[HealthAPI] Response body: ${res.body}');
 
     final data = _decodeBody(res.body);
 
     if (res.statusCode != 200 || data['success'] != true) {
+      debugPrint(
+          '[HealthAPI] Error detected - success: ${data['success']}, message: ${data['message']}');
       throw ApiException(data['message'] ?? "Lỗi phân tích stress",
           statusCode: res.statusCode);
     }

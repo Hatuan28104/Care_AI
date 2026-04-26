@@ -136,12 +136,15 @@ export const handleGetLatestDeviceData = async (deviceId) => {
 
 export const handleGetLatestUserData = async (user) => {
   const nguoiDungId = user?.NguoiDung_ID || user?.nguoidung_id;
+  console.log("[latest-user] service userId:", nguoiDungId);
   if (!nguoiDungId) throw new Error("Chưa đăng nhập");
 
+  console.log("[latest-user] service getLatestHealthDataByUser start");
   const [data, inputData] = await Promise.all([
     getLatestHealthDataByUser(nguoiDungId),
     getStressInputData(nguoiDungId)
   ]);
+  console.log("[latest-user] service latest data length:", data?.length ?? 0);
   
   console.log(`[STRESS_DEBUG] Full inputData:`, JSON.stringify(inputData));
   
@@ -187,7 +190,7 @@ export const handleAnalyzeStress = async (user) => {
 
   const inputData = await getStressInputData(nguoiDungId);
   
-  const stressScore = calculateStress(inputData);
+  const stressScore = await callStressAI(inputData);
 
   await saveHealthData({
     nguoidung_id: nguoiDungId,

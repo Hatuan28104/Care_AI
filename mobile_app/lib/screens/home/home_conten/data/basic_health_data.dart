@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Care_AI/api/api_exception.dart';
 import 'package:Care_AI/api/health_api.dart';
 import 'package:Care_AI/models/health_icon_mapper.dart';
 import 'package:Care_AI/models/tr.dart';
@@ -83,8 +84,18 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
   /// =========================
   Future<void> _loadLatestHealthData() async {
     try {
+      debugPrint('[BasicHealth] call API');
       final response = await HealthApi.getLatestHealthDataByUser();
+      debugPrint('[BasicHealth] response: $response');
       final List<dynamic> data = response['data'] ?? [];
+      debugPrint('[BasicHealth] data length: ${data.length}');
+
+      for (var d in data) {
+        final id = d['loaichiso_id'];
+        final value = d['giatri'];
+        final time = d['thoigiancapnhat'];
+        debugPrint('[BasicHealth] id=$id value=$value time=$time');
+      }
 
       // Sort newest first
       data.sort((a, b) {
@@ -141,8 +152,13 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
           }
         }
       });
-    } catch (e) {
-      debugPrint('[BasicHealth] Error: $e');
+    } on ApiException catch (e) {
+      debugPrint('[BasicHealth] api error: ${e.message}');
+      debugPrint('[BasicHealth] status: ${e.statusCode}');
+    } catch (e, stack) {
+      debugPrint('[BasicHealth] error: $e');
+      debugPrint('[BasicHealth] type: ${e.runtimeType}');
+      debugPrint('[BasicHealth] stack: $stack');
     }
   }
 

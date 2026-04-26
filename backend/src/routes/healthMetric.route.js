@@ -63,12 +63,22 @@ router.get("/data/latest/device/:deviceId", auth, async (req, res) => {
 });
 
 router.get("/data/latest/user", auth, async (req, res) => {
+  const userId = req.user?.NguoiDung_ID || req.user?.nguoidung_id;
+  console.log("[latest-user] user:", req.user);
+  console.log("[latest-user] userId:", userId);
+
   try {
     const response = await healthMetricService.handleGetLatestUserData(req.user);
     res.json(response);
   } catch (err) {
-    console.error(err);
-    res.status(err.message === "Chưa đăng nhập" ? 401 : 500).json({ success: false, message: err.message === "Chưa đăng nhập" ? err.message : "Không lấy được dữ liệu user" });
+    console.error("[latest-user] ERROR:", err);
+    console.error("[latest-user] MESSAGE:", err.message);
+    console.error("[latest-user] STACK:", err.stack);
+    return res.status(500).json({
+      success: false,
+      message: "Không lấy được dữ liệu user",
+      error: err.message,
+    });
   }
 });
 
