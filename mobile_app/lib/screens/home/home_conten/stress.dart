@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:Care_AI/l10n/app_localizations.dart';
 import 'package:Care_AI/models/tr.dart';
 import 'package:Care_AI/widgets/app_components.dart';
 import 'package:Care_AI/api/health_api.dart';
@@ -186,13 +187,10 @@ class _StressScreenState extends State<StressScreen>
       // Sau khi AI tính xong và lưu vào DB, load lại toàn bộ để đồng bộ
       await _loadLatestMetrics();
     } on ApiException catch (e) {
-      debugPrint(
-          '[StressScreen] ApiException: ${e.message}, status: ${e.statusCode}');
       setState(() {
         _error = e.message;
       });
     } catch (e) {
-      debugPrint('[StressScreen] Unknown error: $e');
       setState(() {
         _error = 'Lỗi không xác định: $e';
       });
@@ -320,20 +318,23 @@ class _StressScreenState extends State<StressScreen>
                                       ),
                                   ],
                                 ),
-                                if (_stressTimeLabel.isNotEmpty)
+                                if (_stressTimeLabel.isNotEmpty ||
+                                    _calibrationDays < 3)
                                   Padding(
                                     padding: const EdgeInsets.only(top: 12),
                                     child: Column(
                                       children: [
-                                        Text(
-                                          "Cập nhật: $_stressTimeLabel",
-                                          style: TextStyle(
-                                            color: statusColor.withOpacity(0.6),
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w700,
-                                            letterSpacing: 0.5,
+                                        if (_stressTimeLabel.isNotEmpty)
+                                          Text(
+                                            "Cập nhật: $_stressTimeLabel",
+                                            style: TextStyle(
+                                              color:
+                                                  statusColor.withOpacity(0.6),
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w700,
+                                              letterSpacing: 0.5,
+                                            ),
                                           ),
-                                        ),
                                         if (_calibrationDays < 3) ...[
                                           const SizedBox(height: 8),
                                           GestureDetector(
@@ -412,8 +413,9 @@ class _StressScreenState extends State<StressScreen>
                                                   Text(
                                                     context.tr
                                                         .stressCalibrationBadge(
-                                                            _calibrationDays
-                                                                .toString()),
+                                                      _calibrationDays
+                                                          .toString(),
+                                                    ),
                                                     style: const TextStyle(
                                                       color: Colors.orange,
                                                       fontSize: 10,

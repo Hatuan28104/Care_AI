@@ -147,6 +147,12 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
     }
   }
 
+  Future<void> _onRefresh() async {
+    debugPrint('[Activity] pull refresh');
+    await _loadMetrics();
+    await _loadLatestActivityData();
+  }
+
   @override
   Widget build(BuildContext context) {
     final filteredItems = _items.where((e) {
@@ -169,14 +175,16 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
             AppHeader(title: context.tr.activityData),
             _searchBox(),
             Expanded(
-              child: filteredItems.isEmpty
-                  ? const SizedBox()
-                  : ListView.separated(
-                      padding: _listPadding,
-                      itemCount: filteredItems.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 8),
-                      itemBuilder: (_, i) => _tile(context, filteredItems[i]),
-                    ),
+              child: RefreshIndicator(
+                onRefresh: _onRefresh,
+                child: ListView.separated(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: _listPadding,
+                  itemCount: filteredItems.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  itemBuilder: (_, i) => _tile(context, filteredItems[i]),
+                ),
+              ),
             ),
           ],
         ),

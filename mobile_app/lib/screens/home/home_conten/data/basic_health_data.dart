@@ -162,6 +162,12 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
     }
   }
 
+  Future<void> _onRefresh() async {
+    debugPrint('[BasicHealth] pull refresh');
+    await _loadMetrics();
+    await _loadLatestHealthData();
+  }
+
   @override
   Widget build(BuildContext context) {
     final filteredItems = _items.where((e) {
@@ -184,14 +190,16 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
             AppHeader(title: context.tr.healthData),
             _searchBox(),
             Expanded(
-              child: filteredItems.isEmpty
-                  ? const SizedBox()
-                  : ListView.separated(
-                      padding: _listPadding,
-                      itemCount: filteredItems.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 8),
-                      itemBuilder: (_, i) => _tile(context, filteredItems[i]),
-                    ),
+              child: RefreshIndicator(
+                onRefresh: _onRefresh,
+                child: ListView.separated(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: _listPadding,
+                  itemCount: filteredItems.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  itemBuilder: (_, i) => _tile(context, filteredItems[i]),
+                ),
+              ),
             ),
           ],
         ),
