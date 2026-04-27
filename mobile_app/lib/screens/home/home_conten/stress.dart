@@ -324,7 +324,8 @@ class _StressScreenState extends State<StressScreen>
                                     padding: const EdgeInsets.only(top: 12),
                                     child: Column(
                                       children: [
-                                        if (_stressTimeLabel.isNotEmpty)
+                                        if (_stressTimeLabel.isNotEmpty ||
+                                            _calibrationDays < 3)
                                           Text(
                                             "Cập nhật: $_stressTimeLabel",
                                             style: TextStyle(
