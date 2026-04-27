@@ -1,5 +1,9 @@
 import { getDB } from "../config/db.js";
-import { getVNStartOfDayUTC, getVNEndOfDayUTC, getVNDateString } from "../utils/time.js";
+import {
+  getVNStartOfDayUTC,
+  getVNEndOfDayUTC,
+  getVNDateString,
+} from "../utils/time.js";
 
 /* =========================
    HELPER: normalize
@@ -19,9 +23,7 @@ function normalizeHealthData(data) {
     nguondulieu_id: data.nguondulieu_id ?? data.NguonDuLieu_ID,
     loaichiso_id: data.loaichiso_id ?? data.LoaiChiSo_ID,
     thoigiancapnhat:
-      data.thoigiancapnhat ??
-      data.ThoiGianCapNhat ??
-      new Date().toISOString(),
+      data.thoigiancapnhat ?? data.ThoiGianCapNhat ?? new Date().toISOString(),
   };
 }
 
@@ -80,19 +82,20 @@ export async function ensureDeviceForUser(nguoiDungId) {
     return data[0].nguondulieu_id;
   }
 
-  const nguonDuLieuId = ("HC" + String(nguoiDungId || "")
-    .replace(/\s/g, "")
-    .slice(-10))
+  const nguonDuLieuId = (
+    "HC" +
+    String(nguoiDungId || "")
+      .replace(/\s/g, "")
+      .slice(-10)
+  )
     .padEnd(12, "0")
     .slice(0, 12);
 
-  const { error: insertError } = await db
-    .from("nguondulieusuckhoe")
-    .insert({
-      nguondulieu_id: nguonDuLieuId,
-      nguoidung_id: nguoiDungId,
-      dangatketnoi: false,
-    });
+  const { error: insertError } = await db.from("nguondulieusuckhoe").insert({
+    nguondulieu_id: nguonDuLieuId,
+    nguoidung_id: nguoiDungId,
+    dangatketnoi: false,
+  });
 
   if (insertError) {
     console.error("Insert device error:", insertError);
@@ -110,7 +113,8 @@ export async function getLatestHealthDataByDevice(thietBiId) {
 
   const { data, error } = await db
     .from("dulieusuckhoe")
-    .select(`
+    .select(
+      `
       giatri,
       thoigiancapnhat,
       loaichisosuckhoe (
@@ -118,7 +122,8 @@ export async function getLatestHealthDataByDevice(thietBiId) {
         tenchiso,
         donvido
       )
-    `)
+    `,
+    )
     .eq("nguondulieu_id", thietBiId)
     .order("thoigiancapnhat", { ascending: false });
 
@@ -140,11 +145,15 @@ export async function getLatestHealthDataByDevice(thietBiId) {
 }
 export async function getLatestHealthDataByUser(nguoiDungId) {
   const db = getDB();
-  console.log("[latest-user] repo getLatestHealthDataByUser userId:", nguoiDungId);
+  console.log(
+    "[latest-user] repo getLatestHealthDataByUser userId:",
+    nguoiDungId,
+  );
 
   const { data, error } = await db
     .from("dulieusuckhoe")
-    .select(`
+    .select(
+      `
       giatri,
       thoigiancapnhat,
       nguondulieu_id,
@@ -153,7 +162,8 @@ export async function getLatestHealthDataByUser(nguoiDungId) {
         tenchiso,
         donvido
       )
-    `)
+    `,
+    )
     .eq("nguoidung_id", nguoiDungId)
     .order("thoigiancapnhat", { ascending: false });
 
@@ -201,7 +211,7 @@ export async function getHealthHistory(thietBiId, loaiChiSoId) {
 
   if (error) throw error;
 
-  return (data || []).map(item => ({
+  return (data || []).map((item) => ({
     ...item,
     thoigiancapnhat: item.thoigiancapnhat
       ? new Date(item.thoigiancapnhat).toISOString()
@@ -211,7 +221,7 @@ export async function getHealthHistory(thietBiId, loaiChiSoId) {
 export async function getHealthHistoryByUser(
   nguoiDungId,
   loaiChiSoId,
-  range = "d"
+  range = "d",
 ) {
   const db = getDB();
 
@@ -249,7 +259,7 @@ export async function getHealthHistoryByUser(
 
   console.log("HISTORY LENGTH:", filtered.length);
 
-  return filtered.map(item => ({
+  return filtered.map((item) => ({
     ...item,
     thoigiancapnhat: item.thoigiancapnhat
       ? new Date(item.thoigiancapnhat).toISOString()
@@ -283,8 +293,8 @@ export async function getHealthReport(userId, quanHeId, type) {
     .eq("dakichhoat", true);
 
   const allowed = (configs || [])
-    .map(i => i.quyen)
-    .filter(q => q.startsWith("CS"));
+    .map((i) => i.quyen)
+    .filter((q) => q.startsWith("CS"));
   let finalAllowed = allowed;
 
   if (finalAllowed.length === 0) {
@@ -292,7 +302,7 @@ export async function getHealthReport(userId, quanHeId, type) {
       .from("loaichisosuckhoe")
       .select("loaichiso_id");
 
-    finalAllowed = (metrics || []).map(m => m.loaichiso_id);
+    finalAllowed = (metrics || []).map((m) => m.loaichiso_id);
   }
   // 3. time range
   let fromDate = new Date();
@@ -311,7 +321,8 @@ export async function getHealthReport(userId, quanHeId, type) {
   // 4. query data
   const { data, error } = await db
     .from("dulieusuckhoe")
-    .select(`
+    .select(
+      `
       giatri,
       loaichiso_id,
       thoigiancapnhat,
@@ -319,7 +330,8 @@ export async function getHealthReport(userId, quanHeId, type) {
         tenchiso,
         donvido
       )
-    `)
+    `,
+    )
     .eq("nguoidung_id", dependentId)
     .in("loaichiso_id", finalAllowed) // 🔥 SHARE CORE
     .gte("thoigiancapnhat", fromDate.toISOString());
@@ -348,7 +360,7 @@ export async function getHealthReport(userId, quanHeId, type) {
   }
 
   // 6. return dynamic
-  return Object.values(map).map(i => ({
+  return Object.values(map).map((i) => ({
     loaichiso_id: i.loaichiso_id,
     tenchiso: i.tenchiso,
     donvido: i.donvido,
@@ -361,7 +373,6 @@ export async function saveMultipleHealthData(payload) {
   if (!payload.nguoidung_id) {
     throw new Error("Thiếu nguoidung_id");
   }
-
 
   // =========================
   // LOAD METRIC MAP
@@ -380,11 +391,13 @@ export async function saveMultipleHealthData(payload) {
     metricIdSet.add(m.loaichiso_id);
   }
 
-
-  let nguondulieu_id = payload.nguondulieu_id ?? payload.NguonDuLieu_ID ?? payload.thietbi_id ?? payload.ThietBi_ID;
+  let nguondulieu_id =
+    payload.nguondulieu_id ??
+    payload.NguonDuLieu_ID ??
+    payload.thietbi_id ??
+    payload.ThietBi_ID;
 
   const isManual = !nguondulieu_id;
-
 
   // =========================
   // TIME UTC BOUNDARIES (VN DAY)
@@ -399,9 +412,25 @@ export async function saveMultipleHealthData(payload) {
   // LOOP ALL PAYLOAD
   // =========================
   for (const [key, value] of Object.entries(payload)) {
-    if (["type", "nguondulieu_id", "NguonDuLieu_ID", "thietbi_id", "ThietBi_ID", "nguoidung_id"].includes(key)) continue;
+    if (
+      [
+        "type",
+        "nguondulieu_id",
+        "NguonDuLieu_ID",
+        "thietbi_id",
+        "ThietBi_ID",
+        "nguoidung_id",
+      ].includes(key)
+    )
+      continue;
 
-    if (value === undefined || value === null || value === "" || Number(value) <= 0) continue;
+    if (
+      value === undefined ||
+      value === null ||
+      value === "" ||
+      Number(value) <= 0
+    )
+      continue;
 
     let loaichiso_id = null;
 
@@ -445,8 +474,7 @@ export async function saveMultipleHealthData(payload) {
       } else {
         // ✅ khác giá trị → insert mới
         const id =
-          Date.now().toString() +
-          Math.random().toString(36).substring(2, 6);
+          Date.now().toString() + Math.random().toString(36).substring(2, 6);
 
         inserts.push({
           dulieusk_id: id,
@@ -462,8 +490,7 @@ export async function saveMultipleHealthData(payload) {
     } else {
       // ✅ chưa có trong ngày → insert
       const id =
-        Date.now().toString() +
-        Math.random().toString(36).substring(2, 6);
+        Date.now().toString() + Math.random().toString(36).substring(2, 6);
 
       inserts.push({
         dulieusk_id: id,
@@ -485,9 +512,7 @@ export async function saveMultipleHealthData(payload) {
   // INSERT BATCH
   // =========================
   if (inserts.length > 0) {
-    const { data, error } = await db
-      .from("dulieusuckhoe")
-      .insert(inserts)
+    const { data, error } = await db.from("dulieusuckhoe").insert(inserts)
       .select(`
       dulieusk_id,
       nguoidung_id,
@@ -573,20 +598,26 @@ export async function getLatestAIInsight(nguoidung_id) {
 export async function getStressInputData(nguoiDungId) {
   const db = getDB();
 
-  const targetMetricIds = ["CS008", "CS001", "CS037", "CS004"]; 
+  const targetMetricIds = ["CS008", "CS001", "CS037", "CS004"];
 
   const { data, error } = await db
     .from("dulieusuckhoe")
     .select("loaichiso_id, giatri, thoigiancapnhat")
     .eq("nguoidung_id", nguoiDungId)
     .in("loaichiso_id", targetMetricIds)
-    .gte("thoigiancapnhat", new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString())
+    .gte(
+      "thoigiancapnhat",
+      new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+    )
     .order("thoigiancapnhat", { ascending: false })
     .limit(1000);
 
   if (error) {
     console.error("[latest-user] Supabase stress input error:", error);
-    console.error("[latest-user] Supabase stress input message:", error.message);
+    console.error(
+      "[latest-user] Supabase stress input message:",
+      error.message,
+    );
     throw error;
   }
 
@@ -610,44 +641,124 @@ export async function getStressInputData(nguoiDungId) {
   const sleepSeries = valuesByMetric.CS037;
   const stepsSeries = valuesByMetric.CS004;
 
-  // Kiểm tra xem bước chân có phải của hôm nay không
-  let todaySteps = 0;
-  if (stepsSeries.length > 0) {
-    const latestStep = rows.find(r => r.loaichiso_id === 'CS004');
-    if (latestStep && latestStep.thoigiancapnhat) {
-      const stepDate = getVNDateString(new Date(latestStep.thoigiancapnhat));
-      const todayDate = getVNDateString();
-      if (stepDate === todayDate) {
-        todaySteps = Number(latestStep.giatri);
+  // 1. Phân tích Giấc ngủ & Nhịp tim nghỉ ngơi (Kiểu Whoop/Oura) chuyên sâu
+  const getSleepSessionMetrics = () => {
+    const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
+    const sleepRows = rows.filter(
+      (r) => new Date(r.thoigiancapnhat) >= twelveHoursAgo,
+    );
+
+    const hrInSleep = sleepRows
+      .filter((r) => r.loaichiso_id === "CS001")
+      .map((r) => Number(r.giatri));
+    const hrvInSleepRows = sleepRows.filter((r) => r.loaichiso_id === "CS008");
+
+    // Resting HR & HRV đại diện
+    const restingHR =
+      hrInSleep.length > 0 ? Math.min(...hrInSleep) : (hrSeries[0] ?? 70);
+    let representativeHRV = 35;
+    if (hrvInSleepRows.length > 0) {
+      representativeHRV =
+        hrvInSleepRows.reduce((a, b) => a + Number(b.giatri), 0) /
+        hrvInSleepRows.length;
+    }
+
+    // Tổng thời gian ngủ (CS037)
+    const sleepInSleep = sleepRows
+      .filter((r) => r.loaichiso_id === "CS037")
+      .map((r) => Number(r.giatri));
+    const totalSleep =
+      sleepInSleep.length > 0
+        ? sleepInSleep.reduce((a, b) => a + b, 0)
+        : (sleepSeries[0] ?? 7);
+
+    return { restingHR, representativeHRV, totalSleep };
+  };
+
+  const { restingHR, representativeHRV, totalSleep } = getSleepSessionMetrics();
+
+  // Kiểm tra tính "tức thời" (trong 30 phút qua)
+  const thirtyMinsAgo = new Date(Date.now() - 30 * 60 * 1000);
+  const latestHR = rows.find(
+    (r) =>
+      r.loaichiso_id === "CS001" &&
+      new Date(r.thoigiancapnhat) >= thirtyMinsAgo,
+  );
+  const latestHRV = rows.find(
+    (r) =>
+      r.loaichiso_id === "CS008" &&
+      new Date(r.thoigiancapnhat) >= thirtyMinsAgo,
+  );
+
+  // 2. Gom nhóm lịch sử 7 ngày (Daily Averages)
+  const getDailyAverages = (metricId, daysCount = 8) => {
+    const dailyData = {};
+    rows
+      .filter((r) => r.loaichiso_id === metricId)
+      .forEach((r) => {
+        const d = getVNDateString(new Date(r.thoigiancapnhat));
+        if (!dailyData[d]) dailyData[d] = [];
+        dailyData[d].push(Number(r.giatri));
+      });
+    const result = [];
+    for (let i = 0; i < daysCount; i++) {
+      const targetDate = getVNDateString(
+        new Date(Date.now() - i * 24 * 60 * 60 * 1000),
+      );
+      const dayValues = dailyData[targetDate] || [];
+      if (dayValues.length > 0) {
+        result.push(dayValues.reduce((a, b) => a + b, 0) / dayValues.length);
+      } else {
+        result.push(null);
       }
     }
-  }
+    return result;
+  };
 
-  // Tính số ngày có dữ liệu trong 7 ngày gần nhất (rolling 7-day window)
-  const sevenDaysLimit = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-  
-  const uniqueDays = new Set();
-  for (const row of rows) {
-    const rowDate = new Date(row.thoigiancapnhat);
-    if (rowDate >= sevenDaysLimit) {
-      const vnDateStr = getVNDateString(rowDate);
-      uniqueDays.add(vnDateStr);
+  const hrvDaily = getDailyAverages("CS008");
+  const hrDaily = getDailyAverages("CS001");
+  const sleepDaily = getDailyAverages("CS037");
+
+  const getDailyMax = (metricId, daysCount = 8) => {
+    const dailyData = {};
+    rows
+      .filter((r) => r.loaichiso_id === metricId)
+      .forEach((r) => {
+        const d = getVNDateString(new Date(r.thoigiancapnhat));
+        dailyData[d] = Math.max(dailyData[d] || 0, Number(r.giatri));
+      });
+    const result = [];
+    for (let i = 0; i < daysCount; i++) {
+      const targetDate = getVNDateString(
+        new Date(Date.now() - i * 24 * 60 * 60 * 1000),
+      );
+      result.push(dailyData[targetDate] || 0);
     }
-  }
-  
-  const calibrationDays = Math.min(uniqueDays.size, 3);
+    return result;
+  };
+  const stepsDaily = getDailyMax("CS004");
 
   return {
-    hrv_rmssd_ms: hrvSeries[0] ?? 35,
-    resting_hr_bpm: hrSeries[0] ?? 70,
-    sleep_duration_hours: sleepSeries[0] ?? 7, 
-    steps: todaySteps, 
-    hrv_history: hrvSeries.slice(1, 8).reverse(),
-    sleep_history: sleepSeries.slice(1, 8).reverse(),
-    hr_history: hrSeries.slice(1, 8).reverse(),
-    calibration_days: calibrationDays,
+    // Nếu có dữ liệu mới đo (ban ngày), ưu tiên dùng giá trị đó. Nếu không, dùng giá trị tinh hoa của đêm.
+    hrv_rmssd_ms: latestHRV ? Number(latestHRV.giatri) : representativeHRV,
+    resting_hr_bpm: latestHR ? Number(latestHR.giatri) : restingHR,
+    sleep_duration_hours: totalSleep,
+    steps: stepsDaily[0],
+    hrv_history: hrvDaily
+      .slice(1)
+      .filter((v) => v !== null)
+      .reverse(),
+    sleep_history: sleepDaily
+      .slice(1)
+      .filter((v) => v !== null)
+      .reverse(),
+    hr_history: hrDaily
+      .slice(1)
+      .filter((v) => v !== null)
+      .reverse(),
+    calibration_days: 0,
     debug_row_count: rows.length,
-    debug_first_row: rows[0] || null
+    debug_first_row: rows[0] || null,
   };
 }
 
@@ -658,12 +769,17 @@ export async function saveHealthData(payload) {
   const nguoidung_id = payload.nguoidung_id ?? payload.NguoiDung_ID;
 
   if (!normalized.loaichiso_id) throw new Error("Thiếu loaichiso_id");
-  if (normalized.giatri === undefined || normalized.giatri === null || normalized.giatri === "") {
+  if (
+    normalized.giatri === undefined ||
+    normalized.giatri === null ||
+    normalized.giatri === ""
+  ) {
     throw new Error("Thiếu giatri");
   }
 
   const record = {
-    dulieusk_id: Date.now().toString() + Math.random().toString(36).substring(2, 6),
+    dulieusk_id:
+      Date.now().toString() + Math.random().toString(36).substring(2, 6),
     giatri: Number(normalized.giatri),
     thoigiancapnhat: new Date(normalized.thoigiancapnhat).toISOString(),
     nguondulieu_id: normalized.nguondulieu_id ?? null,
@@ -674,7 +790,8 @@ export async function saveHealthData(payload) {
   const { data, error } = await db
     .from("dulieusuckhoe")
     .insert(record)
-    .select(`
+    .select(
+      `
       dulieusk_id,
       nguoidung_id,
       loaichiso_id,
@@ -682,7 +799,8 @@ export async function saveHealthData(payload) {
       loaichisosuckhoe (
         code
       )
-    `)
+    `,
+    )
     .single();
 
   if (error) throw error;
