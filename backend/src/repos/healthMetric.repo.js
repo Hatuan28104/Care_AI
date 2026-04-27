@@ -18,12 +18,28 @@ function normalizeMetric(data) {
 }
 
 function normalizeHealthData(data) {
+  let time = data.thoigiancapnhat ?? data.ThoiGianCapNhat;
+
+  if (!time) {
+    time = new Date().toISOString();
+  } else if (
+    typeof time === "string" &&
+    !time.includes("Z") &&
+    !time.includes("+")
+  ) {
+    // Nếu chuỗi không có múi giờ → coi là giờ VN và convert về UTC
+    const d = new Date(time);
+    if (!isNaN(d.getTime())) {
+      d.setUTCHours(d.getUTCHours() - 7);
+      time = d.toISOString();
+    }
+  }
+
   return {
     giatri: data.giatri ?? data.GiaTri,
     nguondulieu_id: data.nguondulieu_id ?? data.NguonDuLieu_ID,
     loaichiso_id: data.loaichiso_id ?? data.LoaiChiSo_ID,
-    thoigiancapnhat:
-      data.thoigiancapnhat ?? data.ThoiGianCapNhat ?? new Date().toISOString(),
+    thoigiancapnhat: time,
   };
 }
 
@@ -641,122 +657,42 @@ export async function getStressInputData(nguoiDungId) {
   const sleepSeries = valuesByMetric.CS037;
   const stepsSeries = valuesByMetric.CS004;
 
-  // 1. Phân tích Giấc ngủ & Nhịp tim nghỉ ngơi (Kiểu Whoop/Oura) chuyên sâu
-  const getSleepSessionMetrics = () => {
-    const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
-    const sleepRows = rows.filter(
-      (r) => new Date(r.thoigiancapnhat) >= twelveHoursAgo,
-    );
-
-    const hrInSleep = sleepRows
-      .filter((r) => r.loaichiso_id === "CS001")
-      .map((r) => Number(r.giatri));
-    const hrvInSleepRows = sleepRows.filter((r) => r.loaichiso_id === "CS008");
-
-    // Resting HR & HRV đại diện
-    const restingHR =
-      hrInSleep.length > 0 ? Math.min(...hrInSleep) : (hrSeries[0] ?? 70);
-    let representativeHRV = 35;
-    if (hrvInSleepRows.length > 0) {
-      representativeHRV =
-        hrvInSleepRows.reduce((a, b) => a + Number(b.giatri), 0) /
-        hrvInSleepRows.length;
-    }
-
-    // Tổng thời gian ngủ (CS037)
-    const sleepInSleep = sleepRows
-      .filter((r) => r.loaichiso_id === "CS037")
-      .map((r) => Number(r.giatri));
-    const totalSleep =
-      sleepInSleep.length > 0
-        ? sleepInSleep.reduce((a, b) => a + b, 0)
-        : (sleepSeries[0] ?? 7);
-
-    return { restingHR, representativeHRV, totalSleep };
-  };
-
-  const { restingHR, representativeHRV, totalSleep } = getSleepSessionMetrics();
-
-  // Kiểm tra tính "tức thời" (trong 30 phút qua)
-  const thirtyMinsAgo = new Date(Date.now() - 30 * 60 * 1000);
-  const latestHR = rows.find(
-    (r) =>
-      r.loaichiso_id === "CS001" &&
-      new Date(r.thoigiancapnhat) >= thirtyMinsAgo,
-  );
-  const latestHRV = rows.find(
-    (r) =>
-      r.loaichiso_id === "CS008" &&
-      new Date(r.thoigiancapnhat) >= thirtyMinsAgo,
-  );
-
-  // 2. Gom nhóm lịch sử 7 ngày (Daily Averages)
-  const getDailyAverages = (metricId, daysCount = 8) => {
-    const dailyData = {};
-    rows
-      .filter((r) => r.loaichiso_id === metricId)
-      .forEach((r) => {
-        const d = getVNDateString(new Date(r.thoigiancapnhat));
-        if (!dailyData[d]) dailyData[d] = [];
-        dailyData[d].push(Number(r.giatri));
-      });
-    const result = [];
-    for (let i = 0; i < daysCount; i++) {
-      const targetDate = getVNDateString(
-        new Date(Date.now() - i * 24 * 60 * 60 * 1000),
-      );
-      const dayValues = dailyData[targetDate] || [];
-      if (dayValues.length > 0) {
-        result.push(dayValues.reduce((a, b) => a + b, 0) / dayValues.length);
-      } else {
-        result.push(null);
+  // Kiểm tra xem bước chân có phải của hôm nay không
+  let todaySteps = 0;
+  if (stepsSeries.length > 0) {
+    const latestStep = rows.find((r) => r.loaichiso_id === "CS004");
+    if (latestStep && latestStep.thoigiancapnhat) {
+      const stepDate = getVNDateString(new Date(latestStep.thoigiancapnhat));
+      const todayDate = getVNDateString();
+      if (stepDate === todayDate) {
+        todaySteps = Number(latestStep.giatri);
       }
     }
-    return result;
-  };
+  }
 
-  const hrvDaily = getDailyAverages("CS008");
-  const hrDaily = getDailyAverages("CS001");
-  const sleepDaily = getDailyAverages("CS037");
+  // Tính số ngày có dữ liệu trong 7 ngày gần nhất (rolling 7-day window)
+  const sevenDaysLimit = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-  const getDailyMax = (metricId, daysCount = 8) => {
-    const dailyData = {};
-    rows
-      .filter((r) => r.loaichiso_id === metricId)
-      .forEach((r) => {
-        const d = getVNDateString(new Date(r.thoigiancapnhat));
-        dailyData[d] = Math.max(dailyData[d] || 0, Number(r.giatri));
-      });
-    const result = [];
-    for (let i = 0; i < daysCount; i++) {
-      const targetDate = getVNDateString(
-        new Date(Date.now() - i * 24 * 60 * 60 * 1000),
-      );
-      result.push(dailyData[targetDate] || 0);
+  const uniqueDays = new Set();
+  for (const row of rows) {
+    const rowDate = new Date(row.thoigiancapnhat);
+    if (rowDate >= sevenDaysLimit) {
+      const vnDateStr = getVNDateString(rowDate);
+      uniqueDays.add(vnDateStr);
     }
-    return result;
-  };
-  const stepsDaily = getDailyMax("CS004");
+  }
+
+  const calibrationDays = Math.min(uniqueDays.size, 3);
 
   return {
-    // Nếu có dữ liệu mới đo (ban ngày), ưu tiên dùng giá trị đó. Nếu không, dùng giá trị tinh hoa của đêm.
-    hrv_rmssd_ms: latestHRV ? Number(latestHRV.giatri) : representativeHRV,
-    resting_hr_bpm: latestHR ? Number(latestHR.giatri) : restingHR,
-    sleep_duration_hours: totalSleep,
-    steps: stepsDaily[0],
-    hrv_history: hrvDaily
-      .slice(1)
-      .filter((v) => v !== null)
-      .reverse(),
-    sleep_history: sleepDaily
-      .slice(1)
-      .filter((v) => v !== null)
-      .reverse(),
-    hr_history: hrDaily
-      .slice(1)
-      .filter((v) => v !== null)
-      .reverse(),
-    calibration_days: 0,
+    hrv_rmssd_ms: hrvSeries[0] ?? 35,
+    resting_hr_bpm: hrSeries[0] ?? 70,
+    sleep_duration_hours: sleepSeries[0] ?? 7,
+    steps: todaySteps,
+    hrv_history: hrvSeries.slice(1, 8).reverse(),
+    sleep_history: sleepSeries.slice(1, 8).reverse(),
+    hr_history: hrSeries.slice(1, 8).reverse(),
+    calibration_days: calibrationDays,
     debug_row_count: rows.length,
     debug_first_row: rows[0] || null,
   };
