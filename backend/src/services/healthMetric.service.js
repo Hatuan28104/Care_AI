@@ -1,4 +1,19 @@
-import { getAllHealthMetrics, createHealthMetric, getLatestHealthDataByDevice, getLatestHealthDataByUser, getHealthHistory, getHealthHistoryByUser, getHealthReport, ensureDeviceForUser, saveMultipleHealthData, insertAIInsight, getLatestAIInsight, getAIInsightByDate, getStressInputData, saveHealthData } from "../repos/healthMetric.repo.js";
+import {
+  getAllHealthMetrics,
+  createHealthMetric,
+  getLatestHealthDataByDevice,
+  getLatestHealthDataByUser,
+  getHealthHistory,
+  getHealthHistoryByUser,
+  getHealthReport,
+  ensureDeviceForUser,
+  saveMultipleHealthData,
+  insertAIInsight,
+  getLatestAIInsight,
+  getAIInsightByDate,
+  getStressInputData,
+  saveHealthData,
+} from "../repos/healthMetric.repo.js";
 import { sendNotification } from "../repos/notification.repo.js";
 import { callSelfEvolutionAI, callStressAI } from "./aiClient.js";
 import { getCurrentVNHour, getVNDateString } from "../utils/time.js";
@@ -41,7 +56,9 @@ export const handleSaveData = async (user, body) => {
     nguondulieu_id,
   });
 
-  await checkAndSendHealthAlert(nguoiDungId, savedRows);
+  if (Array.isArray(savedRows)) {
+    await checkAndSendHealthAlert(nguoiDungId, savedRows);
+  }
 
   const vnHour = getCurrentVNHour();
   const today = getVNDateString();
@@ -51,14 +68,14 @@ export const handleSaveData = async (user, body) => {
   if (vnHour < 9) {
     return {
       success: true,
-      message: "Đã lưu dữ liệu, AI sẽ cập nhật sau 9h"
+      message: "Đã lưu dữ liệu, AI sẽ cập nhật sau 9h",
     };
   }
 
   if (existingInsight) {
     return {
       success: true,
-      message: "Đã có dữ liệu hôm nay"
+      message: "Đã có dữ liệu hôm nay",
     };
   }
 
@@ -71,7 +88,7 @@ export const handleSaveData = async (user, body) => {
 
   return {
     success: true,
-    message: "Đã lưu dữ liệu sức khỏe"
+    message: "Đã lưu dữ liệu sức khỏe",
   };
 };
 
@@ -108,10 +125,18 @@ export const createDailyCompareNotification = async (userId, aiEvaluation) => {
   const titleSelf = mapCompareTitleUser(trangthai);
   const titleGuardian = mapCompareTitleGuardian(trangthai);
 
-  const body = `${thongdiep}\n\n${sosanhText}\n\n💡 Lời khuyên: ${loikhuyen}`.trim();
+  const body =
+    `${thongdiep}\n\n${sosanhText}\n\n💡 Lời khuyên: ${loikhuyen}`.trim();
 
   try {
-    await sendNotification(userId, titleSelf, body, 1, 'DAILY_COMPARE', titleGuardian);
+    await sendNotification(
+      userId,
+      titleSelf,
+      body,
+      1,
+      "DAILY_COMPARE",
+      titleGuardian,
+    );
   } catch (err) {
     console.error(err.message);
   }
@@ -119,7 +144,7 @@ export const createDailyCompareNotification = async (userId, aiEvaluation) => {
 
 function formatSoSanh(sosanh) {
   if (!sosanh) return "Không có dữ liệu so sánh.";
-  if (typeof sosanh === 'string') return sosanh;
+  if (typeof sosanh === "string") return sosanh;
 
   const lines = [];
   for (const value of Object.values(sosanh)) {
@@ -142,21 +167,20 @@ export const handleGetLatestUserData = async (user) => {
   console.log("[latest-user] service getLatestHealthDataByUser start");
   const [data, inputData] = await Promise.all([
     getLatestHealthDataByUser(nguoiDungId),
-    getStressInputData(nguoiDungId)
+    getStressInputData(nguoiDungId),
   ]);
   console.log("[latest-user] service latest data length:", data?.length ?? 0);
-  
+
   console.log(`[STRESS_DEBUG] Full inputData:`, JSON.stringify(inputData));
-  
-  return { 
-    success: true, 
-    data, 
+
+  return {
+    success: true,
+    data,
     calibration_days: Math.floor(inputData.calibration_days || 0),
     debug_row_count: inputData.debug_row_count || 0,
-    debug_first_row: inputData.debug_first_row || null
+    debug_first_row: inputData.debug_first_row || null,
   };
 };
-
 
 export const handleGetLatestAIInsight = async (user) => {
   const nguoiDungId = user?.NguoiDung_ID || user?.nguoidung_id;
@@ -189,7 +213,7 @@ export const handleAnalyzeStress = async (user) => {
   const nguoiDungId = user?.NguoiDung_ID || user?.nguoidung_id;
 
   const inputData = await getStressInputData(nguoiDungId);
-  
+
   const stressScore = await callStressAI(inputData);
 
   await saveHealthData({
@@ -197,16 +221,16 @@ export const handleAnalyzeStress = async (user) => {
     loaichiso_id: "CS016",
     giatri: stressScore,
     thoigiancapnhat: new Date().toISOString(),
-    nguondulieu_id: null 
+    nguondulieu_id: null,
   });
 
-  return { 
-    success: true, 
-    data: { 
+  return {
+    success: true,
+    data: {
       stress: stressScore,
       thoigian: new Date().toISOString(),
-      calibration_days: Math.floor(inputData.calibration_days || 0)
-    } 
+      calibration_days: Math.floor(inputData.calibration_days || 0),
+    },
   };
 };
 
@@ -239,7 +263,7 @@ async function checkAndSendHealthAlert(userId, savedRows = []) {
       body,
       alert.level,
       "HEALTH",
-      `Cảnh báo sức khỏe người thân: ${rule.name}`
+      `Cảnh báo sức khỏe người thân: ${rule.name}`,
     );
   }
 }
