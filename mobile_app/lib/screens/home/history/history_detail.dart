@@ -124,7 +124,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
 
       setState(() {
         messages.removeWhere((m) => m["isTyping"] == true);
-        messages.last["media_url"] = mediaUrl;
+        messages.last["anhurl"] = mediaUrl;
       });
     } catch (e) {
       if (!mounted) return;
@@ -245,16 +245,16 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
       final list = data.map<Map<String, dynamic>>((msg) {
         final laDigital = msg["ladigital"] == true;
 
-        final loaiTinNhan = (msg["loai_tin_nhan"] ?? "text").toString();
-        final mediaUrl =
-            msg["media_url"] == null ? null : msg["media_url"].toString();
+        final loaitinnhan = (msg["loaitinnhan"] ?? "text").toString();
+        final anhurl =
+            msg["anhurl"] == null ? null : msg["anhurl"].toString();
 
         return {
           "text": (msg["noidung"] ?? "").toString(),
           "isUser": !laDigital,
-          "isImage": loaiTinNhan == "image",
-          "loai_tin_nhan": loaiTinNhan,
-          "media_url": mediaUrl,
+          "isImage": loaitinnhan == "image",
+          "loaitinnhan": loaitinnhan,
+          "anhurl": anhurl,
         };
       }).toList();
 
@@ -346,7 +346,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
 
   Widget messageBubble(Map<String, dynamic> msg) {
     final isUser = msg["isUser"] == true;
-    final isImage = msg["isImage"] == true || msg["loai_tin_nhan"] == "image";
+    final isImage = msg["isImage"] == true || msg["loaitinnhan"] == "image";
     final double maxWidth = MediaQuery.of(context).size.width * 0.7;
     return Row(
       mainAxisAlignment:
@@ -386,7 +386,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                           builder: (_) {
                             final path = (msg["path"] ?? "").toString();
                             final mediaUrl =
-                                (msg["media_url"] ?? "").toString();
+                                (msg["anhurl"] ?? "").toString();
 
                             if (mediaUrl.isNotEmpty) {
                               return Image.network(
