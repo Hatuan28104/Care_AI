@@ -128,7 +128,7 @@ class _ChatScreenState extends State<ChatScreen> {
       // 🔥 3. update message → dùng URL server
       setState(() {
         messages.removeWhere((m) => m["isTyping"] == true);
-        messages.last["media_url"] = mediaUrl;
+        messages.last["anhurl"] = mediaUrl;
       });
     } catch (e) {
       debugPrint("SEND IMAGE ERROR: $e");
@@ -318,7 +318,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget buildMessage(Map<String, dynamic> msg) {
     final isUser = msg["isUser"] == true;
-    final isImage = msg["isImage"] == true || msg["loai_tin_nhan"] == "image";
+    final isImage = msg["isImage"] == true || msg["loaitinnhan"] == "image";
     final double maxWidth = MediaQuery.of(context).size.width * 0.70;
 
     return Row(
@@ -357,7 +357,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           builder: (_) {
                             final path = (msg["path"] ?? "").toString();
                             final mediaUrl =
-                                (msg["media_url"] ?? "").toString();
+                                (msg["anhurl"] ?? "").toString();
 
                             if (mediaUrl.isNotEmpty) {
                               return Image.network(
