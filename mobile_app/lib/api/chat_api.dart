@@ -187,9 +187,9 @@ class ChatApi {
           "noidung": row["noidung"]?.toString() ?? "",
           "ladigital": row["ladigital"] == true,
           "thoigiangui": row["thoigiangui"]?.toString() ?? "",
-          "loai_tin_nhan": row["loai_tin_nhan"]?.toString() ?? "text",
-          "media_url":
-              row["media_url"] == null ? null : row["media_url"].toString(),
+          "loaitinnhan": row["loaitinnhan"]?.toString() ?? "text",
+          "anhurl":
+              row["anhurl"] == null ? null : row["anhurl"].toString(),
         };
       }).toList();
     } catch (e) {
