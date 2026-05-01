@@ -1,6 +1,7 @@
 .login-wrapper {
     width: 100vw;
-    height: 100vh;
+    min-height: 100vh;
+    padding: 24px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -8,7 +9,7 @@
 }
 
 .login-card {
-    width: 604px 671px;
+    width: min(604px, 100%);
     padding: 20px 50px;
     border-radius: 20px;
     background: var(--bg-card);
@@ -34,6 +35,7 @@ h1 {
     color: var(--text-secondary);
     font-size: 18px;
     font-weight: 400;
+    line-height: 1.45;
     margin-bottom: 25px;
 }
 
@@ -74,6 +76,10 @@ input:focus {
     position: relative;
 }
 
+.password-field input {
+    padding-right: 60px;
+}
+
 .toggle {
     position: absolute;
     right: 20px;
@@ -89,25 +95,97 @@ input:focus {
     color: var(--primary-blue2);
 }
 
-button {
+.auth-options {
+    max-width: 510px;
+    margin: -6px auto 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.remember-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: 15px;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.remember-option input {
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    border-radius: 4px;
+}
+
+.link-button {
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    color: var(--primary-blue2);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.link-button:hover {
+    background: transparent;
+    box-shadow: none;
+    transform: none;
+    color: var(--primary-blue-hover);
+}
+
+.primary-button,
+.secondary-button {
     margin-top: var(--space-2);
-    width: 370px;
+    width: min(370px, 100%);
     height: 67px;
     border-radius: 10px;
-    background: var(--primary-blue2);
-    color: var(--bg-card);
     font-size: 20px;
     font-weight: 600;
     border: none;
     cursor: pointer;
     transition: var(--transition);
+}
+
+.primary-button {
+    background: var(--primary-blue2);
+    color: var(--bg-card);
     box-shadow: 0 4px 12px rgba(24, 119, 242, 0.3);
 }
 
-button:hover {
-    background: var(--primary-blue-hover);
+.secondary-button {
+    background: #EFF4FF;
+    color: var(--primary-blue2);
+    box-shadow: none;
+}
+
+.primary-button:hover,
+.secondary-button:hover {
     transform: translateY(-2px);
+}
+
+.primary-button:hover {
+    background: var(--primary-blue-hover);
     box-shadow: 0 6px 16px rgba(24, 119, 242, 0.4);
+}
+
+.secondary-button:hover {
+    background: #E1EBFF;
+}
+
+.primary-button:disabled,
+.secondary-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+    transform: none;
 }
 
 .error-text {
@@ -117,11 +195,26 @@ button:hover {
     display: none;
 }
 
+.status-text {
+    color: var(--status-success);
+    font-size: 14px;
+    margin-top: 16px;
+    display: none;
+}
+
 .demo {
     margin-top: var(--space-4);
     font-size: 18px;
     color: var(--text-secondary);
     opacity: 0.8;
+}
+
+.back-login {
+    margin-top: 18px;
+}
+
+.hidden {
+    display: none;
 }
 
 @keyframes slideDown {
@@ -133,5 +226,46 @@ button:hover {
     to {
         transform: translateY(0);
         opacity: 1;
+    }
+}
+
+@media (max-width: 640px) {
+    .login-wrapper {
+        padding: 16px;
+        align-items: flex-start;
+    }
+
+    .login-card {
+        padding: 24px 18px;
+        border-radius: 16px;
+    }
+
+    h1 {
+        font-size: 30px;
+    }
+
+    .subtitle,
+    .demo {
+        font-size: 15px;
+    }
+
+    label {
+        font-size: 18px;
+    }
+
+    input {
+        height: 54px;
+        font-size: 16px;
+    }
+
+    .auth-options {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .primary-button,
+    .secondary-button {
+        height: 56px;
+        font-size: 18px;
     }
 }

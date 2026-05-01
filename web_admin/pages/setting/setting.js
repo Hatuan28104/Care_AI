@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
-                                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                                    Authorization: `Bearer ${localStorage.getItem('token') || sessionStorage.getItem('token')}`
                                 },
                                 body: JSON.stringify({
                                     oldPassword: oldPass.value,
@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const adminPhoneInput = document.getElementById('admin-phone');
     if (adminPhoneInput) {
-        const savedPhone = localStorage.getItem('user_phone');
+        const savedPhone = localStorage.getItem('user_phone') || sessionStorage.getItem('user_phone');
         if (savedPhone) adminPhoneInput.value = savedPhone;
     }
 

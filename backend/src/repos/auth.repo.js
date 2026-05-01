@@ -1,4 +1,4 @@
-import { getDB } from "../config/db.js";
+﻿import { getDB } from "../config/db.js";
 import jwt from "jsonwebtoken";
 import crypto from "node:crypto";
 import admin from "../config/firebase.js";
@@ -21,77 +21,21 @@ function normalizeVnPhone(phone) {
 
   return digits;
 }
-async function sendOtpSms(localPhone, otp) {
-  if (process.env.DEV_MODE === "true") {
-    await sendOtpTelegram(localPhone, otp);
-    return;
-  }
-  if (
-    !process.env.ESMS_API_KEY ||
-    !process.env.ESMS_SECRET_KEY
-  ) {
-    throw new Error("Thiếu cấu hình ESMS");
-  }
-
-  const content = `${otp} la ma xac minh dang ky CareAI cua ban`;
-
-  try {
-    const response = await fetch(
-      "https://rest.esms.vn/MainService.svc/json/SendMultipleMessage_V4_post_json/",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ApiKey: process.env.ESMS_API_KEY,
-          SecretKey: process.env.ESMS_SECRET_KEY,
-          Phone: localPhone,
-          Content: content,
-          SmsType: process.env.ESMS_SMS_TYPE || "4",
-          IsUnicode: "0",
-          RequestId: crypto.randomUUID(),
-        }),
-      }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok || String(data.CodeResult) !== "100") {
-      console.error("ESMS send OTP failed:", {
-        phone: localPhone,
-        response: data,
-      });
-
-      throw new Error("Không thể gửi OTP SMS");
-    }
-
-    console.log("ESMS OTP sent:", {
-      phone: localPhone,
-      smsId: data.SMSID,
-    });
-  } catch (error) {
-    console.error("ESMS send OTP error:", {
-      phone: localPhone,
-      error: error.message,
-    });
-
-    throw new Error("Không thể gửi OTP SMS");
-  }
-}
 async function sendOtpTelegram(localPhone, otp) {
-  if (
-    process.env.OTP_DEBUG_CHANNEL !== "telegram" ||
-    !process.env.TELEGRAM_BOT_TOKEN ||
-    !process.env.TELEGRAM_CHAT_ID
-  ) {
-    return false;
+  if (!process.env.TELEGRAM_BOT_TOKEN || !process.env.TELEGRAM_CHAT_ID) {
+    throw new Error("Thieu cau hinh Telegram OTP");
   }
 
   const chatIds = process.env.TELEGRAM_CHAT_ID
     .split(",")
     .map((id) => id.trim())
     .filter(Boolean);
+
+  if (chatIds.length === 0) {
+    throw new Error("Thieu Telegram chat ID");
+  }
+
+  let sent = false;
 
   for (const chatId of chatIds) {
     const url = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`;
@@ -115,6 +59,7 @@ async function sendOtpTelegram(localPhone, otp) {
         response: data,
       });
     } else {
+      sent = true;
       console.log("Telegram OTP sent:", {
         chatId,
         phone: localPhone,
@@ -123,7 +68,9 @@ async function sendOtpTelegram(localPhone, otp) {
     }
   }
 
-  return true;
+  if (!sent) {
+    throw new Error("Khong the gui OTP Telegram");
+  }
 }
 async function phoneExists(db, phone) {
   const { data, error } = await db
@@ -140,6 +87,46 @@ function generateOtp() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
+function hashPassword(password) {
+  const salt = crypto.randomBytes(16).toString("hex");
+  const hash = crypto.scryptSync(String(password), salt, 64).toString("hex");
+  return `scrypt:${salt}:${hash}`;
+}
+
+function passwordMatches(inputPassword, storedPassword) {
+  const input = String(inputPassword || "").trim();
+  const stored = String(storedPassword || "").trim();
+
+  if (!stored.startsWith("scrypt:")) {
+    return input === stored;
+  }
+
+  const [, salt, storedHash] = stored.split(":");
+  if (!salt || !storedHash) return false;
+
+  const inputHash = crypto.scryptSync(input, salt, 64);
+  const storedBuffer = Buffer.from(storedHash, "hex");
+
+  return storedBuffer.length === inputHash.length &&
+    crypto.timingSafeEqual(storedBuffer, inputHash);
+}
+
+function getValidOtp(localPhone, allowedPurposes) {
+  const data = otpStore.get(localPhone);
+  if (!data) throw new Error("OTP không tồn tại");
+
+  if (Date.now() > data.expires) {
+    otpStore.delete(localPhone);
+    throw new Error("OTP hết hạn");
+  }
+
+  if (!allowedPurposes.includes(data.purpose)) {
+    throw new Error("OTP không hợp lệ");
+  }
+
+  return data;
+}
+
 function isProfileCompleted(nguoidung) {
   if (!nguoidung) return false;
   const name = String(nguoidung.tennd || "").trim().toLowerCase();
@@ -153,7 +140,7 @@ function isProfileCompleted(nguoidung) {
 }
 
 /* =========================
-   REGISTER – REQUEST OTP
+   REGISTER - REQUEST OTP
 ========================= */
 export async function requestRegisterOtp(phone) {
   const db = getDB();
@@ -167,13 +154,14 @@ export async function requestRegisterOtp(phone) {
   otpStore.set(localPhone, {
     otp,
     expires: Date.now() + 2 * 60 * 1000,
+    purpose: "register",
   });
 
-  await sendOtpSms(localPhone, otp);
+  await sendOtpTelegram(localPhone, otp);
 }
 
 /* =========================
-   LOGIN – REQUEST OTP
+   LOGIN - REQUEST OTP
 ========================= */
 export async function requestLoginOtp(phone) {
   const db = getDB();
@@ -187,9 +175,10 @@ export async function requestLoginOtp(phone) {
   otpStore.set(localPhone, {
     otp,
     expires: Date.now() + 2 * 60 * 1000,
+    purpose: "login",
   });
 
-  await sendOtpSms(localPhone, otp);
+  await sendOtpTelegram(localPhone, otp);
 }
 
 /* =========================
@@ -197,14 +186,7 @@ export async function requestLoginOtp(phone) {
 ========================= */
 export async function verifyOtp(phone, otp, req, deviceId) {
   const localPhone = normalizeVnPhone(phone);
-  const data = otpStore.get(localPhone);
-
-  if (!data) throw new Error("OTP không tồn tại");
-
-  if (Date.now() > data.expires) {
-    otpStore.delete(localPhone);
-    throw new Error("OTP hết hạn");
-  }
+  const data = getValidOtp(localPhone, ["register", "login"]);
 
   if (data.otp !== otp) {
     throw new Error("OTP không đúng");
@@ -322,7 +304,7 @@ export async function adminLogin(phone, password, req) {
   const inputPassword = String(password || "").trim();
   const dbPassword = String(account?.matkhau || "").trim();
 
-  const ok = account && dbPassword && inputPassword === dbPassword;
+  const ok = account && dbPassword && passwordMatches(inputPassword, dbPassword);
 
   if (!ok) {
     throw new Error("Số điện thoại hoặc mật khẩu không đúng");
@@ -481,17 +463,72 @@ export async function changeAdminPassword(taikhoanId, oldPw, newPw) {
   if (fetchErr) throw fetchErr;
   if (!account) throw new Error("Tài khoản không tồn tại");
 
-  if (String(account.matkhau).trim() !== String(oldPw).trim()) {
+  if (!passwordMatches(oldPw, account.matkhau)) {
     throw new Error("Mật khẩu cũ không chính xác");
   }
 
   // 2. Update to new password
   const { error: updateErr } = await db
     .from("taikhoan")
-    .update({ matkhau: String(newPw).trim() })
+    .update({ matkhau: hashPassword(newPw) })
     .eq("taikhoan_id", taikhoanId);
 
   if (updateErr) throw updateErr;
 
   return true;
 }
+
+export async function requestAdminPasswordResetOtp(phone) {
+  const db = getDB();
+  const localPhone = normalizeVnPhone(phone);
+
+  const { data: account, error } = await db
+    .from("taikhoan")
+    .select("taikhoan_id")
+    .eq("sodienthoai", localPhone)
+    .eq("laadmin", true)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!account) throw new Error("Số điện thoại admin không tồn tại");
+
+  const otp = generateOtp();
+  otpStore.set(localPhone, {
+    otp,
+    expires: Date.now() + 2 * 60 * 1000,
+    purpose: "admin-password-reset",
+  });
+
+  await sendOtpTelegram(localPhone, otp);
+}
+
+export async function resetAdminPasswordWithOtp(phone, otp, newPassword) {
+  const db = getDB();
+  const localPhone = normalizeVnPhone(phone);
+  const data = getValidOtp(localPhone, ["admin-password-reset"]);
+
+  if (data.otp !== otp) {
+    throw new Error("OTP không đúng");
+  }
+
+  const { data: account, error: fetchError } = await db
+    .from("taikhoan")
+    .select("taikhoan_id")
+    .eq("sodienthoai", localPhone)
+    .eq("laadmin", true)
+    .maybeSingle();
+
+  if (fetchError) throw fetchError;
+  if (!account) throw new Error("Tài khoản admin không tồn tại");
+
+  const { error: updateError } = await db
+    .from("taikhoan")
+    .update({ matkhau: hashPassword(newPassword) })
+    .eq("taikhoan_id", account.taikhoan_id);
+
+  if (updateError) throw updateError;
+
+  otpStore.delete(localPhone);
+  return true;
+}
+

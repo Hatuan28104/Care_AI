@@ -45,6 +45,28 @@ router.post("/admin/login", async (req, res) => {
   }
 });
 
+router.post("/admin/forgot-password/request-otp", async (req, res) => {
+  try {
+    const phone = req.body?.phone ?? req.body?.sodienthoai;
+    const response = await authService.handleAdminForgotPasswordRequestOtp(phone);
+    res.json(response);
+  } catch (e) {
+    res.status(400).json({ success: false, message: e.message });
+  }
+});
+
+router.post("/admin/forgot-password/reset", async (req, res) => {
+  try {
+    const phone = req.body?.phone ?? req.body?.sodienthoai;
+    const { otp } = req.body;
+    const newPassword = req.body?.newPassword ?? req.body?.matkhau;
+    const response = await authService.handleAdminForgotPasswordReset(phone, otp, newPassword);
+    res.json(response);
+  } catch (e) {
+    res.status(400).json({ success: false, message: e.message });
+  }
+});
+
 router.post("/change-phone", auth, async (req, res) => {
   try {
     const response = await authService.handleChangePhone(req.user.nguoidung_id, req.body.phone);

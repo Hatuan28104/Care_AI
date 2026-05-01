@@ -1,11 +1,30 @@
 import {
   requestRegisterOtp, requestLoginOtp, verifyOtp, changePhone, adminLogin,
-  getLoginHistory, saveFcmToken, sendTestPush, removeFcmToken, changeAdminPassword
+  getLoginHistory, saveFcmToken, sendTestPush, removeFcmToken, changeAdminPassword,
+  requestAdminPasswordResetOtp, resetAdminPasswordWithOtp
 } from "../repos/auth.repo.js";
 
 export const handleAdminChangePassword = async (taikhoanId, oldPassword, newPassword) => {
   if (!oldPassword || !newPassword) throw new Error("Thiếu mật khẩu cũ hoặc mật khẩu mới");
+  if (String(newPassword).trim().length < 6) throw new Error("Mật khẩu mới phải có ít nhất 6 ký tự");
   return await changeAdminPassword(taikhoanId, oldPassword, newPassword);
+};
+
+export const handleAdminForgotPasswordRequestOtp = async (phone) => {
+  if (!phone) throw new Error("Thiếu số điện thoại");
+  await requestAdminPasswordResetOtp(phone);
+  return { success: true, message: "OTP đặt lại mật khẩu đã được gửi" };
+};
+
+export const handleAdminForgotPasswordReset = async (phone, otp, newPassword) => {
+  if (!phone || !otp || !newPassword) {
+    throw new Error("Thiếu số điện thoại, OTP hoặc mật khẩu mới");
+  }
+  if (String(newPassword).trim().length < 6) {
+    throw new Error("Mật khẩu mới phải có ít nhất 6 ký tự");
+  }
+  await resetAdminPasswordWithOtp(phone, otp, newPassword);
+  return { success: true, message: "Đặt lại mật khẩu thành công" };
 };
 
 export const handleRequestRegisterOtp = async (phone) => {
