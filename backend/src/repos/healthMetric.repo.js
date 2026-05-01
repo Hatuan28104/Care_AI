@@ -3,6 +3,7 @@ import {
   getVNStartOfDayUTC,
   getVNEndOfDayUTC,
   getVNDateString,
+  getCurrentVNHour,
 } from "../utils/time.js";
 
 /* =========================
@@ -611,7 +612,7 @@ export async function getLatestAIInsight(nguoidung_id) {
   return data && data.length > 0 ? data[0] : null;
 }
 
-export async function getStressInputData(nguoiDungId) {
+export async function getStressInputData(nguoiDungId, deviceId) {
   const db = getDB();
 
   const targetMetricIds = ["CS008", "CS001", "CS037", "CS004"];
@@ -684,10 +685,70 @@ export async function getStressInputData(nguoiDungId) {
 
   const calibrationDays = Math.min(uniqueDays.size, 3);
 
+  const todayDateStr = getVNDateString();
+  let hasHrvToday = false;
+  let hasHrToday = false;
+  let hasSleepToday = false;
+  let hasStepsToday = false;
+
+  for (const row of rows) {
+    if (row.thoigiancapnhat) {
+      const vnDateStr = getVNDateString(new Date(row.thoigiancapnhat));
+      if (vnDateStr === todayDateStr) {
+        if (row.loaichiso_id === "CS008") hasHrvToday = true;
+        if (row.loaichiso_id === "CS001") hasHrToday = true;
+        if (row.loaichiso_id === "CS037") hasSleepToday = true;
+        if (row.loaichiso_id === "CS004") hasStepsToday = true;
+      }
+    }
+  }
+
+  if (!hasHrvToday && !hasHrToday && !hasSleepToday && !hasStepsToday) {
+    throw new Error("NOT_ENOUGH_DATA");
+  }
+
+  let sleepValue = sleepSeries.length > 0 ? sleepSeries[0] : 0;
+
+  // Phát hiện thức trắng đêm: chỉ trong khung 2h-10h sáng
+  if (!hasSleepToday && (hasHrToday || hasHrvToday)) {
+    const currentHour = getCurrentVNHour();
+
+    if (currentHour >= 2 && currentHour < 10) {
+      // Kiểm tra 2 tiếng trước có HR/HRV record không
+      const twoHoursAgo = new Date(Date.now() - 2 * 3600000);
+
+      const hasRecentHrHrv = rows.some((r) => {
+        if (r.loaichiso_id !== "CS001" && r.loaichiso_id !== "CS008") return false;
+        const t = new Date(r.thoigiancapnhat);
+        return t >= twoHoursAgo;
+      });
+
+      if (hasRecentHrHrv) {
+        // Có HR/HRV trong 2h trước → đeo đồng hồ liên tục → thức trắng đêm
+        sleepValue = 0;
+        console.log(`[SLEEP] Thức trắng đêm: có HR/HRV trong 2h gần đây, không có giấc ngủ`);
+      } else {
+        // Không có HR/HRV trong 2h trước → vừa đeo đồng hồ → dùng sleep lịch sử
+        console.log(`[SLEEP] Vừa đeo đồng hồ: không có HR/HRV trong 2h trước → dùng sleep lịch sử`);
+      }
+    }
+  }
+
+  // Tính hours_since_last_sleep = từ BÂY GIỜ đến lần ghi sleep gần nhất
+  // Ví dụ: ngủ tối qua ghi lúc 7h sáng, bây giờ 3h chiều → 8h
+  // Thức trắng, sleep gần nhất hôm qua 7h sáng, bây giờ 3h chiều → 32h
+  const sleepRecords = rows.filter((r) => r.loaichiso_id === "CS037");
+  let hoursSinceLastSleep = null;
+  if (sleepRecords.length >= 1) {
+    const lastSleepTime = new Date(sleepRecords[0].thoigiancapnhat);
+    hoursSinceLastSleep = (Date.now() - lastSleepTime.getTime()) / 3600000;
+  }
+
   return {
-    hrv_rmssd_ms: hrvSeries[0] ?? 35,
-    resting_hr_bpm: hrSeries[0] ?? 70,
-    sleep_duration_hours: sleepSeries[0] ?? 7,
+    hrv_rmssd_ms: hrvSeries[0],
+    resting_hr_bpm: hrSeries[0],
+    sleep_duration_hours: sleepValue,
+    hours_since_last_sleep: hoursSinceLastSleep,
     steps: todaySteps,
     hrv_history: hrvSeries.slice(1, 8).reverse(),
     sleep_history: sleepSeries.slice(1, 8).reverse(),

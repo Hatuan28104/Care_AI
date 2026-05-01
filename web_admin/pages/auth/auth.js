@@ -21,7 +21,7 @@ function togglePassword() {
 function setButtonLoading(button, isLoading, loadingText, defaultText) {
     if (!button) return;
     button.disabled = isLoading;
-    button.innerText = isLoading ? loadingText : defaultText;
+    button.innerText = defaultText;
 }
 
 function showError(elementId, message) {
@@ -39,7 +39,7 @@ function showMessage(elementId, message) {
 }
 
 function clearFeedback() {
-    ['loginError', 'loginStatus', 'forgotError', 'forgotMessage'].forEach((id) => {
+    ['loginError', 'loginStatus', 'forgotError'].forEach((id) => {
         const el = document.getElementById(id);
         if (el) {
             el.innerText = '';
@@ -51,7 +51,7 @@ function clearFeedback() {
 function formatApiError(data, fallback) {
     const message = data?.message || fallback;
     if (message?.startsWith('API not found:')) {
-        return 'Backend hiện tại chưa có API quên mật khẩu. Hãy chạy backend local mới nhất hoặc deploy backend trước.';
+        return '';
     }
     return message;
 }
@@ -71,6 +71,9 @@ function showLogin() {
     clearFeedback();
     document.getElementById('forgotPanel')?.classList.add('hidden');
     document.getElementById('loginPanel')?.classList.remove('hidden');
+    document.getElementById('forgotPhone').disabled = false;
+    document.getElementById('sendOtpButton')?.classList.remove('hidden');
+    document.getElementById('resetFields')?.classList.add('hidden');
 }
 
 async function login() {
@@ -157,7 +160,8 @@ async function requestResetOtp() {
         }
 
         document.getElementById('resetFields')?.classList.remove('hidden');
-        showMessage('forgotMessage', data.message || t('OTP đã được gửi'));
+        document.getElementById('sendOtpButton')?.classList.add('hidden');
+        document.getElementById('forgotPhone').disabled = true;
     } catch (err) {
         showError('forgotError', err.message);
     } finally {

@@ -64,8 +64,8 @@ export async function handleChat(
       noidung: isImage ? (message || "") : message,
       ladigital: false,
       thoigiangui: new Date().toISOString(),
-      loai_tin_nhan: isImage ? "image" : "text",
-      media_url: isImage ? mediaUrl : null,
+      loaitinnhan: isImage ? "image" : "text",
+      anhurl: isImage ? mediaUrl : null,
     })
     .select()
     .single();
@@ -171,7 +171,7 @@ export async function handleChat(
   /* ===== LẤY HISTORY ===== */
   const { data: history } = await db
     .from("tinnhan")
-    .select("noidung, ladigital, loai_tin_nhan")
+    .select("noidung, ladigital, loaitinnhan")
     .eq("hoithoai_id", conversationId)
     .order("thoigiangui", { ascending: false })
     .limit(20);
@@ -179,7 +179,7 @@ export async function handleChat(
   const messages = [{ role: "system", content: mota }];
 
   (history || []).reverse().forEach(row => {
-    if (row.loai_tin_nhan === "image") return;
+    if (row.loaitinnhan === "image") return;
 
     messages.push({
       role: row.ladigital ? "assistant" : "user",
@@ -203,8 +203,8 @@ export async function handleChat(
     noidung: aiReply,
     ladigital: true,
     thoigiangui: new Date().toISOString(),
-    loai_tin_nhan: "text",
-    media_url: null,
+    loaitinnhan: "text",
+    anhurl: null,
   });
 
   /* ===== UPDATE LAST CHAT ===== */
@@ -265,7 +265,7 @@ export async function getMessages(hoiThoaiId) {
 
   const { data, error } = await db
     .from("tinnhan")
-    .select("noidung, ladigital, thoigiangui, loai_tin_nhan, media_url")
+    .select("noidung, ladigital, thoigiangui, loaitinnhan, anhurl")
     .eq("hoithoai_id", hoiThoaiId)
     .order("thoigiangui", { ascending: true });
 

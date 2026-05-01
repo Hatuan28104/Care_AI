@@ -209,19 +209,20 @@ export const handleGetReport = async (user, quanHeId, type) => {
   return { success: true, data };
 };
 
-export const handleAnalyzeStress = async (user) => {
+export const handleAnalyzeStress = async (user, deviceId) => {
   const nguoiDungId = user?.NguoiDung_ID || user?.nguoidung_id;
 
-  const inputData = await getStressInputData(nguoiDungId);
+  const inputData = await getStressInputData(nguoiDungId, deviceId);
 
-  const stressScore = await callStressAI(inputData);
+  const aiResult = await callStressAI(nguoiDungId, inputData);
+  const stressScore = aiResult?.stress ?? 0;
 
   await saveHealthData({
     nguoidung_id: nguoiDungId,
     loaichiso_id: "CS016",
     giatri: stressScore,
     thoigiancapnhat: new Date().toISOString(),
-    nguondulieu_id: null,
+    nguondulieu_id: deviceId || null,
   });
 
   return {

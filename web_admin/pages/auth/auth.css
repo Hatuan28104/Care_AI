@@ -72,6 +72,12 @@ input:focus {
     box-shadow: 0 0 0 4px rgba(24, 119, 242, 0.1);
 }
 
+input:disabled {
+    color: var(--text-secondary);
+    background: #F8FAFC;
+    cursor: not-allowed;
+}
+
 .password-group .password-field {
     position: relative;
 }
@@ -142,6 +148,27 @@ input:focus {
     color: var(--primary-blue-hover);
 }
 
+.resend-otp-button {
+    width: auto;
+    height: auto;
+    margin: 12px 0 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    color: var(--primary-blue2);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.resend-otp-button:hover {
+    background: transparent;
+    box-shadow: none;
+    transform: none;
+    color: var(--primary-blue-hover);
+}
+
 .primary-button,
 .secondary-button {
     margin-top: var(--space-2);
@@ -153,6 +180,24 @@ input:focus {
     border: none;
     cursor: pointer;
     transition: var(--transition);
+}
+
+#forgotPanel .primary-button,
+#forgotPanel .secondary-button {
+    width: min(300px, 100%);
+    height: 52px;
+    font-size: 17px;
+}
+
+#forgotPanel .secondary-button {
+    background: var(--primary-blue2);
+    color: var(--bg-card);
+    box-shadow: 0 4px 12px rgba(24, 119, 242, 0.3);
+}
+
+#forgotPanel .secondary-button:hover {
+    background: var(--primary-blue-hover);
+    box-shadow: 0 6px 16px rgba(24, 119, 242, 0.4);
 }
 
 .primary-button {
@@ -209,10 +254,6 @@ input:focus {
     opacity: 0.8;
 }
 
-.back-login {
-    margin-top: 18px;
-}
-
 .hidden {
     display: none;
 }
@@ -267,5 +308,12 @@ input:focus {
     .secondary-button {
         height: 56px;
         font-size: 18px;
+    }
+
+    #forgotPanel .primary-button,
+    #forgotPanel .secondary-button {
+        width: min(260px, 100%);
+        height: 48px;
+        font-size: 16px;
     }
 }

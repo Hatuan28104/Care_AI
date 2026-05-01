@@ -122,9 +122,9 @@ router.get("/report/:quanHeId", auth, async (req, res) => {
   }
 });
 
-router.post("/analyze-stress", auth, async (req, res) => {
+router.post(["/analyze-stress", "/analyze-stress/:deviceId"], auth, async (req, res) => {
   try {
-    const response = await healthMetricService.handleAnalyzeStress(req.user);
+    const response = await healthMetricService.handleAnalyzeStress(req.user, req.params.deviceId);
     res.json(response);
   } catch (err) {
     console.error("Stress Analysis Error:", err.message);

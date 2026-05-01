@@ -473,8 +473,7 @@ const I18n = (function () {
 
     let currentLang = STORAGE_KEY && localStorage.getItem(STORAGE_KEY);
     if (!SUPPORTED_LANGS.includes(currentLang)) {
-        const browserLang = navigator.language || navigator.userLanguage || DEFAULT_LANG;
-        currentLang = browserLang.toLowerCase().startsWith('en') ? 'en' : 'vi';
+        currentLang = DEFAULT_LANG;
     }
 
     function setLanguage(lang) {
