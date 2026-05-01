@@ -43,7 +43,7 @@ class _HealthDataScreenState extends State<HealthDataScreen> {
       _metrics.clear();
 
       for (var e in metrics) {
-        if ((e['loai'] ?? '').toString().toLowerCase() != 'health') continue;
+        if ((e['loai'] ?? '').toString().toLowerCase() != 'sức khỏe') continue;
 
         final iconData = getHealthIcon((e['tenchiso'] ?? '').toString());
 
