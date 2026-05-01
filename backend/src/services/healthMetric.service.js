@@ -165,12 +165,23 @@ export const handleGetLatestUserData = async (user) => {
   if (!nguoiDungId) throw new Error("Chưa đăng nhập");
 
   console.log("[latest-user] service getLatestHealthDataByUser start");
-  const [data, inputData] = await Promise.all([
-    getLatestHealthDataByUser(nguoiDungId),
-    getStressInputData(nguoiDungId),
-  ]);
-  console.log("[latest-user] service latest data length:", data?.length ?? 0);
 
+  let data, inputData;
+  try {
+    [data, inputData] = await Promise.all([
+      getLatestHealthDataByUser(nguoiDungId),
+      getStressInputData(nguoiDungId).catch((e) => {
+        console.log("[latest-user] getStressInputData error (ignored):", e.message);
+        return { calibration_days: 0, debug_row_count: 0, debug_first_row: null };
+      }),
+    ]);
+  } catch (e) {
+    console.error("[latest-user] Promise.all error:", e.message);
+    data = [];
+    inputData = { calibration_days: 0, debug_row_count: 0, debug_first_row: null };
+  }
+
+  console.log("[latest-user] service latest data length:", data?.length ?? 0);
   console.log(`[STRESS_DEBUG] Full inputData:`, JSON.stringify(inputData));
 
   return {
