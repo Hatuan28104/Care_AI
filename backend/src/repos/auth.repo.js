@@ -531,4 +531,3 @@ export async function resetAdminPasswordWithOtp(phone, otp, newPassword) {
   otpStore.delete(localPhone);
   return true;
 }
-

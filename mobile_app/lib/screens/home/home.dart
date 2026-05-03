@@ -65,18 +65,10 @@ class _HomeScreenState extends State<HomeScreen> {
         );
         return;
       }
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => CreateProfileScreen(
-            nguoiDungId: widget.userId,
-            phone: '',
-          ),
-        ),
-      );
+      print('HOME PROFILE CHECK ERROR: $e');
+      setState(() => _checkingProfile = false);
       return;
     }
 

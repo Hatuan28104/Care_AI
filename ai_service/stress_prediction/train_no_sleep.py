@@ -8,8 +8,7 @@ from sklearn.metrics import mean_absolute_error, r2_score
 from sklearn.preprocessing import StandardScaler
 from xgboost import XGBRegressor
 
-# Cấu hình để joblib sử dụng thư mục hiện tại (ổ D) làm nơi lưu file tạm
-# Điều này giúp tránh lỗi "No space left on device" nếu ổ C bị đầy.
+# Cấu hình để joblib sử dụng thư mục hiện tại làm nơi lưu file tạm
 os.environ['JOBLIB_TEMP_FOLDER'] = os.path.dirname(__file__)
 
 # ===== LOAD DATA =====
@@ -25,82 +24,67 @@ if not os.path.exists(csv_path):
 
 df = pd.read_csv(csv_path)
 
-# Giả định CSV có cột 'date', nếu không có ta tạo giả lập hoặc bỏ qua.
-# Ở đây ta thêm yếu tố 'day_of_week' nếu dữ liệu theo chuỗi thời gian
+# Day of week
 if 'date' in df.columns:
     df['date'] = pd.to_datetime(df['date'])
+    
+    # Sắp xếp để đảm bảo tính toán thời gian đúng
+    sort_cols = ['user_id', 'date'] if 'user_id' in df.columns else ['date']
+    df = df.sort_values(sort_cols)
+    
     df['day_of_week'] = df['date'].dt.dayofweek
 
-    # Thêm Lag Features
-    # Stress thường có tính hệ quả từ ngày hôm trước
+    # Lag Features (chỉ HRV, không có sleep) 
     # Lưu ý: Nếu có nhiều User, hãy dùng groupby('user_id') trước khi shift/rolling
-    # Ví dụ: df['hrv_lag1'] = df.groupby('user_id')['hrv_rmssd_ms'].shift(1)
     df['hrv_lag1'] = df['hrv_rmssd_ms'].shift(1)
-    df['sleep_lag1'] = df['sleep_duration_hours'].shift(1)
     df['rolling_hr_7d'] = df['resting_hr_bpm'].rolling(window=7, min_periods=1).mean()
+    # Lag Features (Dùng groupby nếu có nhiều người dùng trong file chung)
+    if 'user_id' in df.columns:
+        df['hrv_lag1'] = df.groupby('user_id')['hrv_rmssd_ms'].shift(1)
+        df['rolling_hr_7d'] = df.groupby('user_id')['resting_hr_bpm'].transform(lambda x: x.rolling(7, min_periods=1).mean())
+    else:
+        df['hrv_lag1'] = df['hrv_rmssd_ms'].shift(1)
+        df['rolling_hr_7d'] = df['resting_hr_bpm'].rolling(window=7, min_periods=1).mean()
 
-# ===== FEATURE ENGINEERING 🔥 =====
-df['sleep_debt'] = 8 - df['sleep_duration_hours']
-
+# ===== FEATURE ENGINEERING (chỉ HR/HRV/Steps) =====
 df['hrv_log'] = np.log1p(df['hrv_rmssd_ms'])
 df['steps_log'] = np.log1p(df['steps'])
 
 df['hrv_hr_ratio'] = df['hrv_rmssd_ms'] / (df['resting_hr_bpm'] + 1)
 df['hrv_hr_product'] = df['hrv_rmssd_ms'] * df['resting_hr_bpm']
 
-df['sleep_hr_interaction'] = df['sleep_duration_hours'] * df['resting_hr_bpm']
-df['stress_index'] = df['resting_hr_bpm'] / (df['sleep_duration_hours'] + 1)
-
-# --- NEW FEATURES ---
 df['hrv_sq'] = df['hrv_rmssd_ms'] ** 2
-df['is_sleep_deprived'] = (df['sleep_duration_hours'] < 6).astype(int)
 df['is_active'] = (df['steps'] > 10000).astype(int)
 df['is_extreme_hrv'] = ((df['hrv_rmssd_ms'] < 20) | (df['hrv_rmssd_ms'] > 100)).astype(int)
-df['sleep_hrv_ratio'] = df['sleep_duration_hours'] / (df['hrv_rmssd_ms'] + 1)
-df['hrv_steps_interaction'] = df['hrv_log'] * df['steps_log']
-df['fatigue_index'] = (df['resting_hr_bpm'] / (df['hrv_rmssd_ms'] + 1)) * (8 / (df['sleep_duration_hours'] + 1))
-df['recovery_proxy'] = df['hrv_rmssd_ms'] * df['sleep_duration_hours'] / (df['resting_hr_bpm'] + 1)
 
-
-
-# ===== FEATURES =====
+# ===== FEATURES (13 — chỉ từ HR, HRV, Steps) =====
 features = [
     'hrv_rmssd_ms',
     'resting_hr_bpm',
-    'sleep_duration_hours',
     'steps',
 
-    'sleep_debt',
     'hrv_log',
     'steps_log',
     'hrv_hr_ratio',
     'hrv_hr_product',
-    'sleep_hr_interaction',
-    'stress_index',
-    
+
     'hrv_sq',
-    'is_sleep_deprived',
     'is_active',
     'is_extreme_hrv',
-    'sleep_hrv_ratio',
-    'fatigue_index',
-    'recovery_proxy',
+
     'day_of_week',
     'hrv_lag1',
-    'sleep_lag1',
     'rolling_hr_7d',
 ]
 
 X = df[features]
 y = df['stress_score']
 
-# ===== REMOVE OUTLIERS (OPTIONAL BUT RECOMMENDED) =====
-# Giới hạn dữ liệu trong khoảng 1% - 99% để tránh nhiễu cực đoan
+# ===== REMOVE OUTLIERS =====
 X = X.clip(lower=X.quantile(0.01), upper=X.quantile(0.99), axis=1)
 
 # ===== CLEAN DATA =====
-X = X.ffill().bfill().fillna(0) # Dùng ffill cho dữ liệu chuỗi thời gian hợp lý hơn
-
+X = X.ffill().bfill().fillna(0)
 
 # ===== SPLIT =====
 X_train, X_test, y_train, y_test = train_test_split(
@@ -122,28 +106,27 @@ param_grid = {
     'colsample_bytree': [0.8, 1.0]
 }
 
-base_model = XGBRegressor(random_state=42, tree_method='hist') # hist giúp chạy nhanh hơn
+base_model = XGBRegressor(random_state=42, tree_method='hist')
 
-# Thêm verbose=2 để thấy tiến trình: mỗi tổ hợp tham số sẽ được in ra khi bắt đầu thử nghiệm
 grid_search = GridSearchCV(
-    base_model, 
-    param_grid, 
-    cv=5, 
-    scoring='neg_mean_absolute_error', 
-    n_jobs=2, # Giảm số luồng xuống để giảm áp lực ghi đĩa
+    base_model,
+    param_grid,
+    cv=5,
+    scoring='neg_mean_absolute_error',
+    n_jobs=2,
     verbose=2
 )
 
 # ===== TRAIN =====
-print(" Bắt đầu quá trình tìm kiếm tham số tối ưu (Grid Search)...")
+print("🔍 Training NO-SLEEP model (13 features: HR/HRV/Steps only)...")
 grid_search.fit(X_train, y_train)
 
 best_model = grid_search.best_estimator_
 
-# Hiển thị độ quan trọng của tính năng
+# Feature importances
 importances = pd.Series(best_model.feature_importances_, index=features).sort_values(ascending=False)
-print("\n Feature Importances:")
-print(importances.head(10))
+print("\n📊 Feature Importances (No Sleep):")
+print(importances)
 
 # ===== EVALUATE =====
 pred = best_model.predict(X_test)
@@ -151,13 +134,13 @@ pred = best_model.predict(X_test)
 mae = mean_absolute_error(y_test, pred)
 r2 = r2_score(y_test, pred)
 
-print(f"\n Best Params: {grid_search.best_params_}")
-print("\n Optimized Evaluation:")
+print(f"\n🏆 Best Params: {grid_search.best_params_}")
+print("\n📈 Evaluation:")
 print("MAE:", mae)
 print("R2:", r2)
 
 # ===== SAVE =====
-joblib.dump(best_model, os.path.join(base_path, "igf_model.pkl"))
-joblib.dump(scaler, os.path.join(base_path, "igf_scaler.pkl"))
+joblib.dump(best_model, os.path.join(base_path, "igf_model_no_sleep.pkl"))
+joblib.dump(scaler, os.path.join(base_path, "igf_scaler_no_sleep.pkl"))
 
-print("\n Model saved!")
+print("\n✅ No-sleep model saved: igf_model_no_sleep.pkl + igf_scaler_no_sleep.pkl")

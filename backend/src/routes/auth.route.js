@@ -1,6 +1,6 @@
 import express from "express";
 import * as authService from "../services/auth.service.js";
-import { auth,requireAdmin  } from "../middlewares/auth.middleware.js";
+import { auth, requireAdmin } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
@@ -88,7 +88,7 @@ router.post("/admin/change-password", auth, requireAdmin, async (req, res) => {
 
 router.get("/login-history", auth, async (req, res) => {
   try {
-    const response = await authService.handleGetLoginHistory(req.user.taikhoan_id);    res.json(response);
+    const response = await authService.handleGetLoginHistory(req.user.taikhoan_id); res.json(response);
   } catch (e) {
     res.status(400).json({ success: false, message: e.message });
   }

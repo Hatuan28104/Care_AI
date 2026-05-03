@@ -53,7 +53,7 @@ class _ActivityDataScreenState extends State<ActivityDataScreen> {
     try {
       final data = await HealthApi.getMetrics();
 
-      final items = data.where((e) => e['loai'] == 'activity').map<MetricItem>((
+      final items = data.where((e) => e['loai'] == 'hoạt động').map<MetricItem>((
         e,
       ) {
         final iconData = getHealthIcon(e['tenchiso']);

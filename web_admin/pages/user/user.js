@@ -169,7 +169,7 @@ function renderTable() {
     const pageData = filteredUsers.slice(start, start + PAGE_SIZE);
 
     if (filteredUsers.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 40px; color: #64748B;">${isSearching ? t('Không có dữ liệu phù hợp') : t('Không có dữ liệu')}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="table-empty-cell">${isSearching ? t('Không có dữ liệu phù hợp') : t('Không có dữ liệu')}</td></tr>`;
         if (emptyState) emptyState.style.display = 'none';
         if (paginationRow) paginationRow.style.display = 'none';
         return;

@@ -54,7 +54,7 @@ class _BasicHealthDataScreenState extends State<BasicHealthDataScreen> {
     try {
       final data = await HealthApi.getMetrics();
 
-      final items = data.where((e) => e['loai'] == 'health').map<MetricItem>((
+      final items = data.where((e) => e['loai'] == 'sức khỏe').map<MetricItem>((
         e,
       ) {
         final iconData = getHealthIcon(e['tenchiso']);

@@ -130,6 +130,12 @@
     border-bottom: none;
 }
 
+.premium-table td.table-empty-cell {
+    padding: 40px;
+    color: #64748B;
+    text-align: center !important;
+}
+
 .user-cell {
     display: flex;
     align-items: center;

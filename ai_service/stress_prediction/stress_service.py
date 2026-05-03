@@ -8,17 +8,7 @@ base_path = os.path.dirname(__file__)
 
 def predict_stress(data, model, scaler):
     """
-    data = {
-        "hrv_rmssd_ms": 35,
-        "resting_hr_bpm": 70,
-        "sleep_duration_hours": 5,
-        "steps": 3000,
-
-        # optional (future - từ DB)
-        "hrv_history": [30, 32, 34],
-        "sleep_history": [6, 5.5, 5],
-        "hr_history": [72, 71, 70]
-    }
+    Model ĐẦY ĐỦ — 22 features (có sleep)
     """
 
     hrv = data["hrv_rmssd_ms"]
@@ -27,9 +17,9 @@ def predict_stress(data, model, scaler):
     steps = data["steps"]
 
     # ===== SAFE HISTORY HANDLING =====
-    hrv_history = data.get("hrv_history", [])
-    sleep_history = data.get("sleep_history", [])
-    hr_history = data.get("hr_history", [])
+    hrv_history = data.get("hrv_history") or []
+    sleep_history = data.get("sleep_history") or []
+    hr_history = data.get("hr_history") or []
 
     # lag1 (ngày trước đó)
     hrv_lag1 = hrv_history[-1] if len(hrv_history) > 0 else hrv
@@ -71,7 +61,58 @@ def predict_stress(data, model, scaler):
 
         hrv_lag1,
         sleep_lag1,
-        rolling_hr_7d
+        rolling_hr_7d,
+    ]
+
+    values = np.array([features])
+    values = scaler.transform(values)
+    stress = model.predict(values)[0]
+
+    return float(stress)
+
+
+def predict_stress_no_sleep(data, model, scaler):
+    """
+    Model KHÔNG CÓ SLEEP — 13 features (chỉ HR/HRV/Steps)
+    Dùng khi không có dữ liệu giấc ngủ.
+    """
+
+    hrv = data["hrv_rmssd_ms"]
+    hr = data["resting_hr_bpm"]
+    steps = data["steps"]
+
+    # ===== SAFE HISTORY HANDLING =====
+    hrv_history = data.get("hrv_history") or []
+    hr_history = data.get("hr_history") or []
+
+    hrv_lag1 = hrv_history[-1] if len(hrv_history) > 0 else hrv
+
+    if len(hr_history) > 0:
+        rolling_hr_7d = np.mean(hr_history[-7:])
+    else:
+        rolling_hr_7d = hr
+
+    # ===== FEATURE ENGINEERING =====
+    hrv_log = np.log1p(hrv)
+    steps_log = np.log1p(steps)
+
+    features = [
+        hrv,
+        hr,
+        steps,
+
+        hrv_log,
+        steps_log,
+        hrv / (hr + 1),        # hrv_hr_ratio
+        hrv * hr,               # hrv_hr_product
+
+        hrv ** 2,               # hrv_sq
+        1 if steps > 10000 else 0,                     # is_active
+        1 if (hrv < 20 or hrv > 100) else 0,           # is_extreme_hrv
+
+        datetime.now().weekday(),  # day_of_week
+        hrv_lag1,
+        rolling_hr_7d,
     ]
 
     values = np.array([features])

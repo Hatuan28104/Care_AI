@@ -4,6 +4,27 @@ function t(key) {
     return window.I18n?.t(key) || key;
 }
 
+function getAuthToken() {
+    return localStorage.getItem('token') || sessionStorage.getItem('token');
+}
+
+async function postJson(path, body) {
+    const res = await fetch(`${API_BASE}${path}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${getAuthToken()}`
+        },
+        body: JSON.stringify(body)
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.success) {
+        throw new Error(data.message || t('Có lỗi xảy ra'));
+    }
+    return data;
+}
+
 const SettingNav = {
     init: async function () {
         document.body.classList.add('setting-nav-loading');
@@ -67,6 +88,15 @@ const SettingNav = {
 document.addEventListener('DOMContentLoaded', async () => {
     await SettingNav.init();
 
+    const adminPhoneInput = document.getElementById('admin-phone');
+    if (adminPhoneInput) {
+        const savedPhone = localStorage.getItem('user_phone') || sessionStorage.getItem('user_phone');
+        if (savedPhone) adminPhoneInput.value = savedPhone;
+        adminPhoneInput.readOnly = true;
+        adminPhoneInput.setAttribute('aria-readonly', 'true');
+        adminPhoneInput.title = t('Số điện thoại admin không được thay đổi');
+    }
+
     const forms = document.querySelectorAll('.setting-form-v2, form');
     forms.forEach((form) => {
         form.addEventListener('submit', async (e) => {
@@ -77,6 +107,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             const confirmPass = document.getElementById('confirm-password');
 
             if (oldPass && newPass && confirmPass) {
+                const passwordChanged = !!(oldPass.value || newPass.value || confirmPass.value);
+
+                if (!passwordChanged) {
+                    UI.showToast(t('Không có thay đổi để cập nhật'), 'warning');
+                    return;
+                }
+
                 if (newPass.value !== confirmPass.value) {
                     UI.showToast(t('Mật khẩu mới không khớp!'), 'danger');
                     return;
@@ -89,35 +126,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 UI.showModal({
                     type: 'confirm-save',
-                    title: t('Xác nhận đổi mật khẩu'),
-                    message: t('Bạn có chắc chắn muốn thay đổi mật khẩu không?'),
+                    title: t('Xác nhận lưu thay đổi'),
+                    message: t('Bạn có chắc chắn muốn cập nhật thông tin không?'),
                     confirmText: t('Xác nhận'),
                     cancelText: t('Hủy'),
                     onConfirm: async () => {
                         try {
-                            const res = await fetch(`${API_BASE}/auth/admin/change-password`, {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    Authorization: `Bearer ${localStorage.getItem('token') || sessionStorage.getItem('token')}`
-                                },
-                                body: JSON.stringify({
-                                    oldPassword: oldPass.value,
-                                    newPassword: newPass.value
-                                })
+                            await postJson('/auth/admin/change-password', {
+                                oldPassword: oldPass.value,
+                                newPassword: newPass.value
                             });
+                            oldPass.value = '';
+                            newPass.value = '';
+                            confirmPass.value = '';
 
-                            const data = await res.json();
-                            if (data.success) {
-                                UI.showToast(t('Đổi mật khẩu thành công!'), 'success');
-                                oldPass.value = '';
-                                newPass.value = '';
-                                confirmPass.value = '';
-                            } else {
-                                UI.showToast(data.message || t('Có lỗi xảy ra'), 'danger');
-                            }
+                            UI.showToast(t('Cài đặt đã được cập nhật thành công!'), 'success');
                         } catch (err) {
-                            UI.showToast(t('Không thể kết nối đến server'), 'danger');
+                            UI.showToast(err.message || t('Không thể kết nối đến server'), 'danger');
                         }
                     }
                 });
@@ -146,12 +171,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         cancelBtn.addEventListener('click', () => {
             UI.showToast(t('Đã hủy thay đổi.'), 'warning');
         });
-    }
-
-    const adminPhoneInput = document.getElementById('admin-phone');
-    if (adminPhoneInput) {
-        const savedPhone = localStorage.getItem('user_phone') || sessionStorage.getItem('user_phone');
-        if (savedPhone) adminPhoneInput.value = savedPhone;
     }
 
     const langSelect = document.getElementById('language-select');
