@@ -141,7 +141,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen>
           metricMap[id] = {
             'name': (m['TenChiSo'] ?? '').toString(),
             'unit': (m['DonViDo'] ?? '').toString(),
-            'category': (m['Category'] ?? 'health').toString(),
+            'category': (m['Category'] ?? 'sức khỏe').toString(),
           };
         }
       } catch (_) {}
@@ -188,7 +188,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen>
         'hcKey': e.key,
         'name': info['name'] ?? e.key,
         'unit': info['unit'] ?? '',
-        'category': info['category'] ?? 'health',
+        'category': info['category'] ?? 'sức khỏe',
       };
     }
 
