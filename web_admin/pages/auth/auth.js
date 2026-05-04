@@ -212,6 +212,9 @@ async function verifyResetOtp() {
         const data = await res.json();
 
         if (!data.success) {
+            if (data.message?.startsWith('API not found:')) {
+                throw new Error(t('Backend chưa cập nhật API xác nhận OTP'));
+            }
             throw new Error(formatApiError(data, t('OTP không đúng')));
         }
 
