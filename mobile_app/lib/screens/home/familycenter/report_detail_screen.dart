@@ -29,29 +29,19 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
 
   Future<void> _loadReport() async {
     try {
-      print(
-        "[REPORT SCREEN] load quanHeId=${widget.quanHeId}, type=${widget.type}",
-      );
-
       final res = await FamilyApi.getHealthReport(
         widget.quanHeId,
         widget.type,
       );
 
       print("REPORT RAW: $res");
-      print("[REPORT SCREEN] result type=${res.runtimeType}");
-      print("[REPORT SCREEN] result length=${res.length}");
-      if (res.isNotEmpty) {
-        print("[REPORT SCREEN] first item=${res.first}");
-      }
 
       setState(() {
         report = res ?? [];
         loading = false;
       });
-    } catch (e, st) {
+    } catch (e) {
       print("REPORT ERROR: $e");
-      print("REPORT STACK: $st");
       setState(() => loading = false);
     }
   }

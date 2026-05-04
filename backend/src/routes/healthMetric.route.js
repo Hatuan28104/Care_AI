@@ -114,21 +114,10 @@ router.get("/history/:deviceId/:metricId", auth, async (req, res) => {
 
 router.get("/report/:quanHeId", auth, async (req, res) => {
   try {
-    console.log("[HEALTH REPORT ROUTE]", {
-      user: req.user,
-      quanHeId: req.params.quanHeId,
-      type: req.query.type || "day",
-    });
     const response = await healthMetricService.handleGetReport(req.user, req.params.quanHeId, req.query.type || "day");
     res.json(response);
   } catch (err) {
-    console.error("[HEALTH REPORT ROUTE ERROR]", {
-      message: err?.message,
-      code: err?.code,
-      details: err?.details,
-      hint: err?.hint,
-      stack: err?.stack,
-    });
+    console.error(err);
     res.status(500).json({ success: false, message: "Không lấy được báo cáo" });
   }
 });

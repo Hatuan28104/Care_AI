@@ -426,17 +426,12 @@ class FamilyApi {
       '$_baseUrl/health/report/$quanHeId?type=$type',
     );
 
-    print('[REPORT API] GET $url');
-
     final response = await http
         .get(
           url,
           headers: await _authHeaders(),
         )
         .timeout(const Duration(seconds: 8));
-
-    print('[REPORT API] status=${response.statusCode}');
-    print('[REPORT API] body=${response.body}');
 
     Map<String, dynamic> data;
     try {
@@ -446,17 +441,6 @@ class FamilyApi {
     }
     if (response.statusCode != 200 || data['success'] != true) {
       throw ApiException(data['message'] ?? 'Không lấy được báo cáo');
-    }
-
-    print('[REPORT API] data type=${data['data'].runtimeType}');
-    if (data['data'] is List) {
-      final list = data['data'] as List;
-      print('[REPORT API] data length=${list.length}');
-      if (list.isNotEmpty) {
-        print('[REPORT API] first item=${list.first}');
-      }
-    } else {
-      print('[REPORT API] data value=${data['data']}');
     }
 
     return data['data'];
