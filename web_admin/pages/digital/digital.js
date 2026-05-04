@@ -1,11 +1,23 @@
 const DIGITAL_PAGE_SIZE = 10;
 const API_BASE = 'https://careai-production.up.railway.app';
 const API = `${API_BASE}/api/digital-human`;
+const JOB_OPTIONS = [
+    'Bác sĩ',
+    'Bác sĩ khoa nhi',
+    'Chuyên gia dinh dưỡng',
+    'Chuyên gia tâm lý',
+    'Y tá',
+    'Dược sĩ',
+    'Chuyên gia vật lý trị liệu',
+    'Nhân viên hỗ trợ',
+    'Chuyên viên tư vấn'
+];
 
 let digitalPage = 1;
 let characters = [];
 let filteredChars = [];
 let isSearching = false;
+let existingDigitalIds = new Set();
 
 function t(key) {
     return window.I18n?.t(key) || key;
@@ -41,6 +53,31 @@ function toStoredImagePath(urlOrPath) {
         return urlOrPath.replace(`${API_BASE}/`, '').replace(`${API_BASE}`, '');
     }
     return urlOrPath.startsWith('/') ? urlOrPath.slice(1) : urlOrPath;
+}
+
+async function loadExistingDigitalIds() {
+    try {
+        const res = await fetch(API);
+        const json = await res.json();
+        const ids = (json?.data || []).map((d) => String(d.digitalhuman_id).trim()).filter(Boolean);
+        existingDigitalIds = new Set(ids);
+    } catch (error) {
+        console.error('Failed to load existing digital IDs', error);
+        existingDigitalIds = new Set();
+    }
+}
+
+function populateJobOptions() {
+    const jobSelect = document.getElementById('jobId');
+    if (!jobSelect) return;
+
+    jobSelect.innerHTML = '<option value="" disabled selected>Chọn nghề nghiệp</option>';
+    JOB_OPTIONS.forEach((job) => {
+        const option = document.createElement('option');
+        option.value = job;
+        option.innerText = job;
+        jobSelect.appendChild(option);
+    });
 }
 
 function showToastMessage(message) {
@@ -164,7 +201,6 @@ async function preloadDigitalForm(id) {
 
         if (digitalId) {
             digitalId.value = d.digitalhuman_id || '';
-            digitalId.disabled = true;
         }
         if (digitalName) digitalName.value = d.tendigitalhuman || '';
         if (gender) {
@@ -361,7 +397,7 @@ function initAvatarUpload() {
     });
 }
 
-function initDigitalForm() {
+async function initDigitalForm() {
     const btnSave = document.getElementById('btnSave');
     const btnCancel = document.getElementById('btnCancel');
     const btnBack = document.getElementById('btnBack');
@@ -374,7 +410,56 @@ function initDigitalForm() {
         window.location.href = './digital.html';
     });
 
-    btnSave?.addEventListener('click', () => {
+    const validateDigitalForm = () => {
+        const pageMode = getCurrentDigitalPage();
+        const currentId = new URLSearchParams(window.location.search).get('id');
+        const digitalId = document.getElementById('digitalId');
+        const digitalName = document.getElementById('digitalName');
+        const gender = document.getElementById('gender');
+        const jobId = document.getElementById('jobId');
+
+        if (!digitalId?.value.trim()) {
+            showToastMessage(t('Vui lòng nhập Mã ID'));
+            digitalId?.focus();
+            return false;
+        }
+
+        const newId = digitalId.value.trim();
+        if (pageMode === 'digital-add' && existingDigitalIds.has(newId)) {
+            showToastMessage(t('Mã ID đã tồn tại, vui lòng chọn mã khác'));
+            digitalId?.focus();
+            return false;
+        }
+
+        if (pageMode === 'digital-edit' && currentId && newId !== currentId && existingDigitalIds.has(newId)) {
+            showToastMessage(t('Mã ID đã tồn tại, vui lòng chọn mã khác'));
+            digitalId?.focus();
+            return false;
+        }
+
+        if (!digitalName?.value.trim()) {
+            showToastMessage(t('Vui lòng nhập Tên nhân vật'));
+            digitalName?.focus();
+            return false;
+        }
+
+        if (!gender?.value.trim()) {
+            showToastMessage(t('Vui lòng chọn Giới tính'));
+            return false;
+        }
+
+        if (!jobId?.value.trim()) {
+            showToastMessage(t('Vui lòng chọn Nghề nghiệp'));
+            jobId?.focus();
+            return false;
+        }
+
+        return true;
+    };
+
+    btnSave?.addEventListener('click', async () => {
+        if (!validateDigitalForm()) return;
+
         confirmModal({
             title: t('Xác nhận lưu'),
             message: t('Bạn có chắc chắn muốn lưu các thay đổi này không?'),
@@ -444,6 +529,12 @@ function initDigitalForm() {
         });
     }
 
+    populateJobOptions();
+
+    const pageMode = getCurrentDigitalPage();
+    if (pageMode === 'digital-add' || pageMode === 'digital-edit') {
+        await loadExistingDigitalIds();
+    }
     initAvatarUpload();
 }
 
@@ -477,7 +568,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     if (page === 'digital-add' || page === 'digital-edit') {
-        initDigitalForm();
+        await initDigitalForm();
     }
 
     if (page === 'digital-edit') {

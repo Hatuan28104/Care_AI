@@ -152,6 +152,11 @@ function initEditPage(id) {
             return;
         }
 
+        if (!/^[A-Za-zÀ-ỹ\s]+$/u.test(tenND)) {
+            toast(t('Tên người dùng không hợp lệ'));
+            return;
+        }
+
         if (ngaySinh) {
             const birthDate = new Date(ngaySinh);
             const today = new Date();
@@ -166,12 +171,12 @@ function initEditPage(id) {
         }
 
         if (chieuCao && (chieuCao < 50 || chieuCao > 300)) {
-            toast(t('Chiều cao phải từ 50 đến 300 cm'));
+            toast(t('Chiều cao không hợp lệ'));
             return;
         }
 
         if (canNang && (canNang < 10 || canNang > 500)) {
-            toast(t('Cân nặng phải từ 10 đến 500 kg'));
+            toast(t('Cân nặng không hợp lệ'));
             return;
         }
 

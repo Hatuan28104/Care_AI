@@ -502,6 +502,28 @@ export async function requestAdminPasswordResetOtp(phone) {
   await sendOtpTelegram(localPhone, otp);
 }
 
+export async function verifyAdminPasswordResetOtp(phone, otp) {
+  const db = getDB();
+  const localPhone = normalizeVnPhone(phone);
+  const data = getValidOtp(localPhone, ["admin-password-reset"]);
+
+  if (data.otp !== otp) {
+    throw new Error("OTP không đúng");
+  }
+
+  const { data: account, error } = await db
+    .from("taikhoan")
+    .select("taikhoan_id")
+    .eq("sodienthoai", localPhone)
+    .eq("laadmin", true)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!account) throw new Error("Tài khoản admin không tồn tại");
+
+  return true;
+}
+
 export async function resetAdminPasswordWithOtp(phone, otp, newPassword) {
   const db = getDB();
   const localPhone = normalizeVnPhone(phone);

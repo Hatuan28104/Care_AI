@@ -1,7 +1,7 @@
 import {
   requestRegisterOtp, requestLoginOtp, verifyOtp, changePhone, adminLogin,
   getLoginHistory, saveFcmToken, sendTestPush, removeFcmToken, changeAdminPassword,
-  requestAdminPasswordResetOtp, resetAdminPasswordWithOtp
+  requestAdminPasswordResetOtp, verifyAdminPasswordResetOtp, resetAdminPasswordWithOtp
 } from "../repos/auth.repo.js";
 
 export const handleAdminChangePassword = async (taikhoanId, oldPassword, newPassword) => {
@@ -14,6 +14,14 @@ export const handleAdminForgotPasswordRequestOtp = async (phone) => {
   if (!phone) throw new Error("Thiếu số điện thoại");
   await requestAdminPasswordResetOtp(phone);
   return { success: true, message: "OTP đặt lại mật khẩu đã được gửi" };
+};
+
+export const handleAdminForgotPasswordVerifyOtp = async (phone, otp) => {
+  if (!phone || !otp) {
+    throw new Error("Thiếu số điện thoại hoặc OTP");
+  }
+  await verifyAdminPasswordResetOtp(phone, otp);
+  return { success: true, message: "OTP hợp lệ" };
 };
 
 export const handleAdminForgotPasswordReset = async (phone, otp, newPassword) => {

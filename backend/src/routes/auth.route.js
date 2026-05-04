@@ -55,6 +55,17 @@ router.post("/admin/forgot-password/request-otp", async (req, res) => {
   }
 });
 
+router.post("/admin/forgot-password/verify-otp", async (req, res) => {
+  try {
+    const phone = req.body?.phone ?? req.body?.sodienthoai;
+    const { otp } = req.body;
+    const response = await authService.handleAdminForgotPasswordVerifyOtp(phone, otp);
+    res.json(response);
+  } catch (e) {
+    res.status(400).json({ success: false, message: e.message });
+  }
+});
+
 router.post("/admin/forgot-password/reset", async (req, res) => {
   try {
     const phone = req.body?.phone ?? req.body?.sodienthoai;

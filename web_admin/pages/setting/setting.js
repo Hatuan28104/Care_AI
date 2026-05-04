@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             newPass.value = '';
                             confirmPass.value = '';
 
-                            UI.showToast(t('Cài đặt đã được cập nhật thành công!'), 'success');
+                            UI.showToast(t('Mật khẩu đã được cập nhật thành công!'), 'success');
                         } catch (err) {
                             UI.showToast(err.message || t('Không thể kết nối đến server'), 'danger');
                         }
@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     message: t('Bạn có chắc chắn muốn cập nhật thông tin không?'),
                     confirmText: t('Xác nhận'),
                     cancelText: t('Hủy'),
-                    onConfirm: () => UI.showToast(t('Cài đặt đã được cập nhật thành công!'))
+                    onConfirm: () => UI.showToast(t('Mật khẩu đã được cập nhật thành công!'))
                 });
             }
         });

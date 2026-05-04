@@ -74,6 +74,13 @@ function showLogin() {
     document.getElementById('forgotPhone').disabled = false;
     document.getElementById('sendOtpButton')?.classList.remove('hidden');
     document.getElementById('resetFields')?.classList.add('hidden');
+    document.getElementById('resetPasswordFields')?.classList.add('hidden');
+    const otpInput = document.getElementById('resetOtp');
+    const newPasswordInput = document.getElementById('newPassword');
+    if (otpInput) otpInput.value = '';
+    if (newPasswordInput) newPasswordInput.value = '';
+    if (otpInput) otpInput.disabled = false;
+    document.getElementById('verifyOtpButton')?.classList.remove('hidden');
 }
 
 async function login() {
@@ -160,12 +167,62 @@ async function requestResetOtp() {
         }
 
         document.getElementById('resetFields')?.classList.remove('hidden');
+        document.getElementById('resetPasswordFields')?.classList.add('hidden');
+        const otpInput = document.getElementById('resetOtp');
+        const newPasswordInput = document.getElementById('newPassword');
+        if (otpInput) {
+            otpInput.value = '';
+            otpInput.disabled = false;
+        }
+        if (newPasswordInput) newPasswordInput.value = '';
+        document.getElementById('verifyOtpButton')?.classList.remove('hidden');
         document.getElementById('sendOtpButton')?.classList.add('hidden');
         document.getElementById('forgotPhone').disabled = true;
     } catch (err) {
         showError('forgotError', err.message);
     } finally {
         setButtonLoading(button, false, t('Đang gửi...'), t('Gửi OTP'));
+    }
+}
+
+async function verifyResetOtp() {
+    const phone = document.getElementById('forgotPhone').value.trim();
+    const otpInput = document.getElementById('resetOtp');
+    const otp = otpInput.value.trim();
+    const button = document.getElementById('verifyOtpButton');
+
+    clearFeedback();
+
+    if (!phone || !otp) {
+        showError('forgotError', t('Vui lòng nhập số điện thoại và OTP'));
+        return;
+    }
+
+    try {
+        setButtonLoading(button, true, t('Đang xác nhận...'), t('Xác nhận OTP'));
+
+        const res = await fetch(`${API_BASE}/auth/admin/forgot-password/verify-otp`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ sodienthoai: phone, otp })
+        });
+
+        const data = await res.json();
+
+        if (!data.success) {
+            throw new Error(formatApiError(data, t('OTP không đúng')));
+        }
+
+        otpInput.disabled = true;
+        button.classList.add('hidden');
+        document.getElementById('resetPasswordFields')?.classList.remove('hidden');
+    } catch (err) {
+        document.getElementById('resetPasswordFields')?.classList.add('hidden');
+        showError('forgotError', err.message);
+    } finally {
+        setButtonLoading(button, false, t('Đang xác nhận...'), t('Xác nhận OTP'));
     }
 }
 
