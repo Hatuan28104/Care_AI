@@ -288,9 +288,10 @@ export async function getHealthHistoryByUser(
 ========================= */
 export async function getHealthReport(userId, quanHeId, type) {
   const db = getDB();
+  console.log("[HEALTH REPORT REPO] start", { userId, quanHeId, type });
 
   // 1. check quyền quan hệ
-  const { data: rel } = await db
+  const { data: rel, error: relError } = await db
     .from("quanhegiamho")
     .select("nguoiduocgiamho_id")
     .eq("quanhegiamho_id", quanHeId)
@@ -298,26 +299,53 @@ export async function getHealthReport(userId, quanHeId, type) {
     .eq("dangatketnoi", false)
     .single();
 
+  console.log("[HEALTH REPORT REPO] relationship query raw", {
+    rel,
+    error: relError,
+  });
+  if (relError) throw relError;
+
   if (!rel) throw new Error("Không có quyền");
 
+  console.log("[HEALTH REPORT REPO] relationship query", {
+    rel,
+    error: relError,
+  });
+  if (relError) throw relError;
+
   const dependentId = rel.nguoiduocgiamho_id;
+  console.log("[HEALTH REPORT REPO] dependentId", dependentId);
 
   // 2. lấy quyền
-  const { data: configs } = await db
+  const { data: configs, error: configError } = await db
     .from("cauhinhdulieu")
     .select("quyen")
     .eq("quanhegiamho_id", quanHeId)
     .eq("dakichhoat", true);
 
+  console.log("[HEALTH REPORT REPO] configs query", {
+    count: configs?.length || 0,
+    configs,
+    error: configError,
+  });
+  if (configError) throw configError;
+
   const allowed = (configs || [])
     .map((i) => i.quyen)
     .filter((q) => q.startsWith("CS"));
   let finalAllowed = allowed;
+  console.log("[HEALTH REPORT REPO] allowed metrics", finalAllowed);
 
   if (finalAllowed.length === 0) {
-    const { data: metrics } = await db
+    const { data: metrics, error: metricsError } = await db
       .from("loaichisosuckhoe")
       .select("loaichiso_id");
+
+    console.log("[HEALTH REPORT REPO] fallback metrics query", {
+      count: metrics?.length || 0,
+      error: metricsError,
+    });
+    if (metricsError) throw metricsError;
 
     finalAllowed = (metrics || []).map((m) => m.loaichiso_id);
   }
@@ -334,6 +362,7 @@ export async function getHealthReport(userId, quanHeId, type) {
   if (["month", "m"].includes(type)) {
     fromDate.setUTCDate(fromDate.getUTCDate() - 30);
   }
+  console.log("[HEALTH REPORT REPO] fromDate", fromDate.toISOString());
 
   // 4. query data
   const { data, error } = await db
@@ -352,6 +381,12 @@ export async function getHealthReport(userId, quanHeId, type) {
     .eq("nguoidung_id", dependentId)
     .in("loaichiso_id", finalAllowed) // 🔥 SHARE CORE
     .gte("thoigiancapnhat", fromDate.toISOString());
+
+  console.log("[HEALTH REPORT REPO] health data query", {
+    count: data?.length || 0,
+    first: data?.[0],
+    error,
+  });
 
   if (error) throw error;
 
@@ -372,17 +407,22 @@ export async function getHealthReport(userId, quanHeId, type) {
       };
     }
 
+    console.log("[HEALTH REPORT REPO] grouping item", item);
+
     map[key].total += item.giatri;
     map[key].count++;
   }
 
   // 6. return dynamic
-  return Object.values(map).map((i) => ({
+  const result = Object.values(map).map((i) => ({
     loaichiso_id: i.loaichiso_id,
     tenchiso: i.tenchiso,
     donvido: i.donvido,
     giatri: i.total / i.count,
   }));
+
+  console.log("[HEALTH REPORT REPO] result", result);
+  return result;
 }
 export async function saveMultipleHealthData(payload) {
   const db = getDB();
