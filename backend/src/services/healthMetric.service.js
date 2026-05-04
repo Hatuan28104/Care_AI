@@ -242,6 +242,7 @@ export const handleAnalyzeStress = async (user, deviceId) => {
       stress: stressScore,
       thoigian: new Date().toISOString(),
       calibration_days: Math.floor(inputData.calibration_days || 0),
+      sleep_warning: inputData.sleep_warning || null,
     },
   };
 };

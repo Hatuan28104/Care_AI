@@ -614,18 +614,19 @@ export async function getLatestAIInsight(nguoidung_id) {
 
 export async function getStressInputData(nguoiDungId, deviceId) {
   const db = getDB();
-
   const targetMetricIds = ["CS008", "CS001", "CS037", "CS004"];
+
+  // Lấy dữ liệu 14 ngày để AI có đủ "chuỗi lịch sử" (history series)
+  const fourteenDaysAgo = new Date(
+    Date.now() - 14 * 24 * 60 * 60 * 1000,
+  ).toISOString();
 
   const { data, error } = await db
     .from("dulieusuckhoe")
     .select("loaichiso_id, giatri, thoigiancapnhat")
     .eq("nguoidung_id", nguoiDungId)
     .in("loaichiso_id", targetMetricIds)
-    .gte(
-      "thoigiancapnhat",
-      new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
-    )
+    .gte("thoigiancapnhat", fourteenDaysAgo)
     .order("thoigiancapnhat", { ascending: false })
     .limit(1000);
 
@@ -657,24 +658,32 @@ export async function getStressInputData(nguoiDungId, deviceId) {
   const hrSeries = valuesByMetric.CS001;
   const sleepSeries = valuesByMetric.CS037;
   const stepsSeries = valuesByMetric.CS004;
+  const currentHour = getCurrentVNHour();
 
-  // Kiểm tra xem bước chân có phải của hôm nay không
-  let todaySteps = 0;
-  if (stepsSeries.length > 0) {
-    const latestStep = rows.find((r) => r.loaichiso_id === "CS004");
-    if (latestStep && latestStep.thoigiancapnhat) {
-      const stepDate = getVNDateString(new Date(latestStep.thoigiancapnhat));
-      const todayDate = getVNDateString();
-      if (stepDate === todayDate) {
-        todaySteps = Number(latestStep.giatri);
-      }
-    }
+  const vnMidnight = new Date(getVNStartOfDayUTC());
+
+  // --- 1. KIỂM TRA TRẠNG THÁI ĐEO TRONG NGÀY (TODAY CHECK) ---
+  // Nếu từ 00:00 đến nay hoàn toàn không có nhịp tim -> Coi như chưa đeo thiết bị hôm nay
+  const hrToday = rows.filter(
+    (r) =>
+      r.loaichiso_id === "CS001" && new Date(r.thoigiancapnhat) >= vnMidnight,
+  );
+
+  if (hrToday.length === 0) {
+    console.log(
+      "[STRESS-INPUT] Ngày mới chưa có dữ liệu nhịp tim -> Giữ nguyên giá trị stress cũ.",
+    );
+    throw new Error("NOT_ENOUGH_DATA");
   }
 
-  // Tính số ngày có dữ liệu trong 7 ngày gần nhất (rolling 7-day window)
-  const sevenDaysLimit = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  // --- 2. TÍNH TOÁN HRV ĐẦU VÀO ---
+  const nightStart = new Date(vnMidnight.getTime() - 2 * 3600000); // 22:00 hôm trước
+  const nightEnd = new Date(vnMidnight.getTime() + 10 * 3600000); // 10:00 hôm nay
 
+  // Logic Calibration: Đếm số ngày duy nhất có dữ liệu trong 7 ngày gần nhất
+  const sevenDaysLimit = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
   const uniqueDays = new Set();
+
   for (const row of rows) {
     const rowDate = new Date(row.thoigiancapnhat);
     if (rowDate >= sevenDaysLimit) {
@@ -685,75 +694,217 @@ export async function getStressInputData(nguoiDungId, deviceId) {
 
   const calibrationDays = Math.min(uniqueDays.size, 3);
 
+  let sleepValue = 0;
+  let sleepWarning = null;
+  let hasSleepData = false;
+
+  // ============================================================
+  // PHÁT HIỆN GIẤC NGỦ (Phân tách Case A vs Case B/C)
+  // ============================================================
+
+  // --- Ưu tiên 1: Luôn tìm chỉ số giấc ngủ CS037 trực tiếp từ thiết bị ---
   const todayDateStr = getVNDateString();
-  let hasHrvToday = false;
-  let hasHrToday = false;
-  let hasSleepToday = false;
-  let hasStepsToday = false;
+  const todaySleep = rows.find(
+    (r) =>
+      r.loaichiso_id === "CS037" &&
+      getVNDateString(new Date(r.thoigiancapnhat)) === todayDateStr,
+  );
 
-  for (const row of rows) {
-    if (row.thoigiancapnhat) {
-      const vnDateStr = getVNDateString(new Date(row.thoigiancapnhat));
-      if (vnDateStr === todayDateStr) {
-        if (row.loaichiso_id === "CS008") hasHrvToday = true;
-        if (row.loaichiso_id === "CS001") hasHrToday = true;
-        if (row.loaichiso_id === "CS037") hasSleepToday = true;
-        if (row.loaichiso_id === "CS004") hasStepsToday = true;
+  if (todaySleep) {
+    sleepValue = Number(todaySleep.giatri);
+    hasSleepData = true;
+    console.log(`[SLEEP] Đã tìm thấy dữ liệu CS037: ${sleepValue}h`);
+  }
+
+  // --- Ưu tiên 2: Xử lý khi thiếu CS037 ---
+  if (!hasSleepData) {
+    if (currentHour < 10) {
+      // TRƯỜNG HỢP B & C: BAN ĐÊM (Dưới 10h sáng)
+      // Dùng HR Pattern để xác nhận thức trắng hoặc tìm đoạn ngủ ngắn
+      console.log(
+        `[SLEEP-B/C] Đang trong khung giờ đêm/sáng sớm (<10h) -> Chạy HR Pattern`,
+      );
+
+      const vnMidnightUTC = new Date(getVNStartOfDayUTC());
+      const vnYesterday22hUTC = new Date(vnMidnightUTC.getTime() - 2 * 3600000);
+      const vn6hUTC = new Date(vnMidnightUTC.getTime() + 6 * 3600000);
+      const vn10hUTC = new Date(vnMidnightUTC.getTime() + 10 * 3600000);
+
+      const hrRecords = rows
+        .filter((r) => r.loaichiso_id === "CS001" && r.thoigiancapnhat)
+        .map((r) => ({
+          value: Number(r.giatri),
+          time: new Date(r.thoigiancapnhat),
+        }))
+        .filter((r) => Number.isFinite(r.value));
+
+      // B1: Core check 0h-6h
+      const hrIn0to6 = hrRecords.filter(
+        (r) => r.time >= vnMidnightUTC && r.time < vn6hUTC,
+      );
+      if (hrIn0to6.length === 0) {
+        console.log(
+          `[SLEEP-B1] Không có HR trong 0h–6h → Không đủ dữ liệu ban đêm`,
+        );
+        throw new Error("NOT_ENOUGH_DATA");
       }
-    }
-  }
 
-  if (!hasHrvToday && !hasHrToday && !hasSleepToday && !hasStepsToday) {
-    throw new Error("NOT_ENOUGH_DATA");
-  }
+      // B2: Coverage check 6h-10h
+      if (currentHour >= 6) {
+        const hrIn6to10 = hrRecords.filter(
+          (r) => r.time >= vn6hUTC && r.time < vn10hUTC,
+        );
+        if (hrIn6to10.length === 0) throw new Error("NOT_ENOUGH_DATA");
+      }
 
-  let sleepValue = sleepSeries.length > 0 ? sleepSeries[0] : 0;
+      // B3: Xác nhận thức trắng hay có ngủ qua HR
+      const hrInNightWindow = hrRecords
+        .filter((r) => r.time >= vnYesterday22hUTC && r.time < vn10hUTC)
+        .sort((a, b) => a.time - b.time);
 
-  // Phát hiện thức trắng đêm: chỉ trong khung 2h-10h sáng
-  if (!hasSleepToday && (hasHrToday || hasHrvToday)) {
-    const currentHour = getCurrentVNHour();
+      const vn10hYesterdayUTC = new Date(
+        vnMidnightUTC.getTime() - 14 * 3600000,
+      );
+      const daytimeHr = hrRecords.filter(
+        (r) => r.time >= vn10hYesterdayUTC && r.time < vnYesterday22hUTC,
+      );
 
-    if (currentHour >= 2 && currentHour < 10) {
-      // Kiểm tra 2 tiếng trước có HR/HRV record không
-      const twoHoursAgo = new Date(Date.now() - 2 * 3600000);
-
-      const hasRecentHrHrv = rows.some((r) => {
-        if (r.loaichiso_id !== "CS001" && r.loaichiso_id !== "CS008") return false;
-        const t = new Date(r.thoigiancapnhat);
-        return t >= twoHoursAgo;
-      });
-
-      if (hasRecentHrHrv) {
-        // Có HR/HRV trong 2h trước → đeo đồng hồ liên tục → thức trắng đêm
-        sleepValue = 0;
-        console.log(`[SLEEP] Thức trắng đêm: có HR/HRV trong 2h gần đây, không có giấc ngủ`);
+      let baseline = null;
+      if (daytimeHr.length >= 5) {
+        // Yêu cầu ít nhất 5 bản ghi ban ngày để có baseline tin cậy
+        baseline =
+          daytimeHr.reduce((sum, r) => sum + r.value, 0) / daytimeHr.length;
       } else {
-        // Không có HR/HRV trong 2h trước → vừa đeo đồng hồ → dùng sleep lịch sử
-        console.log(`[SLEEP] Vừa đeo đồng hồ: không có HR/HRV trong 2h trước → dùng sleep lịch sử`);
+        const allDaytimeHr = hrRecords.filter((r) => {
+          const vnH = (r.time.getUTCHours() + 7) % 24;
+          return vnH >= 10 && vnH < 22;
+        });
+        if (allDaytimeHr.length >= 5)
+          baseline =
+            allDaytimeHr.reduce((sum, r) => sum + r.value, 0) /
+            allDaytimeHr.length;
       }
+
+      if (baseline && hrInNightWindow.length >= 2) {
+        const threshold = baseline * 0.875;
+        let sleepStart = null;
+        let maxSleepMs = 0;
+
+        for (const record of hrInNightWindow) {
+          if (record.value <= threshold) {
+            if (!sleepStart) sleepStart = record.time;
+            const durationMs = record.time - sleepStart;
+            if (durationMs > maxSleepMs) maxSleepMs = durationMs;
+          } else {
+            sleepStart = null;
+          }
+        }
+
+        const maxSleepHours = maxSleepMs / 3600000;
+
+        if (maxSleepHours >= 1) {
+          // HR giảm -> Có ngủ nhưng vì thiếu CS037 nên không rõ thời lượng
+          sleepValue = null;
+          hasSleepData = false;
+          console.log(
+            `[SLEEP-B3] HR có giảm (${maxSleepHours.toFixed(1)}h) -> Có ngủ nhưng thiếu CS037 -> gán null (model no-sleep)`,
+          );
+        } else {
+          // HR không giảm -> Xác nhận thức trắng đêm
+          sleepValue = 0;
+          hasSleepData = true;
+          console.log(
+            `[SLEEP-B3] HR không giảm -> Xác nhận thức trắng -> gán 0 (model bình thường)`,
+          );
+        }
+      } else {
+        // Có đeo máy nhưng không đủ dữ liệu baseline để so sánh nhịp tim
+        console.log(
+          `[SLEEP-B3] Có dữ liệu HR nhưng không xác nhận được thức trắng (thiếu baseline) -> null`,
+        );
+        sleepValue = null;
+      }
+    } else {
+      // TRƯỜNG HỢP A: BAN NGÀY (Sau 10h sáng)
+      // Không có CS037 thì để null luôn, không cố suy luận từ HR nữa
+      console.log(
+        `[SLEEP-A] Ban ngày (>10h) và không có CS037 -> Để null giấc ngủ`,
+      );
+      sleepValue = null;
     }
   }
 
-  // Tính hours_since_last_sleep = từ BÂY GIỜ đến lần ghi sleep gần nhất
-  // Ví dụ: ngủ tối qua ghi lúc 7h sáng, bây giờ 3h chiều → 8h
-  // Thức trắng, sleep gần nhất hôm qua 7h sáng, bây giờ 3h chiều → 32h
-  const sleepRecords = rows.filter((r) => r.loaichiso_id === "CS037");
-  let hoursSinceLastSleep = null;
-  if (sleepRecords.length >= 1) {
-    const lastSleepTime = new Date(sleepRecords[0].thoigiancapnhat);
-    hoursSinceLastSleep = (Date.now() - lastSleepTime.getTime()) / 3600000;
+  // --- TRƯỜNG HỢP 2: THIẾU GIẤC NGỦ -> CHẠY MODEL NO-SLEEP (GỬI NULL) ---
+  // (Logic này đã được xử lý phía trên, nếu không tìm thấy CS037, sleepValue sẽ là null)
+  // Không có giấc ngủ từ bất kỳ nguồn nào → gửi null để AI dùng model no-sleep
+  if (!hasSleepData) {
+    sleepValue = null;
+    sleepWarning =
+      "Bạn vừa đo stress, nhưng hệ thống không có dữ liệu giấc ngủ gần nhất vì đồng hồ không được đeo khi ngủ.\n\nKết quả vẫn được tính toán, nhưng độ chính xác có thể thấp hơn. Hãy đeo đồng hồ khi ngủ để nhận phân tích đầy đủ hơn.";
+    console.log(
+      `[SLEEP] KHÔNG CÓ dữ liệu giấc ngủ → sleep=null, dùng model no-sleep`,
+    );
+  }
+
+  // ============================================================
+  // TÍNH TOÁN HRV ĐẦU VÀO (DỰA TRÊN KẾT QUẢ GIẤC NGỦ)
+  // ============================================================
+  const latestHrvRow = rows.find((r) => r.loaichiso_id === "CS008");
+  if (!latestHrvRow) throw new Error("NOT_ENOUGH_DATA");
+
+  const latestHrvTime = new Date(latestHrvRow.thoigiancapnhat).getTime();
+  // Mốc thời gian kết thúc giấc ngủ (nếu có CS037)
+  const sleepEndTime = todaySleep
+    ? new Date(todaySleep.thoigiancapnhat).getTime()
+    : 0;
+
+  let hrvVal = 0;
+
+  // Phân biệt HRV sinh ra trong lúc ngủ vs HRV sau khi ngủ dậy
+  if (hasSleepData && sleepValue > 0 && latestHrvTime <= sleepEndTime) {
+    // TRƯỜNG HỢP: Lần đầu đo sau dậy, dữ liệu HRV hiện tại vẫn là dữ liệu từ lúc ngủ
+    // Lấy danh sách HRV từ 22h hôm trước đến thời điểm kết thúc giấc ngủ
+    const hrvDuringSleep = rows.filter((r) => {
+      if (r.loaichiso_id !== "CS008") return false;
+      const t = new Date(r.thoigiancapnhat).getTime();
+      return t >= nightStart.getTime() && t <= sleepEndTime;
+    });
+
+    if (hrvDuringSleep.length > 0) {
+      const sum = hrvDuringSleep.reduce((s, r) => s + Number(r.giatri), 0);
+      hrvVal = sum / hrvDuringSleep.length;
+      console.log(
+        `[STRESS-INPUT] Lần đầu sau dậy -> Dùng TB HRV trong lúc ngủ: ${hrvVal.toFixed(1)}ms (${hrvDuringSleep.length} mẫu)`,
+      );
+    } else {
+      hrvVal = Number(latestHrvRow.giatri);
+    }
+  } else {
+    // TRƯỜNG HỢP: Đã có HRV mới sau khi dậy, hoặc thức trắng/không có dữ liệu ngủ
+    hrvVal = Number(latestHrvRow.giatri);
+    console.log(
+      `[STRESS-INPUT] Đo sau khi dậy hoặc không ngủ -> Dùng HRV gần nhất: ${hrvVal}ms`,
+    );
+  }
+
+  // Kiểm tra bước chân hôm nay
+  let todaySteps = 0;
+  const latestStep = rows.find((r) => r.loaichiso_id === "CS004");
+  if (latestStep) {
+    const stepDate = getVNDateString(new Date(latestStep.thoigiancapnhat));
+    if (stepDate === getVNDateString()) todaySteps = Number(latestStep.giatri);
   }
 
   return {
-    hrv_rmssd_ms: hrvSeries[0],
+    hrv_rmssd_ms: hrvVal,
     resting_hr_bpm: hrSeries[0],
     sleep_duration_hours: sleepValue,
-    hours_since_last_sleep: hoursSinceLastSleep,
     steps: todaySteps,
     hrv_history: hrvSeries.slice(1, 8).reverse(),
     sleep_history: sleepSeries.slice(1, 8).reverse(),
     hr_history: hrSeries.slice(1, 8).reverse(),
     calibration_days: calibrationDays,
+    sleep_warning: sleepWarning,
     debug_row_count: rows.length,
     debug_first_row: rows[0] || null,
   };
