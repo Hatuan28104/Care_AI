@@ -8,7 +8,9 @@ from settings import (
     AI_TITLE,
     SELF_EVOLUTION_MODEL_PATH,
     STRESS_MODEL_PATH,
+    STRESS_MODEL_NO_SLEEP_PATH,
     STRESS_SCALER_PATH,
+    STRESS_SCALER_NO_SLEEP_PATH,
 )
 from self_evolution.self_evolution_router import router as self_router
 from stress_prediction.stress_route import router as stress_router
@@ -35,11 +37,26 @@ async def lifespan(app: FastAPI):
         app.state.stress_model = None
         app.state.stress_scaler = None
 
+    try:
+        app.state.stress_model_no_sleep = joblib.load(
+            STRESS_MODEL_NO_SLEEP_PATH
+        )
+        app.state.stress_scaler_no_sleep = joblib.load(
+            STRESS_SCALER_NO_SLEEP_PATH
+        )
+        logger.info("Stress no-sleep model + scaler loaded")
+    except Exception as e:
+        logger.warning(f"Stress no-sleep model load failed ({e})")
+        app.state.stress_model_no_sleep = None
+        app.state.stress_scaler_no_sleep = None
+
     yield
 
     app.state.model_bundle = None
     app.state.stress_model = None
     app.state.stress_scaler = None
+    app.state.stress_model_no_sleep = None
+    app.state.stress_scaler_no_sleep = None
 
 
 app = FastAPI(title=AI_TITLE, lifespan=lifespan)
