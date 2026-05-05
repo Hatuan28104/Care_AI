@@ -44,6 +44,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen>
   /// Health Connect đôi khi trả snapshot rỗng giữa các lần đọc — giữ giá trị đã đọc được.
   static int _lastGoodSteps = 0;
   static final Map<String, dynamic> _lastGoodSummary = {};
+  static String? _cacheDayKey;
 
   static const _fallbackDefinitions = {
     'CS004': {'name': 'Số bước chân', 'unit': 'steps', 'category': 'hoạt động'},
@@ -67,6 +68,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _resetCacheIfNewDay();
     // Load last synced values để delta sync hoạt động
     HealthBackendSync.loadLastSyncedValues();
 
@@ -121,12 +123,14 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen>
 
   Future<void> _loadHealthData({bool syncAndNotify = false}) async {
     try {
+      _resetCacheIfNewDay();
       final permissionOk = await HealthService.checkPermission();
       if (permissionOk)
         _syncToBackendInBackground(showSuccessSnackBar: syncAndNotify);
 
       final steps = await HealthService.getSteps();
       final summary = await HealthService.getHealthSummary();
+      await _mergeDbBackedMetrics(summary);
       _mergeHealthSnapshot(steps, summary);
       final displaySteps = _effectiveStepsForDisplay(steps, summary);
       final displaySummary = _effectiveSummaryForDisplay(summary);
@@ -166,6 +170,33 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen>
           _loading = false;
         });
       }
+    }
+  }
+
+  Future<void> _mergeDbBackedMetrics(Map<String, dynamic> summary) async {
+    try {
+      final response = await HealthApi.getLatestHealthDataByUser();
+      final list = response['data'] as List? ?? const [];
+
+      for (final item in list) {
+        final row = item is Map<String, dynamic>
+            ? item
+            : (item is Map ? Map<String, dynamic>.from(item) : null);
+        if (row == null) continue;
+
+        final metricId = (row['loaichiso_id'] ?? '').toString().trim();
+        final rawValue = row['giatri'];
+        final value = rawValue is num
+            ? rawValue.toDouble()
+            : double.tryParse(rawValue?.toString() ?? '');
+
+        if (metricId == 'CS008' && value != null && value > 0) {
+          summary['heartRateVariabilityRmssd'] = value;
+          break;
+        }
+      }
+    } catch (_) {
+      // HRV từ DB chỉ là fallback/override bổ sung, lỗi thì bỏ qua để UI không vỡ.
     }
   }
 
@@ -250,6 +281,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen>
   }
 
   void _mergeHealthSnapshot(int steps, Map<String, dynamic> summary) {
+    _resetCacheIfNewDay();
     if (steps > 0) {
       // Chỉ cập nhật cache nếu có dữ liệu thực tế (> 0)
       // Nếu steps == 0 (do lỗi đọc hoặc chưa đi), giữ nguyên giá trị cũ để UI không bị "về 0" đột ngột.
@@ -263,6 +295,24 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen>
         _lastGoodSummary[e.key] = e.value;
       }
     }
+  }
+
+  String _todayCacheKey() {
+    final now = DateTime.now();
+    return '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+  }
+
+  void _resetCacheIfNewDay() {
+    final todayKey = _todayCacheKey();
+    if (_cacheDayKey == null) {
+      _cacheDayKey = todayKey;
+      return;
+    }
+    if (_cacheDayKey == todayKey) return;
+
+    _cacheDayKey = todayKey;
+    _lastGoodSteps = 0;
+    _lastGoodSummary.clear();
   }
 
   bool _isMeaningfulHealthValue(String key, dynamic v) {
