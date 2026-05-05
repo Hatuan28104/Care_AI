@@ -114,6 +114,7 @@ class MainActivity : FlutterActivity() {
         allTimeRange: TimeRangeFilter,
         originFilters: List<Set<DataOrigin>>,
         extract: (T) -> Double?,
+        fallbackToHistory: Boolean = true,
     ): Double? {
         for (origins in originFilters) {
             val todayReq = ReadRecordsRequest(
@@ -129,6 +130,7 @@ class MainActivity : FlutterActivity() {
             val v = extract(rToday)
             if (v != null) return v
         }
+        if (!fallbackToHistory) return null
         for (origins in originFilters) {
             val allReq = ReadRecordsRequest(
                 recordClass,
@@ -166,29 +168,33 @@ class MainActivity : FlutterActivity() {
                 suspend fun readLatestHeartRate(): Double? {
                     if (!granted.contains(HealthPermission.getReadPermission(HeartRateRecord::class))) return null
                     return readLatestTodayThenHistory(
-                        client,
-                        HeartRateRecord::class,
-                        todayRange,
-                        allTimeRange,
-                        originFilters,
-                    ) { rec ->
-                        val sample = rec.samples.lastOrNull()
-                        sample?.beatsPerMinute?.toDouble()
-                    }
+                        client = client,
+                        recordClass = HeartRateRecord::class,
+                        todayRange = todayRange,
+                        allTimeRange = allTimeRange,
+                        originFilters = originFilters,
+                        extract = { rec ->
+                            val sample = rec.samples.lastOrNull()
+                            sample?.beatsPerMinute?.toDouble()
+                        },
+                        fallbackToHistory = false,
+                    )
                 }
 
                 suspend fun readLatestSpo2(): Double? {
                     if (!granted.contains(HealthPermission.getReadPermission(OxygenSaturationRecord::class))) return null
                     return readLatestTodayThenHistory(
-                        client,
-                        OxygenSaturationRecord::class,
-                        todayRange,
-                        allTimeRange,
-                        originFilters,
-                    ) { rec ->
-                        val v = rec.percentage.value
-                        if (v > 1 && v <= 100) v else v * 100.0
-                    }
+                        client = client,
+                        recordClass = OxygenSaturationRecord::class,
+                        todayRange = todayRange,
+                        allTimeRange = allTimeRange,
+                        originFilters = originFilters,
+                        extract = { rec ->
+                            val v = rec.percentage.value
+                            if (v > 1 && v <= 100) v else v * 100.0
+                        },
+                        fallbackToHistory = false,
+                    )
                 }
 
                 suspend fun readTodayDistanceKm(): Double? {
@@ -238,23 +244,27 @@ class MainActivity : FlutterActivity() {
                 suspend fun readLatestRespiratoryRate(): Double? {
                     if (!granted.contains(HealthPermission.getReadPermission(RespiratoryRateRecord::class))) return null
                     return readLatestTodayThenHistory(
-                        client,
-                        RespiratoryRateRecord::class,
-                        todayRange,
-                        allTimeRange,
-                        originFilters,
-                    ) { it.rate }
+                        client = client,
+                        recordClass = RespiratoryRateRecord::class,
+                        todayRange = todayRange,
+                        allTimeRange = allTimeRange,
+                        originFilters = originFilters,
+                        extract = { rec -> rec.rate },
+                        fallbackToHistory = false,
+                    )
                 }
 
                 suspend fun readLatestBodyTemp(): Double? {
                     if (!granted.contains(HealthPermission.getReadPermission(BodyTemperatureRecord::class))) return null
                     return readLatestTodayThenHistory(
-                        client,
-                        BodyTemperatureRecord::class,
-                        todayRange,
-                        allTimeRange,
-                        originFilters,
-                    ) { it.temperature.inCelsius }
+                        client = client,
+                        recordClass = BodyTemperatureRecord::class,
+                        todayRange = todayRange,
+                        allTimeRange = allTimeRange,
+                        originFilters = originFilters,
+                        extract = { rec -> rec.temperature.inCelsius },
+                        fallbackToHistory = false,
+                    )
                 }
 
                 suspend fun readLatestBloodPressure(): String? {
@@ -263,24 +273,6 @@ class MainActivity : FlutterActivity() {
                         val request = ReadRecordsRequest(
                             BloodPressureRecord::class,
                             todayRange,
-                            origins,
-                            false,
-                            1,
-                            null,
-                        )
-                        @Suppress("UNCHECKED_CAST")
-                        val response = client.readRecords(request) as ReadRecordsResponse<BloodPressureRecord>
-                        val record = response.records.firstOrNull()
-                        if (record != null) {
-                            val sys = record.systolic.inMillimetersOfMercury.toInt()
-                            val dia = record.diastolic.inMillimetersOfMercury.toInt()
-                            return "$sys/$dia"
-                        }
-                    }
-                    for (origins in originFilters) {
-                        val request = ReadRecordsRequest(
-                            BloodPressureRecord::class,
-                            allTimeRange,
                             origins,
                             false,
                             1,
@@ -325,23 +317,25 @@ class MainActivity : FlutterActivity() {
                 suspend fun readLatestHeightCm(): Double? {
                     if (!granted.contains(HealthPermission.getReadPermission(HeightRecord::class))) return null
                     return readLatestTodayThenHistory(
-                        client,
-                        HeightRecord::class,
-                        todayRange,
-                        allTimeRange,
-                        originFilters,
-                    ) { it.height.inMeters * 100.0 }
+                        client = client,
+                        recordClass = HeightRecord::class,
+                        todayRange = todayRange,
+                        allTimeRange = allTimeRange,
+                        originFilters = originFilters,
+                        extract = { rec -> rec.height.inMeters * 100.0 },
+                    )
                 }
 
                 suspend fun readLatestWeightKg(): Double? {
                     if (!granted.contains(HealthPermission.getReadPermission(WeightRecord::class))) return null
                     return readLatestTodayThenHistory(
-                        client,
-                        WeightRecord::class,
-                        todayRange,
-                        allTimeRange,
-                        originFilters,
-                    ) { it.weight.inKilograms }
+                        client = client,
+                        recordClass = WeightRecord::class,
+                        todayRange = todayRange,
+                        allTimeRange = allTimeRange,
+                        originFilters = originFilters,
+                        extract = { rec -> rec.weight.inKilograms },
+                    )
                 }
 
                 suspend fun readTodayHydrationMl(): Double? {
@@ -369,23 +363,27 @@ class MainActivity : FlutterActivity() {
                 suspend fun readLatestRestingHeartRate(): Double? {
                     if (!granted.contains(HealthPermission.getReadPermission(RestingHeartRateRecord::class))) return null
                     return readLatestTodayThenHistory(
-                        client,
-                        RestingHeartRateRecord::class,
-                        todayRange,
-                        allTimeRange,
-                        originFilters,
-                    ) { it.beatsPerMinute.toDouble() }
+                        client = client,
+                        recordClass = RestingHeartRateRecord::class,
+                        todayRange = todayRange,
+                        allTimeRange = allTimeRange,
+                        originFilters = originFilters,
+                        extract = { rec -> rec.beatsPerMinute.toDouble() },
+                        fallbackToHistory = false,
+                    )
                 }
 
                 suspend fun readLatestHRV(): Double? {
                     if (!granted.contains(HealthPermission.getReadPermission(HeartRateVariabilityRmssdRecord::class))) return null
                     return readLatestTodayThenHistory(
-                        client,
-                        HeartRateVariabilityRmssdRecord::class,
-                        todayRange,
-                        allTimeRange,
-                        originFilters,
-                    ) { it.heartRateVariabilityMillis }
+                        client = client,
+                        recordClass = HeartRateVariabilityRmssdRecord::class,
+                        todayRange = todayRange,
+                        allTimeRange = allTimeRange,
+                        originFilters = originFilters,
+                        extract = { rec -> rec.heartRateVariabilityMillis },
+                        fallbackToHistory = false,
+                    )
                 }
 
                 suspend fun <T> safeRead(key: String, block: suspend () -> T?): T? {
