@@ -197,7 +197,7 @@ export async function verifyOtp(phone, otp, req, deviceId) {
   const db = getDB();
 
   /* ===== CHECK USER ===== */
-  let { data: user } = await db
+  let { data: user, error: findUserError } = await db
     .from("taikhoan")
     .select(`
       taikhoan_id,
@@ -214,24 +214,43 @@ export async function verifyOtp(phone, otp, req, deviceId) {
     .eq("sodienthoai", localPhone)
     .maybeSingle();
 
+  if (findUserError) throw findUserError;
+
   /* ===== CREATE IF NOT EXIST ===== */
   if (!user) {
     const newUserId = "ND" + Date.now().toString().slice(-10);
     const newAccountId = "TK" + Date.now().toString().slice(-10);
 
-    await Promise.all([
-      db.from("nguoidung").insert({
-        nguoidung_id: newUserId,
-        tennd: null,
-      }),
-      db.from("taikhoan").insert({
-        taikhoan_id: newAccountId,
-        nguoidung_id: newUserId,
-        sodienthoai: localPhone,
-        laadmin: false,
-        ngaytao: new Date().toISOString().slice(0, 10),
-      })
-    ]);
+    const { error: accountInsertError } = await db.from("taikhoan").insert({
+      taikhoan_id: newAccountId,
+      nguoidung_id: null,
+      sodienthoai: localPhone,
+      laadmin: false,
+      ngaytao: new Date().toISOString().slice(0, 10),
+    });
+
+    if (accountInsertError) throw accountInsertError;
+
+    const { error: profileInsertError } = await db.from("nguoidung").insert({
+      nguoidung_id: newUserId,
+      tennd: null,
+    });
+
+    if (profileInsertError) {
+      await db.from("taikhoan").delete().eq("taikhoan_id", newAccountId);
+      throw profileInsertError;
+    }
+
+    const { error: accountUpdateError } = await db
+      .from("taikhoan")
+      .update({ nguoidung_id: newUserId })
+      .eq("taikhoan_id", newAccountId);
+
+    if (accountUpdateError) {
+      await db.from("nguoidung").delete().eq("nguoidung_id", newUserId);
+      await db.from("taikhoan").delete().eq("taikhoan_id", newAccountId);
+      throw accountUpdateError;
+    }
 
     user = {
       taikhoan_id: newAccountId,
