@@ -44,6 +44,25 @@ function normalizeHealthData(data) {
   };
 }
 
+function normalizeStoredMetricValue(loaichiso_id, value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return value;
+
+  // Legacy Huawei Health sync từng lưu giấc ngủ theo phút,
+  // trong khi toàn hệ thống dùng CS037 theo giờ.
+  if (loaichiso_id === "CS037" && numeric > 24) {
+    return Number((numeric / 60).toFixed(1));
+  }
+
+  return numeric;
+}
+
+function getDbNowVnString() {
+  const now = new Date();
+  const vnNow = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+  return vnNow.toISOString().slice(0, 19).replace("T", " ");
+}
+
 /* =========================
    LẤY DANH SÁCH CHỈ SỐ
 ========================= */
@@ -127,6 +146,7 @@ export async function ensureDeviceForUser(nguoiDungId) {
 ========================= */
 export async function getLatestHealthDataByDevice(thietBiId) {
   const db = getDB();
+  const dbNow = getDbNowVnString();
 
   const { data, error } = await db
     .from("dulieusuckhoe")
@@ -142,6 +162,7 @@ export async function getLatestHealthDataByDevice(thietBiId) {
     `,
     )
     .eq("nguondulieu_id", thietBiId)
+    .lte("thoigiancapnhat", dbNow)
     .order("thoigiancapnhat", { ascending: false });
 
   if (error) throw error;
@@ -155,6 +176,10 @@ export async function getLatestHealthDataByDevice(thietBiId) {
 
   return Object.values(map).map((item) => ({
     ...item,
+    giatri: normalizeStoredMetricValue(
+      item.loaichisosuckhoe?.loaichiso_id,
+      item.giatri,
+    ),
     thoigiancapnhat: item.thoigiancapnhat
       ? new Date(item.thoigiancapnhat).toISOString()
       : "",
@@ -162,10 +187,7 @@ export async function getLatestHealthDataByDevice(thietBiId) {
 }
 export async function getLatestHealthDataByUser(nguoiDungId) {
   const db = getDB();
-  console.log(
-    "[latest-user] repo getLatestHealthDataByUser userId:",
-    nguoiDungId,
-  );
+  const dbNow = getDbNowVnString();
 
   const { data, error } = await db
     .from("dulieusuckhoe")
@@ -182,22 +204,16 @@ export async function getLatestHealthDataByUser(nguoiDungId) {
     `,
     )
     .eq("nguoidung_id", nguoiDungId)
+    .lte("thoigiancapnhat", dbNow)
     .order("thoigiancapnhat", { ascending: false });
 
   if (error) {
-    console.error("[latest-user] Supabase error:", error);
-    console.error("[latest-user] Supabase message:", error.message);
     throw error;
   }
-
-  console.log("[latest-user] Supabase data length:", data?.length ?? 0);
 
   const map = {};
 
   for (let item of data) {
-    if (!item.loaichisosuckhoe) {
-      console.log("[latest-user] missing loaichisosuckhoe relation:", item);
-    }
     const key = item.loaichisosuckhoe.loaichiso_id;
 
     if (!map[key]) {
@@ -207,6 +223,10 @@ export async function getLatestHealthDataByUser(nguoiDungId) {
 
   return Object.values(map).map((item) => ({
     ...item,
+    giatri: normalizeStoredMetricValue(
+      item.loaichisosuckhoe?.loaichiso_id,
+      item.giatri,
+    ),
     thoigiancapnhat: item.thoigiancapnhat
       ? new Date(item.thoigiancapnhat).toISOString()
       : "",
@@ -217,12 +237,14 @@ export async function getLatestHealthDataByUser(nguoiDungId) {
 ========================= */
 export async function getHealthHistory(thietBiId, loaiChiSoId) {
   const db = getDB();
+  const dbNow = getDbNowVnString();
 
   const { data, error } = await db
     .from("dulieusuckhoe")
     .select("giatri, thoigiancapnhat")
     .eq("nguondulieu_id", thietBiId)
     .eq("loaichiso_id", loaiChiSoId)
+    .lte("thoigiancapnhat", dbNow)
     .order("thoigiancapnhat", { ascending: false })
     .limit(50);
 
@@ -230,6 +252,7 @@ export async function getHealthHistory(thietBiId, loaiChiSoId) {
 
   return (data || []).map((item) => ({
     ...item,
+    giatri: normalizeStoredMetricValue(loaiChiSoId, item.giatri),
     thoigiancapnhat: item.thoigiancapnhat
       ? new Date(item.thoigiancapnhat).toISOString()
       : "",
@@ -241,12 +264,14 @@ export async function getHealthHistoryByUser(
   range = "d",
 ) {
   const db = getDB();
+  const dbNow = getDbNowVnString();
 
   const { data, error } = await db
     .from("dulieusuckhoe")
     .select("giatri, thoigiancapnhat")
     .eq("nguoidung_id", nguoiDungId)
     .eq("loaichiso_id", loaiChiSoId)
+    .lte("thoigiancapnhat", dbNow)
     .order("thoigiancapnhat", { ascending: true })
     .limit(200);
 
@@ -274,10 +299,9 @@ export async function getHealthHistoryByUser(
     return t >= fromDate;
   });
 
-  console.log("HISTORY LENGTH:", filtered.length);
-
   return filtered.map((item) => ({
     ...item,
+    giatri: normalizeStoredMetricValue(loaiChiSoId, item.giatri),
     thoigiancapnhat: item.thoigiancapnhat
       ? new Date(item.thoigiancapnhat).toISOString()
       : "",
@@ -373,7 +397,7 @@ export async function getHealthReport(userId, quanHeId, type) {
       };
     }
 
-    map[key].total += item.giatri;
+    map[key].total += normalizeStoredMetricValue(key, item.giatri);
     map[key].count++;
   }
 
@@ -473,14 +497,16 @@ export async function saveMultipleHealthData(payload) {
       .eq("nguoidung_id", payload.nguoidung_id)
       .eq("loaichiso_id", loaichiso_id)
       .gte("thoigiancapnhat", startOfDayVN)
+      .lte("thoigiancapnhat", nowISO)
       .lte("thoigiancapnhat", endOfDayVN)
       .order("thoigiancapnhat", { ascending: false })
       .limit(1);
 
     if (existing && existing.length > 0) {
       const oldValue = Number(existing[0].giatri);
+      const newValue = Number(value);
 
-      if (oldValue === Number(value)) {
+      if (oldValue === newValue) {
         await db
           .from("dulieusuckhoe")
           .update({
@@ -489,7 +515,6 @@ export async function saveMultipleHealthData(payload) {
           })
           .eq("dulieusk_id", existing[0].dulieusk_id);
 
-        console.log(`UPDATE TIME (same value) ${loaichiso_id}`);
       } else {
         // ✅ khác giá trị → insert mới
         const id =
@@ -504,7 +529,6 @@ export async function saveMultipleHealthData(payload) {
           nguoidung_id: payload.nguoidung_id,
         });
 
-        console.log(`INSERT NEW VALUE ${loaichiso_id}`);
       }
     } else {
       // ✅ chưa có trong ngày → insert
@@ -520,7 +544,6 @@ export async function saveMultipleHealthData(payload) {
         nguoidung_id: payload.nguoidung_id,
       });
 
-      console.log(`INSERT FIRST ${loaichiso_id}`);
     }
   }
 
@@ -617,6 +640,7 @@ export async function getLatestAIInsight(nguoidung_id) {
 export async function getStressInputData(nguoiDungId, deviceId) {
   const db = getDB();
   const targetMetricIds = ["CS008", "CS001", "CS037", "CS004"];
+  const dbNow = getDbNowVnString();
 
   // Lấy dữ liệu 14 ngày để AI có đủ "chuỗi lịch sử" (history series)
   const fourteenDaysAgo = new Date(
@@ -625,19 +649,15 @@ export async function getStressInputData(nguoiDungId, deviceId) {
 
   const { data, error } = await db
     .from("dulieusuckhoe")
-    .select("loaichiso_id, giatri, thoigiancapnhat")
+    .select("loaichiso_id, giatri, thoigiancapnhat, nguondulieu_id")
     .eq("nguoidung_id", nguoiDungId)
     .in("loaichiso_id", targetMetricIds)
     .gte("thoigiancapnhat", fourteenDaysAgo)
+    .lte("thoigiancapnhat", dbNow)
     .order("thoigiancapnhat", { ascending: false })
     .limit(1000);
 
   if (error) {
-    console.error("[latest-user] Supabase stress input error:", error);
-    console.error(
-      "[latest-user] Supabase stress input message:",
-      error.message,
-    );
     throw error;
   }
 
@@ -651,7 +671,9 @@ export async function getStressInputData(nguoiDungId, deviceId) {
 
   for (const row of rows) {
     if (!valuesByMetric[row.loaichiso_id]) continue;
-    const val = Number(row.giatri);
+    const val = Number(
+      normalizeStoredMetricValue(row.loaichiso_id, row.giatri),
+    );
     if (!Number.isFinite(val)) continue;
     valuesByMetric[row.loaichiso_id].push(val);
   }
@@ -672,9 +694,6 @@ export async function getStressInputData(nguoiDungId, deviceId) {
   );
 
   if (hrToday.length === 0) {
-    console.log(
-      "[STRESS-INPUT] Ngày mới chưa có dữ liệu nhịp tim -> Giữ nguyên giá trị stress cũ.",
-    );
     throw new Error("NOT_ENOUGH_DATA");
   }
 
@@ -715,7 +734,6 @@ export async function getStressInputData(nguoiDungId, deviceId) {
   if (todaySleep) {
     sleepValue = Number(todaySleep.giatri);
     hasSleepData = true;
-    console.log(`[SLEEP] Đã tìm thấy dữ liệu CS037: ${sleepValue}h`);
   }
 
   // --- Ưu tiên 2: Xử lý khi thiếu CS037 ---
@@ -843,9 +861,6 @@ export async function getStressInputData(nguoiDungId, deviceId) {
     sleepValue = null;
     sleepWarning =
       "Bạn vừa đo stress, nhưng hệ thống không có dữ liệu giấc ngủ gần nhất vì đồng hồ không được đeo khi ngủ.\n\nKết quả vẫn được tính toán, nhưng độ chính xác có thể thấp hơn. Hãy đeo đồng hồ khi ngủ để nhận phân tích đầy đủ hơn.";
-    console.log(
-      `[SLEEP] KHÔNG CÓ dữ liệu giấc ngủ → sleep=null, dùng model no-sleep`,
-    );
   }
 
   // ============================================================
@@ -862,10 +877,9 @@ export async function getStressInputData(nguoiDungId, deviceId) {
 
   let hrvVal = 0;
 
-  // Phân biệt HRV sinh ra trong lúc ngủ vs HRV sau khi ngủ dậy
+  // Chỉ dùng trung bình HRV lúc ngủ cho lần đầu trong ngày:
+  // chưa có HRV mới sau khi thức dậy, tức latest HRV vẫn nằm trước/đúng lúc kết thúc giấc ngủ.
   if (hasSleepData && sleepValue > 0 && latestHrvTime <= sleepEndTime) {
-    // TRƯỜNG HỢP: Lần đầu đo sau dậy, dữ liệu HRV hiện tại vẫn là dữ liệu từ lúc ngủ
-    // Lấy danh sách HRV từ 22h hôm trước đến thời điểm kết thúc giấc ngủ
     const hrvDuringSleep = rows.filter((r) => {
       if (r.loaichiso_id !== "CS008") return false;
       const t = new Date(r.thoigiancapnhat).getTime();
@@ -875,18 +889,12 @@ export async function getStressInputData(nguoiDungId, deviceId) {
     if (hrvDuringSleep.length > 0) {
       const sum = hrvDuringSleep.reduce((s, r) => s + Number(r.giatri), 0);
       hrvVal = sum / hrvDuringSleep.length;
-      console.log(
-        `[STRESS-INPUT] Lần đầu sau dậy -> Dùng TB HRV trong lúc ngủ: ${hrvVal.toFixed(1)}ms (${hrvDuringSleep.length} mẫu)`,
-      );
     } else {
       hrvVal = Number(latestHrvRow.giatri);
     }
   } else {
-    // TRƯỜNG HỢP: Đã có HRV mới sau khi dậy, hoặc thức trắng/không có dữ liệu ngủ
+    // Đã có HRV mới sau khi thức dậy, hoặc không có dữ liệu ngủ -> lấy HRV gần nhất.
     hrvVal = Number(latestHrvRow.giatri);
-    console.log(
-      `[STRESS-INPUT] Đo sau khi dậy hoặc không ngủ -> Dùng HRV gần nhất: ${hrvVal}ms`,
-    );
   }
 
   // Kiểm tra bước chân hôm nay
