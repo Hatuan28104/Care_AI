@@ -12,6 +12,17 @@ const metricsMap = {
   "CS023": "distance"
 };
 
+function normalizeMetricValue(metricId, value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return value;
+
+  if (metricId === "CS037" && numeric > 24) {
+    return Number((numeric / 60).toFixed(1));
+  }
+
+  return numeric;
+}
+
 
 export const fetchAIHistory = async (nguoidungId) => {
   const db = getDB();
@@ -36,7 +47,7 @@ export const fetchAIHistory = async (nguoidungId) => {
     }
 
     const cid = r.loaichiso_id;
-    const val = r.giatri;
+    const val = normalizeMetricValue(r.loaichiso_id, r.giatri);
 
     if (metricsMap[cid]) {
       pivot[dateStr][metricsMap[cid]] = val;
@@ -101,7 +112,6 @@ export const callSelfEvolutionAI = async (nguoidung_id, currentBody) => {
 export const callStressAI = async (nguoidung_id, inputData) => {
   try {
     const url = `${AI_SERVER_URL}/stress/predict`;
-    console.log("[AI Client Stress] Calling:", url);
 
     const payload = {
       nguoidung_id,
@@ -113,7 +123,6 @@ export const callStressAI = async (nguoidung_id, inputData) => {
     });
 
     const raw = response.data || {};
-    console.log("[AI Client Stress] Response:", raw);
 
     return raw;
   } catch (err) {
