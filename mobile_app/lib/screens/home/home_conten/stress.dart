@@ -44,8 +44,19 @@ class _StressScreenState extends State<StressScreen>
   DateTime? _lastAnalyzeAt;
   bool _isDataToday = false;
   bool _isMissingEssentials = false;
+  bool _isNoSleepResult = false;
   int _calibrationDays = 0;
   String _stressTimeLabel = "";
+  String? _sleepWarning;
+  DateTime? _latestInputAt;
+  DateTime? _latestStressAt;
+
+  double _normalizeSleepHours(double rawValue) {
+    if (rawValue > 24) {
+      return rawValue / 60.0;
+    }
+    return rawValue;
+  }
 
   bool _isToday(String? dateStr) {
     if (dateStr == null || dateStr.isEmpty) return false;
@@ -82,6 +93,17 @@ class _StressScreenState extends State<StressScreen>
     if (isMissingEssentials) {
       return "Dữ liệu sức khỏe hôm nay chưa đầy đủ. Hãy đeo thiết bị thường xuyên để CareAI có thể phân tích chính xác nhất nhé!";
     }
+    if (_isNoSleepResult) {
+      final compactWarning = (_sleepWarning ?? "")
+          .replaceAll("\n\n", "\n")
+          .replaceAll("\n", " ")
+          .replaceAll(RegExp(r"\s+"), " ")
+          .trim();
+
+      return compactWarning.isNotEmpty
+          ? compactWarning
+          : "Ket qua nay duoc phan tich tu nhanh thieu du lieu giac ngu nen do chinh xac co the thap hon binh thuong.";
+    }
     if (!isToday) {
       return "Hệ thống chưa nhận được dữ liệu mới nhất hôm nay. Hãy đeo thiết bị để CareAI có thể đưa ra lời khuyên chính xác nhất cho bạn nhé!";
     }
@@ -92,6 +114,7 @@ class _StressScreenState extends State<StressScreen>
 
   IconData getStressIcon(double v,
       {bool isToday = true, bool isMissingEssentials = false}) {
+    if (_isNoSleepResult) return Icons.warning_amber_rounded;
     if (isMissingEssentials || !isToday) return Icons.watch_rounded;
     if (v < 40) return Icons.spa_rounded;
     if (v < 70) return Icons.self_improvement_rounded;
@@ -102,6 +125,34 @@ class _StressScreenState extends State<StressScreen>
     if (v < 40) return const Color(0xFF10B981);
     if (v < 70) return const Color(0xFF3B82F6);
     return const Color(0xFFF43F5E);
+  }
+
+  DateTime? _parseMetricTime(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return null;
+    try {
+      return DateTime.parse(dateStr).toLocal();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> _initStressData() async {
+    debugPrint('[Stress] _initStressData start');
+    await _loadLatestMetrics();
+
+    final latestInputAt = _latestInputAt;
+    final latestStressAt = _latestStressAt;
+    final shouldAnalyze = latestInputAt != null &&
+        (latestStressAt == null || latestInputAt.isAfter(latestStressAt));
+
+    debugPrint('[Stress] latestInputAt=$latestInputAt');
+    debugPrint('[Stress] latestStressAt=$latestStressAt');
+    debugPrint('[Stress] shouldAnalyze=$shouldAnalyze');
+
+    if (shouldAnalyze) {
+      debugPrint('[Stress] calling _analyzeStress()');
+      await _analyzeStress();
+    }
   }
 
   Future<void> _loadLatestMetrics() async {
@@ -116,7 +167,11 @@ class _StressScreenState extends State<StressScreen>
         bool anyToday = false;
         bool hasSleepToday = false;
         bool hasHrvToday = false;
+        bool hasHrToday = false;
+        bool hasStepsToday = false;
         String latestStressTime = "";
+        DateTime? latestInputAt;
+        DateTime? latestStressAt;
 
         for (var item in metrics) {
           final cid = item['loaichiso_id'];
@@ -124,13 +179,18 @@ class _StressScreenState extends State<StressScreen>
               item['giatri'] is num ? (item['giatri'] as num).toDouble() : 0.0;
           final time = item['thoigiancapnhat'] as String?;
           final isToday = _isToday(time);
+          final parsedTime = _parseMetricTime(time);
 
           if (isToday) anyToday = true;
 
           if (cid == 'CS016') {
             stressValue = val;
+            if (parsedTime != null &&
+                (latestStressAt == null || parsedTime.isAfter(latestStressAt))) {
+              latestStressAt = parsedTime;
+            }
             if (time != null) {
-              final dt = DateTime.parse(time).toLocal();
+              final dt = parsedTime ?? DateTime.parse(time).toLocal();
               if (isToday) {
                 latestStressTime =
                     "${dt.hour}:${dt.minute.toString().padLeft(2, '0')}, Hôm nay";
@@ -140,20 +200,39 @@ class _StressScreenState extends State<StressScreen>
               }
             }
           }
-          if (cid == 'CS001') hrValue = isToday ? val : 0.0;
+          if (cid == 'CS001') {
+            hrValue = isToday ? val : 0.0;
+            if (isToday) hasHrToday = true;
+          }
           if (cid == 'CS008') {
             hrvValue = isToday ? val : 0.0;
             if (isToday) hasHrvToday = true;
           }
           if (cid == 'CS037') {
-            sleepValue = isToday ? val : 0.0;
+            sleepValue = isToday ? _normalizeSleepHours(val) : 0.0;
             if (isToday) hasSleepToday = true;
           }
-          if (cid == 'CS004') stepsValue = isToday ? val : 0.0;
+          if (cid == 'CS004') {
+            stepsValue = isToday ? val : 0.0;
+            if (isToday) hasStepsToday = true;
+          }
+          if ((cid == 'CS001' ||
+                  cid == 'CS004' ||
+                  cid == 'CS008' ||
+                  cid == 'CS037') &&
+              parsedTime != null &&
+              (latestInputAt == null || parsedTime.isAfter(latestInputAt))) {
+            latestInputAt = parsedTime;
+          }
         }
+        final canAnalyzeNormal = hasSleepToday && hasHrvToday;
+        final canAnalyzeNoSleep =
+            hasHrvToday && hasHrToday && hasStepsToday;
         _isDataToday = anyToday;
-        _isMissingEssentials = !hasSleepToday || !hasHrvToday;
+        _isMissingEssentials = !(canAnalyzeNormal || canAnalyzeNoSleep);
         _stressTimeLabel = latestStressTime;
+        _latestInputAt = latestInputAt;
+        _latestStressAt = latestStressAt;
       });
     } catch (e) {
       debugPrint("Error loading latest metrics: $e");
@@ -179,6 +258,8 @@ class _StressScreenState extends State<StressScreen>
       setState(() {
         stressValue = score;
         _calibrationDays = result['calibration_days'] ?? 0;
+        _sleepWarning = result['sleep_warning']?.toString();
+        _isNoSleepResult = _sleepWarning != null && _sleepWarning!.isNotEmpty;
         _lastAnalyzeAt = DateTime.now();
         _isDataToday = true;
         _stressTimeLabel = "Vừa xong";
@@ -221,7 +302,7 @@ class _StressScreenState extends State<StressScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _loadLatestMetrics(); // Load data cũ ngay khi vào màn hình
+    _initStressData();
     _autoRefreshTimer = Timer.periodic(const Duration(hours: 1), (_) {
       if (mounted) {
         _analyzeStress();
@@ -248,6 +329,9 @@ class _StressScreenState extends State<StressScreen>
   @override
   Widget build(BuildContext context) {
     final statusColor = getStatusColor(stressValue);
+    final isCalibrated = _calibrationDays >= 3;
+    final calibrationBadgeColor =
+        isCalibrated ? Colors.green : Colors.orange;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF1F5F9),
@@ -319,13 +403,12 @@ class _StressScreenState extends State<StressScreen>
                                   ],
                                 ),
                                 if (_stressTimeLabel.isNotEmpty ||
-                                    _calibrationDays < 3)
+                                    _calibrationDays >= 0)
                                   Padding(
                                     padding: const EdgeInsets.only(top: 12),
                                     child: Column(
                                       children: [
-                                        if (_stressTimeLabel.isNotEmpty ||
-                                            _calibrationDays < 3)
+                                        if (_stressTimeLabel.isNotEmpty)
                                           Text(
                                             "Cập nhật: $_stressTimeLabel",
                                             style: TextStyle(
@@ -336,7 +419,7 @@ class _StressScreenState extends State<StressScreen>
                                               letterSpacing: 0.5,
                                             ),
                                           ),
-                                        if (_calibrationDays < 3) ...[
+                                        ...[
                                           const SizedBox(height: 8),
                                           GestureDetector(
                                             onTap: () {
@@ -396,20 +479,27 @@ class _StressScreenState extends State<StressScreen>
                                                       horizontal: 10,
                                                       vertical: 4),
                                               decoration: BoxDecoration(
-                                                color: Colors.orange
+                                                color: calibrationBadgeColor
                                                     .withOpacity(0.08),
                                                 borderRadius:
                                                     BorderRadius.circular(20),
                                                 border: Border.all(
-                                                    color: Colors.orange
+                                                    color:
+                                                        calibrationBadgeColor
                                                         .withOpacity(0.2)),
                                               ),
                                               child: Row(
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [
-                                                  const Icon(Icons.info_outline,
-                                                      size: 12,
-                                                      color: Colors.orange),
+                                                  Icon(
+                                                    isCalibrated
+                                                        ? Icons
+                                                            .check_circle_outline
+                                                        : Icons.info_outline,
+                                                    size: 12,
+                                                    color:
+                                                        calibrationBadgeColor,
+                                                  ),
                                                   const SizedBox(width: 4),
                                                   Text(
                                                     context.tr
@@ -417,8 +507,9 @@ class _StressScreenState extends State<StressScreen>
                                                       _calibrationDays
                                                           .toString(),
                                                     ),
-                                                    style: const TextStyle(
-                                                      color: Colors.orange,
+                                                    style: TextStyle(
+                                                      color:
+                                                          calibrationBadgeColor,
                                                       fontSize: 10,
                                                       fontWeight:
                                                           FontWeight.bold,
@@ -443,10 +534,13 @@ class _StressScreenState extends State<StressScreen>
                                             isToday: _isDataToday,
                                             isMissingEssentials:
                                                 _isMissingEssentials),
-                                        color: (_isDataToday &&
-                                                !_isMissingEssentials)
-                                            ? statusColor.withOpacity(0.5)
-                                            : Colors.orange.withOpacity(0.5),
+                                        color: _isNoSleepResult
+                                            ? Colors.amber.withOpacity(0.7)
+                                            : (_isDataToday &&
+                                                    !_isMissingEssentials)
+                                                ? statusColor.withOpacity(0.5)
+                                                : Colors.orange
+                                                    .withOpacity(0.5),
                                         size: 28,
                                       ),
                                       const SizedBox(height: 12),
