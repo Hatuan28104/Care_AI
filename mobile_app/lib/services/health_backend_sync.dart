@@ -56,12 +56,15 @@ class HealthBackendSync {
       final deviceId = await HealthApi.getOrCreateDevice();
       final steps = await HealthService.getSteps();
       final summary = await HealthService.getHealthSummary();
+      final sleepMinutes = summary['sleepMinutes'];
+      final sleepHours =
+          sleepMinutes is num ? double.parse((sleepMinutes / 60).toStringAsFixed(1)) : null;
 
       final payload = {
         "steps": steps,
         "hr": summary['heartRateBpm'],
         "spo2": summary['spo2Percent'],
-        "sleep": summary['sleepMinutes'],
+        "sleep": sleepHours,
         "distance": summary['distanceKm'],
         "hrv": summary['heartRateVariabilityRmssd'],
       };
